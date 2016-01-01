@@ -53,15 +53,17 @@ if [ ! -e "$fname.amdl" ]
 fi
 
 ## Create a redistribute file and pass it to ADIPLS' redistrb 
-echo "
+# rerun with fewer points if the redistribution failed 
+for nn in 9602 8602 7602 6602 5602 4602 3602 2602 1602; do
+    echo "
 2 '$fname.amdl'    @    
 3 '$fname.model'    @
 -1 ''        @
 nn  ,icnmsh
-9602,      ,,  @
+$nn,      ,,  @
 icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
 211  ,      ,     ,0.013,      ,5.    ,      , 
-211  ,      ,     ,   64,      ,5.    ,      , @
+11   ,      ,     ,   64,      ,5.    ,      , @
 cg,  cx,ca  ,sig1,sig2,lmax,alphsf,adda4,accrm
 1.,0.05,0.05,0.  ,0.  ,   2,      , 0.02, 0.01, @ 
 nout,cn,irsu,unew   
@@ -69,8 +71,12 @@ nout,cn,irsu,unew
 nmodel,kmodel,itsaml,ioldex
       ,      ,      ,     2,,,,,,,,  @
 " > "redistrb-$fname.in"
-(egrep '# *$|@ *$' "redistrb-$fname.in" | sed -e 's/ *[#,@] *$//') | \
-    $aprgdir/adiajobs/redistrb.c.d.x
+    (egrep '# *$|@ *$' "redistrb-$fname.in" | sed -e 's/ *[#,@] *$//') | \
+        $aprgdir/adiajobs/redistrb.c.d.x
+    if [ -e "$fname.model" ]; then break; fi
+    echo "Failed with nn = $nn, retrying with smaller nn"
+    sleep 2
+done
 
 ## Check that the redistribution was successful
 if [ ! -e "$fname.model" ]; then
