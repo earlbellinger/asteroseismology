@@ -1,0 +1,160 @@
+
+&star_job
+
+      show_log_description_at_start = .false.
+      
+      !show_net_species_info = .true.
+      !show_net_reactions_info = .true.
+
+      create_pre_main_sequence_model = .true.
+      
+      save_model_when_terminate = .true.
+      save_model_filename = 'final.mod'
+      
+      load_saved_model = .false.
+      saved_model_name = 'final.mod'
+      
+      steps_to_take_before_terminate = -1
+      
+      write_profile_when_terminate = .true.
+      filename_for_profile_when_terminate = 'final_profile.data'
+
+      kappa_file_prefix = 'gs98'
+      
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag = .true.
+
+      !change_initial_net = .true.
+      !new_net_name = 'o18_and_ne22.net'
+
+      pre_ms_relax_num_steps = 150
+      pre_ms_T_c = 9e5 ! 3e5
+      
+      !new_surface_rotation_v = 0 ! changed from 2 solar (km sec^1)
+      !change_rotation_flag = .true.
+      !new_rotation_flag = .false.
+
+      !pgstar_flag = .true.
+      
+      relax_initial_Y = .true.
+      relax_initial_Z = .true.
+      !new_Y = -1
+      !new_Z = -1
+      !change_Y = .true.
+      !change_Z = .true.
+
+
+/ ! end of star_job namelist
+
+&controls
+
+      ! check for retries and backups as part of test_suite
+      ! you can/should delete this for use outside of test_suite
+      !max_number_backups = 200
+      !max_number_retries = 500
+      
+      max_num_profile_models = -1
+      
+      min_timestep_limit = 1d-12
+      max_years_for_timestep = 1d6
+      !max_timestep = 3.15d14
+      
+      initial_mass = 1.0
+      initial_z = 0.02d0
+      !initial_y = -1
+      !mixing_length_alpha = 2.1
+      
+      use_Type2_opacities = .true.
+      Zbase = 0.02d0
+      !cubic_interpolation_in_Z = .true.
+      
+      !D_DSI_factor = 0
+      !D_SH_factor  = 0
+      !D_SSI_factor = 0
+      !D_ES_factor  = 0
+      !D_GSF_factor = 0
+      !D_ST_factor  = 0
+      skip_rotation_in_convection_zones = .true.
+      
+      !varcontrol_target = 1d-3
+      mesh_delta_coeff = 0.8
+      
+      photostep = 50
+      write_profiles_flag = .false.
+      profile_interval = 10
+      history_interval = 10
+      terminal_cnt = 10
+      write_header_frequency = 10
+      
+      !log_L_lower_limit = -1
+      !smooth_convective_bdy = .true.
+      !convective_bdy_weight = 1
+      
+      !overshoot_f_above_nonburn_core = 0.005
+      !overshoot_f0_above_nonburn_core = 0.001
+      !overshoot_f_above_nonburn_shell = 0.005
+      !overshoot_f0_above_nonburn_shell = 0.001
+      !overshoot_f_below_nonburn_shell = 0.005
+      !overshoot_f0_below_nonburn_shell = 0.001
+      
+      !RGB_wind_scheme = 'Reimers'
+      !AGB_wind_scheme = 'Blocker'
+      !RGB_to_AGB_wind_switch = 1d-4
+      !Reimers_wind_eta = 0.7d0  
+      !Blocker_wind_eta = 0.7d0  
+      
+      ! atomic diffusion
+      do_element_diffusion = .false.
+      diffusion_calculates_ionization = .true.
+      diffusion_use_isolve = .true.
+      
+      diffusion_class_representative(1) = 'h1'
+      diffusion_class_representative(2) = 'he3'
+      diffusion_class_representative(3) = 'he4'
+      diffusion_class_representative(4) = 'c12'
+      diffusion_class_representative(5) = 'n14'
+      diffusion_class_representative(6) = 'o16'
+      diffusion_class_representative(7) = 'ne20'
+      diffusion_class_representative(8) = 'mg24'
+      
+      ! in ascending order.  species goes into 1st class with A_max >= species A
+      diffusion_class_A_max(1) = 2
+      diffusion_class_A_max(2) = 3
+      diffusion_class_A_max(3) = 4
+      diffusion_class_A_max(4) = 12
+      diffusion_class_A_max(5) = 14
+      diffusion_class_A_max(6) = 16
+      diffusion_class_A_max(7) = 20
+      diffusion_class_A_max(8) = 10000
+      
+      calculate_Brunt_N2 = .true.
+      write_pulse_info_with_profile = .true.
+      pulse_info_format = 'FGONG'
+      write_pulsation_plot_data = .true.
+      add_center_point_to_pulse_info = .false.
+      
+      add_atmosphere_to_pulse_info = .true.
+      which_atm_option = 'Eddington_grey' ! Eddington T-tau integration
+         ! you could also use:
+         ! 'Krishna_Swamy' ! Krishna Swamy T-tau integration
+         ! 'solar_Hopf_grey' ! another T(tau), this one tuned to solar data
+      
+      ! stopping conditions
+      Lnuc_div_L_zams_limit = 0.999d0
+      stop_near_zams = .true.
+      max_model_number = 25000
+      max_age = 15e9
+      xa_central_lower_limit_species(1) = 'h1'
+      xa_central_lower_limit(1) = 1d-3
+      stop_when_done_with_center_flash = .true.
+      stop_at_TP = .true.
+      
+
+/ ! end of controls namelist
+
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+
