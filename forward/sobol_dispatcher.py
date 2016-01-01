@@ -1,11 +1,14 @@
 #!usr/bin/env python
 
-from sobol_lib import i4_sobol
 import numpy as np
 import subprocess
 import argparse
 from time import sleep
 from math import log10
+
+from sys import path
+path.append('../scripts')
+from sobol_lib import i4_sobol
 
 def main(arguments):
     parser = argparse.ArgumentParser()
@@ -21,7 +24,7 @@ def main(arguments):
                         type=int)
     parser.add_argument('-s', '--skip', default=0, type=int,
                         help='offset for sobol numbers')
-    parser.add_argument('-d', '--directory', default="deleter", type=str,
+    parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')
     args = parser.parse_args(arguments)
     print(args)

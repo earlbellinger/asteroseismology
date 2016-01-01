@@ -75,7 +75,7 @@ nmodel,kmodel,itsaml,ioldex
         $aprgdir/adiajobs/redistrb.c.d.x
     if [ -e "$fname.model" ]; then break; fi
     echo "Failed with nn = $nn, retrying with smaller nn"
-    sleep 2
+    sleep 1
 done
 
 ## Check that the redistribution was successful

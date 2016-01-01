@@ -4,8 +4,9 @@ dualexp() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"
     dirname="$directory/$expname"
     
-    #mkdir -p "$dirname"
-    #cp -r mesa_template/* "$dirname"
+    mkdir -p "$dirname"
+    cp -r "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/mesa_template/*\
+        "$dirname"
     cd "$dirname"
     
     change 'initial_mass' '1.0' "$M"
@@ -39,7 +40,7 @@ dualexp() {
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
     cd ..
-    Rscript ../seismology.R "$expname"
+    Rscript ../scripts/seismology.R "$expname"
     #rm -rf "$expname"
 }
 
@@ -79,7 +80,7 @@ if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.275; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
 if [ -z ${alpha+x} ]; then alpha=1.85; fi
-if [ -z ${directory+x} ]; then directory=deleter; fi
+if [ -z ${directory+x} ]; then directory=simulations; fi
 
 dualexp
 

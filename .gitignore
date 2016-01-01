@@ -1,2 +1,4 @@
-forward/simulations/*
-*/plots/*
+forward/simulations/**
+forward/maybe_sub_logs/**
+**/plots/**
+**/__pycache__/**
