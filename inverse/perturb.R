@@ -1,16 +1,25 @@
-source('seismology.R')
+#### Generate Monte-Carlo perturbations of observed stars 
+#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
+#### Stellar predictions & Galactic Evolution Group 
+#### Max-Planck-Institut fur Sonnensystemforschung 
+
+source('../scripts/seismology.R')
 
 dir.create('perturb', showWarnings=FALSE)
 dir.create('perturb/kages', showWarnings=FALSE)
 dir.create('perturb/hares', showWarnings=FALSE)
 
-speed_of_light <- 299792 # km/s
+speed_of_light = 299792 # km/s
 
 ### Obtain properties of real stars varied within their uncertainties 
-monte_carlo_perturbations <- function(obs_data_file, freqs_data_file,
+monte_carlo_perturbations <- function(star, obs_data_file, freqs_data_file,
         n_perturbations=10000) {
+    
     freqs <- read.table(freqs_data_file, header=TRUE)
     obs_data <- read.table(obs_data_file, header=TRUE)
+    
+    seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, outf=star)
+    
     noisy_freqs <- freqs
     parallelStartMulticore(max(1, detectCores()))
     do.call(rbind, with(obs_data, {
@@ -42,23 +51,23 @@ monte_carlo_perturbations <- function(obs_data_file, freqs_data_file,
 }
 
 process <- function(star, star_dir, out_dir="perturb") {
+    obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
+    freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
     write.table(
-        monte_carlo_perturbations(
-            file.path(star_dir, paste0(star, "-obs.dat")),
-            file.path(star_dir, paste0(star, "-freqs.dat"))), 
+        monte_carlo_perturbations(star, obs_data_file, freqs_data_file), 
         file.path(out_dir, paste0(star, "_perturb.dat")), 
         quote=FALSE, sep='\t', row.names=FALSE)
 }
 
 # Perturb every star 10k times and save the results
-star_dir <- file.path('..', 'data', 'hares')
+star_dir <- file.path("data", "hares")
 for (fname in list.files(star_dir)) {
     if (!grepl('-obs.dat', fname)) next
     star <- sub('-obs.dat', '', fname)
     process(star, star_dir, out_dir="perturb/hares")
 }
 
-star_dir <- file.path('..', 'data', 'kages')
+star_dir <- file.path("data", "kages")
 for (fname in list.files(star_dir)) {
     if (!grepl('-obs.dat', fname)) next
     star <- sub('-obs.dat', '', fname)
@@ -66,6 +75,6 @@ for (fname in list.files(star_dir)) {
 }
 
 star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
-star_dir <- file.path("..", "data")
+star_dir <- file.path("data")
 for (star in star_names) process(star, star_dir)
 

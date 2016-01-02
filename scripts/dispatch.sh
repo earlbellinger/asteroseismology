@@ -1,11 +1,13 @@
 #!/bin/bash
 
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 dualexp() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"
     dirname="$directory/$expname"
     
     mkdir -p "$dirname"
-    cp -r "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/mesa_template/*\
+    cp -r $scriptdir/mesa_template/*\
         "$dirname"
     cd "$dirname"
     
@@ -40,7 +42,7 @@ dualexp() {
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
     cd ..
-    Rscript ../scripts/seismology.R "$expname"
+    Rscript $scriptdir/seismology.R "$expname"
     #rm -rf "$expname"
 }
 

@@ -2,3 +2,5 @@ forward/simulations/**
 forward/maybe_sub_logs/**
 **/plots/**
 **/__pycache__/**
+**.png
+**.pdf
