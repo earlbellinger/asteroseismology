@@ -31,8 +31,12 @@ make_plots <- function(plot_f, filename, ...,
         make_png=TRUE, make_pdf=TRUE, 
         paper=TRUE, slide=TRUE) {
     
-    if (paper) dir.create(file.path(filepath, 'paper'), showWarnings=FALSE)
-    if (slide) dir.create(file.path(filepath, 'slides'), showWarnings=FALSE)
+    print(filepath)
+    
+    if (paper) dir.create(file.path(filepath, 'paper'), 
+        showWarnings=FALSE, recursive=TRUE)
+    if (slide) dir.create(file.path(filepath, 'slides'), 
+        showWarnings=FALSE, recursive=TRUE)
     
     if (paper & make_pdf & wide) {
         cairo_pdf(file.path(filepath, 'paper', paste0(filename, '.pdf')),

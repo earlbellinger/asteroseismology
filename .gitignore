@@ -4,3 +4,4 @@ forward/maybe_sub_logs/**
 **/__pycache__/**
 **.png
 **.pdf
+inverse/perturb/**

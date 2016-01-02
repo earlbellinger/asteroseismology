@@ -61,6 +61,7 @@ seismology_plot <- function(text.cex,
         a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
         ylab, dnu.cl, pchs, ...) {
     
+    print("I am being called")
     plot(a~b, tck=0, ylab=as.expression(ylab), 
          cex=2*gaussian_env/max(gaussian_env), 
          ylim=range(w.median, coef(fit)[1], w.median+(w.median-coef(fit)[1])), 
@@ -119,6 +120,7 @@ avg <- function(f, df, freqs, l_degs, nu_max, outf=FALSE, ...) {
     fit <- lm(a~b, weights=gaussian_env)
     df[paste0(sep_name, "_slope")] <- coef(fit)[2]
     
+    print(outf)
     if (outf != FALSE) make_plots(seismology_plot, 
         paste0(outf, '-', sep_name), 
         a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
@@ -132,7 +134,7 @@ avg <- function(f, df, freqs, l_degs, nu_max, outf=FALSE, ...) {
 # nu_max is the frequency of maximum oscillation power
 # acoustic_cutoff is the truncation frequency 
 # outf is the filename that plots should have (None for no plot)
-seismology <- function(freqs, nu_max, acoustic_cutoff=Inf, outf=FALSE, ...) {
+seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     if (nrow(freqs) == 0) {
         print("No frequencies found")
         return(NULL)

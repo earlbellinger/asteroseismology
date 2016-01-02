@@ -4,6 +4,8 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 source('../scripts/seismology.R')
+library(parallel)
+library(parallelMap)
 
 dir.create('perturb', showWarnings=FALSE)
 dir.create('perturb/kages', showWarnings=FALSE)
@@ -18,7 +20,8 @@ monte_carlo_perturbations <- function(star, obs_data_file, freqs_data_file,
     freqs <- read.table(freqs_data_file, header=TRUE)
     obs_data <- read.table(obs_data_file, header=TRUE)
     
-    seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, outf=star)
+    seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, outf=star,
+        filepath=file.path('plots', 'perturb'))
     
     noisy_freqs <- freqs
     parallelStartMulticore(max(1, detectCores()))
@@ -77,4 +80,3 @@ for (fname in list.files(star_dir)) {
 star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
 star_dir <- file.path("data")
 for (star in star_names) process(star, star_dir)
-
