@@ -61,10 +61,9 @@ seismology_plot <- function(text.cex,
         a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
         ylab, dnu.cl, pchs, ...) {
     
-    print("I am being called")
     plot(a~b, tck=0, ylab=as.expression(ylab), 
          cex=2*gaussian_env/max(gaussian_env), 
-         ylim=range(w.median, coef(fit)[1], w.median+(w.median-coef(fit)[1])), 
+         ylim=range(a, w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
          col=if (length(l_degs)==1) 1 else dnu.cl[pchs], 
          pch=if (length(l_degs)==1) 1 else pchs, 
          xlab=expression("Frequency" ~ nu / mu*Hz))
@@ -77,7 +76,7 @@ seismology_plot <- function(text.cex,
                legend=paste0("\u2113=", l_degs))
 }
 
-## calculate averages of things like f = dnu, Dnu, r_sep, r_avg
+## Calculate averages of things like f = dnu, Dnu, r_sep, r_avg
 # df is the where the result will be stored
 # freqs are a data frame with columns l, n, nu
 # l_degs are the l's for which this calculation should be made 
