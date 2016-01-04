@@ -20,9 +20,9 @@ def main(arguments):
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')
-    parser.add_argument('-N', default=1000, help='number of models to generate',
+    parser.add_argument('-N', default=1000, help='number of tracks to generate',
                         type=int)
-    parser.add_argument('-s', '--skip', default=0, type=int,
+    parser.add_argument('-s', '--skip', default=10000, type=int,
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')

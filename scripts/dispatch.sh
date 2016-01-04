@@ -41,9 +41,9 @@ dualexp() {
         --max-procs=$OMP_NUM_THREADS bash -c \
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
-    cd ..
-    Rscript $scriptdir/seismology.R "$expname"
-    #rm -rf "$expname"
+    cd ../..
+    Rscript summarize.R "$dirname"
+    rm -rf "$dirname"
 }
 
 change() { #param initval newval

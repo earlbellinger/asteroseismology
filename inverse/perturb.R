@@ -14,7 +14,7 @@ dir.create('perturb/hares', showWarnings=FALSE)
 speed_of_light = 299792 # km/s
 
 ### Obtain properties of real stars varied within their uncertainties 
-monte_carlo_perturbations <- function(star, obs_data_file, freqs_data_file,
+perturb <- function(star, obs_data_file, freqs_data_file,
         n_perturbations=10000) {
     
     freqs <- read.table(freqs_data_file, header=TRUE)
@@ -57,7 +57,7 @@ process <- function(star, star_dir, out_dir="perturb") {
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
     write.table(
-        monte_carlo_perturbations(star, obs_data_file, freqs_data_file), 
+        perturb(star, obs_data_file, freqs_data_file), 
         file.path(out_dir, paste0(star, "_perturb.dat")), 
         quote=FALSE, sep='\t', row.names=FALSE)
 }

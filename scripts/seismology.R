@@ -11,13 +11,46 @@ library(RColorBrewer)
 
 dnu.cl <- brewer.pal(4, "BrBG")
 
+## build a data frame containing seismological calculations
+# freqs is a data frame with l, n, and nu
+# nu_max is the frequency of maximum oscillation power
+# acoustic_cutoff is the truncation frequency 
+# outf is the filename that plots should have (None for no plot)
+seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
+    if (nrow(freqs) == 0) {
+        print("No frequencies found")
+        return(NULL)
+    }
+    freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
+    
+    # all (l,n) combinations should be unique; discard otherwise
+    for (l_mode in unique(freqs$l)) {
+        if (any(duplicated(freqs[freqs$l==l_mode & freqs$n>0,]$n))) {
+            print("Duplicated (l,n) combination")
+            return(NULL)
+        }
+    }
+    
+    # get averages for Dnu, dnu, r01, r02, r10, r13
+    seis.DF <- avg(Dnu, NULL, freqs, sort(unique(freqs$l)), nu_max, outf, ...)
+    seis.DF <- avg(Dnu, seis.DF, freqs, 0, nu_max, outf, ...)
+    for (l_deg in 0:1) {
+        if (l_deg==0 || 3 %in% freqs$l) { # some stars only have l=0,1,2
+            seis.DF <- avg(dnu, seis.DF, freqs, l_deg, nu_max, outf, ...)
+            seis.DF <- avg(r_sep, seis.DF, freqs, l_deg, nu_max, outf, ...)
+        }
+        seis.DF <- avg(r_avg, seis.DF, freqs, l_deg, nu_max, outf, ...)
+    }
+    return(seis.DF)
+}
+
 ## Separation: just the difference between two frequencies 
 # nu_{l1,n1} - nu_{l2,n2}
-separation <- function(first_l, first_n, second_l, second_n, df) {
-    first <- df$l == first_l & df$n == first_n
-    second <- df$l == second_l & df$n == second_n
+separation <- function(first_l, first_n, second_l, second_n, DF) {
+    first <- DF$l == first_l & DF$n == first_n
+    second <- DF$l == second_l & DF$n == second_n
     if (sum(first) == 1 && sum(second) == 1) { # check that it's unique
-        difference <- df[first,]$nu - df[second,]$nu
+        difference <- DF[first,]$nu - DF[second,]$nu
         if (difference < 0) return(NA)
         return(difference)
     }
@@ -27,12 +60,12 @@ separation <- function(first_l, first_n, second_l, second_n, df) {
 ## Five point averages 
 #dd_01= 1/8( nu_[n-1,0] - 4*nu_[n-1,1] + 6*nu_[n,0] - 4*nu[n,  1] + nu_[n+1,0] )
 #dd_10=-1/8( nu_[n-1,1] - 4*nu_[n,  0] + 6*nu_[n,1] - 4*nu[n+1,0] + nu_[n+1,1] )
-dd <- function(l0, l1, n, df) {
-    ell.0 <- df[df$l==0 & df$n>0,]
-    ell.1 <- df[df$l==1 & df$n>0,]
-    n. <- df[df$n==n,]
-    n.minus.one <- df[df$n==n-1,]
-    n.plus.one <- df[df$n==n+1,]
+dd <- function(l0, l1, n, DF) {
+    ell.0 <- DF[DF$l==0 & DF$n>0,]
+    ell.1 <- DF[DF$l==1 & DF$n>0,]
+    n. <- DF[DF$n==n,]
+    n.minus.one <- DF[DF$n==n-1,]
+    n.plus.one <- DF[DF$n==n+1,]
     val <- if (l0 == 0 && l1 == 1) { ## dd_01
         ( merge(n.minus.one, ell.0)$nu -
         4*merge(n.minus.one, ell.1)$nu +
@@ -51,10 +84,10 @@ dd <- function(l0, l1, n, df) {
 }
 
 ## Separations and ratios
-dnu <- function(l, n, df) separation(l, n, l+2, n-1, df)
-Dnu <- function(l, n, df) separation(l, n, l, n-1, df)
-r_sep <- function(l, n, df) dnu(l, n, df) / Dnu(1-l, n+l, df)
-r_avg <- function(l, n, df) dd(l, 1-l, n, df) / Dnu(1-l, n+l, df)
+dnu <- function(l, n, DF) separation(l, n, l+2, n-1, DF)
+Dnu <- function(l, n, DF) separation(l, n, l, n-1, DF)
+r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
+r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
 seismology_plot <- function(text.cex, 
@@ -77,12 +110,12 @@ seismology_plot <- function(text.cex,
 }
 
 ## Calculate averages of things like f = dnu, Dnu, r_sep, r_avg
-# df is the where the result will be stored
+# DF is the where the result will be stored
 # freqs are a data frame with columns l, n, nu
 # l_degs are the l's for which this calculation should be made 
 # nu_max is the center of the gaussian
 # make a plot with filename 'outf' if outf != FALSE
-avg <- function(f, df, freqs, l_degs, nu_max, outf=FALSE, ...) {
+avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     sep_name <- deparse(substitute(f))
     a <- c() # contains the computed quantity (e.g. large freq separations)
     b <- c() # contains frequencies of the base mode
@@ -115,47 +148,14 @@ avg <- function(f, df, freqs, l_degs, nu_max, outf=FALSE, ...) {
     fwhm <- (0.66*nu_max**0.88)/(2*sqrt(2*log(2)))
     gaussian_env <- dnorm(b, nu_max, fwhm)
     w.median <- weightedMedian(a, gaussian_env)
-    df[paste0(sep_name, "_median")] <- w.median
+    DF[paste0(sep_name, "_median")] <- w.median
     fit <- lm(a~b, weights=gaussian_env)
-    df[paste0(sep_name, "_slope")] <- coef(fit)[2]
+    DF[paste0(sep_name, "_slope")] <- coef(fit)[2]
     
-    print(outf)
     if (outf != FALSE) make_plots(seismology_plot, 
         paste0(outf, '-', sep_name), 
         a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
         ylab, dnu.cl, pchs, ...)
     
-    df
-}
-
-## build a data frame containing seismological calculations
-# freqs is a data frame with l, n, and nu
-# nu_max is the frequency of maximum oscillation power
-# acoustic_cutoff is the truncation frequency 
-# outf is the filename that plots should have (None for no plot)
-seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
-    if (nrow(freqs) == 0) {
-        print("No frequencies found")
-        return(NULL)
-    }
-    freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
-    
-    # all (l,n) combinations should be unique; discard otherwise
-    for (l_mode in unique(freqs$l)) {
-        if (any(duplicated(freqs[freqs$l==l_mode & freqs$n>0,]$n))) {
-            print("Duplicated (l,n) combination")
-            return(NULL)
-        }
-    }
-    
-    seis.DF <- avg(Dnu, NULL, freqs, sort(unique(freqs$l)), nu_max, outf, ...)
-    seis.DF <- avg(Dnu, seis.DF, freqs, 0, nu_max, outf, ...)
-    for (l_deg in 0:1) {
-        if (l_deg==0 || 3 %in% freqs$l) { # some stars only have l=0,1,2
-            seis.DF <- avg(dnu, seis.DF, freqs, l_deg, nu_max, outf, ...)
-            seis.DF <- avg(r_sep, seis.DF, freqs, l_deg, nu_max, outf, ...)
-        }
-        seis.DF <- avg(r_avg, seis.DF, freqs, l_deg, nu_max, outf, ...)
-    }
-    return(seis.DF)
+    DF
 }

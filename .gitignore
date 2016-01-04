@@ -1,6 +1,6 @@
-forward/simulations/**
+forward/simulations**/**
 inverse/perturb/**
-**/maybe_sub_logs/**
+**/maybe_sub_logs**/**
 **/plots/**
 **/__pycache__/**
 **.png
