@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #### Check if the queuing system is available. Otherwise, run locally. 
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar Ages & Galactic Evolution Group 

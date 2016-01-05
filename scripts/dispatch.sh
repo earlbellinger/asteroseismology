@@ -1,8 +1,12 @@
 #!/bin/bash
+#### Script for dispatching a stellar evolutionary track simulation 
+#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
+#### Stellar predictions & Galactic Evolution Group 
+#### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-dualexp() {
+simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"
     dirname="$directory/$expname"
     
@@ -20,7 +24,6 @@ dualexp() {
     change 'mixing_length_alpha' '2.1' "$alpha"
     
     mk
-    #run "ZAMS"
     rn
     mv LOGS/history.data .
     
@@ -30,9 +33,6 @@ dualexp() {
     change "write_profiles_flag" ".false." ".true."
     
     change "do_element_diffusion" ".false." ".true."
-    
-    #change "change_Y" ".false." ".true."
-    #change "change_Z" ".false." ".true."
     
     rerun #"Hexh"
     mv history.data LOGS
@@ -51,21 +51,14 @@ change() { #param initval newval
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
 }
 
-#run() { # nameOfRun
-#    #condor_submit mesa.job
-#    #condor_wait condor.log
-#    rn
-#    mv final_profile.data "LOGS/profile_$1.data"
-#    mv final_profile.data.FGONG "LOGS/profile_$1.data.FGONG"
-#}
-
 rerun() { # nameOfRun
-    #run $1
     rn
     cp history.data "history.$1.data"
     tail -n+7 LOGS/history.data >> history.data
 }
 
+## Parse command line arguments
+# takes mass M, helium Y, metallicity Z, and mixing length parameter alpha
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -M) M="$2"; shift 2;;
@@ -78,11 +71,12 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+# set defaults if they weren't supplied
 if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.275; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
 if [ -z ${alpha+x} ]; then alpha=1.85; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 
-dualexp
+simulate
 

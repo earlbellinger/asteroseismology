@@ -1,4 +1,8 @@
 #!usr/bin/env python
+#### Call dispatch.sh with quasi-random inputs 
+#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
+#### Stellar predictions & Galactic Evolution Group 
+#### Max-Planck-Institut fur Sonnensystemforschung 
 
 import numpy as np
 import subprocess

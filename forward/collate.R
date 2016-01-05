@@ -1,8 +1,13 @@
+#### Collect nearly-evenly-spaced points from all evolutionary tracks 
+#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
+#### Stellar predictions & Galactic Evolution Group 
+#### Max-Planck-Institut fur Sonnensystemforschung 
+
 library(lpSolve)
 library(parallel)
 library(parallelMap)
 
-sim_dir <- 'deleter'
+sim_dir <- 'simulations'
 simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
@@ -34,4 +39,3 @@ print(sapply(seis.DF, fivenum))
 # Save data
 write.table(seis.DF, file.path('grids', 'deleter.dat'), quote=FALSE, 
     sep='\t', row.names=FALSE)
-
