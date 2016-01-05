@@ -10,7 +10,7 @@ Earl Bellinger's Ph.D. repository on forward and inverse problems in asteroseism
 `forward/`
   1. `python3 sobol_dispatcher.py` -- generate simulations with inputs varied in a quasi-random fashion 
     * `Rscript summarize.R` -- summarize each evolutionary track into a matrix table (this is called by `sobol_dispatcher`)
-  2. `Rscript collate.R` -- collect 100 nearly-evenly-spaced points from each summarized simulation into one big data file `grid.dat`; this facilitates the inverse problem
+  2. `Rscript collate.R` -- collect nearly-evenly-spaced points from each summarized simulation into one big data file `grid.dat`; this facilitates the inverse problem 
   3. `Rscript mesh.R` -- create meshes and scatterplot visualizations (e.g. H-R and C-D diagrams) on the collated tracks 
   4. `Rscript rankcorr.R` -- perform rank correlation tests and principal components analysis on the collated tracks 
 
@@ -37,7 +37,7 @@ Earl Bellinger's Ph.D. repository on forward and inverse problems in asteroseism
 - `utils.R` -- R utility script for plotting, constants, etc 
 - `sobol_lib.py` -- python library for generating Sobol (quasi-random) numbers 
 
-#### Misc
+#### Miscellaneous
 
 `misc/`
 - `python3 plot_sph_harm.py` -- make spherical harmonics plots to visualize the pulsation frequencies of solar-like oscillators 
