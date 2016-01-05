@@ -3,7 +3,7 @@
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
-source('../scripts/seismology.R')
+source(file.path('..', 'scripts', 'seismology.R'))
 library(parallel)
 library(parallelMap)
 

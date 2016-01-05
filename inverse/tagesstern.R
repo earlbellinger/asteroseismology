@@ -3,7 +3,7 @@
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
-source('../scripts/seismology.R')
+source(file.path('..', 'scripts', 'seismology.R'))
 library(randomForest)
 
 plot_dir <- file.path('plots', 'Tagesstern')
