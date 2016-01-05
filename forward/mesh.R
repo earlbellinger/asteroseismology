@@ -1,3 +1,10 @@
+#### Mesh and scatterplot analysis of evolutionary tracks 
+#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
+#### Stellar predictions & Galactic Evolution Group 
+#### Max-Planck-Institut fur Sonnensystemforschung 
+
+## Libraries
+source(file.path('..', 'scripts', 'utils.R'))
 library(magicaxis)
 library(RColorBrewer)
 library(akima)
@@ -6,14 +13,12 @@ library(parallelMap)
 library(data.table)
 library(lattice)
 
-seis.DF <- data.table(read.table('grids/deleter.dat', header=1))
+seis.DF <- data.table(read.table('grid.dat', header=1))
 setkey(seis.DF, M, Y, Z, alpha)
 keys <- key(seis.DF)
 
 solar_vals <- read.table(file.path('perturb', 'Sun_perturb.dat'), 
     nrow=1, header=1)
-
-font <- 'Palatino'
 
 plot_dir <- file.path('plots')
 hrcdr_dir <- file.path(plot_dir, 'hrcdr')
