@@ -33,13 +33,11 @@ make_plots <- function(plot_f, filename, ...,
     
     print(filepath)
     
-    if (paper) dir.create(file.path(filepath, 'paper'), 
-        showWarnings=FALSE, recursive=TRUE)
-    if (slide) dir.create(file.path(filepath, 'slides'), 
-        showWarnings=FALSE, recursive=TRUE)
     
     if (paper & make_pdf & wide) {
-        cairo_pdf(file.path(filepath, 'paper', paste0(filename, '.pdf')),
+        directory <- file.path(filepath, 'paper', 'wide')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
                   width=paper_pdf_width, height=paper_pdf_height, 
                   family=font)
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font)
@@ -48,7 +46,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (paper & make_pdf & thin) {
-        cairo_pdf(file.path(filepath, 'paper', paste0(filename, '-thin.pdf')),
+        directory <- file.path(filepath, 'paper', 'thin')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        cairo_pdf(file.path(directory, paste0(filename, '-thin.pdf')),
                   width=paper_pdf_width/2, height=paper_pdf_height, 
                   family=font)
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font)
@@ -57,7 +57,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (paper & make_png & wide) {
-        png(file.path(filepath, 'paper', paste0(filename, '.png')),
+        directory <- file.path(filepath, 'paper', 'wide')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        png(file.path(directory, paste0(filename, '.png')),
                   width=paper_png_width, height=paper_png_height, 
                   family=font, res=png_res, type='cairo')
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font)
@@ -66,7 +68,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (paper & make_png & thin) {
-        png(file.path(filepath, 'paper', paste0(filename, '-thin.png')),
+        directory <- file.path(filepath, 'paper', 'thin')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        png(file.path(directory, paste0(filename, '-thin.png')),
                   width=paper_png_width/2, height=paper_png_height, 
                   family=font, res=png_res, type='cairo')
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font)
@@ -75,7 +79,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (slide & make_pdf & wide) {
-        cairo_pdf(file.path(filepath, 'slides', paste0(filename, '.pdf')),
+        directory <- file.path(filepath, 'slides', 'wide')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        cairo_pdf(file.path(directory, paste0(filename, '-slides.pdf')),
                   width=slide_pdf_width, height=slide_pdf_height, 
                   family=font)
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=slide_cex.lab, family=font)
@@ -84,7 +90,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (slide & make_pdf & thin) {
-        cairo_pdf(file.path(filepath, 'slides', paste0(filename, '-thin.pdf')),
+        directory <- file.path(filepath, 'slides', 'thin')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        cairo_pdf(file.path(directory, paste0(filename, '-slides-thin.pdf')),
                   width=slide_pdf_width/2, height=slide_pdf_height, 
                   family=font)
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=slide_cex.lab, family=font)
@@ -93,7 +101,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (slide & make_png & wide) {
-        png(file.path(filepath, 'slides', paste0(filename, '.png')),
+        directory <- file.path(filepath, 'slides', 'wide')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        png(file.path(directory, paste0(filename, '-slides.png')),
                   width=slide_png_width, height=slide_png_height, 
                   family=font, res=png_res, type='cairo')
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=slide_cex.lab, family=font)
@@ -102,7 +112,9 @@ make_plots <- function(plot_f, filename, ...,
     }
     
     if (slide & make_png & thin) {
-        png(file.path(filepath, 'slides', paste0(filename, '-thin.png')),
+        directory <- file.path(filepath, 'slides', 'thin')
+        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
+        png(file.path(directory, paste0(filename, '-slides-thin.png')), 
                   width=slide_png_width/2, height=slide_png_height, 
                   family=font, res=png_res, type='cairo')
         par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=slide_cex.lab, family=font)

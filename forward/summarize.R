@@ -161,8 +161,8 @@ if (length(args)>0) {
     print(head(DF))
     
     # make plot
-    make_plots(plot_HR, "HR", filepath=file.path('plots', 'HR'),
-        mar=c(3, 4, 1, 7), DF=DF)
+    make_plots(plot_HR, paste0(basename(args[1]), "-HR"), 
+        filepath=file.path('plots', 'HR'), mar=c(3, 4, 1, 7), DF=DF)
     
     # check if the track should be kept 
     if (nrow(DF) < 5) {
