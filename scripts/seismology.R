@@ -104,8 +104,7 @@ seismology_plot <- function(text.cex,
     abline(v=nu_max, lty=3)
     magaxis(side=1:4, family=font, tcl=0.25, labels=FALSE)
     if (length(l_degs)>1)
-        legend("topleft", pch=l_degs+1, col=dnu.cl, cex=text.cex, #horiz=1,
-               #ncol=length(l_degs), #bty="n",
+        legend("topleft", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
                legend=paste0("\u2113=", l_degs))
 }
 

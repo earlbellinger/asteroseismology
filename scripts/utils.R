@@ -10,14 +10,14 @@ font <- "Palatino"
 png_res <- 400
 slide_cex.lab <- 1.3
 
-paper_pdf_width <- 6.97522
+paper_pdf_width <- 6.97522 # inches
 paper_pdf_height <- 4.17309
 
 latex_pt_per_in <- 5 * 72.27
 paper_png_width <- paper_pdf_width * latex_pt_per_in
 paper_png_height <- paper_pdf_height * latex_pt_per_in
 
-slide_pdf_width <- 6.22665
+slide_pdf_width <- 6.22665 
 slide_pdf_height <- 4.1511
 
 slide_png_width <- slide_pdf_width * latex_pt_per_in
@@ -31,16 +31,13 @@ make_plots <- function(plot_f, filename, ...,
         make_png=TRUE, make_pdf=TRUE, 
         paper=TRUE, slide=TRUE) {
     
-    print(filepath)
-    
-    
     if (paper & make_pdf & wide) {
         directory <- file.path(filepath, 'paper', 'wide')
         dir.create(directory, showWarnings=FALSE, recursive=TRUE)
         cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
                   width=paper_pdf_width, height=paper_pdf_height, 
                   family=font)
-        par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font)
+        par(mar=mar, mgp=c(2, 0.25, 0), cex.lab=1, family=font, ...)
         plot_f(text.cex=1, ...)
         dev.off()
     }

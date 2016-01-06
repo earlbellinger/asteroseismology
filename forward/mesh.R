@@ -13,44 +13,50 @@ library(parallelMap)
 library(data.table)
 library(lattice)
 
+## Load data
 seis.DF <- data.table(read.table('grid.dat', header=1))
 setkey(seis.DF, M, Y, Z, alpha)
 keys <- key(seis.DF)
 
-solar_vals <- read.table(file.path('perturb', 'Sun_perturb.dat'), 
+solar_vals <- read.table(
+        file.path('..', 'inverse', 'perturb', 'Sun_perturb.dat'), 
     nrow=1, header=1)
-
-plot_dir <- file.path('plots')
-hrcdr_dir <- file.path(plot_dir, 'hrcdr')
-dir.create(plot_dir, showWarnings=FALSE)
-dir.create(hrcdr_dir, showWarnings=FALSE)
-
-plot_width = 6.97522
-plot_height = 4.17309
 
 col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(1000)
 
-thirds <- c('M', 'Y', 'Z', 'alpha', 'age', 'radius', 'He', 'Hc')
-labels <- c(
-    expression(M/M["\u0298"]), 
-    expression(Y[0]), 
-    expression(Z[0]),
-    expression(alpha["MLT"]), 
-    'Age/Gyr', 
-    expression(R/R["\u0298"]), 
-    expression(X(He)), 
-    expression(H[c])
+# Sort data
+combos <- unique(seis.DF[,keys, with=0])
+ages <- unlist(Map(function(i) max(merge(seis.DF, combos[i,])$age), 
+    1:nrow(combos)))
+combos <- combos[order(ages),]
+
+## Labels
+Z_names <- names(seis.DF)[1:9]
+
+Z_labels <- list(
+    M=expression(M/M["\u0298"]), 
+    Y=expression(Y[0]), 
+    Z=expression(Z[0]),
+    alpha=expression(alpha["MLT"]), 
+    age='Age/Gyr', 
+    radius=expression(R/R["\u0298"]), 
+    H=expression(X(H)), 
+    He=expression(X(He)), 
+    Hc=expression(H[c])
 )
-levels <- list(
+
+Z_levels <- list(
     M=seq(0.7, 1.3, 0.1),
     Y=seq(0.22, 0.34, 0.01),
     Z=log10(seq(10**1e-04, 10**0.04, length=10)),
     alpha=seq(1.5, 2.5, 0.1),
     age=0:14, 
     radius=seq(0.6, 2.1, 0.1),
+    H=seq(0.54, 0.78, 0.02),
     He=seq(0.22, 0.45, 0.02),
     Hc=seq(0, 0.78, 0.05)
 )
+
 color_levels <- list(
     age=seq(0, 13.8, 0.5),
     M=seq(0.7, 1.3, 0.025),
@@ -58,27 +64,29 @@ color_levels <- list(
     Z=log10(seq(10**1e-04, 10**0.04, length=20)),
     alpha=seq(1.5, 2.5, 0.025),
     radius=seq(0.6, 2.1, 0.025),
+    H=seq(0.54, 0.78, 0.01),
     He=seq(0.22, 0.45, 0.005),
     Hc=seq(0, 0.78, 0.015)
 )
 
-labs <- expression(M, Y[0], Z[0], alpha["MLT"], tau, "mass", R, 
-    H[c], "X(He)", log~g, L, T["eff"], "Fe"/"H", 
-    "<"*Delta*nu*">", "<"*d*Delta*nu/d*nu*">", #"<"*Delta*nu^b*">", 
-    "<"*Delta*nu[0]*">", "<"*d*Delta*nu[0]/d*nu*">", #"<"*Delta*nu[0]^b*">", 
+seis.labs <- expression(
+    M, Y[0], Z[0], alpha["MLT"], 
+    tau, R, "X(H)", "X(He)", H[c], 
+    log~g, L, T["eff"], "Fe"/"H", 
+    "<"*Delta*nu*">", "<"*d*Delta*nu/d*nu*">", 
+    "<"*Delta*nu[0]*">", "<"*d*Delta*nu[0]/d*nu*">", 
     "<"*delta*nu[0*","*2]*">", "<"*d*delta*nu[0*","*2]/d*nu*">", 
-        #"<"*delta*nu[0*","*2]^b*">", 
-    "<"*r[0*","*2]*">", "<"*d*r[0*","*2]/d*nu*">", #"<"*r[0*","*2]^b*">", 
-    "<"*r[0*","*1]*">", "<"*d*r[0*","*1]/d*nu*">", #"<"*r[0*","*1]^b*">", 
-    "<"*delta*nu[1*","*3]*">", "<"*d*delta*nu[1*","*3]/d*nu*">", 
-        #"<"*delta*nu[1*","*3]^b*">", 
+    "<"*r[0*","*2]*">", "<"*d*r[0*","*2]/d*nu*">", 
+    "<"*r[0*","*1]*">", "<"*d*r[0*","*1]/d*nu*">", 
+    "<"*delta*nu[1*","*3]*">", "<"*d*delta*nu[1*","*3]/d*nu*">",  
     "<"*r[1*","*3]*">", "<"*d*r[1*","*3]/d*nu*">",
-    "<"*r[1*","*0]*">", "<"*d*r[1*","*0]/d*nu*">"#, "<"*r[0*","*1]^b*">", 
+    "<"*r[1*","*0]*">", "<"*d*r[1*","*0]/d*nu*">"
 )
 
-latex_labs <- c("M", "$Y_0$", "$Z_0$", "$\\alpha_{\\text{\"MLT\"}}$", 
-    "$\\tau$", "mass", "R", "$H_c$", "X(He)", "$\\log g$", "L", 
-    "$T_{\text{\"eff\"}}$", "Fe/H", 
+seis.latex <- c(
+    "M", "$Y_0$", "$Z_0$", "$\\alpha_{\\text{\"MLT\"}}$", 
+    "$\\tau$", "mass", "R", "X(H)", "X(Hc)", "$H_c$", 
+    "$\\log g$", "L", "$T_{\text{\"eff\"}}$", "Fe/H", 
     
     "$\\langle\\Delta\\nu\\rangle$", 
     "$\\langle\\frac{d\\Delta\\nu}{d\nu}\\rangle$", 
@@ -107,7 +115,7 @@ latex_labs <- c("M", "$Y_0$", "$Z_0$", "$\\alpha_{\\text{\"MLT\"}}$",
 
 ## Plot histograms
 #tmp <- data.frame(seis.DF[,1:8, with=0])
-#colnames(tmp) <- labs[-exclude][1:8]
+#colnames(tmp) <- seis.labs[-exclude][1:8]
 #d <- melt(tmp)
 #ggplot(d, aes(x = value)) +#, y=..density..)) +
 #    geom_histogram(aes(y=..ncount..), fill="#c0392b", alpha=0.75) + 
@@ -116,39 +124,46 @@ latex_labs <- c("M", "$Y_0$", "$Z_0$", "$\\alpha_{\\text{\"MLT\"}}$",
 #    scale_y_continuous(labels=comma) + 
 #    geom_hline(yintercept=0, size=0.4, color="black") +
 #    facet_wrap(~variable,scales = "free_x", nrow=4) +
-#    ggtitle(labs[-exclude][1:8])
-
-# Sort data
-combos <- unique(seis.DF[,keys, with=0])
-ages <- unlist(Map(function(i) max(merge(seis.DF, combos[i,])$age), 
-    1:nrow(combos)))
-combos <- combos[order(ages),]
+#    ggtitle(seis.labs[-exclude][1:8])
 
 
 # Make inputs diagram
-#cairo_pdf(file.path(plot_dir, 'inputs.pdf'), 
-#          width=plot_width+0.25*plot_width, height=plot_width, 
-#          family=font)
-png(file.path(plot_dir, 'inputs.png'), res=400, 
-    width=150*plot_width, height=150*plot_width, 
-    family=font)
-par(mar=c(0, 0, 0, 0), mgp=c(0, 0, 0), oma=c(0, 0, 0, 0))
-H <- 1-combos$Y-combos$Z
-varmax <- max(H)
-varmin <- min(H)
-cols <- col.pal[floor((H-varmin) / (varmax-varmin) * (length(col.pal)-1))+1]
-splom(combos, cex=0.001, pch=3,
-      col=cols,
-      #col.pal[floor(ages/max(ages)*length(col.pal))],
-      xlab=NULL, ylab=NULL, 
-      axis.text.cex=0.25,
-      axis.text.lineheight=0.0001,
-      axis.line.tck=0.25,
-      xaxs='n', yaxs='n',
-      varname.cex=0.5,
-      varnames=c(expression(M[0]), expression(Y[0]), expression(Z[0]), 
-               expression(alpha["MLT"])))
-dev.off()
+inputs_plot <- function(...) {
+    H <- 1-combos$Y-combos$Z
+    varmax <- max(H)
+    varmin <- min(H)
+    splom(combos,
+        cex=0.001, pch=3,
+        col=col.pal[floor((H-varmin)/(varmax-varmin)*(length(col.pal)-1))+1],
+        xlab=NULL, ylab=NULL, 
+        axis.text.cex=0.25,
+        axis.text.lineheight=0.0001,
+        axis.line.tck=0.25,
+        xaxs='n', yaxs='n',
+        varname.cex=0.5, varnames=Z_labels[1:4])
+}
+make_plots(inputs_plot, "inputs", filepath=file.path("plots", "mesh"),
+    mar=c(0,0,0,0), mgp=c(0,0,0), oma=c(0,0,0,0))
+#png(file.path(plot_dir, 'inputs.png'), res=400, 
+#    width=150*plot_width, height=150*plot_width, 
+#    family=font)
+#par(mar=c(0, 0, 0, 0), mgp=c(0, 0, 0), oma=c(0, 0, 0, 0))
+#H <- 1-combos$Y-combos$Z
+#varmax <- max(H)
+#varmin <- min(H)
+#cols <- col.pal[floor((H-varmin) / (varmax-varmin) * (length(col.pal)-1))+1]
+#splom(combos, cex=0.001, pch=3,
+#      col=cols,
+#      #col.pal[floor(ages/max(ages)*length(col.pal))],
+#      xlab=NULL, ylab=NULL, 
+#      axis.text.cex=0.25,
+#      axis.text.lineheight=0.0001,
+#      axis.line.tck=0.25,
+#      xaxs='n', yaxs='n',
+#      varname.cex=0.5,
+#      varnames=c(expression(M[0]), expression(Y[0]), expression(Z[0]), 
+#               expression(alpha["MLT"])))
+#dev.off()
 
 #png(file.path(plot_dir, 'inputs-legend.png'), res=400, 
 #    width=150*plot_width/8, height=150*plot_width, 
@@ -163,9 +178,9 @@ dev.off()
 
 
 # HR scatter
-third <- 'M'
-varmax <- round(max(seis.DF[[third]]), 2)
-varmin <- round(min(seis.DF[[third]]), 2)
+Z_name <- 'M'
+varmax <- round(max(seis.DF[[Z_name]]), 2)
+varmin <- round(min(seis.DF[[Z_name]]), 2)
 png(file.path(plot_dir, 'HR-M.png'), 
     family=font, res=400, width=plot_width*250, height=plot_height*250)
 par(mar=c(3, 4, 1, 6), mgp=c(2, 0.25, 0), cex.lab=1.3)
@@ -173,7 +188,7 @@ for (simulation_i in 1:nrow(combos)) {
     DF <- merge(seis.DF, combos[simulation_i,])
     relation <- log10(DF$L) ~ DF$Teff
     color <- col.pal[
-        floor((DF[[third]]-varmin)/(varmax-varmin)*length(col.pal))+1]
+        floor((DF[[Z_name]]-varmin)/(varmax-varmin)*length(col.pal))+1]
     cex <- 0.01
     if (simulation_i == 1) {
         plot(relation, 
@@ -235,7 +250,7 @@ filled.contour(mesh,
         mtext(expression(M/M['\u0298']), side=4, las=3, line=4, cex=2)
     },
     plot.axes={
-        contour(mesh, add=TRUE, labcex=1, levels=levels[['M']],
+        contour(mesh, add=TRUE, labcex=1, levels=Z_levels[['M']],
            )#method="simple")
         points(log10(5777), 0, pch=1, cex=1)
         points(log10(5777), 0, pch=20, cex=0.1)
@@ -317,7 +332,7 @@ scatter_mesh <- function(plotname, var1, var2, var3, label1, label2, label3,
             mtext(label3, side=4, las=3, line=4, cex=2)
         },
         plot.axes={
-            contour(mesh, add=TRUE, labcex=0.5, levels=levels[[var3]])
+            contour(mesh, add=TRUE, labcex=0.5, levels=Z_levels[[var3]])
             if (any(grepl(var1, names(solar_vals))) && 
                 any(grepl(var2, names(solar_vals)))) {
                 points(solar_vals[[var1]], solar_vals[[var2]], pch=1, cex=1)
@@ -333,16 +348,16 @@ scatter_mesh <- function(plotname, var1, var2, var3, label1, label2, label3,
     dev.off()
 }
 
-for (third in thirds) {
-    scatter_mesh('JCD', 'Dnu0_median', 'dnu02_median', third, 
+for (Z_name in Z_names) {
+    scatter_mesh('JCD', 'Dnu0_median', 'dnu02_median', Z_name, 
         expression(Delta*nu/mu*Hz), 
         expression(delta*nu[0*","*2]/mu*Hz), 
-        labels[which(third==thirds)], seis.DF)
+        Z_labels[which(Z_name==Z_names)], seis.DF)
     
-    #scatter_mesh('HR', 'Teff', 'L', third, 
+    #scatter_mesh('HR', 'Teff', 'L', Z_name, 
     #    expression(T[eff]~"["*K*"]"), 
     #    expression(L/L['\u0298']), 
-    #    labels[which(third==thirds)])
+    #    Z_labels[which(Z_name==Z_names)])
 }
 
 pca <- prcomp(seis.DF[,-1:-8, with=0], center=TRUE, scale.=TRUE)
@@ -351,15 +366,15 @@ pcs <- pca$x[,cumsum(pca$sdev)/sum(pca$sdev)<0.99]
 scatter_mesh('PC23', 'PC2', 'PC3', 'age', 
     expression(PC[2]), 
     expression(PC[3]), 
-    labels[which('age'==thirds)], cbind(seis.DF, pcs))
+    Z_labels[which('age'==Z_names)], cbind(seis.DF, pcs))
 
 scatter_mesh('PC12', 'PC1', 'PC2', 'Hc', 
     expression(PC[1]), 
     expression(PC[2]), 
-    labels[which('Hc'==thirds)], cbind(seis.DF, pcs))
+    Z_labels[which('Hc'==Z_names)], cbind(seis.DF, pcs))
 
 scatter_mesh('PC14', 'PC1', 'PC4', 'radius', 
     expression(PC[1]), 
     expression(PC[4]), 
-    labels[which('radius'==thirds)], cbind(seis.DF, pcs))
+    Z_labels[which('radius'==Z_names)], cbind(seis.DF, pcs))
 

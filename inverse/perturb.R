@@ -63,6 +63,10 @@ process <- function(star, star_dir, out_dir="perturb") {
 }
 
 # Perturb every star 10k times and save the results
+star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
+star_dir <- file.path("data")
+for (star in star_names) process(star, star_dir)
+
 star_dir <- file.path("data", "hares")
 for (fname in list.files(star_dir)) {
     if (!grepl('-obs.dat', fname)) next
@@ -76,7 +80,3 @@ for (fname in list.files(star_dir)) {
     star <- sub('-obs.dat', '', fname)
     process(star, star_dir, out_dir="perturb/kages")
 }
-
-star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
-star_dir <- file.path("data")
-for (star in star_names) process(star, star_dir)

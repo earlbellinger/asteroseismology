@@ -111,9 +111,8 @@ plot_HR <- function(text.cex, DF, ...) {
     points(log10(5771), 0, pch=1, cex=1)
     points(log10(5771), 0, pch=20, cex=0.1)
     points(log10(DF$Teff), log10(DF$L), pch=1, cex=0.1, 
-        col=col.pal[
-            floor((DF$Hc-min(DF$Hc)) /
-                  (max(DF$Hc)-min(DF$Hc))*length(col.pal)) + 1])
+        col=col.pal[floor((DF$Hc-min(DF$Hc)) / (max(DF$Hc)-min(DF$Hc))
+                          * (length(col.pal)-1)) + 1])
     magaxis(side=1:4, family=font, tcl=0.25, mgp=utils.mgp, labels=c(1,1,0,0)) 
     var1range <- diff(par()$usr)[1] # Add colorbar
     color.legend(par()$usr[2]+0.05*var1range, par()$usr[3], 
