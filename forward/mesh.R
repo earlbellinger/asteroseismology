@@ -13,6 +13,8 @@ library(parallelMap)
 library(data.table)
 library(lattice)
 
+source('grid-meta.R')
+
 ## Load data
 seis.DF <- data.table(read.table('grid.dat', header=1))
 setkey(seis.DF, M, Y, Z, alpha)
@@ -29,103 +31,6 @@ combos <- unique(seis.DF[,keys, with=0])
 ages <- unlist(Map(function(i) max(merge(seis.DF, combos[i,])$age), 
     1:nrow(combos)))
 combos <- combos[order(ages),]
-
-## Labels
-Z_names <- names(seis.DF)[1:9]
-
-Z_labels <- list(
-    M=expression(M/M["\u0298"]), 
-    Y=expression(Y[0]), 
-    Z=expression(Z[0]),
-    alpha=expression(alpha["MLT"]), 
-    age='Age/Gyr', 
-    radius=expression(R/R["\u0298"]), 
-    H=expression(X(H)), 
-    He=expression(X(He)), 
-    Hc=expression(H[c])
-)
-
-Z_levels <- list(
-    M=seq(0.7, 1.3, 0.1),
-    Y=seq(0.22, 0.34, 0.01),
-    Z=log10(seq(10**1e-04, 10**0.04, length=10)),
-    alpha=seq(1.5, 2.5, 0.1),
-    age=0:14, 
-    radius=seq(0.6, 2.1, 0.1),
-    H=seq(0.54, 0.78, 0.02),
-    He=seq(0.22, 0.45, 0.02),
-    Hc=seq(0, 0.78, 0.05)
-)
-
-color_levels <- list(
-    age=seq(0, 13.8, 0.5),
-    M=seq(0.7, 1.3, 0.025),
-    Y=seq(0.22, 0.34, 0.0025),
-    Z=log10(seq(10**1e-04, 10**0.04, length=20)),
-    alpha=seq(1.5, 2.5, 0.025),
-    radius=seq(0.6, 2.1, 0.025),
-    H=seq(0.54, 0.78, 0.01),
-    He=seq(0.22, 0.45, 0.005),
-    Hc=seq(0, 0.78, 0.015)
-)
-
-seis.labs <- expression(
-    M, Y[0], Z[0], alpha["MLT"], 
-    tau, R, "X(H)", "X(He)", H[c], 
-    log~g, L, T["eff"], "Fe"/"H", 
-    "<"*Delta*nu*">", "<"*d*Delta*nu/d*nu*">", 
-    "<"*Delta*nu[0]*">", "<"*d*Delta*nu[0]/d*nu*">", 
-    "<"*delta*nu[0*","*2]*">", "<"*d*delta*nu[0*","*2]/d*nu*">", 
-    "<"*r[0*","*2]*">", "<"*d*r[0*","*2]/d*nu*">", 
-    "<"*r[0*","*1]*">", "<"*d*r[0*","*1]/d*nu*">", 
-    "<"*delta*nu[1*","*3]*">", "<"*d*delta*nu[1*","*3]/d*nu*">",  
-    "<"*r[1*","*3]*">", "<"*d*r[1*","*3]/d*nu*">",
-    "<"*r[1*","*0]*">", "<"*d*r[1*","*0]/d*nu*">"
-)
-
-seis.latex <- c(
-    "M", "$Y_0$", "$Z_0$", "$\\alpha_{\\text{\"MLT\"}}$", 
-    "$\\tau$", "mass", "R", "X(H)", "X(Hc)", "$H_c$", 
-    "$\\log g$", "L", "$T_{\text{\"eff\"}}$", "Fe/H", 
-    
-    "$\\langle\\Delta\\nu\\rangle$", 
-    "$\\langle\\frac{d\\Delta\\nu}{d\nu}\\rangle$", 
-    
-    "$\\langle\\Delta\\nu_0\\rangle$", 
-    "$\\langle\\frac{d\\Delta\\nu_0}{d\nu}\\rangle$", 
-    
-    "$\\langle\\delta\\nu_{02}\\rangle$", 
-    "$\\langle\\frac{d\\delta\\nu_{02}}{d\nu}\\rangle$", 
-    
-    "$\\langle r_{02}\\rangle$", 
-    "$\\langle\\frac{dr_{02}}{d\nu}\\rangle$", 
-    
-    "$\\langle r_{01}\\rangle$", 
-    "$\\langle\\frac{dr_{01}}{d\nu}\\rangle$", 
-    
-    "$\\langle\\delta\\nu_{13}\\rangle$", 
-    "$\\langle\\frac{d\\delta\\nu_{13}}{d\nu}\\rangle$", 
-    
-    "$\\langle r_{13}\\rangle$", 
-    "$\\langle\\frac{dr_{13}}{d\nu}\\rangle$", 
-    
-    "$\\langle r_{10}\\rangle$", 
-    "$\\langle\\frac{dr_{10}}{d\nu}\\rangle$"
-)
-
-## Plot histograms
-#tmp <- data.frame(seis.DF[,1:8, with=0])
-#colnames(tmp) <- seis.labs[-exclude][1:8]
-#d <- melt(tmp)
-#ggplot(d, aes(x = value)) +#, y=..density..)) +
-#    geom_histogram(aes(y=..ncount..), fill="#c0392b", alpha=0.75) + 
-#    fte_theme() + 
-#    geom_density(aes(y = ..scaled..)) +#col=2) + 
-#    scale_y_continuous(labels=comma) + 
-#    geom_hline(yintercept=0, size=0.4, color="black") +
-#    facet_wrap(~variable,scales = "free_x", nrow=4) +
-#    ggtitle(seis.labs[-exclude][1:8])
-
 
 # Make inputs diagram
 inputs_plot <- function(...) {
@@ -144,38 +49,135 @@ inputs_plot <- function(...) {
 }
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "mesh"),
     mar=c(0,0,0,0), mgp=c(0,0,0), oma=c(0,0,0,0))
-#png(file.path(plot_dir, 'inputs.png'), res=400, 
-#    width=150*plot_width, height=150*plot_width, 
-#    family=font)
-#par(mar=c(0, 0, 0, 0), mgp=c(0, 0, 0), oma=c(0, 0, 0, 0))
-#H <- 1-combos$Y-combos$Z
-#varmax <- max(H)
-#varmin <- min(H)
-#cols <- col.pal[floor((H-varmin) / (varmax-varmin) * (length(col.pal)-1))+1]
-#splom(combos, cex=0.001, pch=3,
-#      col=cols,
-#      #col.pal[floor(ages/max(ages)*length(col.pal))],
-#      xlab=NULL, ylab=NULL, 
-#      axis.text.cex=0.25,
-#      axis.text.lineheight=0.0001,
-#      axis.line.tck=0.25,
-#      xaxs='n', yaxs='n',
-#      varname.cex=0.5,
-#      varnames=c(expression(M[0]), expression(Y[0]), expression(Z[0]), 
-#               expression(alpha["MLT"])))
-#dev.off()
 
-#png(file.path(plot_dir, 'inputs-legend.png'), res=400, 
-#    width=150*plot_width/8, height=150*plot_width, 
-#    family=font)
-#par(mar=c(0, 0, 0, 0), mgp=c(0, 0, 0), oma=c(0, 0, 0, 0))
-#color.legend(par()$usr[2], par()$usr[1], par()$usr[4], par()$usr[3], 
-#             signif(quantile(seq(varmin, varmax, length=1000), 
-#                    c(0.05, 0.275, 0.5, 0.725, 0.95)), 3), 
-#             col.pal[1:length(col.pal)], gradient='y', align='rb')
-#mtext(expression(H_0), 4, line=4.5, cex=1.3)
-#dev.off()
+## Scatter plot definitions 
+scatter_plot <- function(...) { 
+    Z_max <- max(seis.DF[[Z]])
+    Z_min <- min(seis.DF[[Z]])
+    for (simulation_i in 1:nrow(combos)) {
+        track <- merge(seis.DF, combos[simulation_i,])
+        color <- col.pal[floor((track[[Z]]-Z_min)/(Z_max-Z_min)*
+                                   (length(col.pal)-1))+1]
+        
+        xx <- track[[X]]
+        yy <- track[[Y]]
+        if (Y == 'L') yy <- log10(yy)
+        if (X == 'Teff') xx <- log10(xx)
+        relation <- yy ~ xx
+        
+        if (simulation_i == 1) {
+            plot(relation, 
+                 pch=20, axes=FALSE, col=color, cex=0.01, tcl=0,
+                 ylim=ylim, xlim=xlim,
+                 xlab=xlab, ylab=ylab)
+            abline(v=solar_x, lty=3, col='black')
+            abline(h=solar_y, lty=3, col='black')
+            magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+                    mgp=c(2, 0.25, 0))
+        } else {
+            points(relation, col=color, pch=20, cex=0.01)
+        }
+    }
+    
+    points(solar_x, solar_y, pch=1, cex=1)
+    points(solar_x, solar_y, pch=20, cex=0.1)
+    X_range <- diff(par()$usr)[1]
+    color.legend(par()$usr[2]+0.05*X_range, par()$usr[3], 
+                 par()$usr[2]+0.10*X_range, par()$usr[4], 
+                 signif(quantile(seq(Z_min, Z_max, length=1000), 
+                                 c(0, 0.25, 0.5, 0.75, 1)), 2), 
+                 col.pal[1:length(col.pal)], gradient='y', align='rb')
+    mtext(seis.labs[[Z]], 4, line=4.5, cex=1.3)
+}
 
+## Mesh plotting definitions 
+get_mesh <- function(X, Y, Z) {
+    xx <- seis.DF[[X]]
+    yy <- seis.DF[[Y]]
+    
+    if (Y == 'L') yy <- log10(yy)
+    if (X == 'Teff') xx <- log10(xx)
+    
+    interp(xx, yy, seis.DF[[Z]],
+           xo=seq(quantile(xx, 0.001), quantile(xx, 0.999), length=20),
+           yo=seq(quantile(yy, 0.001), quantile(yy, 0.999), length=20))
+}
+
+mesh_plot <- function(text.cex, ...) {
+    filled.contour(mesh,
+                   xlim=if (X=='Teff') rev(range(mesh$x)) else range(mesh$x),
+                   levels=color_levels[[Z]], 
+                   color=colorRampPalette(brewer.pal(11, "Spectral")),
+                   key.axes={
+                       axis(4, cex.axis=text.cex, tcl=0, line=0)
+                       mtext(get_label(Z), side=4, las=3, line=4, cex=text.cex)
+                   },
+                   plot.axes={
+                       contour(mesh, add=TRUE, labcex=0.5, levels=Z_levels[[Z]])
+                       if (has_solar) {
+                           points(solar_x, solar_y, pch=1, cex=1)
+                           points(solar_x, solar_y, pch=20, cex=0.1)
+                       }
+                       magaxis(side=1:4, family=font, tcl=0.25, 
+                               labels=c(1,1,0,0), mgp=c(2, 0.5, 0), 
+                               cex.axis=text.cex)
+                   },
+                   plot.title={
+                       title(xlab=xlab, cex.lab=text.cex, line=3)
+                       title(ylab=ylab, cex.lab=text.cex, line=3)
+                   })
+}
+
+for (Z in names(seis.DF)[1:9]) {
+    xy_names <- names(seis.DF)[-1:-9]
+    for (X_i in 1:length(xy_names)) {
+        X <- xy_names[X_i]
+        for (Y_i in (1+X_i):length(xy_names)) {
+            Y <- xy_names[Y_i]
+            
+            if (Y == 'Teff' && X == 'L') {
+                Y = 'L'
+                X = 'Teff'
+            }
+            
+            xlab <- get_label(X)
+            ylab <- get_label(Y)
+            xlim <- quantile(seis.DF[[X]], c(0.001, 0.999))
+            ylim <- quantile(seis.DF[[Y]], c(0.001, 0.999))
+            
+            has_solar <- any(grepl(X, names(solar_vals))) && 
+                any(grepl(Y, names(solar_vals)))
+            if (has_solar) {
+                solar_x <- solar_vals[[X]]
+                solar_y <- solar_vals[[Y]]
+            }
+            
+            if (Y == 'L') {
+                ylab <- expression(lg~(L/L["\u0298"]))
+                ylim <- log10(ylim)
+                if (has_solar) solar_y <- log10(solar_y)
+            }
+            if (X == 'Teff') {
+                xlab <- expression(lg~(T["eff"]/K))
+                xlim <- rev(log10(xlim))
+                if (has_solar) solar_x <- log10(solar_x)
+            }
+            
+            make_plots(scatter_plot, 
+                       paste0(paste(Z, Y, X, sep="_"), "-scatter"),
+                       filepath=file.path("plots", "mesh"),
+                       mar=c(3,4,1,6))
+            
+            mesh <- get_mesh(X, Y, Z)
+            make_plots(mesh_plot, 
+                       paste0(paste(Z, Y, X, sep="_"), "-mesh"),
+                       filepath=file.path("plots", "mesh"),
+                       mar=c(5, 6, 1, 0))
+        }
+    }
+}
+#make_plots(mesh_plot, "mesh", mar=c(5, 6, 1, 0))
+#make_plots(scatter_plot, "scatter", mar=c(3,4,1,6))
 
 # HR scatter
 Z_name <- 'M'
