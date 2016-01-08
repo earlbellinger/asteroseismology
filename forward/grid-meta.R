@@ -3,15 +3,50 @@
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
-get_label <- function(name) 
-  as.expression(bquote(.(seis.labs[[name]]) * .(seis.units[[name]])))
+get_label <- function(symbol) as.expression(bquote(
+        .(seis.names[[symbol]])
+      ~ .(seis.labs[[symbol]])
+      * .(seis.units[[symbol]])
+))
+
+seis.names <- list(
+  M              = "Mass", 
+  Y              = "Initial helium", 
+  Z              = "Initial metallicity",
+  alpha          = "Mixing length parameter", 
+  age            = "Age", 
+  radius         = "Radius", 
+  H              = "Fractional hydrogen", 
+  He             = "Fractional helium", 
+  Hc             = "Fractional core-hydrogen", 
+  log_g          = "Surface gravity", 
+  L              = "Luminosity", 
+  Teff           = "Temperature", 
+  Fe.H           = "Metallicity", 
+  Dnu_median     = "Large frequency separation", 
+  Dnu_slope      = "", 
+  Dnu0_median    = "Large frequency separation", 
+  Dnu0_slope     = "", 
+  dnu02_median   = "Small frequency separation", 
+  dnu02_slope    = "", 
+  r_sep02_median = "", 
+  r_sep02_slope  = "", 
+  r_avg01_median = "", 
+  r_avg01_slope  = "", 
+  dnu13_median   = "Small frequency separation", 
+  dnu13_slope    = "", 
+  r_sep13_median = "", 
+  r_sep13_slope  = "",
+  r_avg10_median = "", 
+  r_avg10_slope  = ""
+)
 
 seis.labs <- list(
   M              = bquote(M), 
   Y              = bquote(Y[0]), 
   Z              = bquote(Z[0]),
   alpha          = bquote(alpha["MLT"]), 
-  age            = bquote('Age'), 
+  age            = bquote(tau), 
   radius         = bquote(R), 
   H              = bquote(X(H)), 
   He             = bquote(X(He)), 
