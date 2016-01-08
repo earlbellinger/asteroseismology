@@ -23,6 +23,8 @@ slide_pdf_height <- 4.1511
 slide_png_width <- slide_pdf_width * latex_pt_per_in
 slide_png_height <- slide_pdf_height * latex_pt_per_in
 
+normalize <- function(x) (x-min(x))/(max(x)-min(x))
+
 ## Make the same plot as a pdf and a png suitable for papers and for slides
 # takes a plotting function plot_f that calls `plot` 
 make_plots <- function(plot_f, filename, ..., 
@@ -119,3 +121,4 @@ make_plots <- function(plot_f, filename, ...,
         dev.off()
     }
 }
+

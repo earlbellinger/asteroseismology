@@ -85,7 +85,7 @@ seis.units <- list(
   Hc             = bquote(), 
   log_g          = bquote(), 
   L              = bquote("/"*L["\u0298"]), 
-  Teff           = bquote(), 
+  Teff           = bquote("/"*K), 
   Fe.H           = bquote(), 
   Dnu_median     = bquote("/"*mu*Hz), 
   Dnu_slope      = bquote(), 
