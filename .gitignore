@@ -1,7 +1,7 @@
 forward/simulations**/**
 inverse/perturb/**
 **/maybe_sub_logs**/**
-**/plots/**
+**/**plots/**
 **/__pycache__/**
 **.png
 **.pdf

@@ -19,6 +19,7 @@ mpl.rc('text', usetex='true')
 mpl.rc('text', dvipnghack='true') 
 mpl.rcParams.update({'font.size': 16}) 
 import pylab as P
+import corner
 
 plot_dir = 'learn_plots'
 perturb_dir = 'perturb'
@@ -28,8 +29,8 @@ if not os.path.exists(perturb_dir):
     os.makedirs(perturb_dir)
 
 ### Load grid of models 
-data = pd.read_csv('grids/deleter.dat', sep='\t')
-exclude = "mass|nu_max|Dnu|radial_velocity"
+data = pd.read_csv('../forward/grid.dat', sep='\t')
+exclude = "nu_max|radial_velocity|Dnu_"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -37,17 +38,34 @@ data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 ### Helpers ####################################################################
 ################################################################################
 y_latex = {
-    "M": "$M/M_\\odot$", 
-    "Y": "$Y_0$", 
-    "Z": "$Z_0$", 
-    "alpha": "$\\alpha_{\mathrm{MLT}}$", 
-    "age": "Age [Gyr]", 
-    "radius": "$R/R_\\odot$", 
-    "He": "X(He)", 
-    "log_g": "log g [dex]", 
-    "L": "$L/L_\\odot$",
-    "Hc": "$H_c$"
+    "M": "Mass M/M$_\\odot$", 
+    "Y": "Initial helium Y$_0$", 
+    "Z": "Initial metallicity Z$_0$", 
+    "alpha": "Mixing length $\\alpha_{\mathrm{MLT}}$", 
+    "age": "Age $\\tau$/Gyr", 
+    "radius": "Radius R/R$_\\odot$", 
+    "H": "Hydrogen fraction X(H)", 
+    "He": "Helium fraction X(He)",
+    "Hc": "Core-hydrogen fraction H$_c$",
+    "log_g": "Surface gravity log g/dex", 
+    "L": "Luminosity L/L$_\\odot$"
 }
+
+y_latex2 = {
+    "M": "M/M$_\\odot$", 
+    "Y": "Y$_0$", 
+    "Z": "Z$_0$", 
+    "alpha": "$\\alpha_{\mathrm{MLT}}$", 
+    "age": "$\\tau$/Gyr", 
+    "radius": "R/R$_\\odot$", 
+    "H": "X(H)", 
+    "He": "X(He)",
+    "Hc": "H$_c$",
+    "log_g": "log g/dex", 
+    "L": "L/L$_\\odot$"
+}
+
+y_show = ['M', 'Y', 'Z', 'age', 'radius']
 
 def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
     X = data.loc[:,X_columns]#data.drop(list(ys.columns) + drop_cols, axis=1)
@@ -56,7 +74,7 @@ def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
     drop_cols = [i for i in ys.columns 
             if re.search(y_exclude, i) if i in ys.columns]
     ys = ys.drop(drop_cols, axis=1)
-    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler()), ('pca', PCA())])
+    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
     forest = Pipeline(steps=[
@@ -88,6 +106,20 @@ def get_rc(num_ys):
     return rows, cols, sqrt
 
 def plot_star(star, predict, y_names, out_dir=plot_dir):
+    ## Corner plot
+    figure = corner.corner(
+        predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
+        labels=[y_latex2[y_name] for y_name in y_names
+                if y_name in y_show],
+        show_titles=True, title_args={"fontsize": 16})
+    figure.gca().annotate(star, 
+        xy=(0.5, 1.0), xycoords="figure fraction",
+        xytext=(0, -5), textcoords="offset points",
+        ha="center", va="top")
+    plt.savefig(os.path.join(out_dir, star + '-corner.png'), dpi=400)
+
+    
+    ## Regular histograms
     middles = np.median(predict, 0)
     stds = np.std(predict, 0)
     
@@ -131,7 +163,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
     
     print(outstr)
     plt.subplots_adjust(top=0.9)
-    plt.savefig(os.path.join(out_dir, star + '.png'))
+    plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
     plt.close()
 
 def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
@@ -164,80 +196,10 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         #predict = forest.predict(star_data)
         predict = y_trfm.inverse_transform(forest.predict(star_data))
         plot_star(star, predict, y_names, out_dir)
-    
-    ### Plot importances 
-    """
-    importances = forest.feature_importances_
-    indices = np.argsort(importances)[::-1]
-    import_dist = np.array([tree.feature_importances_ 
-        for tree in forest.estimators_]).T[indices][::-1].T
-    
-    print("Feature ranking:")
-    for f in range(len(X_names)):
-        print("%d. %s (%.3g)" % (f+1, X_names[indices[f]], 
-            importances[indices[f]]))
-    
-    mpl.rc('text', usetex='false') 
-    plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-    plt.boxplot(import_dist, vert=0)
-    plt.yticks(range(1,1+len(X_names)), np.array(X_names)[indices][::-1])
-    plt.xlabel("Feature importance")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, 'importances.pdf'))
-    plt.close()
-    """
-    """
-    ### Test on 16 Cyg A & B
-    cygA = pd.read_csv('perturb/16CygA_perturb.dat', sep='\t')
-    cygA = cygA.drop([i for i in cygA.columns 
-        if re.search(exclude, i)], axis=1)
-    cygB = pd.read_csv('perturb/16CygB_perturb.dat', sep='\t')
-    cygB = cygB.drop([i for i in cygB.columns 
-        if re.search(exclude, i)], axis=1)
-    start = time()
-    pred_A = forest.predict(cygA)
-    pred_B = forest.predict(cygB)
-    end = time()
-    print("%.3g seconds to predict Cyg A and B" % (end-start))
-    plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-    plt.suptitle("16 Cyg")
-    for (pred_j, name) in enumerate(y_names):
-        ax = plt.subplot(3,3,pred_j+1)
-        
-        (m_A, s_A) = (np.median(pred_A[:,pred_j]), np.std(pred_A[:,pred_j]))
-        (m_B, s_B) = (np.median(pred_B[:,pred_j]), np.std(pred_B[:,pred_j]))
-        
-        n, bins, patches = P.hist(pred_A[:,pred_j], 50, normed=1, 
-            histtype='stepfilled', color='red', alpha=0.5)
-        y = P.normpdf(bins, m_A, s_A)
-        P.plot(bins, y, 'r--', linewidth=1.5)
-        
-        n, bins, patches = P.hist(pred_B[:,pred_j], 50, normed=1, 
-            histtype='stepfilled', color='blue', alpha=0.5)
-        y = P.normpdf(bins, m_B, s_B)
-        P.plot(bins, y, 'b--', linewidth=1.5)
-        
-        P.xlabel(y_latex[y_names[pred_j]])
-        ax.set_yticklabels('',visible=False)
-        P.locator_params(axis='x', nbins=3)
-        xticks = np.linspace(min(m_A-3*s_A, m_B-3*s_B), 
-                             max(m_A+3*s_A, m_B+3*s_B), 3)
-        ax.set_xlim([min(m_A-4*s_A, m_B-4*s_B), 
-                     max(m_A+4*s_A, m_B+4*s_B)])
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(['%.3g'%xtick for xtick in xticks])
-        ax.minorticks_on()
-        plt.tight_layout()
-
-    plt.subplots_adjust(top=0.9)
-    plt.savefig(os.path.join(plot_dir, '16Cyg.png'))
-    plt.close()
-    """
 
 ################################################################################
 ### Start ######################################################################
 ################################################################################
-
 process_dir()
 for directory in [f for f in os.listdir(perturb_dir) 
                   if not re.match(perturb_pattern, f)]:
