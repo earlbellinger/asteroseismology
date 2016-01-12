@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-output_dir = 'plots'
+np.random.seed(13)
+
+output_dir = 'plots/classification'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 N=100
 x = np.random.random(N)
-err = np.random.normal(0, 1.5, N)
+err = np.random.normal(0, 2, N)
 
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111)

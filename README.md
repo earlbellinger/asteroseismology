@@ -10,7 +10,7 @@ Earl Bellinger's Ph.D. repository on forward and inverse problems in asteroseism
 `forward/`
   1. `python3 sobol_dispatcher.py` -- generate simulations with inputs varied in a quasi-random fashion 
     * `Rscript summarize.R` -- summarize each evolutionary track into a matrix table (this is called by `sobol_dispatcher`)
-  2. `Rscript collate.R` -- collect nearly-evenly-spaced points from each summarized simulation into one big data file `grid.dat`; this facilitates the inverse problem 
+  2. `Rscript collate.R` -- collect nearly-evenly-spaced points from each summarized simulation into one big data file `simulations.dat`; this facilitates the inverse problem 
   3. `Rscript mesh.R` -- create meshes and scatterplot visualizations (e.g. H-R and C-D diagrams) on the collated tracks 
   4. `Rscript rankcorr.R` -- perform rank correlation tests and principal components analysis on the collated tracks 
 
@@ -19,7 +19,7 @@ Earl Bellinger's Ph.D. repository on forward and inverse problems in asteroseism
 `inverse/`
   1. `Rscript tagesstern.R` -- degrade BiSON solar frequencies to the level of what is observable from the 16 Cyg stars for the sake of fair evaluation & comparison 
   2. `Rscript perturb.R` -- make Monte-Carlo perturbations of solar, Tagesstern, 16 Cyg, kages, and hares data to account for uncertainties in observed data 
-  3. `python3 learn.py` -- learn what relates observable data to model properties from `../forward/grid.dat` and predict the properties of the stars in `perturb/`
+  3. `python3 learn.py` -- learn what relates observable data to model properties from `../forward/simulations.dat` and predict the properties of the stars in `perturb/`
   4. `python3 constrain.py` -- constrain stellar systems like 16 Cyg by assuming that they have the same age and initial composition 
 
 ---

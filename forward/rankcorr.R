@@ -74,13 +74,13 @@ cor.mtest <- function(mat, test) {
     return(p.mat)
 }
 
-res1 <- cor.mtest(X, method)
+p.values <- cor.mtest(X, method)
 
 cairo_pdf('plots/corr-spearman.pdf', width=8, height=7, family='Palatino')
 par(mar=c(0, 0, 0, 0), mgp=c(2, 0.25, 0), oma=c(0,0,0,0), cex=1, cex.lab=1)
 a <- corrplot(M, diag=1, tl.col='white', type='lower', order="FPC", 
     tl.cex = 0.3, cl.cex=1, tl.srt=90, 
-    p.mat = res1, sig.level = sig.level/length(M))
+    p.mat = p.values, sig.level = sig.level/length(M))
     #hclust.method="median"
 pos <- as.numeric(sapply(colnames(a), function(x) which(x==names(X))))
 colors <- ifelse(grepl('M|Y|Z|alpha', names(X)[pos]), '#800080', 'black')

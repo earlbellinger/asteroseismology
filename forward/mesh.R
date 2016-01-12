@@ -9,7 +9,6 @@ source('grid-meta.R')
 
 library(magicaxis)
 library(RColorBrewer)
-library(akima)
 library(parallel)
 library(parallelMap)
 library(data.table)
@@ -61,70 +60,6 @@ inputs_plot <- function(text.cex, ...) {
         #sapply(names(seis.DF)[1:4], function (name) get_label(name))))
 }
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "mesh"))
-
-## Scatter plot definitions 
-scatter_plot <- function(...) { 
-    Z_max <- max(seis.DF[[Z]])
-    Z_min <- min(seis.DF[[Z]])
-    for (simulation_i in 1:nrow(combos)) {
-        track <- merge(seis.DF, combos[simulation_i,])
-        color <- col.pal[floor((track[[Z]]-Z_min)/(Z_max-Z_min)*
-                                   (length(col.pal)-1))+1]
-        use_line <- length(unique(color))==1
-        relation <- track[[Y]] ~ track[[X]]
-        if (simulation_i == 1) {
-            plot(relation, type=ifelse(use_line, 'l', 'p'),
-                 pch=20, axes=FALSE, col=color, cex=0.01, tcl=0, 
-                 ylim=ylim, xlim=xlim,
-                 xlab=xlab, ylab=ylab)
-            if (has_solar) {
-                abline(v=solar_x, lty=3, col='black')
-                abline(h=solar_y, lty=3, col='black')
-            }
-            magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
-                    mgp=c(2, 0.25, 0))
-        } else {
-            if (use_line) lines(relation, col=color[1])
-            else points(relation, col=color, pch=20, cex=0.01)
-        }
-    }
-    
-    points(solar_x, solar_y, pch=1, cex=1)
-    points(solar_x, solar_y, pch=20, cex=0.1)
-    X_range <- diff(par()$usr)[1]
-    color.legend(par()$usr[2]+0.05*X_range, par()$usr[3], 
-                 par()$usr[2]+0.10*X_range, par()$usr[4], 
-                 signif(quantile(seq(Z_min, Z_max, length=1000), 
-                                 c(0, 0.25, 0.5, 0.75, 1)), 2), 
-                 col.pal[1:length(col.pal)], gradient='y', align='rb')
-    mtext(get_label(Z), 4, line=4.5, cex=1.3)
-}
-
-## Mesh plotting definitions 
-mesh_plot <- function(text.cex, ...) {
-    filled.contour(mesh,
-                   xlim=if (X=='Teff') rev(range(mesh$x)) else range(mesh$x),
-                   levels=color_levels[[Z]], 
-                   color=colorRampPalette(brewer.pal(11, "Spectral")),
-                   key.axes={
-                       axis(4, cex.axis=text.cex, tcl=0, line=0)
-                       mtext(get_label(Z), side=4, las=3, line=3, cex=text.cex)
-                   },
-                   plot.axes={
-                       contour(mesh, add=TRUE, labcex=0.5, levels=Z_levels[[Z]])
-                       if (has_solar) {
-                           points(solar_x, solar_y, pch=1, cex=1)
-                           points(solar_x, solar_y, pch=20, cex=0.1)
-                       }
-                       magaxis(side=1:4, family=font, tcl=0.25, 
-                               labels=c(1,1,0,0), mgp=utils.mgp, 
-                               cex.axis=text.cex)
-                   },
-                   plot.title={
-                       title(xlab=xlab, cex.lab=text.cex, line=3)
-                       title(ylab=ylab, cex.lab=text.cex, line=3)
-                   })
-}
 
 for (Z in names(seis.DF)[1:9]) {
     xy_names <- names(seis.DF)[-1:-9]

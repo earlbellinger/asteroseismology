@@ -29,7 +29,7 @@ if not os.path.exists(perturb_dir):
     os.makedirs(perturb_dir)
 
 ### Load grid of models 
-data = pd.read_csv('../forward/grid.dat', sep='\t')
+data = pd.read_csv('../forward/simulations.dat', sep='\t')
 exclude = "nu_max|radial_velocity|Dnu_"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
@@ -44,9 +44,9 @@ y_latex = {
     "alpha": "Mixing length $\\alpha_{\mathrm{MLT}}$", 
     "age": "Age $\\tau$/Gyr", 
     "radius": "Radius R/R$_\\odot$", 
-    "H": "Hydrogen fraction X(H)", 
-    "He": "Helium fraction X(He)",
-    "Hc": "Core-hydrogen fraction H$_c$",
+    "H": "Hydrogen fraction X", 
+    "He": "Helium fraction Y",
+    "Hc": "Core-hydrogen fraction X$_c$",
     "log_g": "Surface gravity log g/dex", 
     "L": "Luminosity L/L$_\\odot$"
 }
@@ -58,9 +58,9 @@ y_latex2 = {
     "alpha": "$\\alpha_{\mathrm{MLT}}$", 
     "age": "$\\tau$/Gyr", 
     "radius": "R/R$_\\odot$", 
-    "H": "X(H)", 
-    "He": "X(He)",
-    "Hc": "H$_c$",
+    "H": "X", 
+    "He": "Y",
+    "Hc": "X$_c$",
     "log_g": "log g/dex", 
     "L": "L/L$_\\odot$"
 }
