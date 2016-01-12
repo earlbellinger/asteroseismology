@@ -4,15 +4,18 @@ import matplotlib.pyplot as plt
 from matplotlib import colors, cm
 import numpy as np
 import os
+
+from sys import path
+path.append('../scripts')
 from sobol_lib import i4_sobol
 
 np.random.seed(12)
 
-output_dir = '../plots/grids'
+output_dir = 'plots/grids'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-points = [100, 250, 1000]
+points = [100, 400, 2000]
 
 ### Random grid
 fig = plt.figure(figsize=(2.35037, 4.17309), dpi=400)
@@ -43,7 +46,7 @@ fig = plt.figure(figsize=(2.35037, 4.17309), dpi=400)
 for ii, n_points in enumerate(points):
     ax = fig.add_subplot(3,1,ii+1)
     grid = np.transpose([np.array(i4_sobol(3, i)[0]) 
-                         for i in range(0, n_points)])
+                         for i in range(20000, 20000+n_points)])
     plt.scatter(grid[0], grid[1], c=grid[2],
                 cmap=cm.gist_heat,
                 #linewidth=0.5/(1+ii),

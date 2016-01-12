@@ -7,22 +7,22 @@ library(lpSolve)
 library(parallel)
 library(parallelMap)
 
-output_fname <- 'grid.dat'
-sim_dir <- 'simulations'
+args <- commandArgs(TRUE)
+sim_dir <- if (length(args)>0) args[1] else 'simulations'
+output_fname <- paste0(sim_dir, '.dat')
+
 simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=100) {
+load_data <- function(filename, num_points=150, space_var='H') {
     DF <- read.table(filename, header=1, check.names=0)
-    DF <- DF[, -which(grepl("mass|Dnu_", names(DF)))]
     DF$age <- DF$age - min(DF$age)
-    DF <- DF[DF$age <= 13.8,]
     
-    nrow.DF <- length(DF$Hc)
+    nrow.DF <- length(DF[[space_var]])
     if (nrow.DF < num_points) return(NULL)
-    ideal <- seq(max(DF$Hc), min(DF$Hc), length=num_points)
-    cost.mat  <- outer(ideal, DF$Hc, function(x, y) abs(x-y))
+    ideal <- seq(max(DF[[space_var]]), min(DF[[space_var]]), length=num_points)
+    cost.mat  <- outer(ideal, DF[[space_var]], function(x, y) abs(x-y))
     row.signs <- rep("==", num_points)
     row.rhs   <- rep(1, num_points)
     col.signs <- rep("<=", nrow.DF)
@@ -38,3 +38,4 @@ print(sapply(seis.DF, fivenum))
 
 # Save data
 write.table(seis.DF, output_fname, quote=FALSE, sep='\t', row.names=FALSE)
+
