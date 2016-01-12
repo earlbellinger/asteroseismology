@@ -5,4 +5,5 @@ inverse/perturb/**
 **/__pycache__/**
 **.png
 **.pdf
-**grid**.dat
+**simulations**.dat
+
