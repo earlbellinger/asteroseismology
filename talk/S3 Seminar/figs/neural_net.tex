@@ -1,0 +1,46 @@
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=2.5cm]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+    \tikzstyle{input neuron}=[neuron, fill=mMediumBrown];
+    \tikzstyle{output neuron}=[neuron, fill=mDarkTeal];
+    \tikzstyle{hidden neuron}=[neuron];
+    \tikzstyle{annot} = [text width=4em, text centered]
+
+    %\node[input neuron, pin=left:Input \#\y] (I-\name) at (0,-\y) {};
+    % Draw the input layer nodes
+    %\foreach \name / \y in {1,...,5}
+    % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+    %    \node[input neuron, pin=left:Input \#\y] (I-\name) at (0,-\y) {};
+
+    \node[input neuron, pin=left:Input 1] (I-1) at (0,-1) {$x_1$};
+    \node[input neuron, pin=left:Input 2] (I-2) at (0,-2) {$x_2$};
+    \node[input neuron, pin=left:Input 3] (I-3) at (0,-3) {$x_3$};
+    \node[input neuron, pin=left:Input n] (I-4) at (0,-4) {$x_n$};
+    \node (vdots) at (-1.5, -3.4) {$\vdots$};
+    \node[left of=H-5] (I-5) {Intercept};
+
+    % Draw the hidden layer nodes
+    \foreach \name / \y in {1,...,5}
+        \path[yshift=0.5cm]
+            node[hidden neuron] (H-\name) at (2.5cm,-\y cm) {$f_\name$};
+    \node (vdots) at (2.5, -3.9) {$\vdots$};
+    \path[yshift=0.5cm] node[hidden neuron] (H-6) at (2.5cm,-5 cm) {$f_m$};
+
+    % Draw the output layer node
+    \node[output neuron,pin={[pin edge={->}]right:Output}] (O) at (5cm, -3 cm) {};
+
+    % Connect every node in the input layer with every node in the
+    % hidden layer.
+    \foreach \source in {1,...,5}
+        \foreach \dest in {1,...,6}
+            \path (I-\source) edge (H-\dest);
+
+    % Connect every node in the hidden layer with the output layer
+    \foreach \source in {1,...,6}
+        \path (H-\source) edge (O);
+
+    % Annotate the layers
+    \node[annot,above of=H-1, node distance=1cm] (hl) {Hidden layer(s)};
+    \node[annot,left of=hl] {Input layer};
+    \node[annot,right of=hl] {Output layer};
+\end{tikzpicture}

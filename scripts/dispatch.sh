@@ -11,9 +11,8 @@ simulate() {
     dirname="$directory/$expname"
     
     mkdir -p "$dirname"
-    cp -r $scriptdir/mesa_template/*\
-        "$dirname"
     cd "$dirname"
+    cp -r $scriptdir/mesa_template/* .
     
     change 'initial_mass' '1.0' "$M"
     change 'initial_y' '-1' "$Y"
@@ -32,7 +31,7 @@ simulate() {
     change "load_saved_model" ".false." ".true."
     change "write_profiles_flag" ".false." ".true."
     
-    change "do_element_diffusion" ".false." ".true."
+    #change "do_element_diffusion" ".false." ".true."
     
     rerun #"Hexh"
     mv history.data LOGS
@@ -42,6 +41,7 @@ simulate() {
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
     cd ../..
+    
     Rscript summarize.R "$dirname"
     rm -rf "$dirname"
 }

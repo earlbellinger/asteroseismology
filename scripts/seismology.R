@@ -44,70 +44,6 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     return(seis.DF)
 }
 
-## Separation: just the difference between two frequencies 
-# nu_{l1,n1} - nu_{l2,n2}
-separation <- function(first_l, first_n, second_l, second_n, DF) {
-    first <- DF$l == first_l & DF$n == first_n
-    second <- DF$l == second_l & DF$n == second_n
-    if (sum(first) == 1 && sum(second) == 1) { # check that it's unique
-        difference <- DF[first,]$nu - DF[second,]$nu
-        if (difference < 0) return(NA)
-        return(difference)
-    }
-    return(NA)
-}
-
-## Five point averages 
-#dd_01= 1/8( nu_[n-1,0] - 4*nu_[n-1,1] + 6*nu_[n,0] - 4*nu[n,  1] + nu_[n+1,0] )
-#dd_10=-1/8( nu_[n-1,1] - 4*nu_[n,  0] + 6*nu_[n,1] - 4*nu[n+1,0] + nu_[n+1,1] )
-dd <- function(l0, l1, n, DF) {
-    ell.0 <- DF[DF$l==0 & DF$n>0,]
-    ell.1 <- DF[DF$l==1 & DF$n>0,]
-    n. <- DF[DF$n==n,]
-    n.minus.one <- DF[DF$n==n-1,]
-    n.plus.one <- DF[DF$n==n+1,]
-    val <- if (l0 == 0 && l1 == 1) { ## dd_01
-        ( merge(n.minus.one, ell.0)$nu -
-        4*merge(n.minus.one, ell.1)$nu +
-        6*merge(n., ell.0)$nu -
-        4*merge(n., ell.1)$nu +
-          merge(n.plus.one, ell.0)$nu )/8
-    } else if (l1 == 0 && l0 == 1) { ## dd_10
-        -( merge(n.minus.one, ell.1)$nu -
-         4*merge(n., ell.0)$nu +
-         6*merge(n., ell.1)$nu -
-         4*merge(n.plus.one, ell.0)$nu +
-           merge(n.plus.one, ell.1)$nu )/8
-    } else NA
-    if (length(val) == 0) NA
-    else val
-}
-
-## Separations and ratios
-dnu <- function(l, n, DF) separation(l, n, l+2, n-1, DF)
-Dnu <- function(l, n, DF) separation(l, n, l, n-1, DF)
-r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
-r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
-
-## Plot Dnu, dnu, r02, ... 
-seismology_plot <- function(text.cex, 
-        a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
-        ylab, dnu.cl, pchs, ...) {
-    
-    plot(a~b, tck=0, ylab=as.expression(ylab), 
-         cex=2*gaussian_env/max(gaussian_env), 
-         ylim=range(a, w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
-         col=if (length(l_degs)==1) 1 else dnu.cl[pchs], 
-         pch=if (length(l_degs)==1) 1 else pchs, 
-         xlab=expression("Frequency" ~ nu / mu*Hz))
-    abline(fit, lty=2)
-    abline(v=nu_max, lty=3)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=FALSE)
-    if (length(l_degs)>1)
-        legend("topleft", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
-               legend=paste0("\u2113=", l_degs))
-}
-
 ## Calculate averages of things like f = dnu, Dnu, r_sep, r_avg
 # DF is the where the result will be stored
 # freqs are a data frame with columns l, n, nu
@@ -158,3 +94,67 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     
     DF
 }
+
+## Separation: just the difference between two frequencies 
+# nu_{l1,n1} - nu_{l2,n2}
+separation <- function(first_l, first_n, second_l, second_n, DF) {
+    first <- DF$l == first_l & DF$n == first_n
+    second <- DF$l == second_l & DF$n == second_n
+    if (sum(first) == 1 && sum(second) == 1) { # check that it's unique
+        difference <- DF[first,]$nu - DF[second,]$nu
+        if (difference < 0) return(NA)
+        return(difference)
+    }
+    return(NA)
+}
+
+## Five point averages 
+#dd_01= 1/8( nu_[n-1,0] - 4*nu_[n-1,1] + 6*nu_[n,0] - 4*nu[n,  1] + nu_[n+1,0] )
+#dd_10=-1/8( nu_[n-1,1] - 4*nu_[n,  0] + 6*nu_[n,1] - 4*nu[n+1,0] + nu_[n+1,1] )
+dd <- function(l0, l1, n, DF) {
+    ell.0 <- DF[DF$l==0 & DF$n>0,]
+    ell.1 <- DF[DF$l==1 & DF$n>0,]
+    n. <- DF[DF$n==n,]
+    n.minus.one <- DF[DF$n==n-1,]
+    n.plus.one <- DF[DF$n==n+1,]
+    val <- if (l0 == 0 && l1 == 1) { ## dd_01
+        ( merge(n.minus.one, ell.0)$nu -
+        4*merge(n.minus.one, ell.1)$nu +
+        6*merge(n., ell.0)$nu -
+        4*merge(n., ell.1)$nu +
+          merge(n.plus.one, ell.0)$nu )/8
+    } else if (l1 == 0 && l0 == 1) { ## dd_10
+        -( merge(n.minus.one, ell.1)$nu -
+         4*merge(n., ell.0)$nu +
+         6*merge(n., ell.1)$nu -
+         4*merge(n.plus.one, ell.0)$nu +
+           merge(n.plus.one, ell.1)$nu )/8
+    } else NA
+    if (length(val) == 0) NA
+    else val
+}
+
+## Separations and ratios
+dnu <- function(l, n, DF) separation(l, n, l+2, n-1, DF)
+Dnu <- function(l, n, DF) separation(l, n, l, n-1, DF)
+r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
+r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
+
+## Plot Dnu, dnu, r02, ... 
+seismology_plot <- function(text.cex, a, b, fit, gaussian_env, w.median, 
+        nu_max, l_degs, ylab, dnu.cl, pchs, ..., mgp=utils.mgp) {
+    
+    plot(a~b, tck=0, ylab=as.expression(ylab), axes=FALSE,
+         cex=2*gaussian_env/max(gaussian_env), 
+         ylim=range(a, w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
+         col=if (length(l_degs)==1) 1 else dnu.cl[pchs], 
+         pch=if (length(l_degs)==1) 1 else pchs, 
+         xlab=expression("Frequency" ~ nu / mu*Hz))
+    abline(fit, lty=2)
+    abline(v=nu_max, lty=3)
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp)
+    if (length(l_degs)>1)
+        legend("topleft", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
+               legend=paste0("\u2113=", l_degs))
+}
+
