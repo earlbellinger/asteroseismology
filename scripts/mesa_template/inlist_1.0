@@ -27,7 +27,7 @@
       !change_initial_net = .true.
       !new_net_name = 'o18_and_ne22.net'
 
-      pre_ms_relax_num_steps = 150
+      pre_ms_relax_num_steps = 100
       pre_ms_T_c = 9e5 ! 3e5
       
       !new_surface_rotation_v = 0 ! changed from 2 solar (km sec^1)
@@ -56,7 +56,7 @@
       max_num_profile_models = -1
       
       min_timestep_limit = 1d-12
-      max_years_for_timestep = 1d6
+      max_years_for_timestep = 5d6
       !max_timestep = 3.15d14
       
       initial_mass = 1.0
@@ -77,12 +77,12 @@
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
-      mesh_delta_coeff = 0.8
+      mesh_delta_coeff = 1
       
       photostep = 50
       write_profiles_flag = .false.
-      profile_interval = 10
-      history_interval = 10
+      profile_interval = 1
+      history_interval = 1
       terminal_cnt = 10
       write_header_frequency = 10
       
@@ -104,7 +104,7 @@
       !Blocker_wind_eta = 0.7d0  
       
       ! atomic diffusion
-      do_element_diffusion = .false.
+      do_element_diffusion = .true.
       diffusion_calculates_ionization = .true.
       diffusion_use_isolve = .true.
       

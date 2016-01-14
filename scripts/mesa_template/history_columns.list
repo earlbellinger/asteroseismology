@@ -351,7 +351,7 @@
       !log_Lneu_nonnuc ! log10 power emitted in neutrinos, thermal sources only (in Lsun units)
       !mass_loc_of_max_eps_nuc ! (in Msun units)
       !mass_ext_to_max_eps_nuc ! (in Msun units)
-      !eps_grav_integral ! (in Lsun units)
+      eps_grav_integral ! (in Lsun units)
       !log_abs_Lgrav ! log10 abs(eps_grav_integral) (in Lsun units)
       
       

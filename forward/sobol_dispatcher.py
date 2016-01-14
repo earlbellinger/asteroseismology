@@ -8,7 +8,6 @@ import numpy as np
 import subprocess
 import argparse
 from time import sleep
-from math import log10
 
 from sys import path
 path.append('../scripts')
@@ -26,17 +25,16 @@ def main(arguments):
                         help='range of mixing length parameter values')
     parser.add_argument('-N', default=1000, help='number of tracks to generate',
                         type=int)
-    parser.add_argument('-s', '--skip', default=10000, type=int,
+    parser.add_argument('-s', '--skip', default=20000, type=int,
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')
+    parser.add_argument('-l', '--logs', default=[0, 0, 1, 0], type=list,
+                        help='booleans of whether to log M, Y, Z, and alpha')
     args = parser.parse_args(arguments)
     print(args)
-    dispatch(ranges=np.vstack((args.M,args.Y,10**np.array(args.Z),args.alpha)),
-             N=args.N, 
-             logs=[0, 0, 1, 0], 
-             directory=args.directory, 
-             skip=args.skip)
+    dispatch(ranges=np.vstack((args.M, args.Y, np.log10(args.Z), args.alpha)),
+             N=args.N, logs=args.logs, directory=args.directory, skip=args.skip)
 
 def dispatch(ranges, N, logs, directory, skip=0):
     shift = ranges[:,0]
@@ -45,7 +43,7 @@ def dispatch(ranges, N, logs, directory, skip=0):
         vals = shift+np.array(i4_sobol(len(ranges), i)[0])*scale
         for j, val in enumerate(vals):
             if (logs[j]):
-                vals[j] = log10(val)
+                vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -p dispatch.sh -d %s "\
             "-M %.6f -Y %.6f -Z %.6f -a %.6f"%\
             tuple([directory] + [val for val in vals])

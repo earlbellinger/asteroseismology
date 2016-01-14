@@ -30,7 +30,7 @@ if not os.path.exists(perturb_dir):
 
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|Dnu_"#|H|He"
+exclude = "nu_max|radial_velocity"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -48,7 +48,8 @@ y_latex = {
     "He": "Helium fraction Y",
     "Hc": "Core-hydrogen fraction X$_c$",
     "log_g": "Surface gravity log g/dex", 
-    "L": "Luminosity L/L$_\\odot$"
+    "L": "Luminosity L/L$_\\odot$",
+    "mass_cc": "Convective core mass fraction M$_{cc}$"
 }
 
 y_latex2 = {
@@ -62,7 +63,8 @@ y_latex2 = {
     "He": "Y",
     "Hc": "X$_c$",
     "log_g": "log g/dex", 
-    "L": "L/L$_\\odot$"
+    "L": "L/L$_\\odot$",
+    "mass_cc": "M$_{cc}$"
 }
 
 y_show = ['M', 'Y', 'Z', 'age', 'radius']
@@ -77,11 +79,19 @@ def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
     y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
-    forest = Pipeline(steps=[
-        ('scaler', StandardScaler()), 
-        ('pca', PCA()),
-        ('forest', ExtraTreesRegressor(n_estimators=2000, n_jobs=-1))])#, 
-             #verbose=1, oob_score=1, bootstrap=1))])
+    for n_trees in [n for n in range(2,65)]:
+        #forest = RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,#,
+        #    oob_score=True, bootstrap=True)
+        forest = Pipeline(steps=[
+            ('scaler', StandardScaler()), 
+            #('pca', PCA()),
+            ('forest', RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,
+                oob_score=True, bootstrap=True))])
+        start = time()
+        forest.fit(X, new_ys)
+        end = time()
+        print(n_trees, forest.steps[1][1].oob_score_, end-start)
+    
     #forest = ExtraTreesRegressor(n_estimators=1000, n_jobs=-1, verbose=1,
     #    oob_score=1, bootstrap=1)
     start = time()
@@ -117,6 +127,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         xytext=(0, -5), textcoords="offset points",
         ha="center", va="top")
     plt.savefig(os.path.join(out_dir, star + '-corner.png'), dpi=400)
+    plt.close()
 
     
     ## Regular histograms

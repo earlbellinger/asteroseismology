@@ -17,7 +17,26 @@ simulations <- simulations[grep('.dat', simulations)]
 # Load data
 load_data <- function(filename, num_points=150, space_var='H') {
     DF <- read.table(filename, header=1, check.names=0)
-    DF$age <- DF$age - min(DF$age)
+    
+    hs <- 1-DF$Y[1]-DF$Z[1]
+    dteff <- diff(DF$Teff)
+    dl <- diff(DF$L)
+    pms <- with(DF, 
+        #which(100*(hs-H[-1])/(hs) < 1.5
+        which(DF$age[-1] < 0.1
+            & dteff %in% boxplot.stats(dteff, coef=3)$out
+            & dl %in% boxplot.stats(dl, coef=3)$out
+        )
+    )
+    if (any(pms)) DF <- DF[-1:-(1+max(pms)),]
+    
+    if (length(boxplot.stats(diff(DF$Teff[DF$Hc > 0.1 & DF$age > 1]), 
+               coef=10)$out)>4) {
+        print(paste("Rejecting", filename))
+        return(NA)
+    }
+    
+    #DF$age <- DF$age - min(DF$age)
     
     nrow.DF <- length(DF[[space_var]])
     if (nrow.DF < num_points) return(NULL)
@@ -32,7 +51,8 @@ load_data <- function(filename, num_points=150, space_var='H') {
     DF[apply(sol, 1, which.max),]
 }
 parallelStartMulticore(max(1, detectCores()))
-seis.DF <- do.call(rbind, parallelMap(load_data, simulations))
+seis.DF <- do.call(rbind, Map(load_data, simulations))
+seis.DF <- seis.DF[complete.cases(seis.DF),]
 print(paste(nrow(seis.DF), "rows"))
 print(sapply(seis.DF, fivenum))
 
