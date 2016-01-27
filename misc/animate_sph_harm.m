@@ -43,9 +43,10 @@ s = surf(x,y,z);
 h = light               % add a light
 lighting gouraud    % preferred lighting for a curved surface
 axis equal off      % set axis equal and remove axis
-if degree == 1; lightangle(h,  35, 30); end
+if degree == 1; lightangle(h, -15, 30); end
 if degree == 2; lightangle(h, -35, 30); end
-if degree == 3; lightangle(h, -70, 30); end
+if degree == 3; lightangle(h, -50, 30); end
+%lightangle(h, -35, 30);
 %lighting gourad 
 %view(40,30)         % set viewpoint
 colormap parula

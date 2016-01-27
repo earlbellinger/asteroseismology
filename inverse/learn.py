@@ -30,7 +30,7 @@ if not os.path.exists(perturb_dir):
 
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity"#|H|He"
+exclude = "nu_max|radial_velocity|conv|mass|H"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -49,7 +49,7 @@ y_latex = {
     "Hc": "Core-hydrogen fraction X$_c$",
     "log_g": "Surface gravity log g/dex", 
     "L": "Luminosity L/L$_\\odot$",
-    "mass_cc": "Convective core mass fraction M$_{cc}$"
+    "mass_cc": "Convective core mass-fraction M$_{cc}$"
 }
 
 y_latex2 = {
@@ -76,27 +76,27 @@ def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
     drop_cols = [i for i in ys.columns 
             if re.search(y_exclude, i) if i in ys.columns]
     ys = ys.drop(drop_cols, axis=1)
-    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
+    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler()), ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
-    for n_trees in [n for n in range(2,65)]:
+    for n_trees in [1024]:#[n for n in range(2,65)]:
         #forest = RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,#,
         #    oob_score=True, bootstrap=True)
         forest = Pipeline(steps=[
             ('scaler', StandardScaler()), 
-            #('pca', PCA()),
+            ('pca', PCA()),
             ('forest', RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,
                 oob_score=True, bootstrap=True))])
         start = time()
-        forest.fit(X, new_ys)
+        forest.fit(X, ys)#new_ys)
         end = time()
-        print(n_trees, forest.steps[1][1].oob_score_, end-start)
+        print(n_trees, forest.steps[2][1].oob_score_, end-start)
     
     #forest = ExtraTreesRegressor(n_estimators=1000, n_jobs=-1, verbose=1,
     #    oob_score=1, bootstrap=1)
-    start = time()
-    forest.fit(X, new_ys)
-    end = time()
+    #start = time()
+    #forest.fit(X, new_ys)
+    #end = time()
     print()
     print("%.5g seconds to train regressor" % (end-start))
     #print("out-of-bag score: %.5g" % forest.oob_score_)

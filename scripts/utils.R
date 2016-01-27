@@ -5,26 +5,14 @@
 
 ## Plotting values
 utils.mgp <<- c(2, 0.25, 0)
+utils.font <<- "Palatino"
 hack.mgp <- c(2, 0.5, 0)
 
-font <- "Palatino"
 png_res <- 400
 cex.paper <- 1
 cex.slides <- 1.3
 cex.hack <- 1.4
-
-paper_pdf_width <- 6.97522 # inches
-paper_pdf_height <- 4.17309
-
 latex_pt_per_in <- 5 * 72.27
-paper_png_width <- paper_pdf_width * latex_pt_per_in
-paper_png_height <- paper_pdf_height * latex_pt_per_in
-
-slides_pdf_width <- 6.22665 
-slides_pdf_height <- 4.1511
-
-slides_png_width <- slides_pdf_width * latex_pt_per_in
-slides_png_height <- slides_pdf_height * latex_pt_per_in
 
 ## Make the same plot as a pdf and a png suitable for papers and for slides
 # takes a plotting function plot_f that calls `plot` 
@@ -33,15 +21,23 @@ make_plots <- function(plot_f, filename, ...,
         wide=TRUE, thin=TRUE, 
         make_png=TRUE, make_pdf=TRUE, 
         paper=TRUE, slides=TRUE,
-        thin.hack=FALSE) {
+        thin.hack=FALSE,
+        paper_pdf_width=6.97522, # inches
+        paper_pdf_height=4.17309,
+        slides_pdf_width=6.22665,
+        slides_pdf_height=4.1511) {
+    paper_png_width <- paper_pdf_width * latex_pt_per_in
+    paper_png_height <- paper_pdf_height * latex_pt_per_in
+    slides_png_width <- slides_pdf_width * latex_pt_per_in
+    slides_png_height <- slides_pdf_height * latex_pt_per_in
     
     if (paper & make_pdf & wide) {
         directory <- file.path(filepath, 'paper', 'wide')
         dir.create(directory, showWarnings=FALSE, recursive=TRUE)
         cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
                   width=paper_pdf_width, height=paper_pdf_height, 
-                  family=font)
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=font)
+                  family=utils.font)
+        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
         plot_f(text.cex=cex.paper, ...)
         dev.off()
     }
@@ -52,14 +48,14 @@ make_plots <- function(plot_f, filename, ...,
         if (thin.hack) {
             cairo_pdf(file.path(directory, paste0(filename, '-thin.pdf')),
                       width=paper_pdf_width, height=paper_pdf_height, 
-                      family=font)
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=font)
+                      family=utils.font)
+            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=utils.font)
             plot_f(text.cex=cex.hack, mgp=hack.mgp, ...)
         } else {
             cairo_pdf(file.path(directory, paste0(filename, '-thin.pdf')),
                       width=paper_pdf_width/2, height=paper_pdf_height, 
-                      family=font)
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=font)
+                      family=utils.font)
+            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
             plot_f(text.cex=cex.paper, ...)
         }
         dev.off()
@@ -70,8 +66,8 @@ make_plots <- function(plot_f, filename, ...,
         dir.create(directory, showWarnings=FALSE, recursive=TRUE)
         png(file.path(directory, paste0(filename, '.png')),
                   width=paper_png_width, height=paper_png_height, 
-                  family=font, res=png_res, type='cairo')
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=font)
+                  family=utils.font, res=png_res, type='cairo')
+        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
         plot_f(text.cex=cex.paper, ...)
         dev.off()
     }
@@ -82,14 +78,14 @@ make_plots <- function(plot_f, filename, ...,
         if (thin.hack) {
             png(file.path(directory, paste0(filename, '-thin.png')),
                       width=paper_png_width, height=paper_png_height, 
-                      family=font, res=png_res, type='cairo')
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=font)
+                      family=utils.font, res=png_res, type='cairo')
+            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=utils.font)
             plot_f(text.cex=cex.hack, ...)
         } else {
             png(file.path(directory, paste0(filename, '-thin.png')),
                       width=paper_png_width/2, height=paper_png_height, 
-                      family=font, res=png_res, type='cairo')
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=font)
+                      family=utils.font, res=png_res, type='cairo')
+            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
             plot_f(text.cex=cex.paper, ...)
         }
         dev.off()
@@ -100,8 +96,8 @@ make_plots <- function(plot_f, filename, ...,
         dir.create(directory, showWarnings=FALSE, recursive=TRUE)
         cairo_pdf(file.path(directory, paste0(filename, '-slides.pdf')),
                   width=slides_pdf_width, height=slides_pdf_height, 
-                  family=font)
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=font)
+                  family=utils.font)
+        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
         plot_f(text.cex=cex.slides, ...)
         dev.off()
     }
@@ -113,16 +109,16 @@ make_plots <- function(plot_f, filename, ...,
             cairo_pdf(file.path(directory, 
                       paste0(filename, '-slides-thin.pdf')),
                       width=slides_pdf_width, height=slides_pdf_height, 
-                      family=font)
+                      family=utils.font)
             par(mar=mar, mgp=hack.mgp, cex.lab=cex.slides*cex.hack, 
-                family=font)
+                family=utils.font)
             plot_f(text.cex=cex.slides*cex.hack, ...)
         } else {
             cairo_pdf(file.path(directory, 
                       paste0(filename, '-slides-thin.pdf')),
                       width=slides_pdf_width/2, height=slides_pdf_height, 
-                      family=font)
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=font)
+                      family=utils.font)
+            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
             plot_f(text.cex=cex.slides, ...)
         }
         dev.off()
@@ -133,8 +129,8 @@ make_plots <- function(plot_f, filename, ...,
         dir.create(directory, showWarnings=FALSE, recursive=TRUE)
         png(file.path(directory, paste0(filename, '-slides.png')),
                   width=slides_png_width, height=slides_png_height, 
-                  family=font, res=png_res, type='cairo')
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=font)
+                  family=utils.font, res=png_res, type='cairo')
+        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
         plot_f(text.cex=cex.slides, ...)
         dev.off()
     }
@@ -145,15 +141,15 @@ make_plots <- function(plot_f, filename, ...,
         if (thin.hack) {
             png(file.path(directory, paste0(filename, '-slides-thin.png')), 
                       width=slides_png_width, height=slides_png_height, 
-                      family=font, res=png_res, type='cairo')
+                      family=utils.font, res=png_res, type='cairo')
             par(mar=mar, mgp=hack.mgp, cex.lab=cex.slides*cex.hack, 
-                family=font)
+                family=utils.font)
             plot_f(text.cex=cex.slides*cex.hack, ...)
         } else {
             png(file.path(directory, paste0(filename, '-slides-thin.png')), 
                       width=slides_png_width/2, height=slides_png_height, 
-                      family=font, res=png_res, type='cairo')
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=font)
+                      family=utils.font, res=png_res, type='cairo')
+            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
             plot_f(text.cex=cex.slides, ...)
         }
         dev.off()
@@ -347,7 +343,7 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
                 abline(v=solar_x, lty=3, col='black')
                 abline(h=solar_y, lty=3, col='black')
             }
-            magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+            magaxis(side=1:4, family=utils.font, tcl=0.25, labels=c(1,1,0,0),
                     mgp=mgp, cex.axis=text.cex)
         } else {
             if (use_line) lines(relation, col=color[1])
@@ -411,7 +407,7 @@ mesh_plot <- function(mesh, X, Z, xlab, ylab, ...,
                 points(solar_x, solar_y, pch=1, cex=1)
                 points(solar_x, solar_y, pch=20, cex=0.1)
             }
-            magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), 
+            magaxis(side=1:4, family=utils.font, tcl=0.25, labels=c(1,1,0,0), 
                     mgp=mgp, cex.axis=text.cex)
         },
         plot.title={
@@ -422,7 +418,8 @@ mesh_plot <- function(mesh, X, Z, xlab, ylab, ...,
 
 ## Calls scatter_plot and mesh_plot 
 # uses globals seis.DF, col.pal, and combos 
-scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh")) {
+scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh"),
+        scatter=1, mesh=1) {
     if (Y == 'Teff' && X == 'L') {
         Y = 'L'
         X = 'Teff'
@@ -440,18 +437,22 @@ scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh")) {
     solar_x <- if (has_solar) solar_vals[[X]] else NA
     solar_y <- if (has_solar) solar_vals[[Y]] else NA
     
-    make_plots(scatter_plot, paste0(paste(Z, Y, X, sep="_"), "-scatter"),
-               filepath=filepath, thin.hack=1,
-               mar=c(3, 4, 1, 6), 
-               seis.DF=seis.DF, X=X, Y=Y, Z=Z, combos=combos, 
-               col.pal=col.pal, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, 
-               solar_x=solar_x, solar_y=solar_y)
+    if (scatter) {
+        make_plots(scatter_plot, paste0(paste(Z, Y, X, sep="_"), "-scatter"),
+                   filepath=filepath, thin.hack=1,
+                   mar=c(3, 4, 1, 6), 
+                   seis.DF=seis.DF, X=X, Y=Y, Z=Z, combos=combos, 
+                   col.pal=col.pal, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, 
+                   solar_x=solar_x, solar_y=solar_y)
+    }
     
-    mesh <- get_mesh(X, Y, Z, seis.DF, cygA_stds)
-    make_plots(mesh_plot, paste0(paste(Z, Y, X, sep="_"), "-mesh"),
-               filepath=filepath, thin.hack=1,
-               mar=c(3, 4, 1, 0), 
-               mesh=mesh, X=X, Z=Z, xlab=xlab, ylab=ylab, 
-               solar_x=solar_x, solar_y=solar_y)
+    if (mesh) {
+        mesh <- get_mesh(X, Y, Z, seis.DF, cygA_stds)
+        make_plots(mesh_plot, paste0(paste(Z, Y, X, sep="_"), "-mesh"),
+                   filepath=filepath, thin.hack=1,
+                   mar=c(3, 4, 1, 0), 
+                   mesh=mesh, X=X, Z=Z, xlab=xlab, ylab=ylab, 
+                   solar_x=solar_x, solar_y=solar_y)
+    }
 }
 

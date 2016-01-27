@@ -33,6 +33,10 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
             pro_header$star_mass_he4)/pro_header$star_mass
     obs.DF["Hc"] <- hstry$center_h1
     obs.DF["mass_cc"] <- hstry$mass_conv_core/pro_header$star_mass
+    #obs.DF["conv_mx1_bot"] <- hstry$conv_mx1_bot
+    #obs.DF["conv_mx1_top"] <- hstry$conv_mx1_top
+    #obs.DF["conv_mx2_bot"] <- hstry$conv_mx2_bot
+    #obs.DF["conv_mx2_top"] <- hstry$conv_mx2_top
     #obs.DF["Lgrav"] <- hstry$eps_grav_integral
     
     ## Observable properties 
@@ -46,14 +50,21 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, acoustic_cutoff, 
-        outf=ifelse(sample(0:10000, 1)==0, gsub("/", "-", freqs_file), FALSE),
+        #outf=ifelse(sample(0:10000, 1)==0, gsub("/", "-", freqs_file), FALSE),
         filepath=file.path('plots', 'separation'))
+    
+    if (length(seis.DF) != 16) {
+        print(paste(pro_file, "is weird!"))
+        print(seis.DF)
+    }
+    
+    if (all(is.na(seis.DF))) return(NULL)
     
     return(merge(rbind(obs.DF), rbind(seis.DF)))
 }
 
 ### Obtain evolutionary tracks from a MESA directory
-parse_dir <- function(directory) {
+parse_dir <- function(directory, min_num_models=150) {
     ## parse dirname string e.g. "M=1.0_Y=0.28"
     params.DF <- NULL
     for (var in unlist(strsplit(basename(directory), '_'))) { 
@@ -83,7 +94,7 @@ parse_dir <- function(directory) {
             freq_files <- c(freq_files, freq_name)
         }
     }
-    if (length(pro_files) <= 100) {
+    if (length(pro_files) <= min_num_models) {
         print(paste(directory, "Too few profile files"))
         return(NA)
     }
@@ -100,14 +111,16 @@ parse_dir <- function(directory) {
 }
 
 ### Hertzsprung-Russell diagram
-## uses global DF
-plot_HR <- function(text.cex, DF, ...) {
-    col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(1000)
-    plot(log10(DF$Teff), log10(DF$L), 
+plot_HR <- function(DF, ev.DF, ..., 
+        text.cex=1, font=utils.font, mgp=utils.mgp,
+        col.pal=colorRampPalette(brewer.pal(11, "Spectral"))(21)) {
+    plot(#log10(DF$Teff), log10(DF$L), 
+        ev.DF$log_L ~ ev.DF$log_Teff,
         type='l', tcl=0, axes=FALSE,
-        xlab=expression('lg' ~ (T[eff]/K) ),
-        ylab=expression('lg' ~ (L / L['\u0298']) ),
-        xlim=rev(log10(range(DF$Teff))))
+        xlab=expression('Temperature' ~ 'lg'*(T[eff]/K)),
+        ylab=expression('Luminosity' ~ 'lg'*(L / L['\u0298'])),
+        xlim=rev(log10(range(DF$Teff))),
+        ylim=log10(range(DF$L)))
     abline(v=log10(5771), lty=3, col='lightgray')
     abline(v=log10(7000), lty=4, col='gray')
     abline(h=0, lty=3, col='lightgray')
@@ -123,9 +136,53 @@ plot_HR <- function(text.cex, DF, ...) {
         round(quantile(seq(min(DF$Hc), max(DF$Hc), length=length(col.pal)), 
             c(0, 0.25, 0.5, 0.75, 1)), 3), 
         col.pal[1:length(col.pal)], gradient='y', align='rb')
-    mtext(expression(H[c]), 4, line=5.5, cex=text.cex)
+    mtext(expression("Core-hydrogen" ~ X[c]), 4, line=5.5, cex=text.cex)
     par(family="Luxi Mono")
     legend("bottomleft", bty='n', xjust=1, cex=text.cex/2, col="gray", 
+        legend=c(
+            as.expression(bquote(M == .(DF$M[1]))), 
+            as.expression(bquote(Y == .(DF$Y[1]))), 
+            as.expression(bquote(Z == .(DF$Z[1]))), 
+            as.expression(bquote(alpha == .(DF$alpha[1])))))
+}
+
+## Kippenhahn diagram of mass vs age showing convective regions 
+hatches <- function(conv_bot, conv_top, age) {
+    disconts <- c(0, which(abs(diff(conv_bot))>=0.1 | abs(diff(conv_top))>=0.1),
+                  length(conv_top)+1)
+    for (ii in 1:(length(disconts)-1)) {
+        selection <- (disconts[ii]+1):(disconts[ii+1]-1)
+        polygon(x = c(age[selection], rev(age[selection])), 
+            y = c(conv_bot[selection], rev(conv_top[selection])), 
+            density=10, angle=60, border='black',
+            col=ifelse(all(conv_bot[selection] < 0.1), "purple", "blue"))
+    }
+}
+
+plot_Kippenhahn <- function(DF, ev.DF, ..., 
+        text.cex=1, font=utils.font, mgp=utils.mgp) {
+    age <- ev.DF$star_age/10**9
+    plot(NA, 
+        type='l', axes=FALSE, 
+        xlab=expression("Age"~tau/"Gyr"), 
+        ylab=expression("Mass"~m/M['\u0298']), 
+        xaxs='i', yaxs='i',
+        ylim=c(0, max(DF$M)), 
+        xlim=c(min(age), max(DF$age)))
+    magaxis(1:4, labels=c(1,1,0,0), mgp=c(2, 0.5, 0), family=font, las=1, 
+        tcl=-0.25)
+    hatches(ev.DF$conv_mx1_bot * ev.DF$star_mass, 
+            ev.DF$conv_mx1_top * ev.DF$star_mass, age)
+    hatches(ev.DF$conv_mx2_bot * ev.DF$star_mass, 
+            ev.DF$conv_mx2_top * ev.DF$star_mass, age)
+    abline(v=min(DF$age), lty=2, col='gray')
+    #lines(age, ev.DF$he_core_mass * ev.DF$star_mass, 
+    #    lty=3, col="darkred")
+    par(family="Luxi Mono")
+    #legend("right", bty='n', cex=text.cex/2, lty=c(2, 3, 4),
+    #    col=c("gray", "darkred"),
+    #    legend=c("ZAMS", "Helium core"))
+    legend("left", bty='n', xjust=1, cex=text.cex/2, col="gray", 
         legend=c(
             as.expression(bquote(M == .(DF$M[1]))), 
             as.expression(bquote(Y == .(DF$Y[1]))), 
@@ -142,6 +199,9 @@ if (length(args)>0) {
     DF <- unique(parse_dir(args[1]))
     DF <- DF[complete.cases(DF),]
     DF <- DF[order(DF$age),]
+    
+    ev.DF <- read.table(file.path(args[1], 'LOGS', 'history.data'), 
+            header=TRUE, skip=5)
     
     ### remove PMS
     ## find all models within 2% of starting H
@@ -167,16 +227,18 @@ if (length(args)>0) {
     #DF$Y <- DF$He[1]
     #DF$Z <- 1 - DF$H[1] - DF$He[1]
     
-    print(head(DF))
+    print(sapply(DF, fivenum))
     
     ## check if the track should be kept 
     rejection <- ""
     if (nrow(DF) < 5) {
         print("Rejecting track: too few data points")
+        print(DF)
         rejection <- "-r"
         #print(DF)
     } else if (ncol(DF) < 5) {
         print("Rejecting track: too few columns")
+        print(DF)
         rejection <- "-r"
     #    print(DF)
     #} else if (any(DF$Teff>=7000)) {
@@ -184,17 +246,27 @@ if (length(args)>0) {
     #    print(DF$Teff)
     #} else if (any(DF[['Fe/H']] <= -5)) {
     #    print("Rejecting track: too low metallicities")
-    #    print(fivenum(DF[['Fe/H']]))
+    #    print(DF[['Fe/H']])
+    #    rejection <- "feh"
     } else if ( 100*(hs-max(DF$H))/hs > 1.5 ) {
         print("Rejecting track: inaccurate starting H")
         print(c(hs, max(DF$Hc)))
         rejection <- "-pms"
     } else { # Make a table of results! 
-        write.table(DF, paste0(args[1], '.dat'), 
-                    quote=FALSE, sep='\t', row.names=FALSE)
+        fname <- paste0(args[1], '.dat')
+        repeat {
+            write.table(DF, fname, quote=FALSE, sep='\t', row.names=FALSE)
+            if (file.exists(fname)) break
+        }
     }
     
     ## make plot
     make_plots(plot_HR, paste0(basename(args[1]), "-HR", rejection), 
-        filepath=file.path('plots', 'HR'), mar=c(3, 4, 1, 7), DF=DF)
+        filepath=file.path('plots', dirname(args[1]), 'HR'), 
+        mar=c(3, 4, 1, 7), DF=DF, ev.DF=ev.DF)
+    make_plots(plot_Kippenhahn, 
+            paste0(basename(args[1]), "-Kippenhahn", rejection), 
+        filepath=file.path('plots', dirname(args[1]), 'Kippenhahn'), 
+        DF=DF, ev.DF=ev.DF)
 }
+

@@ -15,26 +15,35 @@ from sobol_lib import i4_sobol
 
 def main(arguments):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-M', default=[0.7, 1.3], nargs=2, type=float,
+    parser.add_argument('-M', default=[0.7, 1.6], nargs=2, type=float,
                         help='range of masses')
     parser.add_argument('-Y', default=[0.22, 0.34], nargs=2, type=float, 
                         help='range of helium values')
-    parser.add_argument('-Z', default=[0.0001, 0.04], nargs=2, type=float,
+    parser.add_argument('-Z', default=[0.0004, 0.04], nargs=2, type=float,
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')
+    parser.add_argument('-D', '--diffusion', default=[0, 2], nargs=2,
+                        type=float, 
+                        help='range of diffusion coefficient values')
+    parser.add_argument('-o', '--overshoot', default=[0, 0.035], nargs=2,
+                        type=float, 
+                        help='range of overshoot values')
     parser.add_argument('-N', default=1000, help='number of tracks to generate',
                         type=int)
     parser.add_argument('-s', '--skip', default=20000, type=int,
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')
-    parser.add_argument('-l', '--logs', default=[0, 0, 1, 0], type=list,
+    parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 0, 0], 
+                        type=list,
                         help='booleans of whether to log M, Y, Z, and alpha')
     args = parser.parse_args(arguments)
     print(args)
-    dispatch(ranges=np.vstack((args.M, args.Y, np.log10(args.Z), args.alpha)),
-             N=args.N, logs=args.logs, directory=args.directory, skip=args.skip)
+    ranges = np.vstack((args.M, args.Y, np.log10(args.Z), args.alpha,
+        args.diffusion, args.overshoot))
+    dispatch(ranges=ranges, N=args.N, logs=args.logs, 
+        directory=args.directory, skip=args.skip)
 
 def dispatch(ranges, N, logs, directory, skip=0):
     shift = ranges[:,0]
@@ -45,7 +54,7 @@ def dispatch(ranges, N, logs, directory, skip=0):
             if (logs[j]):
                 vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -p dispatch.sh -d %s "\
-            "-M %.6f -Y %.6f -Z %.6f -a %.6f"%\
+            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -o %.6f"%\
             tuple([directory] + [val for val in vals])
         subprocess.Popen(bash_cmd.split(), shell=False)
         sleep(0.1)

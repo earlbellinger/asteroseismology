@@ -137,6 +137,9 @@ text(0.8, ncol(seis.DF):1-0.1, col=cols, pos=2,
     as.expression(Map(function(x) bquote(.(x)[""]), seis.labs[colnames(a)])))
 mtext(expression("Spearman correlation coefficient"~rho~"       "), outer=1,
     side=4, line=-5, cex=1.75)
+age_pos <- length(seis.DF)-which(colnames(a)=="age")+1
+segments(1, age_pos, x1=age_pos+2, lty=2, col='darkgray', lwd=2)
+segments(age_pos+2, age_pos, y1=1, lty=2, col='darkgray', lwd=2)
 dev.off()
 
 
