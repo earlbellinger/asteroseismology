@@ -35,22 +35,21 @@ simulate() {
     rn
     mv LOGS/history.data .
     
-    change 'relax_initial_Y' '.true.' '.false.'
-    change 'relax_initial_Z' '.true.' '.false.'
-    
-    change "stop_near_zams" ".true." ".false."
-    change "Lnuc_div_L_zams_limit" "0.999d0" "-1"
-    
+    change "write_profiles_flag" ".false." ".true."
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
-    change "write_profiles_flag" ".false." ".true."
-    
     change "save_model_when_terminate" ".true." ".false."
+    change "stop_near_zams" ".true." ".false."
+    change "Lnuc_div_L_zams_limit" "0.999d0" "-1"
+    change 'relax_initial_Y' '.true.' '.false.'
+    change 'relax_initial_Z' '.true.' '.false.'
+    change 'which_atm_option' 'simple_photosphere' 'Eddington_grey'
     
     #change "do_element_diffusion" ".false." ".true."
     
-    rerun #"Hexh"
-    mv history.data LOGS
+    rn
+    #rerun #"Hexh"
+    #mv history.data LOGS
     
     find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | xargs -i \
         --max-procs=$OMP_NUM_THREADS bash -c \
@@ -68,11 +67,11 @@ change() { #param initval newval
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
 }
 
-rerun() { # nameOfRun
-    rn
-    cp history.data "history.$1.data"
-    tail -n+7 LOGS/history.data >> history.data
-}
+#rerun() { # nameOfRun
+#    rn
+#    cp history.data "history.$1.data"
+#    tail -n+7 LOGS/history.data >> history.data
+#}
 
 ## Parse command line arguments
 # takes mass M, helium Y, metallicity Z, and mixing length parameter alpha

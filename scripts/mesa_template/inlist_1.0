@@ -28,13 +28,13 @@
       !new_net_name = 'o18_and_ne22.net'
 
       pre_ms_relax_num_steps = 100
-      pre_ms_T_c = 9e5 ! 3e5
+      pre_ms_T_c = 3e5 ! 3e5
       
       !new_surface_rotation_v = 0 ! changed from 2 solar (km sec^1)
       !change_rotation_flag = .true.
       !new_rotation_flag = .false.
 
-      !pgstar_flag = .true.
+      pgstar_flag = .false.
       
       relax_initial_Y = .true.
       relax_initial_Z = .true.
@@ -72,7 +72,7 @@
       
       use_Type2_opacities = .true.
       Zbase = 0.02d0
-      cubic_interpolation_in_Z = .true.
+      !cubic_interpolation_in_Z = .true.
       
       skip_rotation_in_convection_zones = .true.
       
@@ -91,7 +91,6 @@
       !smooth_convective_bdy = .false.
       convective_bdy_weight = 1
       convective_bdy_dq_limit = 1d-5
-      
       
       !! Overshooting controls 
       !overshoot_f_above_nonburn_core = 0.005
@@ -140,8 +139,9 @@
       add_center_point_to_pulse_info = .false.
       
       add_atmosphere_to_pulse_info = .true.
-      which_atm_option = 'Eddington_grey' ! Eddington T-tau integration
+      which_atm_option = 'simple_photosphere'
          ! you could also use:
+         ! 'Eddington_grey' ! Eddington T-tau integration
          ! 'Krishna_Swamy' ! Krishna Swamy T-tau integration
          ! 'solar_Hopf_grey' ! another T(tau), this one tuned to solar data
       

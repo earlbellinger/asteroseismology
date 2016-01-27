@@ -8,69 +8,76 @@ library(randomForest)
 
 plot_dir <- file.path('plots', 'Tagesstern')
 
-sun <- read.table(file.path('data', 'Sun-freqs.dat'), header=1)
-cygA <- read.table(file.path('data', '16CygA-freqs.dat'), header=1)
-cygB <- read.table(file.path('data', '16CygB-freqs.dat'), header=1)
+sun.freqs <- read.table(file.path('data', 'Sun-freqs.dat'), header=1)
+cygA.freqs <- read.table(file.path('data', '16CygA-freqs.dat'), header=1)
+cygB.freqs <- read.table(file.path('data', '16CygB-freqs.dat'), header=1)
 
-sun$nu <- sun$nu - 3090
-cygA$nu <- cygA$nu - 2201
-cygB$nu <- cygB$nu - 2552
+sun.obs <- read.table(file.path('data', 'Sun-obs.dat'), header=1)
+cygA.obs <- read.table(file.path('data', '16CygA-obs.dat'), header=1)
+cygB.obs <- read.table(file.path('data', '16CygB-obs.dat'), header=1)
 
-relation <- randomForest(dnu~n+l+nu, data=cygA)
+sun.freqs$nu <- sun.freqs$nu - sun.obs[sun.obs$name == 'nu_max',]$value
+cygA.freqs$nu <- cygA.freqs$nu - cygA.obs[cygA.obs$name == 'nu_max',]$value
+cygB.freqs$nu <- cygB.freqs$nu - cygB.obs[cygB.obs$name == 'nu_max',]$value
+
+ab.freqs <- rbind(cygA.freqs, cygB.freqs)
+relation <- randomForest(dnu~l+nu+n, data=ab.freqs)
 y <- predict(relation)
+plot(ab.freqs$dnu, 100*(ab.freqs$dnu-y)/ab.freqs$dnu)
 
-freq_range <- range(cygA$nu, cygB$nu)*1.025
-tag <- sun[sun$nu >= freq_range[1] & sun$nu <= freq_range[2],]
+tag.freqs <- sun.freqs[-1:-(nrow(sun.freqs)-55),]
 
-y2 <- predict(relation, newdata=tag)
-new_nu <- rnorm(nrow(tag), tag$nu, y2)
+y2 <- predict(relation, newdata=tag.freqs)
+new_nu <- rnorm(nrow(tag.freqs), tag.freqs$nu, y2)
 
-#cairo_pdf('plots/tagesstern-sigma.pdf', width=6, height=4.5, family='Palatino')
-#par(mar=c(3, 4, 1, 1), mgp=c(2, 0.25, 0), cex.lab=1.3)
-
-plot_tag <- function(text.cex, ...) {
-    plot(sun$nu, sun$dnu, pch=20, 
-         ylim=range(sun$dnu, cygA$dnu),
-         xlab=expression(nu-nu[max]~"["*mu*Hz*"]"),
-         ylab=expression("uncertainty"~sigma[nu]~"["*mu*Hz*"]"),
+plot_tag <- function(..., text.cex=1) {
+    plot(sun.freqs$nu, sun.freqs$dnu, pch=20, 
+         ylim=range(sun.freqs$dnu, cygA.freqs$dnu, y2),
+         #xlab=expression((nu-nu[max])/mu*Hz),
+         #ylab=expression("uncertainty"~sigma[nu]/mu*Hz),
          tcl=0)
-    points(cygA$nu, cygA$dnu, pch=20, col='darkred')
-
-    abline(v=0, lty=2)
     magaxis(1:4, tcl=0.25, labels=0)
+    points(cygA.freqs$nu, cygA.freqs$dnu, pch=20, col='darkred')
+    points(cygB.freqs$nu, cygB.freqs$dnu, pch=20, col='blue', cex=0.75)
+    points(tag.freqs$nu, y2, pch=1, cex=0.75)
+    segments(new_nu, y2, tag.freqs$nu, tag.freqs$dnu, 
+        col=adjustcolor('black',alpha.f=0.25))
+    abline(v=0, lty=2)
     legend("topleft", 
            legend=c(expression("("*nu["16CygA"]*", "*sigma["16CygA"]*")"),
-                    expression("("*nu["16CygA"]*", "*hat(sigma)["16CygA"]*")"),
+                    expression("("*nu["16CygB"]*", "*sigma["16CygB"]*")"),
+                    #expression("("*nu["16CygA"]*", "*hat(sigma)["16CygA"]*")"),
                     expression("("*nu["Sun"]*", "*sigma["Sun"]*")"),
                     expression("("*hat(nu)["Sun"]*", "*hat(sigma)["Sun"]*")"),
-                    expression(nu[max]),
-                    expression(nu["cutoff"])),
-           pch=c(20, 1, 20, 1, NA, NA), 
-           col=c("darkred", "darkred", "black", "black", "black", "black"),
-           lty=c(NA, NA, NA, NA, 2, 3),
+                    expression(nu[max])),
+           pch=c(20, 20, 20, 1, NA), 
+           col=c("darkred", "blue", "black", "black", "black"),
+           lty=c(NA, NA, NA, NA, 2),
            pt.cex=c(1, 0.75, 1, 0.75),
            bty='n')
-    
-    points(cygA$nu, y, pch=1, col='darkred', cex=0.75)
-    segments(cygA$nu, y, cygA$nu, cygA$dnu, 
-             col=adjustcolor('darkred', alpha.f=0.25))
-
-    
-    abline(v=freq_range, lty=3)
-    #abline(v=min(sun$nu), lty=3)
-    #abline(v=max(sun$nu), lty=3)
-
-    
-    points(tag$nu, y2, pch=1, cex=0.75)
-    segments(new_nu, y2, tag$nu, tag$dnu, col=adjustcolor('black',alpha.f=0.25))
 }
-#dev.off()
 
 make_plots(plot_tag, 'Tagesstern', filepath=plot_dir)
 
-tag$nu <- new_nu + 3108
-tag$dnu <- y2
+tag.freqs$nu <- new_nu + sun.obs[sun.obs$name == 'nu_max',]$value
+tag.freqs$dnu <- y2
 
-seismology(tag, nu_max=3108, outf='Tagesstern', filepath=plot_dir)
-write.table(tag, file.path('data', 'Tagesstern-freqs.dat'), 
+## Generate uncertainties for classical observations
+tag.obs <- sun.obs
+rel.unc <- unlist(Map(mean, abs(cygA.obs$uncertainty / cygB.obs$value), 
+                            abs(cygB.obs$uncertainty / cygB.obs$value) ))
+tag.obs$uncertainty <- rel.unc * tag.obs$value
+zeros <- tag.obs$uncertainty == 0
+tag.obs$uncertainty[zeros] <- log10(10**rel.unc[zeros] * 
+    10**tag.obs$value[zeros])
+
+# Perturb the value within uncertainty one time 
+tag.obs$value <- rnorm(nrow(tag.obs), tag.obs$value, tag.obs$uncertainty)
+
+write.table(tag.obs, file.path('data', 'Tagesstern-obs.dat'), 
     quote=FALSE, row.names=FALSE)
+seismology(tag.freqs, nu_max=tag.obs[tag.obs$name=="nu_max",]$value, 
+    outf='Tagesstern', filepath=plot_dir)
+write.table(tag.freqs, file.path('data', 'Tagesstern-freqs.dat'), 
+    quote=FALSE, row.names=FALSE)
+
