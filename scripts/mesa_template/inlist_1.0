@@ -9,10 +9,10 @@
       create_pre_main_sequence_model = .true.
       
       save_model_when_terminate = .true.
-      save_model_filename = 'final.mod'
+      save_model_filename = 'zams.mod'
       
       load_saved_model = .false.
-      saved_model_name = 'final.mod'
+      saved_model_name = 'zams.mod'
       
       steps_to_take_before_terminate = -1
       
@@ -56,8 +56,14 @@
       max_num_profile_models = -1
       
       min_timestep_limit = 1d-12
-      max_years_for_timestep = 5d6
+      max_years_for_timestep = 1d6
       !max_timestep = 3.15d14
+      
+      !report_ierr = .true. ! if true, produce terminal output when error
+      !report_why_dt_limits = .true.
+      !report_all_dt_limits = .true.
+      !show_mesh_changes = .true.
+      !trace_evolve = .true.
       
       initial_mass = 1.0
       initial_z = 0.02d0
@@ -66,47 +72,47 @@
       
       use_Type2_opacities = .true.
       Zbase = 0.02d0
-      !cubic_interpolation_in_Z = .true.
+      cubic_interpolation_in_Z = .true.
       
-      !D_DSI_factor = 0
-      !D_SH_factor  = 0
-      !D_SSI_factor = 0
-      !D_ES_factor  = 0
-      !D_GSF_factor = 0
-      !D_ST_factor  = 0
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
       mesh_delta_coeff = 1
+      max_allowed_nz = 64000
       
-      photostep = 50
+      photostep = 0
       write_profiles_flag = .false.
-      profile_interval = 1
-      history_interval = 1
+      profile_interval = 5
+      history_interval = 5
       terminal_cnt = 10
       write_header_frequency = 10
       
       !log_L_lower_limit = -1
-      !smooth_convective_bdy = .true.
-      !convective_bdy_weight = 1
+      !smooth_convective_bdy = .false.
+      convective_bdy_weight = 1
+      convective_bdy_dq_limit = 1d-5
       
+      
+      !! Overshooting controls 
       !overshoot_f_above_nonburn_core = 0.005
-      !overshoot_f0_above_nonburn_core = 0.001
       !overshoot_f_above_nonburn_shell = 0.005
-      !overshoot_f0_above_nonburn_shell = 0.001
       !overshoot_f_below_nonburn_shell = 0.005
-      !overshoot_f0_below_nonburn_shell = 0.001
+      !overshoot_f_above_burn_h_core = 0.005
+      !overshoot_f_above_burn_h_shell = 0.005
+      !overshoot_f_below_burn_h_shell = 0.005
       
-      !RGB_wind_scheme = 'Reimers'
-      !AGB_wind_scheme = 'Blocker'
-      !RGB_to_AGB_wind_switch = 1d-4
-      !Reimers_wind_eta = 0.7d0  
-      !Blocker_wind_eta = 0.7d0  
+      overshoot_f0_above_nonburn_core = 0.001
+      overshoot_f0_above_nonburn_shell = 0.001
+      overshoot_f0_below_nonburn_shell = 0.001
+      overshoot_f0_above_burn_h_core = 0.001
+      overshoot_f0_above_burn_h_shell = 0.001
+      overshoot_f0_below_burn_h_shell = 0.001
       
-      ! atomic diffusion
-      do_element_diffusion = .true.
+      !! Atomic diffusion
+      do_element_diffusion = .false.
+      !diffusion_class_factor(:) = 1d0
       diffusion_calculates_ionization = .true.
-      diffusion_use_isolve = .true.
+      !diffusion_use_isolve = .false.
       
       diffusion_class_representative(1) = 'h1'
       diffusion_class_representative(2) = 'he3'
@@ -142,7 +148,7 @@
       ! stopping conditions
       Lnuc_div_L_zams_limit = 0.999d0
       stop_near_zams = .true.
-      max_model_number = 25000
+      max_model_number = -1 ! 25000
       max_age = 15e9
       xa_central_lower_limit_species(1) = 'h1'
       xa_central_lower_limit(1) = 1d-3
@@ -151,8 +157,6 @@
       
 
 / ! end of controls namelist
-
-
 
 &pgstar
 
