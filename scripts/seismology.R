@@ -149,7 +149,8 @@ r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
 seismology_plot <- function(text.cex, a, b, fit, gaussian_env, w.median, 
-        nu_max, l_degs, ylab, dnu.cl, pchs, ..., mgp=utils.mgp) {
+        nu_max, l_degs, ylab, dnu.cl, pchs, ..., mgp=utils.mgp, 
+        font=utils.font) {
     plot(a~b, tck=0, 
          ylab=as.expression(ylab), 
          axes=FALSE,

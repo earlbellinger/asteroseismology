@@ -20,29 +20,29 @@ request_cpus = $OMP_NUM_THREADS"
     if command -v condor_submit >/dev/null 2>&1
       then
         ## Make directory for script
-        dname=maybe_sub_logs
+        dname="maybe_sub_logs/$name"
         mkdir -p $dname
         cd $dname
         
         ## Create a shell script
         echo "#!/usr/bin/sh
-cd ..
+cd ../..
 $cmd
-" > "condor-$name.sh"
-        chmod +x "condor-$name.sh"
+" > "condor.sh"
+        chmod +x "condor.sh"
         
         ## Create and submit a condor job 
 	    echo "Universe     = vanilla
 getenv       = True
-Executable   = condor-$name.sh
-Output       = condor-$name.out
-Error        = condor-$name.error
-Log          = condor-$name.log
+Executable   = condor.sh
+Output       = condor.out
+Error        = condor.error
+Log          = condor.log
 $threads
 
 queue
-" > "condor-$name.job"
-        condor_submit "condor-$name.job"
+" > "condor.job"
+        condor_submit "condor.job"
         #condor_wait -status -wait 36000 "condor-$name.log"
         cd -
       else

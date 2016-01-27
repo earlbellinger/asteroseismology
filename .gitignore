@@ -1,5 +1,6 @@
 forward/simulations**/**
 inverse/perturb/**
+**/data/**
 **/maybe_sub_logs**/**
 **/**plots**/**
 **/__pycache__/**
