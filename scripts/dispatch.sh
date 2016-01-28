@@ -59,7 +59,7 @@ simulate() {
     
     sleep 1
     Rscript summarize.R "$dirname"
-    #rm -rf "$dirname"
+    rm -rf "$dirname"
 }
 
 change() { #param initval newval

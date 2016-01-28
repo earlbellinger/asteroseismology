@@ -23,7 +23,7 @@ cygB.freqs$nu <- cygB.freqs$nu - cygB.obs[cygB.obs$name == 'nu_max',]$value
 ab.freqs <- rbind(cygA.freqs, cygB.freqs)
 relation <- randomForest(dnu~l+nu+n, data=ab.freqs)
 y <- predict(relation)
-plot(ab.freqs$dnu, 100*(ab.freqs$dnu-y)/ab.freqs$dnu)
+#plot(ab.freqs$dnu, 100*(ab.freqs$dnu-y)/ab.freqs$dnu)
 
 tag.freqs <- sun.freqs[-1:-(nrow(sun.freqs)-55),]
 
@@ -64,12 +64,13 @@ tag.freqs$dnu <- y2
 
 ## Generate uncertainties for classical observations
 tag.obs <- sun.obs
-rel.unc <- unlist(Map(mean, abs(cygA.obs$uncertainty / cygB.obs$value), 
-                            abs(cygB.obs$uncertainty / cygB.obs$value) ))
-tag.obs$uncertainty <- rel.unc * tag.obs$value
-zeros <- tag.obs$uncertainty == 0
-tag.obs$uncertainty[zeros] <- log10(10**rel.unc[zeros] * 
-    10**tag.obs$value[zeros])
+#rel.unc <- unlist(Map(mean, abs(cygA.obs$uncertainty / cygB.obs$value), 
+#                            abs(cygB.obs$uncertainty / cygB.obs$value) ))
+#tag.obs$uncertainty <- rel.unc * tag.obs$value
+tag.obs$uncertainty <- cygB.obs$uncertainty
+#zeros <- tag.obs$uncertainty == 0
+#tag.obs$uncertainty[zeros] <- log10(10**rel.unc[zeros] * 
+#    10**tag.obs$value[zeros])
 
 # Perturb the value within uncertainty one time 
 tag.obs$value <- rnorm(nrow(tag.obs), tag.obs$value, tag.obs$uncertainty)

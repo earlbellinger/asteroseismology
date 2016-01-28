@@ -22,15 +22,19 @@ import pylab as P
 import corner
 
 plot_dir = 'learn_plots'
+cov_dir = 'learn_covs'
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
 
 if not os.path.exists(perturb_dir):
     os.makedirs(perturb_dir)
 
+if not os.path.exists(cov_dir):
+    os.makedirs(cov_dir)
+
 ### Load grid of models 
-data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|conv|mass|H"#|H|He"
+data = pd.read_csv('../forward/simulations-od.dat', sep='\t')
+exclude = "nu_max|radial_velocity|Dnu|H|mass"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -42,6 +46,8 @@ y_latex = {
     "Y": "Initial helium Y$_0$", 
     "Z": "Initial metallicity Z$_0$", 
     "alpha": "Mixing length $\\alpha_{\mathrm{MLT}}$", 
+    "diffusion": "Diffusion coefficient D",
+    "overshoot": "Overshoot f",
     "age": "Age $\\tau$/Gyr", 
     "radius": "Radius R/R$_\\odot$", 
     "H": "Hydrogen fraction X", 
@@ -57,6 +63,8 @@ y_latex2 = {
     "Y": "Y$_0$", 
     "Z": "Z$_0$", 
     "alpha": "$\\alpha_{\mathrm{MLT}}$", 
+    "diffusion": "D",
+    "overshoot": "f",
     "age": "$\\tau$/Gyr", 
     "radius": "R/R$_\\odot$", 
     "H": "X", 
@@ -69,28 +77,28 @@ y_latex2 = {
 
 y_show = ['M', 'Y', 'Z', 'age', 'radius']
 
-def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
+def train_regressor(data, X_columns, y_exclude="median|slope"):
     X = data.loc[:,X_columns]#data.drop(list(ys.columns) + drop_cols, axis=1)
     
     ys = data.drop(X_columns, axis=1)
     drop_cols = [i for i in ys.columns 
             if re.search(y_exclude, i) if i in ys.columns]
     ys = ys.drop(drop_cols, axis=1)
-    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler()), ('pca', PCA())])
+    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
-    for n_trees in [1024]:#[n for n in range(2,65)]:
+    for n_trees in [n**2 for n in range(2,12)]:
         #forest = RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,#,
         #    oob_score=True, bootstrap=True)
         forest = Pipeline(steps=[
             ('scaler', StandardScaler()), 
-            ('pca', PCA()),
-            ('forest', RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,
+            #('pca', PCA()),
+            ('forest', ExtraTreesRegressor(n_estimators=n_trees, n_jobs=62,
                 oob_score=True, bootstrap=True))])
         start = time()
-        forest.fit(X, ys)#new_ys)
+        forest.fit(X, new_ys)
         end = time()
-        print(n_trees, forest.steps[2][1].oob_score_, end-start)
+        print(n_trees, forest.steps[1][1].oob_score_, end-start)
     
     #forest = ExtraTreesRegressor(n_estimators=1000, n_jobs=-1, verbose=1,
     #    oob_score=1, bootstrap=1)
@@ -101,7 +109,9 @@ def train_regressor(data, X_columns, y_exclude="median|slope|intercept"):
     print("%.5g seconds to train regressor" % (end-start))
     #print("out-of-bag score: %.5g" % forest.oob_score_)
     print('\t\t'.join(ys.columns))
-    #return [forest, ys.columns, X.columns]#, y_trfm]
+    y_names = ys.columns
+    X_names = X.columns
+    #return [forest, y_names, X_names]#, y_trfm]
     return [forest, ys.columns, X.columns, y_trfm]
 
 def get_rc(num_ys):
@@ -122,10 +132,10 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         labels=[y_latex2[y_name] for y_name in y_names
                 if y_name in y_show],
         show_titles=True, title_args={"fontsize": 16})
-    figure.gca().annotate(star, 
-        xy=(0.5, 1.0), xycoords="figure fraction",
-        xytext=(0, -5), textcoords="offset points",
-        ha="center", va="top")
+    #figure.gca().annotate(star, 
+    #    xy=(0.5, 1.0), xycoords="figure fraction",
+    #    xytext=(0, -5), textcoords="offset points",
+    #    ha="center", va="top")
     plt.savefig(os.path.join(out_dir, star + '-corner.png'), dpi=400)
     plt.close()
 
@@ -139,16 +149,18 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
     
     rows, cols, sqrt = get_rc(num_ys)
     
-    plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-    plt.suptitle(star)
+    plt.figure(figsize=(6.97522*2, 4.17309*2), dpi=400, 
+        facecolor='w', edgecolor='k')
+    #plt.suptitle(star)
     for (pred_j, name) in enumerate(y_names[0:num_ys]):
         (m, s) = (middles[pred_j], stds[pred_j])
-        outstr += "\t%.3g +/- %.3g" % (m, s)
+        #outstr += "\t%.3g +/- %.3g" % (m, s)
+        outstr += "\t%.3g\t%.3g" % (m, s)
         
-        if num_ys%2 == 0 or num_ys%3==0 or int(sqrt)==sqrt:
+        if num_ys%2==0 or num_ys%3==0 or int(sqrt)==sqrt:
             ax = plt.subplot(rows, cols, pred_j+1)
-        elif pred_j%2 and pred_j == num_ys:
-            ax = plt.subplot2grid((rows, cols), (rows, 1), colspan=2)
+        elif pred_j%2==0 and pred_j == num_ys-1:
+            ax = plt.subplot2grid((rows, cols), (pred_j//2, 1), colspan=2)
         else:
             ax = plt.subplot2grid((rows, cols), (pred_j//2, (pred_j%2)*2),
                 colspan=2)
@@ -164,16 +176,16 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         
         P.xlabel(y_latex[y_names[pred_j]])
         P.locator_params(axis='x', nbins=3)
-        xticks = [m-3*s, m, m+3*s]
+        xticks = [max(0, m-3*s), m, m+3*s]
         ax.set_xticks(xticks)
-        ax.set_xlim([m-4*s, m+4*s])
+        ax.set_xlim([max(0, m-4*s), m+4*s])
         ax.set_xticklabels(['%.3g'%xtick for xtick in xticks])
         ax.set_yticklabels('',visible=False)
         ax.minorticks_on()
         plt.tight_layout()
     
     print(outstr)
-    plt.subplots_adjust(top=0.9)
+    #plt.subplots_adjust(top=0.9)
     plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
     plt.close()
 
@@ -189,6 +201,10 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     
+    cov_subdir = os.path.join(cov_dir, directory)
+    if not os.path.exists(cov_subdir):
+        os.makedirs(cov_subdir)
+    
     forest = None
     for star_fname in stars:
         star = os.path.split(star_fname)[-1].split("_")[0]
@@ -198,14 +214,18 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             if re.search(exclude, i)], axis=1).dropna()
         
         if forest is None: # train the regressor
-            out = train_regressor(data, star_data.columns)
+            X_columns = star_data.columns
+            out = train_regressor(data, X_columns)
             forest, y_names, X_names, y_trfm = out
             #forest, y_names, X_names = out#, y_trfm = out
         
-        star_data = star_data.drop([i for i in star_data.columns 
-            if i not in X_names], axis=1)
-        #predict = forest.predict(star_data)
-        predict = y_trfm.inverse_transform(forest.predict(star_data))
+        #star_data = star_data.drop([i for i in star_data.columns 
+        #    if i not in X_names], axis=1)
+        star_X = star_data.loc[:,X_names]
+        #predict = forest.predict(star_X)
+        predict = y_trfm.inverse_transform(forest.predict(star_X))
+        np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
+            header=" ".join(y_names))
         plot_star(star, predict, y_names, out_dir)
 
 ################################################################################
