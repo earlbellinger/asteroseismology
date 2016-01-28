@@ -54,6 +54,7 @@ perturb <- function(star, obs_data_file, freqs_data_file,
 }
 
 process <- function(star, star_dir, out_dir="perturb") {
+    print(paste("Processing", star))
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
     write.table(

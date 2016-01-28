@@ -152,7 +152,7 @@ hatches <- function(conv_bot, conv_top, age) {
                   length(conv_top)+1)
     for (ii in 1:(length(disconts)-1)) {
         selection <- (disconts[ii]+1):(disconts[ii+1]-1)
-        polygon(x = c(age[selection], rev(age[selection])), 
+        polygon(x =  c(age[selection], rev(age[selection])), 
             y = c(conv_bot[selection], rev(conv_top[selection])), 
             density=10, angle=60, border='black',
             col=ifelse(all(conv_bot[selection] < 0.1), "purple", "blue"))
@@ -187,7 +187,11 @@ plot_Kippenhahn <- function(DF, ev.DF, ...,
             as.expression(bquote(M == .(DF$M[1]))), 
             as.expression(bquote(Y == .(DF$Y[1]))), 
             as.expression(bquote(Z == .(DF$Z[1]))), 
-            as.expression(bquote(alpha == .(DF$alpha[1])))))
+            as.expression(bquote(alpha == .(DF$alpha[1]))),
+            as.expression(bquote(f == .(DF$overshoot[1]))),
+            as.expression(bquote(D == .(DF$diffusion[1])))
+        )
+    )
 }
 
 ###############################################################################
@@ -235,29 +239,17 @@ if (length(args)>0) {
         print("Rejecting track: too few data points")
         print(DF)
         rejection <- "-r"
-        #print(DF)
     } else if (ncol(DF) < 5) {
         print("Rejecting track: too few columns")
         print(DF)
         rejection <- "-r"
-    #    print(DF)
-    #} else if (any(DF$Teff>=7000)) {
-    #    print("Rejecting track: too high temperatures")
-    #    print(DF$Teff)
-    #} else if (any(DF[['Fe/H']] <= -5)) {
-    #    print("Rejecting track: too low metallicities")
-    #    print(DF[['Fe/H']])
-    #    rejection <- "feh"
     } else if ( 100*(hs-max(DF$H))/hs > 1.5 ) {
         print("Rejecting track: inaccurate starting H")
         print(c(hs, max(DF$Hc)))
         rejection <- "-pms"
     } else { # Make a table of results! 
-        fname <- paste0(args[1], '.dat')
-        repeat {
-            write.table(DF, fname, quote=FALSE, sep='\t', row.names=FALSE)
-            if (file.exists(fname)) break
-        }
+        write.table(DF, paste0(args[1], '.dat'), quote=FALSE, sep='\t', 
+            row.names=FALSE)
     }
     
     ## make plot
@@ -265,7 +257,7 @@ if (length(args)>0) {
         filepath=file.path('plots', dirname(args[1]), 'HR'), 
         mar=c(3, 4, 1, 7), DF=DF, ev.DF=ev.DF)
     make_plots(plot_Kippenhahn, 
-            paste0(basename(args[1]), "-Kippenhahn", rejection), 
+        paste0(basename(args[1]), "-Kippenhahn", rejection), 
         filepath=file.path('plots', dirname(args[1]), 'Kippenhahn'), 
         DF=DF, ev.DF=ev.DF)
 }
