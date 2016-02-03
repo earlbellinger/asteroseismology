@@ -10,7 +10,8 @@ library(magicaxis)
 library(RColorBrewer)
 
 #dnu.cl <- brewer.pal(4, "BrBG")
-dnu.cl <- c("#ca0020", "#f4a582", "#92c5de", "#0571b0")
+dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
+#c("#ca0020", "#f4a582", "#92c5de", "#0571b0")
 
 ## build a data frame containing seismological calculations
 # freqs is a data frame with l, n, and nu
@@ -58,6 +59,7 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     pchs <- c() # if there's more than one l, get different symbols for each
     for (l_deg in l_degs) {
         ell <- freqs[freqs$n > 1 & freqs$l==l_deg,]
+        if (nrow(ell) == 0) next
         vals <- sapply(unique(ell$n), function(n) f(l_deg, n, freqs))
         not.nan <- complete.cases(vals)
         a <- c(a, vals[not.nan])
@@ -94,9 +96,10 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     
     if (outf != FALSE) make_plots(seismology_plot, 
         paste0(outf, '-', sep_name), 
-        a, b, fit, gaussian_env, w.median, nu_max, l_degs, 
-        ylab, dnu.cl, pchs, sep_name, 
-        #slides_pdf_height=4.1511/2, 
+        a=a, b=b, fit=fit, gaussian_env=gaussian_env, 
+        w.median=w.median, nu_max=nu_max, l_degs=l_degs, 
+        ylab=ylab, dnu.cl=dnu.cl, pchs=pchs, sep_name=sep_name, 
+        freqs=freqs,
         ...)
     
     DF
@@ -148,24 +151,25 @@ r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
 r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
-seismology_plot <- function(text.cex, a, b, fit, gaussian_env, w.median, 
-        nu_max, l_degs, ylab, dnu.cl, pchs, ..., mgp=utils.mgp, 
-        font=utils.font) {
-    plot(a~b, tck=0, 
-         ylab=as.expression(ylab), 
-         axes=FALSE,
+seismology_plot <- function(a, b, fit, gaussian_env, w.median, 
+        nu_max, l_degs, ylab, dnu.cl, pchs, freqs, ..., 
+        text.cex=1, mgp=utils.mgp, font=utils.font) {
+    print(text.cex)
+    plot(a~b, axes=FALSE, tck=0, xaxs='i',
          cex=2*gaussian_env/max(gaussian_env), 
-         ylim=range(a, w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
+         ylab=as.expression(ylab), 
+         xlab=expression("Frequency" ~ nu / mu*Hz), 
+         xlim=range(freqs$nu), 
+         #ylim=quantile(a, c(0.001, 0.999)), 
+         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
          col=if (length(l_degs)==1) 1 else dnu.cl[pchs], 
-         pch=if (length(l_degs)==1) 1 else pchs, 
-         xaxs='i', yaxs='i',
-         #xlim=c(1501,3499),
-         xlab=expression("Frequency" ~ nu / mu*Hz))
+         pch=if (length(l_degs)==1) 1 else pchs)
     abline(fit, lty=2)
     abline(v=nu_max, lty=3)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, las=1)
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
+        las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
-        legend("topleft", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
+        legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
                legend=paste0("\u2113=", l_degs))
 }
 

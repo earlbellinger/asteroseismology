@@ -33,7 +33,7 @@ if not os.path.exists(cov_dir):
     os.makedirs(cov_dir)
 
 ### Load grid of models 
-data = pd.read_csv('../forward/simulations-od.dat', sep='\t')
+data = pd.read_csv('../forward/simulations.dat', sep='\t')
 exclude = "nu_max|radial_velocity|Dnu|H|mass"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
@@ -75,7 +75,8 @@ y_latex2 = {
     "mass_cc": "M$_{cc}$"
 }
 
-y_show = ['M', 'Y', 'Z', 'age', 'radius']
+#y_show = ['M', 'Y', 'Z', 'age', 'radius']
+y_show = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age']
 
 def train_regressor(data, X_columns, y_exclude="median|slope"):
     X = data.loc[:,X_columns]#data.drop(list(ys.columns) + drop_cols, axis=1)
@@ -87,31 +88,21 @@ def train_regressor(data, X_columns, y_exclude="median|slope"):
     y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
-    for n_trees in [n**2 for n in range(2,12)]:
-        #forest = RandomForestRegressor(n_estimators=n_trees, n_jobs=-1,#,
-        #    oob_score=True, bootstrap=True)
+    for n_trees in [1024]:#[2**n for n in range(0,13)]:
         forest = Pipeline(steps=[
-            ('scaler', StandardScaler()), 
-            #('pca', PCA()),
-            ('forest', ExtraTreesRegressor(n_estimators=n_trees, n_jobs=62,
+            ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
+                n_jobs=min(n_trees, 62),
                 oob_score=True, bootstrap=True))])
         start = time()
         forest.fit(X, new_ys)
         end = time()
-        print(n_trees, forest.steps[1][1].oob_score_, end-start)
+        print(n_trees, forest.steps[0][1].oob_score_, end-start)
     
-    #forest = ExtraTreesRegressor(n_estimators=1000, n_jobs=-1, verbose=1,
-    #    oob_score=1, bootstrap=1)
-    #start = time()
-    #forest.fit(X, new_ys)
-    #end = time()
     print()
     print("%.5g seconds to train regressor" % (end-start))
-    #print("out-of-bag score: %.5g" % forest.oob_score_)
-    print('\t\t'.join(ys.columns))
+    
     y_names = ys.columns
     X_names = X.columns
-    #return [forest, y_names, X_names]#, y_trfm]
     return [forest, ys.columns, X.columns, y_trfm]
 
 def get_rc(num_ys):
@@ -136,12 +127,12 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
     #    xy=(0.5, 1.0), xycoords="figure fraction",
     #    xytext=(0, -5), textcoords="offset points",
     #    ha="center", va="top")
-    plt.savefig(os.path.join(out_dir, star + '-corner.png'), dpi=400)
+    plt.savefig(os.path.join(out_dir, star + '-corner.pdf'), dpi=400)
     plt.close()
 
     
     ## Regular histograms
-    middles = np.median(predict, 0)
+    middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
     
     outstr = star
@@ -217,6 +208,36 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             X_columns = star_data.columns
             out = train_regressor(data, X_columns)
             forest, y_names, X_names, y_trfm = out
+            
+            
+            ## Plot importances
+            est = forest.steps[0][1]
+            importances = est.feature_importances_
+            indices = np.argsort(importances)[::-1]
+            import_dist = np.array([tree.feature_importances_ 
+                for tree in est.estimators_]).T[indices][::-1].T
+            
+            np.savetxt(os.path.join(cov_dir, 'feature-importance-'+star+'.dat'),
+                import_dist, header=" ".join(X_names), comments='')
+            
+            print("Feature ranking:")
+            for f in range(len(X_names)):
+                print("%d. %s (%.3g)" % (f+1, X_names[indices[f]], 
+                    importances[indices[f]]))
+            
+            mpl.rc('text', usetex='false') 
+            plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
+            plt.boxplot(import_dist, vert=0)
+            plt.yticks(range(1,1+len(X_names)),
+                       np.array(X_names)[indices][::-1])
+            plt.xlabel("Feature importance")
+            plt.tight_layout()
+            plt.savefig(os.path.join(plot_dir, 'feature_importance' + \
+                star + '.pdf'))
+            plt.close()
+            
+            print()
+            print('\t'+'\t\t'.join(y_names))
             #forest, y_names, X_names = out#, y_trfm = out
         
         #star_data = star_data.drop([i for i in star_data.columns 
@@ -225,7 +246,7 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         #predict = forest.predict(star_X)
         predict = y_trfm.inverse_transform(forest.predict(star_X))
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
-            header=" ".join(y_names))
+            header=" ".join(y_names), comments='')
         plot_star(star, predict, y_names, out_dir)
 
 ################################################################################

@@ -4,155 +4,113 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 ## Plotting values
+utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 utils.font <<- "Palatino"
 hack.mgp <- c(2, 0.5, 0)
 
 png_res <- 400
-cex.paper <- 1
+cex.paper <- 0.8
 cex.slides <- 1.3
 cex.hack <- 1.4
 latex_pt_per_in <- 5 * 72.27
 
+widethin <- function(plot_f, filename, directory, 
+            pdf_width, pdf_height, png_width, png_height, text.cex, ...,
+            wide=T, thin=T) {
+    if (thin) {
+        thin_dir <- file.path(directory, 'thin')
+        dir.create(thin_dir, showWarnings=FALSE, recursive=TRUE)
+        tallshort(plot_f, filename, thin_dir, 
+                  pdf_width/2, png_width/2, 
+                  pdf_height, png_height, text.cex, ...)
+    }
+    
+    if (wide) {
+        wide_dir <- file.path(directory, 'wide')
+        dir.create(wide_dir, showWarnings=FALSE, recursive=TRUE)
+        tallshort(plot_f, filename, wide_dir, 
+                  pdf_width, png_width, 
+                  pdf_height, png_height, text.cex, ...)
+    }
+}
+
+tallshort <- function(plot_f, filename, directory, pdf_width, png_width, pdf_height, png_height, 
+        text.cex, ..., tall=T, short=T, make_png=T, make_pdf=T, thin.hack=F) {
+    if (short) {
+        short_dir <- file.path(directory, 'short')
+        dir.create(short_dir, showWarnings=FALSE, recursive=TRUE)
+        pdfpng(plot_f, filename, short_dir, 
+               pdf_width, pdf_height/2, 
+               png_width, png_height/2, text.cex, ...)
+    }
+    if (tall) {
+        tall_dir <- file.path(directory, 'tall')
+        dir.create(tall_dir, showWarnings=FALSE, recursive=TRUE)
+        pdfpng(plot_f, filename, tall_dir, 
+               pdf_width, pdf_height, 
+               png_width, png_height, text.cex, ...)
+    }
+}
+
+pdfpng <- function(plot_f, filename, directory, 
+        pdf_width, pdf_height, png_width, png_height, 
+        text.cex, ..., font=utils.font, mar=utils.mar, thin.hack=F,
+        make_png=T, make_pdf=T, mgp=utils.mgp) {
+    if (make_png) {
+        png(file.path(directory, paste0(filename, '.png')),
+            width=png_width, height=png_height, 
+            family=utils.font, res=png_res, type='cairo')
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+        plot_f(text.cex=if (thin.hack) cex.hack else text.cex, 
+               mgp=if (thin.hack) hack.mgp else mgp, ...)
+        dev.off()
+    }
+    if (make_pdf) {
+        cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
+            width=pdf_width, height=pdf_height, 
+            family=utils.font)
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+        plot_f(text.cex=if (thin.hack) cex.hack else text.cex, 
+               mgp=if (thin.hack) hack.mgp else mgp, ...)
+        dev.off()
+    }
+}
+
 ## Make the same plot as a pdf and a png suitable for papers and for slides
 # takes a plotting function plot_f that calls `plot` 
 make_plots <- function(plot_f, filename, ..., 
-        filepath='plots', mar=c(3, 4, 1, 1), mgp=utils.mgp, 
+        filepath='plots', mar=utils.mar, mgp=utils.mgp, 
         wide=TRUE, thin=TRUE, 
+        tall=TRUE, short=TRUE,
         make_png=TRUE, make_pdf=TRUE, 
         paper=TRUE, slides=TRUE,
         thin.hack=FALSE,
         paper_pdf_width=6.97522, # inches
         paper_pdf_height=4.17309,
         slides_pdf_width=6.22665,
-        slides_pdf_height=4.1511) {
+        slides_pdf_height=4.1511,
+        font=utils.font) {
+    
     paper_png_width <- paper_pdf_width * latex_pt_per_in
     paper_png_height <- paper_pdf_height * latex_pt_per_in
     slides_png_width <- slides_pdf_width * latex_pt_per_in
     slides_png_height <- slides_pdf_height * latex_pt_per_in
     
-    if (paper & make_pdf & wide) {
-        directory <- file.path(filepath, 'paper', 'wide')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
-                  width=paper_pdf_width, height=paper_pdf_height, 
-                  family=utils.font)
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
-        plot_f(text.cex=cex.paper, ...)
-        dev.off()
+    if (paper) {
+        directory <- file.path(filepath, 'paper')
+        widethin(plot_f, filename, directory, 
+            paper_pdf_width, paper_pdf_height, 
+            paper_png_width, paper_png_height, 
+            text.cex=cex.paper, ...)
+        
     }
-    
-    if (paper & make_pdf & thin) {
-        directory <- file.path(filepath, 'paper', 'thin')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        if (thin.hack) {
-            cairo_pdf(file.path(directory, paste0(filename, '-thin.pdf')),
-                      width=paper_pdf_width, height=paper_pdf_height, 
-                      family=utils.font)
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=utils.font)
-            plot_f(text.cex=cex.hack, mgp=hack.mgp, ...)
-        } else {
-            cairo_pdf(file.path(directory, paste0(filename, '-thin.pdf')),
-                      width=paper_pdf_width/2, height=paper_pdf_height, 
-                      family=utils.font)
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
-            plot_f(text.cex=cex.paper, ...)
-        }
-        dev.off()
-    }
-    
-    if (paper & make_png & wide) {
-        directory <- file.path(filepath, 'paper', 'wide')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        png(file.path(directory, paste0(filename, '.png')),
-                  width=paper_png_width, height=paper_png_height, 
-                  family=utils.font, res=png_res, type='cairo')
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
-        plot_f(text.cex=cex.paper, ...)
-        dev.off()
-    }
-    
-    if (paper & make_png & thin) {
-        directory <- file.path(filepath, 'paper', 'thin')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        if (thin.hack) {
-            png(file.path(directory, paste0(filename, '-thin.png')),
-                      width=paper_png_width, height=paper_png_height, 
-                      family=utils.font, res=png_res, type='cairo')
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.hack, family=utils.font)
-            plot_f(text.cex=cex.hack, ...)
-        } else {
-            png(file.path(directory, paste0(filename, '-thin.png')),
-                      width=paper_png_width/2, height=paper_png_height, 
-                      family=utils.font, res=png_res, type='cairo')
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.paper, family=utils.font)
-            plot_f(text.cex=cex.paper, ...)
-        }
-        dev.off()
-    }
-    
-    if (slides & make_pdf & wide) {
-        directory <- file.path(filepath, 'slides', 'wide')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        cairo_pdf(file.path(directory, paste0(filename, '-slides.pdf')),
-                  width=slides_pdf_width, height=slides_pdf_height, 
-                  family=utils.font)
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
-        plot_f(text.cex=cex.slides, ...)
-        dev.off()
-    }
-    
-    if (slides & make_pdf & thin) {
-        directory <- file.path(filepath, 'slides', 'thin')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        if (thin.hack) {
-            cairo_pdf(file.path(directory, 
-                      paste0(filename, '-slides-thin.pdf')),
-                      width=slides_pdf_width, height=slides_pdf_height, 
-                      family=utils.font)
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.slides*cex.hack, 
-                family=utils.font)
-            plot_f(text.cex=cex.slides*cex.hack, ...)
-        } else {
-            cairo_pdf(file.path(directory, 
-                      paste0(filename, '-slides-thin.pdf')),
-                      width=slides_pdf_width/2, height=slides_pdf_height, 
-                      family=utils.font)
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
-            plot_f(text.cex=cex.slides, ...)
-        }
-        dev.off()
-    }
-    
-    if (slides & make_png & wide) {
-        directory <- file.path(filepath, 'slides', 'wide')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        png(file.path(directory, paste0(filename, '-slides.png')),
-                  width=slides_png_width, height=slides_png_height, 
-                  family=utils.font, res=png_res, type='cairo')
-        par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
-        plot_f(text.cex=cex.slides, ...)
-        dev.off()
-    }
-    
-    if (slides & make_png & thin) {
-        directory <- file.path(filepath, 'slides', 'thin')
-        dir.create(directory, showWarnings=FALSE, recursive=TRUE)
-        if (thin.hack) {
-            png(file.path(directory, paste0(filename, '-slides-thin.png')), 
-                      width=slides_png_width, height=slides_png_height, 
-                      family=utils.font, res=png_res, type='cairo')
-            par(mar=mar, mgp=hack.mgp, cex.lab=cex.slides*cex.hack, 
-                family=utils.font)
-            plot_f(text.cex=cex.slides*cex.hack, ...)
-        } else {
-            png(file.path(directory, paste0(filename, '-slides-thin.png')), 
-                      width=slides_png_width/2, height=slides_png_height, 
-                      family=utils.font, res=png_res, type='cairo')
-            par(mar=mar, mgp=utils.mgp, cex.lab=cex.slides, family=utils.font)
-            plot_f(text.cex=cex.slides, ...)
-        }
-        dev.off()
+    if (slides) {
+        directory <- file.path(filepath, 'slides')
+        widethin(plot_f, filename, directory, 
+            slides_pdf_width, slides_pdf_height, 
+            slides_png_width, slides_png_height, 
+            text.cex=cex.slides, ...)
     }
 }
 
@@ -176,6 +134,8 @@ seis.names <- list(
   Y              = "Initial helium", 
   Z              = "Initial metallicity",
   alpha          = "Mixing length parameter", 
+  diffusion      = "Diffusion coefficient",
+  overshoot      = "Overshoot",
   age            = "Age", 
   radius         = "Radius", 
   H              = "Fractional hydrogen", 
@@ -208,6 +168,8 @@ seis.labs <- list(
   Y              = bquote(Y[0]), 
   Z              = bquote(Z[0]),
   alpha          = bquote(alpha["MLT"]), 
+  diffusion      = bquote(D),
+  overshoot      = bquote(f),
   age            = bquote(tau), 
   radius         = bquote(R), 
   H              = bquote(X), 
@@ -240,6 +202,8 @@ seis.units <- list(
   Y              = bquote(), 
   Z              = bquote(),
   alpha          = bquote(), 
+  diffusion      = bquote(), 
+  overshoot      = bquote(), 
   age            = bquote("/Gyr"), 
   radius         = bquote("/"*R["\u0298"]), 
   H              = bquote(), 

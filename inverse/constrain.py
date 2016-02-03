@@ -22,7 +22,7 @@ mpl.rcParams.update({'font.size': 16})
 import pylab as P
 
 ## Load 16 Cyg A & B
-exclude_pattern = "mass|nu_max|Dnu|radial_velocity"
+exclude_pattern = "mass|nu_max|Dnu|radial_velocity|H|diffusion|overshoot"
 cygA = read_csv('perturb/16CygA_perturb.dat', sep='\t')
 cygA = cygA.drop([i for i in cygA.columns 
     if search(exclude_pattern, i)], axis=1)
@@ -31,10 +31,11 @@ cygB = cygB.drop([i for i in cygB.columns
     if search(exclude_pattern, i)], axis=1)
 
 ## Load data
-data = read_csv('grids/deleter.dat', sep='\t')
+data = read_csv('../forward/simulations.dat', sep='\t')
 data = data.drop([i for i in data.columns
     if search(exclude_pattern, i)], axis=1)
-X = data.drop(["M", "Y", "Z", "alpha", "age"], axis=1)
+X = data.drop(["M", "Y", "Z", "alpha", "age"],axis=1)
+#X = data.drop(["M", "Y", "Z", "alpha", "diffusion", "overshoot", "age"],axis=1)
 ys = data.drop(X.columns, axis=1)
 X = X.drop([name for name in X.columns if name not in cygA.columns], axis=1)
 print(X.head())

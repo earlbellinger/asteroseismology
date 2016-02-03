@@ -16,12 +16,13 @@ library(lattice)
 library(corrplot)
 library(ggplot2)
 library(GGally)
+library(scales)
 
 col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(21)
 
 ## Load data
 seis.DF <- data.table(read.table('simulations.dat', header=1))
-setkey(seis.DF, M, Y, Z, alpha)
+setkey(seis.DF, M, Y, Z, alpha, diffusion, overshoot)
 keys <- key(seis.DF)
 
 solar_vals <- read.table(
@@ -40,39 +41,54 @@ combos <- combos[order(ages),]
 
 # Make inputs diagram
 X <- 1-combos$Y-combos$Z
-p = ggpairs(data=combos, axisLabels="show", #font=font, #
-        columnLabels=sapply(names(seis.DF)[1:4], 
-                            function (name) get_label_nameless(name)))
+p = ggpairs(data=combos, axisLabels="show", upper="blank",#font=font, #
+        columnLabels=sapply(names(seis.DF)[1:6], 
+            function (name) get_label_nameless(name)))
 for (subplot in grep('points', p$plots)) {
     p$plots[[subplot]] <- sub("))", ", colour=X))", p$plots[[subplot]])
 }
-for (ii in 1:4) {
-    for (jj in (ii+1):4) {
-        if (jj > 4) break
-        p <- putPlot(p, getPlot(p, ii, jj) + 
-            theme(axis.ticks=element_blank(), axis.line=element_blank(), 
-                  axis.text=element_blank(), panel.grid.major= element_blank()),
-            ii, jj)
+#p <- putPlot(p, getPlot(p, 1, 1) + ylab(""), 1, 1)
+#for (ii in 1:6) {
+#    for (jj in (ii+1):6) {
+#        if (jj > 6) break
+#        p <- putPlot(p, getPlot(p, ii, jj) + 
+#            theme(axis.ticks=element_blank(), axis.line=element_blank(), 
+#                 axis.text=element_blank(), panel.grid.major= element_blank()),
+#            ii, jj)
+#    }
+#}
+number_ticks <- function(xs) {
+    repr <- seq(min(xs), max(xs), length.out=1000)
+    signif(as.numeric(quantile(repr, c(0.2, 0.8))), 2)
+}
+for (ii in 1:6) {
+    for (jj in 1:6) {
+        pp <- getPlot(p, ii, jj)
+        pp <- pp + scale_x_continuous(breaks=number_ticks) + 
+                   scale_y_continuous(breaks=number_ticks)
+        p <- putPlot(p, pp, ii, jj)
     }
 }
-for (col_j in 1:2) {
+for (col_j in c(1,2,4)) {
     zplot <- getPlot(p, 3, col_j)
-    log_zplot <- zplot + scale_y_log10(limits=c(0.0001, 0.04))
+    log_zplot <- zplot + scale_y_log10(limits=c(0.0004, 0.04))
     log_zplot$subtype <- 'logpoints'
     log_zplot$type <- 'logcontinuous'
     p <- putPlot(p, log_zplot, 3, col_j)
 }
-for (row_i in 3:4) {
+for (row_i in 3:6) {
     zplot <- getPlot(p, row_i, 3)
-    log_zplot <- zplot + scale_x_log10(limits=c(0.0001, 0.04))
+    log_zplot <- zplot + scale_x_log10(limits=c(0.0004, 0.04))
     log_zplot$subtype <- 'logpoints'
     log_zplot$type <- 'logcontinuous'
     p <- putPlot(p, log_zplot, row_i, 3)
 }
-inputs_plot <- function(text.cex, ...) {
-    print(p, leftWidthProportion=0.3, bottomHeightProportion=0.3)
+inputs_plot <- function(..., text.cex) {
+    print(p, leftWidthProportion=0.4, bottomHeightProportion=0.5)
 }
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"))
+
+
 
 ## Make scatter and contour plots of X-R and C-D diagrams for all model vars
 for (Z in names(seis.DF)[1:9]) {
@@ -109,7 +125,7 @@ a <- corrplot(M, diag=1, type='lower', order="FPC",
     tl.cex=0.3, tl.col=rgb(1,1,1,0), tl.srt=90, 
     sig.level=sig_level/length(M))
 pos <- as.numeric(sapply(colnames(a), function(x) which(x==names(seis.DF))))
-cols <- ifelse(grepl('M|Y|Z|alpha', names(seis.DF)[pos]), 
+cols <- ifelse(grepl('M|Y|Z|alpha|diffusion|overshoot', names(seis.DF)[pos]), 
     '#800080', 'black')
 text(1:ncol(seis.DF)-0.3, (ncol(seis.DF)+1):2-0.4, col=cols, pos=4, srt=90,
     as.expression(seis.labs[colnames(a)]))

@@ -26,7 +26,7 @@ def main(arguments):
     parser.add_argument('-D', '--diffusion', default=[0, 2], nargs=2,
                         type=float, 
                         help='range of diffusion coefficient values')
-    parser.add_argument('-o', '--overshoot', default=[0, 0.035], nargs=2,
+    parser.add_argument('-f', '--overshoot', default=[0, 0.5], nargs=2,
                         type=float, 
                         help='range of overshoot values')
     parser.add_argument('-N', default=1000, help='number of tracks to generate',
@@ -37,11 +37,15 @@ def main(arguments):
                         help='offset for sobol numbers')
     parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 0, 0], 
                         type=list,
-                        help='booleans of whether to log M, Y, Z, and alpha')
+                        help='booleans of whether to log M, Y, Z, alpha, D, f')
     args = parser.parse_args(arguments)
     print(args)
-    ranges = np.vstack((args.M, args.Y, np.log10(args.Z), args.alpha,
+    ranges = np.vstack((args.M, args.Y, args.Z, args.alpha,
         args.diffusion, args.overshoot))
+    for i, val in enumerate(ranges):
+        if (args.logs[i]):
+            ranges[i] = np.log10(ranges[i])
+    print(ranges)
     dispatch(ranges=ranges, N=args.N, logs=args.logs, 
         directory=args.directory, skip=args.skip)
 
@@ -54,7 +58,7 @@ def dispatch(ranges, N, logs, directory, skip=0):
             if (logs[j]):
                 vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -p dispatch.sh -d %s "\
-            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -o %.6f"%\
+            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f"%\
             tuple([directory] + [val for val in vals])
         subprocess.Popen(bash_cmd.split(), shell=False)
         sleep(0.1)

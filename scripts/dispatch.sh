@@ -23,13 +23,12 @@ simulate() {
     change "new_Z" '-1' "$Z"
     change 'mixing_length_alpha' '2.1' "$alpha"
     
-    change 'overshoot_f_above_nonburn_core' '0.005' "$overshoot"
-    change 'overshoot_f_above_nonburn_shell' '0.005' "$overshoot"
-    change 'overshoot_f_below_nonburn_shell' '0.005' "$overshoot"
-    change 'overshoot_f_above_burn_h_core' '0.005' "$overshoot"
-    change 'overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
-    change 'overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
-    change 'diffusion_class_factor(:)' '1d0' "$diffusion"
+    change 'step_overshoot_f_above_nonburn_core' '0.005' "$overshoot"
+    change 'step_overshoot_f_above_nonburn_shell' '0.005' "$overshoot"
+    change 'step_overshoot_f_below_nonburn_shell' '0.005' "$overshoot"
+    change 'step_overshoot_f_above_burn_h_core' '0.005' "$overshoot"
+    change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
+    change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
     
     mk
     rn
@@ -43,9 +42,12 @@ simulate() {
     change "Lnuc_div_L_zams_limit" "0.999d0" "-1"
     change 'relax_initial_Y' '.true.' '.false.'
     change 'relax_initial_Z' '.true.' '.false.'
-    change 'which_atm_option' 'simple_photosphere' 'Eddington_grey'
+    change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
-    #change "do_element_diffusion" ".false." ".true."
+    if (( $(echo "$diffusion > 0" | bc -l) )); then
+       change "do_element_diffusion" ".false." ".true."
+       change 'diffusion_class_factor(:)' '1d0' "$diffusion"
+    fi
     
     rn
     #rerun #"Hexh"
@@ -59,7 +61,7 @@ simulate() {
     
     sleep 1
     Rscript summarize.R "$dirname"
-    rm -rf "$dirname"
+    #rm -rf "$dirname"
 }
 
 change() { #param initval newval
@@ -81,9 +83,9 @@ while [ "$#" -gt 0 ]; do
     -Y) Y="$2"; shift 2;;
     -Z) Z="$2"; shift 2;;
     -a) alpha="$2"; shift 2;;
-    -d) directory="$2"; shift 2;;
     -D) diffusion="$2"; shift 2;;
-    -o) overshoot="$2"; shift 2;;
+    -f) overshoot="$2"; shift 2;;
+    -d) directory="$2"; shift 2;;
 
     *) echo "unknown option: $1" >&2; exit 1;;
   esac
@@ -94,9 +96,9 @@ if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.275; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
 if [ -z ${alpha+x} ]; then alpha=1.85; fi
-if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${diffusion+x} ]; then diffusion=0; fi
 if [ -z ${overshoot+x} ]; then overshoot=0; fi
+if [ -z ${directory+x} ]; then directory=simulations; fi
 
 simulate
 

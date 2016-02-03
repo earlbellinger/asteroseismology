@@ -30,15 +30,15 @@ tag.freqs <- sun.freqs[-1:-(nrow(sun.freqs)-55),]
 y2 <- predict(relation, newdata=tag.freqs)
 new_nu <- rnorm(nrow(tag.freqs), tag.freqs$nu, y2)
 
-plot_tag <- function(..., text.cex=1) {
-    plot(sun.freqs$nu, sun.freqs$dnu, pch=20, 
+plot_tag <- function(..., text.cex=1, mgp=utils.mgp, font=utils.font) {
+    plot(sun.freqs$nu, sun.freqs$dnu, pch=20, axes=F,
          ylim=range(sun.freqs$dnu, cygA.freqs$dnu, y2),
-         #xlab=expression((nu-nu[max])/mu*Hz),
-         #ylab=expression("uncertainty"~sigma[nu]/mu*Hz),
+         xlab=expression("Distance from frequency of maximum oscillation power"~(nu-nu[max])/mu*Hz),
+         ylab=expression("Uncertainty"~sigma[nu]/mu*Hz),
          tcl=0)
-    magaxis(1:4, tcl=0.25, labels=0)
+    magaxis(1:4, tcl=0.25, labels=c(1,1,0,0), cex.axis=text.cex, las=1, family=font, mgp=mgp)
     points(cygA.freqs$nu, cygA.freqs$dnu, pch=20, col='darkred')
-    points(cygB.freqs$nu, cygB.freqs$dnu, pch=20, col='blue', cex=0.75)
+    points(cygB.freqs$nu, cygB.freqs$dnu, pch=20, col='blue')
     points(tag.freqs$nu, y2, pch=1, cex=0.75)
     segments(new_nu, y2, tag.freqs$nu, tag.freqs$dnu, 
         col=adjustcolor('black',alpha.f=0.25))
@@ -53,7 +53,8 @@ plot_tag <- function(..., text.cex=1) {
            pch=c(20, 20, 20, 1, NA), 
            col=c("darkred", "blue", "black", "black", "black"),
            lty=c(NA, NA, NA, NA, 2),
-           pt.cex=c(1, 0.75, 1, 0.75),
+           pt.cex=c(1, 1, 1, 0.75),
+           cex=text.cex,
            bty='n')
 }
 
