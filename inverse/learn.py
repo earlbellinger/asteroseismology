@@ -42,37 +42,37 @@ data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 ### Helpers ####################################################################
 ################################################################################
 y_latex = {
-    "M": "Mass M/M$_\\odot$", 
-    "Y": "Initial helium Y$_0$", 
-    "Z": "Initial metallicity Z$_0$", 
-    "alpha": "Mixing length $\\alpha_{\mathrm{MLT}}$", 
-    "diffusion": "Diffusion coefficient D",
-    "overshoot": "Overshoot f",
-    "age": "Age $\\tau$/Gyr", 
-    "radius": "Radius R/R$_\\odot$", 
-    "H": "Hydrogen fraction X", 
-    "He": "Helium fraction Y",
-    "Hc": "Core-hydrogen fraction X$_c$",
-    "log_g": "Surface gravity log g/dex", 
-    "L": "Luminosity L/L$_\\odot$",
-    "mass_cc": "Convective core mass-fraction M$_{cc}$"
+    "M": r"Mass M$/$M$_\odot$", 
+    "Y": r"Initial helium Y$_0$", 
+    "Z": r"Initial metallicity Z$_0$", 
+    "alpha": r"Mixing length $\alpha_{\mathrm{MLT}}$", 
+    "diffusion": r"Diffusion coefficient D",
+    "overshoot": r"Overshoot f",
+    "age": r"Age $\tau/$Gyr", 
+    "radius": r"Radius R$/$R$_\odot$", 
+    "H": r"Hydrogen fraction X", 
+    "He": r"Helium fraction Y",
+    "Hc": r"Core-hydrogen fraction X$_c$",
+    "log_g": r"Surface gravity log g/dex", 
+    "L": r"Luminosity L$/$L$_\odot$",
+    "mass_cc": r"Convective core mass-fraction M$_{\mathrm{cc}}$"
 }
 
 y_latex2 = {
-    "M": "M/M$_\\odot$", 
-    "Y": "Y$_0$", 
-    "Z": "Z$_0$", 
-    "alpha": "$\\alpha_{\mathrm{MLT}}$", 
-    "diffusion": "D",
-    "overshoot": "f",
-    "age": "$\\tau$/Gyr", 
-    "radius": "R/R$_\\odot$", 
-    "H": "X", 
-    "He": "Y",
-    "Hc": "X$_c$",
-    "log_g": "log g/dex", 
-    "L": "L/L$_\\odot$",
-    "mass_cc": "M$_{cc}$"
+    "M": r"M$/$M$_\odot$", 
+    "Y": r"Y$_0$", 
+    "Z": r"Z$_0$", 
+    "alpha": r"$\alpha_{\mathrm{MLT}}$", 
+    "diffusion": r"D",
+    "overshoot": r"f",
+    "age": r"$\tau/$Gyr", 
+    "radius": r"R$/$R$_\odot$", 
+    "H": r"X", 
+    "He": r"Y",
+    "Hc": r"X$_\mathrm{c}$",
+    "log_g": r"log g/dex", 
+    "L": r"L$/$L$_\odot$",
+    "mass_cc": r"M$_{\mathrm{cc}}$"
 }
 
 #y_show = ['M', 'Y', 'Z', 'age', 'radius']
@@ -118,16 +118,19 @@ def get_rc(num_ys):
 
 def plot_star(star, predict, y_names, out_dir=plot_dir):
     ## Corner plot
+    truths = [np.NaN for i in range(len(y_names))]
+    if star == 'Sun' or star == 'Tagesstern':
+        truths[0] = 1
+        truths[-1] = 4.57
     figure = corner.corner(
         predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
         labels=[y_latex2[y_name] for y_name in y_names
                 if y_name in y_show],
+        title_fmt='.3g',
+        truths=truths,
+        quantiles=[0.16, 0.5, 0.84],
         show_titles=True, title_args={"fontsize": 16})
-    #figure.gca().annotate(star, 
-    #    xy=(0.5, 1.0), xycoords="figure fraction",
-    #    xytext=(0, -5), textcoords="offset points",
-    #    ha="center", va="top")
-    plt.savefig(os.path.join(out_dir, star + '-corner.pdf'), dpi=400)
+    plt.savefig(os.path.join(out_dir, star + '-corner.pdf'))
     plt.close()
 
     
@@ -146,7 +149,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
     for (pred_j, name) in enumerate(y_names[0:num_ys]):
         (m, s) = (middles[pred_j], stds[pred_j])
         #outstr += "\t%.3g +/- %.3g" % (m, s)
-        outstr += "\t%.3g\t%.3g" % (m, s)
+        outstr += r" & %.3g $\pm$ %.2g" % (m, s)
         
         if num_ys%2==0 or num_ys%3==0 or int(sqrt)==sqrt:
             ax = plt.subplot(rows, cols, pred_j+1)
@@ -175,7 +178,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         ax.minorticks_on()
         plt.tight_layout()
     
-    print(outstr)
+    print(outstr + r' \\')
     #plt.subplots_adjust(top=0.9)
     plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
     plt.close()
@@ -184,9 +187,14 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     stars = [os.path.join(perturb_dir, f) 
              for f in os.listdir(perturb_dir) if re.match(perturb_pattern, f)]
     if directory != perturb_dir:
-        stars = [os.path.join(perturb_dir, directory, f) 
-                 for f in os.listdir(os.path.join(perturb_dir, directory)) 
-                 if re.match(perturb_pattern, f)] + stars
+        others = [os.path.join(perturb_dir, directory, f) 
+                  for f in os.listdir(os.path.join(perturb_dir, directory)) 
+                  if re.match(perturb_pattern, f)]
+        names = [os.path.split(a)[-1].split("_")[0] for a in others]
+        if all([x.isdigit() for x in names]):
+            names = [int(x) for x in names]
+        sort = [b for (a,b) in sorted(zip(names, others))]
+        stars = sort + stars
     
     out_dir = os.path.join(plot_dir, directory)
     if not os.path.exists(out_dir):
@@ -208,7 +216,6 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             X_columns = star_data.columns
             out = train_regressor(data, X_columns)
             forest, y_names, X_names, y_trfm = out
-            
             
             ## Plot importances
             est = forest.steps[0][1]
@@ -237,7 +244,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             plt.close()
             
             print()
-            print('\t'+'\t\t'.join(y_names))
+            print(r"\colhead{Name} & "+\
+                  ' & '.join([r"\colhead{" + y_latex2[yy] + r"}"
+                              for yy in y_names]) + r'\\ \hline\hline')
             #forest, y_names, X_names = out#, y_trfm = out
         
         #star_data = star_data.drop([i for i in star_data.columns 

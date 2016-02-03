@@ -15,22 +15,30 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=90, space_var='Hc') {
+load_data <- function(filename, num_points=45, space_var='Hc') {
     DF <- read.table(filename, header=1, check.names=0)
     
-    #hs <- 1-DF$Y[1]-DF$Z[1]
-    pms <- which(DF$age[-1] < 0.1 & diff(DF$L) < 0)
-    if (any(pms)) {
-        print(paste(filename, "Clipping", 1+max(pms), "points"))
-        DF <- DF[-1:-(1+max(pms)),]
+    #pms <- which(DF$age[-1] < 0.25 & diff(DF$L) < 0)
+    decreasing_L <- which(diff(DF$L) < 0)
+    if (any(decreasing_L)) {
+        #print(decreasing_L)
+        goes_back_up <- diff(decreasing_L) > 1
+        pms <- ifelse(any(goes_back_up), 
+                   which(goes_back_up)[1] + 1, 
+                   max(decreasing_L))
+        print(paste(filename, "Clipping", pms, "points"))
+        DF <- DF[-1:-pms,]
     } else {
-        print(paste(filename, "No PMS to be clipped"))
+        print(paste(filename, "has no PMS to be clipped"))
     }
     DF$age <- DF$age - min(DF$age) # set ZAMS age
     DF <- DF[DF$age <= 15,]
     
     nrow.DF <- length(DF[[space_var]])
-    if (nrow.DF < num_points) return(NULL)
+    if (nrow.DF < num_points) {
+        print(paste(filename, "has too few points"))
+        return(NULL)
+    }
     ideal <- seq(max(DF[[space_var]]), min(DF[[space_var]]), length=num_points)
     cost.mat  <- outer(ideal, DF[[space_var]], function(x, y) abs(x-y))
     row.signs <- rep("==", num_points)
