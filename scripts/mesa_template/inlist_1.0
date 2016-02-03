@@ -56,7 +56,7 @@
       max_num_profile_models = -1
       
       min_timestep_limit = 1d-12
-      max_years_for_timestep = 1d7
+      max_years_for_timestep = 1d6
       !max_timestep = 3.15d14
       
       !report_ierr = .true. ! if true, produce terminal output when error
@@ -77,15 +77,15 @@
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
-      mesh_delta_coeff = 1
+      mesh_delta_coeff = 0.8
       max_allowed_nz = 64000
       
       photostep = 0
       write_profiles_flag = .false.
-      profile_interval = 1
-      history_interval = 1
+      profile_interval = 8
+      history_interval = 8
       terminal_cnt = 10
-      write_header_frequency = 10
+      write_header_frequency = 8
       
       !log_L_lower_limit = -1
       !smooth_convective_bdy = .false.

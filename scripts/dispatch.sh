@@ -44,14 +44,22 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
+    if (( $(echo "$M < 1" | bc -l) )); then
+        change "profile_interval" "8" "12"
+    fi
+    if (( $(echo "$M < 0.9" | bc -l) )); then
+        change "profile_interval" "12" "16"
+    fi
+    if (( $(echo "$M < 0.8" | bc -l) )); then
+        change "profile_interval" "16" "20"
+    fi
+    
     if (( $(echo "$diffusion > 0" | bc -l) )); then
        change "do_element_diffusion" ".false." ".true."
        change 'diffusion_class_factor(:)' '1d0' "$diffusion"
     fi
     
     rn
-    #rerun #"Hexh"
-    #mv history.data LOGS
     
     find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | xargs -i \
         --max-procs=$OMP_NUM_THREADS bash -c \
@@ -61,19 +69,13 @@ simulate() {
     
     sleep 1
     Rscript summarize.R "$dirname"
-    #rm -rf "$dirname"
+    rm -rf "$dirname"
 }
 
 change() { #param initval newval
     sed -i.bak "s/\!$1 = $2/$1 = $3/g" inlist_1.0
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
 }
-
-#rerun() { # nameOfRun
-#    rn
-#    cp history.data "history.$1.data"
-#    tail -n+7 LOGS/history.data >> history.data
-#}
 
 ## Parse command line arguments
 # takes mass M, helium Y, metallicity Z, and mixing length parameter alpha

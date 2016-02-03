@@ -6,6 +6,7 @@
 ## Plotting values
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
+paper.mgp <<- c(2, 0.15, 0)
 utils.font <<- "Palatino"
 hack.mgp <- c(2, 0.5, 0)
 
@@ -102,7 +103,7 @@ make_plots <- function(plot_f, filename, ...,
         widethin(plot_f, filename, directory, 
             paper_pdf_width, paper_pdf_height, 
             paper_png_width, paper_png_height, 
-            text.cex=cex.paper, ...)
+            text.cex=cex.paper, mgp=paper.mgp, ...)
         
     }
     if (slides) {
