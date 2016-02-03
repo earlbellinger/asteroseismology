@@ -141,7 +141,7 @@ data2 <- read.table(header=0, col.names=c("n_trees", "oob_estimate", "time"),
 oob_plot <- function(..., max_n=64, plotboth=0, text.cex=1, mgp=utils.mgp) {
     plot(data$n_trees, data$oob_estimate, axes=FALSE,
          xlab="Number of Decision Trees in Forest",
-         ylab="Accuracy",
+         ylab="Out-of-Bag Accuracy",
          xaxs='i', yaxs='i',
          ylim=c(0, 1), xlim=c(1, max_n), type='l', tcl=0)
     if (plotboth) lines(data2$n_trees, data2$oob_estimate, lty=2)
@@ -151,20 +151,21 @@ oob_plot <- function(..., max_n=64, plotboth=0, text.cex=1, mgp=utils.mgp) {
     #lines(data3$n_trees, data3$oob_estimate, lty=3)
     axis(1, at=1:max_n, labels=FALSE, tcl=-0.125)
     axis(3, at=1:max_n, labels=FALSE, tcl=-0.125)
-    axis(1, at=2^(0:log2(max_n)), labels=2^(0:log2(max_n)), tcl=-0.25)
+    axis(1, at=2^(0:log2(max_n)), labels=2^(0:log2(max_n)), tcl=-0.25,
+        cex.axis=text.cex)
     axis(3, at=2^(0:log2(max_n)), labels=FALSE, tcl=-0.25)
-    magaxis(side=c(2,4), tcl=0.5, labels=c(1,0), mgp=mgp, family=utils.font,
-        las=2)
+    magaxis(side=c(2,4), tcl=-0.25, labels=c(1,0), mgp=mgp+c(0,0.25,0), 
+        family=utils.font, las=2, cex.axis=text.cex)
     if (plotboth) {
         legend("bottomright", bty='n', lty=c(1,2,3), xjust=1, yjust=1,
-               col=c("black", "black", "darkred"),
+               col=c("black", "black", "darkred"), cex=text.cex,
                legend=c("Fit using all observables",
                         expression("Fit without"~L*", "*log~g*", "*
                                    delta*nu[1*","*3]* ", or"~r[1*","*3]),
                         "99% Accuracy"))
     } else {
         legend("bottomright", bty='n', lty=3, col='darkred', 
-            legend="99% Accuracy", xjust=1, yjust=1)
+            legend="99% Accuracy", xjust=1, yjust=1, cex=text.cex)
     }
 }
 oob_plot()

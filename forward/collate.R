@@ -15,27 +15,19 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=70, space_var='Hc') {
+load_data <- function(filename, num_points=90, space_var='Hc') {
     DF <- read.table(filename, header=1, check.names=0)
     
-    hs <- 1-DF$Y[1]-DF$Z[1]
-    dteff <- diff(DF$Teff)
-    dl <- diff(DF$L)
-    pms <- with(DF, 
-        #which(100*(hs-H[-1])/(hs) < 1.5
-        which(DF$age[-1] < 0.1
-            & dteff %in% boxplot.stats(dteff, coef=3)$out
-            & dl %in% boxplot.stats(dl, coef=3)$out
-        )
-    )
+    #hs <- 1-DF$Y[1]-DF$Z[1]
+    pms <- which(DF$age[-1] < 0.1 & diff(DF$L) < 0)
     if (any(pms)) {
         print(paste(filename, "Clipping", 1+max(pms), "points"))
         DF <- DF[-1:-(1+max(pms)),]
     } else {
-        print(paste(filename, "No PMS"))
+        print(paste(filename, "No PMS to be clipped"))
     }
     DF$age <- DF$age - min(DF$age) # set ZAMS age
-    DF <- DF[DF$age <= 14,]
+    DF <- DF[DF$age <= 15,]
     
     nrow.DF <- length(DF[[space_var]])
     if (nrow.DF < num_points) return(NULL)

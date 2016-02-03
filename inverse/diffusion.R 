@@ -1,8 +1,32 @@
 library(randomForest)
 library(magicaxis)
 
+get_data <- function(perturb, cov) {
+    print(c(perturb, cov))
+    a <- read.table(perturb, header=1)[1:100,]
+    b <- read.table(cov, header=1)[1:100,]
+    if (nrow(a) != nrow(b)) return(NULL)
+    cbind(a, b)
+}
+
+perturbs <- c(file.path('perturb', 
+    grep('.dat', list.files('perturb'), value=T)), 
+    file.path('perturb', 'kages', 
+                     list.files(file.path('perturb', 'kages'))))
+perturbs <- perturbs[order(basename(perturbs))]
+covs <- file.path('learn_covs', 'kages', 
+            list.files(file.path('learn_covs', 'kages')))
+covs <- covs[order(basename(covs))]
+
+data <- do.call(plyr:::rbind.fill, 
+    Map(function(perturb, cov) get_data(perturb, cov), 
+    perturb=perturbs, cov=covs))
+data <- data[,c(-26:-30)]
+#data <- data[complete.cases(data),]
+
+
+
 data <- read.table('predict.dat', header=1)
-attach(data)
 
 DF <- data[,!grepl("^d", names(data))]
 DF.unc <- cbind(data.frame(Name=data$Name), data[,grepl("^d", names(data))])
@@ -11,7 +35,7 @@ new_vals <- NULL
 new_uncs <- NULL
 
 for (filename in grep('-obs.dat$', 
-        c(file.path('data', list.files(directory)), 
+        c(file.path('data', list.files(file.path('data'))), 
           file.path('data', 'kages', list.files(file.path('data', 'kages')))), 
         value=1)) {
     Name <- sub('-.+', '', basename(filename))
@@ -21,7 +45,9 @@ for (filename in grep('-obs.dat$',
     vals <- data.frame(rbind(obs$value))
     uncs <- data.frame(rbind(obs$uncertainty))
     names(vals) <- sub("Fe/H", "FeH", obs$name)
-    names(uncs) <- sub("Fe/H", "FeH", obs$name)
+    names(uncs) <- sub("Fe/H", "dFeH", obs$name)
+    names(uncs) <- sub("Teff", "dTeff", obs$name)
+    names(uncs) <- sub("nu_max", "dTeff", obs$name)
     vals <- cbind(Name, vals)
     uncs <- cbind(Name, uncs)
     
@@ -40,11 +66,15 @@ selection <- !apply(is.na(DF), 2, any)
 DF <- DF[,selection]
 DF.unc <- DF.unc[,selection]
 
-result1 <- symbolicRegression(D~., data=DF[,-1], 
-    populationSize=1000, individualSizeLimit=128,
-    breedingTries=1000,
-    extinctionPrevention=1,
-    penalizeGenotypeConstantIndividuals=1)
+#library(rgp)
+#result1 <- symbolicRegression(D~., data=DF[,-1], 
+#    populationSize=1000, individualSizeLimit=128,
+#    breedingTries=1000,
+#    extinctionPrevention=1,
+#    penalizeGenotypeConstantIndividuals=1)
+
+attach(DF)
+attach(DF.unc)
 
 plot(NA, xlab="Mass M", ylab="Diffusion D",
     xlim=c(min(M-dM), max(M+dM)), 
@@ -55,14 +85,14 @@ points(M, D, pch=19)
 
 plot(NA, axes=FALSE,
     xlab="Metallicity Z", ylab="Diffusion D",
-    xlim=c(0, max(Z+dZ)), 
+    xlim=c(min(Z-dZ), max(Z+dZ)), 
     ylim=c(min(D-dD), max(D+dD)),
     xaxs='i', yaxs='i')
 magaxis(side=1:4, family="Palatino", tcl=0.25, labels=c(1,1,0,0))
 arrows(Z, D-dD, Z, D+dD, length=0, angle=90, code=3, col="gray")
 arrows(Z-dZ, D, Z+dZ, D, length=0, angle=90, code=3, col="gray")
 points(Z, D, pch=19)
-relation <- lm(D~Z, data=DF)
+relation <- lm(D~I(Z**3), data=DF)
 new_Z <- seq(0, 0.04, 0.0001)
 lines(new_Z, predict(relation, newdata=data.frame(Z=new_Z)))
 legend("topright", bty='n',
@@ -78,4 +108,6 @@ magaxis(side=1:4, family="Palatino", tcl=0.25, labels=c(1,1,0,0))
 arrows(Y, D-dD, Y, D+dD, length=0, angle=90, code=3, col="gray")
 arrows(Y-dY, D, Y+dY, D, length=0, angle=90, code=3, col="gray")
 points(Y, D, pch=19)
+
+
 
