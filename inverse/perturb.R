@@ -24,7 +24,7 @@ perturb <- function(star, obs_data_file, freqs_data_file,
         filepath=file.path('plots', 'perturb'))
     
     noisy_freqs <- freqs
-    parallelStartMulticore(max(1, detectCores()))
+    parallelStartMulticore(max(1, min(62, detectCores())))
     do.call(rbind, with(obs_data, {
         parallelMap(function(n) {
         #Map(function(n) {

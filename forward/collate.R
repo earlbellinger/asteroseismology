@@ -15,11 +15,11 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=45, space_var='Hc') {
+load_data <- function(filename, num_points=50, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
     
     #pms <- which(DF$age[-1] < 0.25 & diff(DF$L) < 0)
-    decreasing_L <- which(diff(DF$L) < 0)
+    decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
     if (any(decreasing_L)) {
         #print(decreasing_L)
         goes_back_up <- diff(decreasing_L) > 1
@@ -28,10 +28,10 @@ load_data <- function(filename, num_points=45, space_var='Hc') {
                    max(decreasing_L))
         print(paste(filename, "Clipping", pms, "points"))
         DF <- DF[-1:-pms,]
-    } else {
-        print(paste(filename, "has no PMS to be clipped"))
-    }
-    DF$age <- DF$age - min(DF$age) # set ZAMS age
+    } #else {
+        #print(paste(filename, "has no PMS to be clipped"))
+    #}
+    #DF$age <- DF$age - min(DF$age) # set ZAMS age
     DF <- DF[DF$age <= 15,]
     
     nrow.DF <- length(DF[[space_var]])

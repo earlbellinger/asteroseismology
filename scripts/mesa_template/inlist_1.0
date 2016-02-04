@@ -82,10 +82,10 @@
       
       photostep = 0
       write_profiles_flag = .false.
-      profile_interval = 8
-      history_interval = 8
+      profile_interval = 5
+      history_interval = 5
       terminal_cnt = 10
-      write_header_frequency = 8
+      write_header_frequency = 10
       
       !log_L_lower_limit = -1
       !smooth_convective_bdy = .false.
