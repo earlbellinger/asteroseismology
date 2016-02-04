@@ -27,19 +27,16 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     
     ## Model properties 
     obs.DF["age"] <- pro_header$star_age/10**9
-    obs.DF["radius"] <- pro_header$photosphere_r
-    obs.DF["H"] <- pro_header$star_mass_h1/pro_header$star_mass
-    obs.DF["He"] <- (pro_header$star_mass_he3 + 
-            pro_header$star_mass_he4)/pro_header$star_mass
-    obs.DF["Hc"] <- hstry$center_h1
     obs.DF["mass_cc"] <- hstry$mass_conv_core/pro_header$star_mass
-    #obs.DF["conv_mx1_bot"] <- hstry$conv_mx1_bot
-    #obs.DF["conv_mx1_top"] <- hstry$conv_mx1_top
-    #obs.DF["conv_mx2_bot"] <- hstry$conv_mx2_bot
-    #obs.DF["conv_mx2_top"] <- hstry$conv_mx2_top
-    #obs.DF["Lgrav"] <- hstry$eps_grav_integral
+    obs.DF["mass_X"] <- pro_header$star_mass_h1/pro_header$star_mass
+    obs.DF["mass_Y"] <- (pro_header$star_mass_he3 + 
+            pro_header$star_mass_he4)/pro_header$star_mass
+    obs.DF["X_c"] <- hstry$center_h1
+    obs.DF["X_surf"] <- hstry$surface_h1
+    obs.DF["Y_surf"] <- hstry$surface_he3 + hstry$surface_he4
     
     ## Observable properties 
+    obs.DF["radius"] <- pro_header$photosphere_r
     obs.DF["L"] <- pro_header$photosphere_L
     obs.DF["log_g"] <- hstry$log_g
     obs.DF["Teff"] <- pro_header$Teff
@@ -49,12 +46,12 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     freqs <- read.table(freqs_file, col.names=freqs.cols, fill=TRUE)
     acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
-    seis.DF <- seismology(freqs, nu_max, acoustic_cutoff, 
-        #outf=ifelse(sample(0:10000, 1)==0, gsub("/", "-", freqs_file), FALSE),
+    seis.DF <- seismology(freqs, nu_max, acoustic_cutoff=acoustic_cutoff, 
+        outf=ifelse(sample(0:10000, 1)==0, gsub("/", "-", freqs_file), FALSE),
         filepath=file.path('plots', 'separation'))
     
     if (length(seis.DF) != 16) {
-        print(paste(pro_file, "is weird!"))
+        print(paste(pro_file, "doesn't have 16 columns"))
         print(seis.DF)
     }
     
@@ -126,14 +123,14 @@ plot_HR <- function(DF, ev.DF, ...,
     points(log10(5771), 0, pch=1, cex=1)
     points(log10(5771), 0, pch=20, cex=0.1)
     points(log10(DF$Teff), log10(DF$L), pch=1, cex=0.1, 
-        col=col.pal[floor((DF$Hc-min(DF$Hc)) / (max(DF$Hc)-min(DF$Hc))
+        col=col.pal[floor((DF$X_c-min(DF$X_c)) / (max(DF$X_c)-min(DF$X_c))
                           * (length(col.pal)-1)) + 1])
     magaxis(side=1:4, family=font, tcl=0.25, mgp=utils.mgp, las=1,
         cex.axis=text.cex, labels=c(1,1,0,0)) 
     var1range <- diff(par()$usr)[1] # Add colorbar
     color.legend(par()$usr[2]+0.05*var1range, par()$usr[3], 
                  par()$usr[2]+0.10*var1range, par()$usr[4], 
-        round(quantile(seq(min(DF$Hc), max(DF$Hc), length=length(col.pal)), 
+        round(quantile(seq(min(DF$X_c), max(DF$X_c), length=length(col.pal)), 
             c(0, 0.25, 0.5, 0.75, 1)), 3), 
         col.pal[1:length(col.pal)], gradient='y', align='rb')
     mtext(expression("Core-hydrogen" ~ X[c]), 4, line=5.5, cex=text.cex)
@@ -223,18 +220,18 @@ plot_separations <- function(DF, ...,
     #tick.locs <- pretty(age)
     #locations <- Map(function(x) 
     #    which(abs(age-x)==min(abs(age-x))), x=tick.locs)
-    #xc_vals <- round(Hc[unlist(locations)], 3)
+    #xc_vals <- round(X_c[unlist(locations)], 3)
     #axis(3, at=tick.locs, tcl=-0.25, labels=xc_vals)
     
     tick.locs <- as.numeric(round(quantile(
-        seq(min(Hc), max(Hc), length.out=1000), 
+        seq(min(X_c), max(X_c), length.out=1000), 
         c(1, 0.8, 0.6, 0.4, 0.2, 0)), 2))
     if (tick.locs[length(tick.locs)] < 10**-2) {
         tick.locs[length(tick.locs)] <- 10**-2
         tick.locs <- c(tick.locs, 0)
     } 
     locations <- Map(function(x) 
-        which(abs(Hc-x)==min(abs(Hc-x))), x=tick.locs)
+        which(abs(X_c-x)==min(abs(X_c-x))), x=tick.locs)
     age_vals <- round(age[unlist(locations)], 3)
     axis(3, at=c(min(age), age_vals[-1]), tcl=-0.25, 
         labels=c(tick.locs))
@@ -248,7 +245,7 @@ plot_separations <- function(DF, ...,
         xc_minors <- c(xc_minors, mins)
     }
     minor.locations <- Map(function(x) 
-        which(abs(Hc-x)==min(abs(Hc-x))), x=xc_minors)
+        which(abs(X_c-x)==min(abs(X_c-x))), x=xc_minors)
     minor.locs <- age[unlist(minor.locations)]
     axis(3, at=minor.locs, labels=F, tcl=-0.125)
     
@@ -307,10 +304,10 @@ if (length(args)>0) {
         print("Rejecting track: too few columns")
         print(DF)
         rejection <- "-r"
-    } else if ( 100*(hs-max(DF$H))/hs > 1.5 ) {
-        print("Rejecting track: inaccurate starting H")
-        print(c(hs, max(DF$Hc)))
-        rejection <- "-pms"
+    #} else if ( 100*(hs-max(DF$H))/hs > 1.5 ) {
+    #    print("Rejecting track: inaccurate starting H")
+    #    print(c(hs, max(DF$X_c)))
+    #    rejection <- "-pms"
     } else { # Make a table of results! 
         write.table(DF, paste0(directory, '.dat'), quote=FALSE, sep='\t', 
             row.names=FALSE)

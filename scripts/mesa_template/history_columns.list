@@ -470,7 +470,8 @@
    ! mass fractions near surface
    
       surface h1
-      !surface he4
+      surface he3
+      surface he4
       surface c12
       surface o16
       ! etc.

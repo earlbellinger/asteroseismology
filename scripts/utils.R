@@ -103,7 +103,7 @@ make_plots <- function(plot_f, filename, ...,
         widethin(plot_f, filename, directory, 
             paper_pdf_width, paper_pdf_height, 
             paper_png_width, paper_png_height, 
-            text.cex=cex.paper, mgp=paper.mgp, ...)
+            text.cex=cex.paper, mgp=paper.mgp, mar=mar, ...)
         
     }
     if (slides) {
@@ -111,7 +111,7 @@ make_plots <- function(plot_f, filename, ...,
         widethin(plot_f, filename, directory, 
             slides_pdf_width, slides_pdf_height, 
             slides_png_width, slides_png_height, 
-            text.cex=cex.slides, ...)
+            text.cex=cex.slides, mgp=mgp, mar=mar, ...)
     }
 }
 
@@ -139,9 +139,11 @@ seis.names <- list(
   overshoot      = "Overshoot",
   age            = "Age", 
   radius         = "Radius", 
-  H              = "Fractional hydrogen", 
-  He             = "Fractional helium", 
-  Hc             = "Fractional core-hydrogen", 
+  mass_X         = "Hydrogen mass fraction", 
+  mass_Y         = "Helium mass fraction", 
+  X_surf         = "Surface hydrogen", 
+  Y_surf         = "Surface helium", 
+  X_c            = "Fractional core-hydrogen", 
   log_g          = "Surface gravity", 
   L              = "Luminosity", 
   Teff           = "Temperature", 
@@ -173,9 +175,11 @@ seis.labs <- list(
   overshoot      = bquote(f),
   age            = bquote(tau), 
   radius         = bquote(R), 
-  H              = bquote(X), 
-  He             = bquote(Y), 
-  Hc             = bquote(X[c]), 
+  mass_X         = bquote(X), 
+  mass_Y         = bquote(Y), 
+  X_surf         = bquote(X["surf"]),
+  Y_surf         = bquote(Y["surf"]),
+  X_c            = bquote(X[c]), 
   log_g          = bquote(log~g), 
   L              = bquote(L), 
   Teff           = bquote(T["eff"]), 
@@ -207,9 +211,11 @@ seis.units <- list(
   overshoot      = bquote(), 
   age            = bquote("/Gyr"), 
   radius         = bquote("/"*R["\u0298"]), 
-  H              = bquote(), 
-  He             = bquote(), 
-  Hc             = bquote(), 
+  mass_X         = bquote(), 
+  mass_Y         = bquote(), 
+  X_surf         = bquote(),
+  Y_surf         = bquote(),
+  X_c            = bquote(), 
   log_g          = bquote("/dex (cgs)"), 
   L              = bquote("/"*L["\u0298"]), 
   Teff           = bquote("/"*K), 
@@ -239,9 +245,11 @@ seis.latex <- list(
   alpha          = "$\\alpha_{\\text{\"MLT\"}}$", 
   age            = "$\\tau$", 
   radius         = "R", 
-  H              = "X", 
-  He             = "Y", 
-  Hc             = "$X_c$", 
+  mass_X         = "X", 
+  mass_Y         = "Y", 
+  X_surf         = "X_{\text{\"surf\"}}",
+  Y_surf         = "Y_{\text{\"surf\"}}",
+  X_c            = "$X_c$", 
   log_g          = "lg $g$", 
   L              = "L", 
   Teff           = "$T_{\text{\"eff\"}}$", 
@@ -271,9 +279,9 @@ Z_levels <- list(
   alpha  = seq(1.5, 2.5, 0.1),
   age    = 0:14, 
   radius = seq(0.6, 2.1, 0.1),
-  H      = seq(0.54, 0.78, 0.02),
-  He     = seq(0.22, 0.45, 0.02),
-  Hc     = seq(0, 0.78, 0.05)
+  mass_X = seq(0.54, 0.78, 0.02),
+  mass_Y = seq(0.22, 0.45, 0.02),
+  X_c    = seq(0, 0.78, 0.05)
 )
 
 color_levels <- list(
@@ -283,9 +291,9 @@ color_levels <- list(
   alpha  = seq(1.5, 2.5, 0.025),
   age    = seq(0, 13.8, 0.5),
   radius = seq(0.6, 2.1, 0.025),
-  H      = seq(0.54, 0.78, 0.01),
-  He     = seq(0.22, 0.45, 0.005),
-  Hc     = seq(0, 0.78, 0.015)
+  mass_X = seq(0.54, 0.78, 0.01),
+  mass_Y = seq(0.22, 0.45, 0.005),
+  X_c    = seq(0, 0.78, 0.015)
 )
 
 ## Scatter plot function

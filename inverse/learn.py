@@ -34,7 +34,7 @@ if not os.path.exists(cov_dir):
 
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|Dnu|H|mass"#|H|He"
+exclude = "nu_max|radial_velocity|Dnu|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -50,9 +50,14 @@ y_latex = {
     "overshoot": r"Overshoot f",
     "age": r"Age $\tau/$Gyr", 
     "radius": r"Radius R$/$R$_\odot$", 
-    "H": r"Hydrogen fraction X", 
-    "He": r"Helium fraction Y",
-    "Hc": r"Core-hydrogen fraction X$_c$",
+#    "H": r"Hydrogen fraction X", 
+#    "He": r"Helium fraction Y",
+#    "Hc": r"Core-hydrogen fraction X$_c$",
+    "mass_X": r"Hydrogen mass-fraction X", 
+    "mass_Y": r"Helium mass-fraction Y",
+    "X_surf": r"Surface hydrogen X$_{\mathrm{surf}}$", 
+    "Y_surf": r"Surface helium Y$_{\mathrm{surf}}$",
+    "X_c": r"Core-hydrogen fraction X$_c$",
     "log_g": r"Surface gravity log g/dex", 
     "L": r"Luminosity L$/$L$_\odot$",
     "mass_cc": r"Convective core mass-fraction M$_{\mathrm{cc}}$"
@@ -67,9 +72,14 @@ y_latex2 = {
     "overshoot": r"f",
     "age": r"$\tau/$Gyr", 
     "radius": r"R$/$R$_\odot$", 
-    "H": r"X", 
-    "He": r"Y",
-    "Hc": r"X$_\mathrm{c}$",
+#    "H": r"X", 
+#    "He": r"Y",
+#    "Hc": r"X$_\mathrm{c}$",
+    "mass_X": r"X", 
+    "mass_Y": r"Y",
+    "X_surf": r"X", 
+    "Y_surf": r"Y",
+    "X_c": r"X$_c$",
     "log_g": r"log g/dex", 
     "L": r"L$/$L$_\odot$",
     "mass_cc": r"M$_{\mathrm{cc}}$"
@@ -88,6 +98,7 @@ def train_regressor(data, X_columns, y_exclude="median|slope"):
     y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
     new_ys = y_trfm.fit_transform(ys)
     
+    print()
     for n_trees in [1024]:#[2**n for n in range(0,13)]:
         forest = Pipeline(steps=[
             ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
@@ -100,6 +111,7 @@ def train_regressor(data, X_columns, y_exclude="median|slope"):
     
     print()
     print("%.5g seconds to train regressor" % (end-start))
+    print()
     
     y_names = ys.columns
     X_names = X.columns
@@ -118,16 +130,16 @@ def get_rc(num_ys):
 
 def plot_star(star, predict, y_names, out_dir=plot_dir):
     ## Corner plot
-    truths = [np.NaN for i in range(len(y_names))]
-    if star == 'Sun' or star == 'Tagesstern':
-        truths[0] = 1
-        truths[-1] = 4.57
+    #truths = [np.NaN for i in range(len(y_names))]
+    #if star == 'Sun' or star == 'Tagesstern':
+    #    truths[0] = 1
+    #    truths[-1] = 4.57
     figure = corner.corner(
         predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
         labels=[y_latex2[y_name] for y_name in y_names
                 if y_name in y_show],
         title_fmt='.3g',
-        truths=truths,
+        #truths=truths,
         quantiles=[0.16, 0.5, 0.84],
         show_titles=True, title_args={"fontsize": 16})
     plt.savefig(os.path.join(out_dir, star + '-corner.pdf'))
@@ -222,10 +234,12 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             importances = est.feature_importances_
             indices = np.argsort(importances)[::-1]
             import_dist = np.array([tree.feature_importances_ 
-                for tree in est.estimators_]).T[indices][::-1].T
+                for tree in est.estimators_])
             
             np.savetxt(os.path.join(cov_dir, 'feature-importance-'+star+'.dat'),
-                import_dist, header=" ".join(X_names), comments='')
+                import_dist, header=" ".join(X_names[indices]), comments='')
+            
+            import_dist = import_dist.T[indices][::-1].T
             
             print("Feature ranking:")
             for f in range(len(X_names)):
@@ -246,8 +260,10 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             print()
             print(r"\colhead{Name} & "+\
                   ' & '.join([r"\colhead{" + y_latex2[yy] + r"}"
-                              for yy in y_names]) + r'\\ \hline\hline')
+                              for yy in y_names]))
             #forest, y_names, X_names = out#, y_trfm = out
+        
+        #print()
         
         #star_data = star_data.drop([i for i in star_data.columns 
         #    if i not in X_names], axis=1)

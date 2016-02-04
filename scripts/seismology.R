@@ -27,8 +27,11 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     
     # all (l,n) combinations should be unique; discard otherwise
     for (l_mode in unique(freqs$l)) {
-        if (any(duplicated(freqs[freqs$l==l_mode & freqs$n>0,]$n))) {
+        radials <- freqs[freqs$l==l_mode & freqs$n>0,]
+        duplicates <- duplicated(radials$n)
+        if (any(duplicates)) {
             print("Duplicated (l,n) combination")
+            print(radials[duplicates,])
             return(NULL)
         }
     }
@@ -57,29 +60,32 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     a <- c() # contains the computed quantity (e.g. large freq separations)
     b <- c() # contains frequencies of the base mode
     pchs <- c() # if there's more than one l, get different symbols for each
+    p_modes <- freqs[freqs$n >= 0,]
     for (l_deg in l_degs) {
-        ell <- freqs[freqs$n > 1 & freqs$l==l_deg,]
+        ell <- p_modes[p_modes$l==l_deg,]
         if (nrow(ell) == 0) next
         vals <- sapply(unique(ell$n), function(n) f(l_deg, n, freqs))
         not.nan <- complete.cases(vals)
         a <- c(a, vals[not.nan])
         b <- c(b, ell$nu[not.nan])
-        pchs = c(pchs, rep(l_deg+1, sum(not.nan)))
+        if (outf != FALSE) pchs = c(pchs, rep(l_deg+1, sum(not.nan)))
     }
     
     # need 3 points to make something reasonable 
     if (length(a)<=2) return(DF) 
     
     # build expression for y label of plot
-    ylab <- if (sep_name == 'Dnu' && length(l_degs) > 1) 
-           bquote(Delta*nu)
-       else if (sep_name == 'Dnu')   
-           bquote(Delta*nu[.(l_degs)])
-       else if (sep_name == 'dnu')   
-           bquote(delta*nu[.(l_degs)*','*.(l_degs+2)])
-       else if (sep_name == 'r_sep') bquote(r[.(l_degs)*','*.(l_degs+2)])
-       else if (sep_name == 'r_avg') bquote(r[.(l_degs)*','*.(1-l_degs)])
-    ylab <- bquote(.(ylab) / mu*Hz)
+    if (outf != FALSE) {
+        ylab <- if (sep_name == 'Dnu' && length(l_degs) > 1) 
+               bquote(Delta*nu)
+           else if (sep_name == 'Dnu')   
+               bquote(Delta*nu[.(l_degs)])
+           else if (sep_name == 'dnu')   
+               bquote(delta*nu[.(l_degs)*','*.(l_degs+2)])
+           else if (sep_name == 'r_sep') bquote(r[.(l_degs)*','*.(l_degs+2)])
+           else if (sep_name == 'r_avg') bquote(r[.(l_degs)*','*.(1-l_degs)])
+        ylab <- bquote(.(ylab) / mu*Hz)
+    }
     
     sep_name <- if (sep_name == 'Dnu' && length(l_degs) > 1) paste0(sep_name)
        else if (sep_name == 'Dnu')   paste0(sep_name, l_degs)
@@ -106,14 +112,14 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
 }
 
 ## Separation: just the difference between two frequencies 
-# nu_{l1,n1} - nu_{l2,n2}
+# nu_{l1,n1} - nu_{l2,n2} 
+# the difference must be positive, otherwise it returns NA 
 separation <- function(first_l, first_n, second_l, second_n, DF) {
     first <- DF$l == first_l & DF$n == first_n
     second <- DF$l == second_l & DF$n == second_n
     if (sum(first) == 1 && sum(second) == 1) { # check that it's unique
         difference <- DF[first,]$nu - DF[second,]$nu
-        if (difference < 0) return(NA)
-        return(difference)
+        if (difference >= 0) return(difference)
     }
     return(NA)
 }
@@ -122,11 +128,13 @@ separation <- function(first_l, first_n, second_l, second_n, DF) {
 #dd_01= 1/8( nu_[n-1,0] - 4*nu_[n-1,1] + 6*nu_[n,0] - 4*nu[n,  1] + nu_[n+1,0] )
 #dd_10=-1/8( nu_[n-1,1] - 4*nu_[n,  0] + 6*nu_[n,1] - 4*nu[n+1,0] + nu_[n+1,1] )
 dd <- function(l0, l1, n, DF) {
-    ell.0 <- DF[DF$l==0 & DF$n>0,]
-    ell.1 <- DF[DF$l==1 & DF$n>0,]
-    n. <- DF[DF$n==n,]
-    n.minus.one <- DF[DF$n==n-1,]
-    n.plus.one <- DF[DF$n==n+1,]
+    p_modes <- DF$n>0
+    ell.0 <- DF[DF$l==0 & p_modes,]
+    ell.1 <- DF[DF$l==1 & p_modes,]
+    ns <- DF[DF$n>=(n-1) || DF$n<=(n+1)]
+    n. <- ns[ns$n==n,]#DF[DF$n==n,]
+    n.minus.one <- ns[ns$n==(n-1),]#DF[DF$n==n-1,]
+    n.plus.one <- ns[ns$n==(n+1),]#DF[DF$n==n+1,]
     val <- if (l0 == 0 && l1 == 1) { ## dd_01
         ( merge(n.minus.one, ell.0)$nu -
         4*merge(n.minus.one, ell.1)$nu +
@@ -154,7 +162,6 @@ r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 seismology_plot <- function(a, b, fit, gaussian_env, w.median, 
         nu_max, l_degs, ylab, dnu.cl, pchs, freqs, ..., 
         text.cex=1, mgp=utils.mgp, font=utils.font) {
-    print(text.cex)
     plot(a~b, axes=FALSE, tck=0, xaxs='i',
          cex=2*gaussian_env/max(gaussian_env), 
          ylab=as.expression(ylab), 

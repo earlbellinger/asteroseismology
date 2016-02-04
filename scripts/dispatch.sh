@@ -45,13 +45,16 @@ simulate() {
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
     if (( $(echo "$M < 1" | bc -l) )); then
-        change "profile_interval" "8" "12"
+        change "profile_interval" "5" "16"
+        change "history_interval" "5" "16"
     fi
     if (( $(echo "$M < 0.9" | bc -l) )); then
-        change "profile_interval" "12" "16"
+        change "profile_interval" "16" "22"
+        change "history_interval" "16" "22"
     fi
     if (( $(echo "$M < 0.8" | bc -l) )); then
-        change "profile_interval" "16" "20"
+        change "profile_interval" "22" "28"
+        change "history_interval" "22" "28"
     fi
     
     if (( $(echo "$diffusion > 0" | bc -l) )); then
