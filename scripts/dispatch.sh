@@ -5,6 +5,11 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+num_process=250
+
+logfile="mesa.log"
+msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
+pmsuccess="termination code: Lnuc_div_L_zams_limit"
 
 simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
@@ -30,8 +35,26 @@ simulate() {
     change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
     change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
     
+    if (( $(echo "$diffusion > 0" | bc -l) )); then
+       change "do_element_diffusion" ".false." ".true."
+       change 'diffusion_class_factor(:)' '1d0' "$diffusion"
+    fi
+    
     mk
-    rn
+    rn | tee -a "$logfile"
+    if ! grep -q "$pmsuccess" "$logfile"; then
+        change "mesh_delta_coeff" "0.8" "0.5"
+        rn | tee -a "$logfile"
+    fi
+    if ! grep -q "$pmsuccess" "$logfile"; then
+        change "mesh_delta_coeff" "0.5" "0.1"
+        rn | tee -a "$logfile"
+    fi
+    if ! grep -q "$pmsuccess" "$logfile"; then
+        echo "Couldn't achieve PMS convergence"
+        exit 1
+    fi
+    
     mv LOGS/history.data .
     
     change "write_profiles_flag" ".false." ".true."
@@ -44,9 +67,13 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
+    if (( $(echo "$M < 1.1" | bc -l) )); then
+        change "profile_interval" "6" "10"
+        change "history_interval" "6" "10"
+    fi
     if (( $(echo "$M < 1" | bc -l) )); then
-        change "profile_interval" "5" "16"
-        change "history_interval" "5" "16"
+        change "profile_interval" "10" "16"
+        change "history_interval" "10" "16"
     fi
     if (( $(echo "$M < 0.9" | bc -l) )); then
         change "profile_interval" "16" "22"
@@ -57,22 +84,35 @@ simulate() {
         change "history_interval" "22" "28"
     fi
     
-    if (( $(echo "$diffusion > 0" | bc -l) )); then
-       change "do_element_diffusion" ".false." ".true."
-       change 'diffusion_class_factor(:)' '1d0' "$diffusion"
+    rn | tee -a "$logfile"
+    if ! grep -q "$msuccess" "$logfile"; then
+        change "mesh_delta_coeff" "0.8" "0.5"
+        rn | tee -a "$logfile"
+    fi
+    if ! grep -q "$msuccess" "$logfile"; then
+        change "mesh_delta_coeff" "0.5" "0.1"
+        rn | tee -a "$logfile"
+    fi
+    if ! grep -q "$msuccess" "$logfile"; then
+        echo "Couldn't achieve main-sequence convergence"
+        exit 1
     fi
     
-    rn
-    
-    find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | xargs -i \
-        --max-procs=$OMP_NUM_THREADS bash -c \
+    # only process ~200 or so adipls files 
+    num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
+    num_skip=1 # 1 means don't skip any, 2 means skip every other, etc.
+    if [ $num_files -gt $num_process ]; then
+        num_skip="$(echo "scale=0; $num_files/$num_process" | bc -l)"
+    fi
+    find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | awk "NR%$num_skip==0" |
+        xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
     cd ../..
-    
-    sleep 1
     Rscript summarize.R "$dirname"
-    rm -rf "$dirname"
+    if [ $remove -eq 1 ]; then
+        rm -rf "$dirname"
+    fi
 }
 
 change() { #param initval newval
@@ -91,6 +131,7 @@ while [ "$#" -gt 0 ]; do
     -D) diffusion="$2"; shift 2;;
     -f) overshoot="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
+    -r) remove="$2"; shift 2;;
 
     *) echo "unknown option: $1" >&2; exit 1;;
   esac
@@ -104,6 +145,6 @@ if [ -z ${alpha+x} ]; then alpha=1.85; fi
 if [ -z ${diffusion+x} ]; then diffusion=0; fi
 if [ -z ${overshoot+x} ]; then overshoot=0; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
+if [ -z ${remove+x} ]; then remove=0; fi
 
 simulate
-

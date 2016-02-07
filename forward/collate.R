@@ -15,8 +15,10 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=50, space_var='X_c') {
+load_data <- function(filename, num_points=30, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
+    #DF <- DF[DF['Fe/H'] > -10,]
+    
     
     #pms <- which(DF$age[-1] < 0.25 & diff(DF$L) < 0)
     decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
@@ -31,7 +33,7 @@ load_data <- function(filename, num_points=50, space_var='X_c') {
     } #else {
         #print(paste(filename, "has no PMS to be clipped"))
     #}
-    #DF$age <- DF$age - min(DF$age) # set ZAMS age
+    DF$age <- DF$age - min(DF$age) # set ZAMS age
     DF <- DF[DF$age <= 15,]
     
     nrow.DF <- length(DF[[space_var]])
@@ -49,7 +51,7 @@ load_data <- function(filename, num_points=50, space_var='X_c') {
         col.signs, col.rhs)$solution
     DF[apply(sol, 1, which.max),]
 }
-parallelStartMulticore(max(1, detectCores()/2))
+parallelStartMulticore(max(1, min(detectCores(), 62)))
 seis.DF <- do.call(rbind, parallelMap(load_data, simulations))
 seis.DF <- seis.DF[complete.cases(seis.DF),]
 print(paste(nrow(seis.DF), "rows"))

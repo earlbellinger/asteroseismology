@@ -385,7 +385,7 @@
       !surface_temperature
       !log_surf_optical_depth
       !surface_optical_depth
-      log_surf_z
+      log_surf_cell_z ! log_surf_z
       !surface_entropy ! in units of kerg per baryon
       
       !surf_avg_j_rot

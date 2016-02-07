@@ -58,7 +58,7 @@ def dispatch(ranges, N, logs, directory, skip=0):
             if (logs[j]):
                 vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -p dispatch.sh -d %s "\
-            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f"%\
+            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f -r 1"%\
             tuple([directory] + [val for val in vals])
         subprocess.Popen(bash_cmd.split(), shell=False)
         sleep(0.1)
