@@ -105,7 +105,7 @@ osc:
   el,nsel,els1,dels,dfsig1,dfsig2,nsig1,nsig2,
     ,   4,   0,   1,     0,      ,    1,    1, @
   itrsig,sig1,istsig,inomde,itrds,
-       1,   5,     1,     1,     , @
+       1,   5,     1,     2,     , @
   dfsig,nsig,iscan,sig2,
        ,  2,  5000,2500, @
   eltrw1, eltrw2, sgtrw1, sgtrw2,

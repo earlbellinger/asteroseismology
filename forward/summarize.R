@@ -40,7 +40,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     obs.DF["L"] <- pro_header$photosphere_L
     obs.DF["log_g"] <- hstry$log_g
     obs.DF["Teff"] <- pro_header$Teff
-    obs.DF["Fe/H"] <- log10(10**hstry$log_surf_z/hstry$surface_h1/Z_div_X_solar)
+    obs.DF["Fe/H"] <- log10(10**hstry$log_surf_cell_z/hstry$surface_h1/Z_div_X_solar)
     
     ## Seismology 
     freqs <- read.table(freqs_file, col.names=freqs.cols, fill=TRUE)

@@ -43,6 +43,15 @@
          ierr = 0
          call star_ptr(id, s, ierr)
          if (ierr /= 0) return
+         
+         s% extras_startup => extras_startup
+         s% extras_check_model => extras_check_model
+         s% extras_finish_step => extras_finish_step
+         s% extras_after_evolve => extras_after_evolve
+         s% how_many_extra_history_columns => how_many_extra_history_columns
+         s% data_for_extra_history_columns => data_for_extra_history_columns
+         s% how_many_extra_profile_columns => how_many_extra_profile_columns
+         s% data_for_extra_profile_columns => data_for_extra_profile_columns  
       end subroutine extras_controls
       
       

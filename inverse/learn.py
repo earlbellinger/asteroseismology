@@ -138,7 +138,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
         labels=[y_latex2[y_name] for y_name in y_names
                 if y_name in y_show],
-        title_fmt='.3g',
+        title_fmt='.2g',
         #truths=truths,
         quantiles=[0.16, 0.5, 0.84],
         show_titles=True, title_args={"fontsize": 16})
