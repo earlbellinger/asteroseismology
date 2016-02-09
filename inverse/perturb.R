@@ -8,8 +8,6 @@ library(parallel)
 library(parallelMap)
 
 dir.create('perturb', showWarnings=FALSE)
-dir.create('perturb/kages', showWarnings=FALSE)
-dir.create('perturb/hares', showWarnings=FALSE)
 
 speed_of_light = 299792 # km/s
 
@@ -25,9 +23,8 @@ perturb <- function(star, obs_data_file, freqs_data_file,
     
     noisy_freqs <- freqs
     parallelStartMulticore(max(1, min(62, detectCores())))
-    do.call(rbind, with(obs_data, {
+    do.call(plyr:::rbind.fill, with(obs_data, {
         parallelMap(function(n) {
-        #Map(function(n) {
             # Perturb observations by their uncertainties
             obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
                 if (n==1) 0 else uncertainty)))
@@ -43,17 +40,29 @@ perturb <- function(star, obs_data_file, freqs_data_file,
             doppler_shift <- sqrt((1+doppler_beta)/(1-doppler_beta))
             
             # Perturb frequencies
-            noisy_freqs$nu <- rnorm(nrow(freqs), freqs$nu * doppler_shift, 
-                ifelse(n==1, 0, freqs$dnu * doppler_shift))
-            
-            # Calculate Dnu, dnus, and ratios
-            seis.DF <- seismology(noisy_freqs, obs.DF$nu_max)
+            repeat {
+                noisy_freqs$nu <- rnorm(nrow(freqs), freqs$nu * doppler_shift, 
+                    ifelse(n==1, 0, freqs$dnu * doppler_shift))
+                # Calculate Dnu, dnus, and ratios
+                seis.DF <- seismology(noisy_freqs, obs.DF$nu_max)
+                if (all(!is.na(seis.DF))) break
+            }
             merge(rbind(obs.DF), rbind(seis.DF))
         }, 1:n_perturbations)
     }))
 }
 
-process <- function(star, star_dir, out_dir="perturb") {
+process_dir <- function(star_dir) {
+    out_dir <- file.path('perturb', basename(star_dir))
+    dir.create(out_dir, showWarnings=FALSE)
+    for (fname in list.files(star_dir)) {
+        if (!grepl('-obs.dat', fname)) next
+        star <- sub('-obs.dat', '', fname)
+        process_star(star, star_dir, out_dir=out_dir)
+    }
+}
+
+process_star <- function(star, star_dir, out_dir="perturb") {
     print(paste("Processing", star))
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
@@ -63,21 +72,12 @@ process <- function(star, star_dir, out_dir="perturb") {
         quote=FALSE, sep='\t', row.names=FALSE)
 }
 
-# Perturb every star 10k times and save the results
+## Perturb every star 10k times and save the results
+process_dir(file.path("data", "kages"))
+process_dir(file.path("data", "basu"))
+process_dir(file.path("data", "hares"))
+
 star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
 star_dir <- file.path("data")
-for (star in star_names) process(star, star_dir)
+for (star in star_names) process_star(star, star_dir)
 
-star_dir <- file.path("data", "hares")
-for (fname in list.files(star_dir)) {
-    if (!grepl('-obs.dat', fname)) next
-    star <- sub('-obs.dat', '', fname)
-    process(star, star_dir, out_dir="perturb/hares")
-}
-
-star_dir <- file.path("data", "kages")
-for (fname in list.files(star_dir)) {
-    if (!grepl('-obs.dat', fname)) next
-    star <- sub('-obs.dat', '', fname)
-    process(star, star_dir, out_dir="perturb/kages")
-}

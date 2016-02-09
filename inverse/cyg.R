@@ -15,6 +15,9 @@ metcalfe <- read.table(file.path('data', 'cyg.dat'), header=1)
 measA <- read.table(file.path('data', '16CygA-obs.dat'), header=1)
 measB <- read.table(file.path('data', '16CygB-obs.dat'), header=1)
 
+#red <- 'darkred'
+#blue <- 'blue'
+
 #ylim <- do.call(max, Map(function(name) { 
 #        print( max( density(cygA[[name]])$y, density(cygB[[name]])$y ) )
 #    }, names(cygA)))
@@ -36,12 +39,9 @@ plot_cygs <- function(name, cygA, cygB, ...,
         other_B <- density(rnorm(100000, means[2], stds[2]))
         
         xlim <- range(xlim, other_A$x, other_B$x)
-        ylim <- range(ylim, other_A$y, other_B$y)
+        #ylim <- range(ylim, other_A$y, other_B$y)
         other_name <- "AMP"
         other_citation <- "Metcalfe et al. 2015"
-        
-        #other_A$y <- other_A$y / max(ylim)
-        #other_B$y <- other_B$y / max(ylim)
     }
     
     #has_meas <- F
@@ -56,7 +56,7 @@ plot_cygs <- function(name, cygA, cygB, ...,
         other_A <- density(rnorm(100000, means[1], stds[1]))
         other_B <- density(rnorm(100000, means[2], stds[2]))
         xlim <- range(xlim, other_A$x, other_B$x)
-        ylim <- range(ylim, other_A$y, other_B$y)
+        #ylim <- range(ylim, other_A$y, other_B$y)
         other_name <- "int"
         other_citation <- "White et al. 2013"
     }
@@ -74,16 +74,26 @@ plot_cygs <- function(name, cygA, cygB, ...,
     }
     
     par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(0.75,0,0))
-    plot(A, axes=F, col='darkred', lwd=2, 
+    plot(A, axes=F, col=red, lwd=2, 
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
         yaxs='i',
         xlab=get_label(name), ylab="", main="")
     magaxis(side=1, family=font, tcl=0.5, labels=1, 
             las=1, mgp=mgp, cex.axis=text.cex)
-    lines(B, col='blue', lwd=2)
+    lines(B, col=blue, lwd=2)
     if (has_other) {
-        lines(other_A, lty=2, col='darkred')
-        lines(other_B, lty=2, col='blue')
+        #arrows(mean(cygB[[name]])-2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
+        #       mean(cygB[[name]])+2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
+        #    lty=1, code=3, col=blue)
+        #arrows(mean(cygA[[name]])-2*sqrt(var(cygA[[name]])), 1.1*mean(A$y), 
+        #       mean(cygA[[name]])+2*sqrt(var(cygA[[name]])), 1.1*mean(A$y), 
+        #    lty=1, code=3, col=red)
+        arrows(means[1]-2*stds[1], mean(A$y), means[1]+2*stds[1], mean(A$y), 
+            lty=2, code=3, col=red)
+        arrows(means[2]-2*stds[2], mean(B$y), means[2]+2*stds[2], mean(B$y),
+            lty=2, code=3, col=blue)
+        #lines(other_A, lty=2, col=red)
+        #lines(other_B, lty=2, col=blue)
     }
     
     eps_A <- signif(sqrt(var(cygA[[name]])) / mean(cygA[[name]]) * 100, 3)

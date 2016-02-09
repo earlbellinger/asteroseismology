@@ -34,7 +34,7 @@ if not os.path.exists(cov_dir):
 
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|Dnu|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|Dnu"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -58,7 +58,7 @@ y_latex = {
     "X_surf": r"Surface hydrogen X$_{\mathrm{surf}}$", 
     "Y_surf": r"Surface helium Y$_{\mathrm{surf}}$",
     "X_c": r"Core-hydrogen fraction X$_c$",
-    "log_g": r"Surface gravity log g/dex", 
+    "log_g": r"Surface gravity log g (cgs)", 
     "L": r"Luminosity L$/$L$_\odot$",
     "mass_cc": r"Convective core mass-fraction M$_{\mathrm{cc}}$"
 }
@@ -80,23 +80,30 @@ y_latex2 = {
     "X_surf": r"X", 
     "Y_surf": r"Y",
     "X_c": r"X$_c$",
-    "log_g": r"log g/dex", 
+    "log_g": r"log g (cgs)", 
     "L": r"L$/$L$_\odot$",
     "mass_cc": r"M$_{\mathrm{cc}}$"
 }
 
 #y_show = ['M', 'Y', 'Z', 'age', 'radius']
-y_show = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age']
+#y_show = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age']
+#all_ys = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age', 
+#    'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
+y_init = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot']
+y_curr = ['age', 'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
 
-def train_regressor(data, X_columns, y_exclude="median|slope"):
-    X = data.loc[:,X_columns]#data.drop(list(ys.columns) + drop_cols, axis=1)
+def train_regressor(data, X_columns, y_show=y_init+y_curr):
+    X = data.loc[:,X_columns]
+    ys = data.loc[:, [i for i in y_show if i not in X_columns]]
+    #ys = data.drop(X_columns, axis=1).loc[:, y_show]
     
-    ys = data.drop(X_columns, axis=1)
-    drop_cols = [i for i in ys.columns 
-            if re.search(y_exclude, i) if i in ys.columns]
-    ys = ys.drop(drop_cols, axis=1)
-    y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
-    new_ys = y_trfm.fit_transform(ys)
+    #ys = ys.drop([i for i in y_show if re.search(ys.columns, i)], axis=1)
+    #data.drop(X_columns, axis=1)
+    #drop_cols = [i for i in ys.columns 
+    #        if re.search(y_exclude, i) if i in ys.columns]
+    #ys = ys.drop(drop_cols, axis=1)
+    #y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
+    #new_ys = y_trfm.fit_transform(ys)
     
     print()
     for n_trees in [1024]:#[2**n for n in range(0,13)]:
@@ -105,7 +112,7 @@ def train_regressor(data, X_columns, y_exclude="median|slope"):
                 n_jobs=min(n_trees, 62),
                 oob_score=True, bootstrap=True))])
         start = time()
-        forest.fit(X, new_ys)
+        forest.fit(X, ys)#new_ys)
         end = time()
         print(n_trees, forest.steps[0][1].oob_score_, end-start)
     
@@ -115,7 +122,7 @@ def train_regressor(data, X_columns, y_exclude="median|slope"):
     
     y_names = ys.columns
     X_names = X.columns
-    return [forest, ys.columns, X.columns, y_trfm]
+    return [forest, y_names, X_names]#, y_trfm]
 
 def get_rc(num_ys):
     rows = (num_ys+(1 if num_ys%2 else 0)) // 2
@@ -128,7 +135,7 @@ def get_rc(num_ys):
         rows, cols = int(sqrt), int(sqrt)
     return rows, cols, sqrt
 
-def plot_star(star, predict, y_names, out_dir=plot_dir):
+def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
     ## Corner plot
     #truths = [np.NaN for i in range(len(y_names))]
     #if star == 'Sun' or star == 'Tagesstern':
@@ -227,7 +234,7 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         if forest is None: # train the regressor
             X_columns = star_data.columns
             out = train_regressor(data, X_columns)
-            forest, y_names, X_names, y_trfm = out
+            forest, y_names, X_names = out#, y_trfm = out
             
             ## Plot importances
             est = forest.steps[0][1]
@@ -268,11 +275,12 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         #star_data = star_data.drop([i for i in star_data.columns 
         #    if i not in X_names], axis=1)
         star_X = star_data.loc[:,X_names]
-        #predict = forest.predict(star_X)
-        predict = y_trfm.inverse_transform(forest.predict(star_X))
+        predict = forest.predict(star_X)
+        #predict = y_trfm.inverse_transform(forest.predict(star_X))
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
             header=" ".join(y_names), comments='')
-        plot_star(star, predict, y_names, out_dir)
+        plot_star(star+"_init", predict, y_names, out_dir)
+        plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
 
 ################################################################################
 ### Start ######################################################################

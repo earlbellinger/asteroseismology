@@ -16,6 +16,9 @@ cex.slides <- 1.3
 cex.hack <- 1.4
 latex_pt_per_in <- 5 * 72.27
 
+blue <- "#0571b0"
+red <- "#ca0020"
+
 widethin <- function(plot_f, filename, directory, 
             pdf_width, pdf_height, png_width, png_height, text.cex, ...,
             wide=T, thin=T) {
@@ -172,7 +175,7 @@ seis.labs <- list(
   Z              = bquote(Z[0]),
   alpha          = bquote(alpha["MLT"]), 
   diffusion      = bquote(D),
-  overshoot      = bquote(f),
+  overshoot      = bquote(alpha["ov"]),
   age            = bquote(tau), 
   radius         = bquote(R), 
   mass_X         = bquote(X), 
@@ -216,7 +219,7 @@ seis.units <- list(
   X_surf         = bquote(),
   Y_surf         = bquote(),
   X_c            = bquote(), 
-  log_g          = bquote("/dex (cgs)"), 
+  log_g          = bquote(" (cgs)"), 
   L              = bquote("/"*L["\u0298"]), 
   Teff           = bquote("/"*K), 
   Fe.H           = bquote(), 

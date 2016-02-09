@@ -21,7 +21,7 @@ library(scales)
 col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(21)
 
 ## Load data
-seis.DF <- data.table(read.table('simulations.dat', header=1))
+seis.DF <- data.table(read.table('simulations-working.dat', header=1))
 setkey(seis.DF, M, Y, Z, alpha, diffusion, overshoot)
 keys <- key(seis.DF)
 
