@@ -15,7 +15,7 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=30, space_var='X_c') {
+load_data <- function(filename, num_points=100, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
     #DF <- DF[DF['Fe/H'] > -10,]
     

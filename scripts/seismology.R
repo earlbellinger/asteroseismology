@@ -60,7 +60,7 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     a <- c() # contains the computed quantity (e.g. large freq separations)
     b <- c() # contains frequencies of the base mode
     pchs <- c() # if there's more than one l, get different symbols for each
-    p_modes <- freqs[freqs$n >= 0,]
+    p_modes <- freqs[freqs$n >= 1,] 
     for (l_deg in l_degs) {
         ell <- p_modes[p_modes$l==l_deg,]
         if (nrow(ell) == 0) next
@@ -70,9 +70,6 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
         b <- c(b, ell$nu[not.nan])
         if (outf != FALSE) pchs = c(pchs, rep(l_deg+1, sum(not.nan)))
     }
-    
-    # need 3 points to make something reasonable 
-    if (length(a)<=2) return(DF) 
     
     # build expression for y label of plot
     if (outf != FALSE) {
@@ -92,6 +89,13 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
        else if (sep_name == 'dnu')   paste0(sep_name, l_degs, l_degs+2)
        else if (sep_name == 'r_sep') paste0(sep_name, l_degs, l_degs+2)
        else if (sep_name == 'r_avg') paste0(sep_name, l_degs, 1-l_degs)
+    
+    # need 3 points to make something reasonable 
+    if (length(a)<=2) {
+        DF[paste0(sep_name, "_median")] <- NA
+        DF[paste0(sep_name, "_slope")] <- NA
+        return(DF)
+    }
     
     fwhm <- (0.66*nu_max**0.88)/(2*sqrt(2*log(2)))
     gaussian_env <- dnorm(b, nu_max, fwhm)
@@ -162,21 +166,24 @@ r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 seismology_plot <- function(a, b, fit, gaussian_env, w.median, 
         nu_max, l_degs, ylab, dnu.cl, pchs, freqs, ..., 
         text.cex=1, mgp=utils.mgp, font=utils.font) {
+    if (length(l_degs)==1)
+        col.pal <- colorRampPalette(c(dnu.cl[1], dnu.cl[3]))(1001)[1+1000*
+            normalize(gaussian_env)]
     plot(a~b, axes=FALSE, tck=0, xaxs='i',
-         cex=2*gaussian_env/max(gaussian_env), 
+         cex=1.5 * gaussian_env/max(gaussian_env), 
          ylab=as.expression(ylab), 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
          xlim=range(freqs$nu), 
          #ylim=quantile(a, c(0.001, 0.999)), 
-         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1]), 
-         col=if (length(l_degs)==1) 1 else dnu.cl[pchs], 
+         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], a), 
+         col=if (length(l_degs)==1) col.pal else dnu.cl[pchs], 
          pch=if (length(l_degs)==1) 1 else pchs)
     abline(fit, lty=2)
     abline(v=nu_max, lty=3)
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
-        legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
-               legend=paste0("\u2113=", l_degs))
+        legend("topright", pch=l_degs+1, col=dnu.cl, cex=text.cex, #bty="n",
+               legend=paste0("\u2113=", l_degs), horiz=1)
 }
 

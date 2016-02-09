@@ -3,17 +3,22 @@
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
+#### Updated: February 9, 2016
 
 maybe_sub() {
     cmd=$*
     
     ## Check if it should be run in parallel
     threads="request_cpus = 1"
-    if [ "-p" == ${cmd:0:3} ]
-      then
+    if [ "$OMP_NUM_THREADS" -gt 1 ]; then
         threads="environment  = OMP_NUM_THREADS=$OMP_NUM_THREADS
 request_cpus = $OMP_NUM_THREADS"
-        cmd=${cmd:3}
+    fi
+    
+    ## Check niceness control
+    nice="nice_user    = False"
+    if [ $NICE -gt 0 ]; then
+        nice="nice_user    = True"
     fi
     
     name=${cmd// /_}
@@ -28,17 +33,18 @@ request_cpus = $OMP_NUM_THREADS"
         echo "#!/usr/bin/sh
 cd ../..
 $cmd
-" > "condor.sh"
-        chmod +x "condor.sh"
+" > "$name.sh"
+        chmod +x "$name.sh"
         
         ## Create and submit a condor job 
 	    echo "Universe     = vanilla
 getenv       = True
-Executable   = condor.sh
+Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
 $threads
+$nice
 
 queue
 " > "condor.job"
@@ -50,7 +56,42 @@ queue
     fi
 }
 
+## Parse command line arguments
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h) HELP=1; break;; #shift 2;;
+    -n) NICE=1; shift 1;;
+    -p) OMP_NUM_THREADS="$2"; shift 2;;
+
+     *) break;;
+  esac
+done
+
+if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${OMP_NUM_THREADS+x} ]; then OMP_NUM_THREADS=1; fi
+if [ -z ${NICE+x} ]; then NICE=0; fi
+
+if [ $HELP -gt 0 ]; then
+    echo "                        _                      _     ";
+    echo "  _ __ ___   __ _ _   _| |__   ___   ___ _   _| |__  ";
+    echo " | '_ \` _ \ / _\` | | | | '_ \ / _ \ / __| | | | '_ \ ";
+    echo " | | | | | | (_| | |_| | |_) |  __/ \__ | |_| | |_) |";
+    echo " |_| |_| |_|\__,_|\__, |_.__/ \___| |___/\__,_|_.__/ ";
+    echo "                  |___/                              ";
+    echo ""
+    echo "  maybe_sub.sh: automatic job queuer for the condor"
+    echo "                queueing system"
+    echo
+    echo "example:"
+    echo "  maybe_sub.sh -n -p 16 echo hi"
+    echo
+    echo "flags:"
+    echo "  -h   : show this helpful message and quit"
+    echo "  -n   : run as nice job"
+    echo "  -p # : set the number of threads to run in parallel"
+    echo
+    exit
+fi
 
 maybe_sub $*
 
