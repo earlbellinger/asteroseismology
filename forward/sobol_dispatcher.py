@@ -35,6 +35,8 @@ def main(arguments):
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')
+    parser.add_argument('-p', '--parallel', default=1, 
+                        type=int, help='number of CPUs to use')
     parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 0, 0], 
                         type=list,
                         help='booleans of whether to log M, Y, Z, alpha, D, f')
@@ -47,9 +49,9 @@ def main(arguments):
             ranges[i] = np.log10(ranges[i])
     print(ranges)
     dispatch(ranges=ranges, N=args.N, logs=args.logs, 
-        directory=args.directory, skip=args.skip)
+        directory=args.directory, skip=args.skip, parallel=args.parallel)
 
-def dispatch(ranges, N, logs, directory, skip=0):
+def dispatch(ranges, N, logs, directory, skip=0, parallel=r"$OMP_NUM_THREADS"):
     shift = ranges[:,0]
     scale = np.array([(b-a) for a,b in ranges])
     for i in range(skip, N+skip):
@@ -57,12 +59,15 @@ def dispatch(ranges, N, logs, directory, skip=0):
         for j, val in enumerate(vals):
             if (logs[j]):
                 vals[j] = 10**val
-        bash_cmd = "maybe_sub.sh -p dispatch.sh -d %s "\
+        bash_cmd = "maybe_sub.sh -n -p %d dispatch.sh -d %s "\
             "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f -r 1"%\
-            tuple([directory] + [val for val in vals])
+            tuple([parallel, directory] + [val for val in vals])
+        print(bash_cmd)
+        #exit()
         subprocess.Popen(bash_cmd.split(), shell=False)
-        sleep(0.1)
+        sleep(0.05)
 
 if __name__ == '__main__':
     import sys
     exit(main(sys.argv[1:]))
+

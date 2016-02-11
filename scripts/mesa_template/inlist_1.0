@@ -79,7 +79,7 @@
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
-      mesh_delta_coeff = 0.8
+      mesh_delta_coeff = 1.6
       max_allowed_nz = 64000
       
       photostep = 0

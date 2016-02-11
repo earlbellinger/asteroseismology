@@ -5,7 +5,8 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=250
+num_process=160
+mesh_delta_coeff=1.6
 
 logfile="mesa.log"
 msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
@@ -42,18 +43,18 @@ simulate() {
     
     mk
     rn | tee -a "$logfile"
-    if ! grep -q "$pmsuccess" "$logfile"; then
-        change "mesh_delta_coeff" "0.8" "0.5"
+    while ! grep -q "$pmsuccess" "$logfile"; do
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff / 2" | bc -l)
+        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
+            echo "Couldn't achieve convergence"
+            exit 1
+        fi
+        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
+            tee -a "$logfile"
+        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
+        mesh_delta_coeff=$new_mesh_delta_coeff
         rn | tee -a "$logfile"
-    fi
-    if ! grep -q "$pmsuccess" "$logfile"; then
-        change "mesh_delta_coeff" "0.5" "0.1"
-        rn | tee -a "$logfile"
-    fi
-    if ! grep -q "$pmsuccess" "$logfile"; then
-        echo "Couldn't achieve PMS convergence"
-        exit 1
-    fi
+    done
     
     mv LOGS/history.data .
     
@@ -85,18 +86,19 @@ simulate() {
     fi
     
     rn | tee -a "$logfile"
-    if ! grep -q "$msuccess" "$logfile"; then
-        change "mesh_delta_coeff" "0.8" "0.5"
+    while ! grep -q "$msuccess" "$logfile" || [ $(Rscript ../../discontinuity.R) == 1 ]; do
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff / 2" | bc -l)
+        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
+            echo "Couldn't achieve convergence"
+            exit 1
+        fi
+        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
+            tee -a "$logfile"
+        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
+        mesh_delta_coeff=$new_mesh_delta_coeff
+        rm -rf LOGS/*
         rn | tee -a "$logfile"
-    fi
-    if ! grep -q "$msuccess" "$logfile"; then
-        change "mesh_delta_coeff" "0.5" "0.1"
-        rn | tee -a "$logfile"
-    fi
-    if ! grep -q "$msuccess" "$logfile"; then
-        echo "Couldn't achieve main-sequence convergence"
-        exit 1
-    fi
+    done
     
     # only process ~200 or so adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
@@ -116,8 +118,27 @@ simulate() {
 }
 
 change() { #param initval newval
-    sed -i.bak "s/\!$1 = $2/$1 = $3/g" inlist_1.0
+    if grep -q "!$1 = $2" inlist_1.0; then
+        sed -i.bak "s/\!$1 = $2/$1 = $2/g" inlist_1.0
+    fi
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
+}
+
+run() { # success
+    rn | tee -a "$logfile"
+    while ! grep -q "$1" "$logfile"; do
+        new_mesh_delta_coeff=$(echo "$mesh_delta_coeff - 0.1" | bc -l)
+        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
+            echo "Couldn't achieve convergence"
+            exit 1
+        fi
+        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
+            tee -a "$logfile"
+        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
+        mesh_delta_coeff=$new_mesh_delta_coeff
+        rm -rf LOGS/*
+        rn | tee -a "$logfile"
+    done
 }
 
 ## Parse command line arguments
@@ -142,9 +163,10 @@ if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.275; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
 if [ -z ${alpha+x} ]; then alpha=1.85; fi
-if [ -z ${diffusion+x} ]; then diffusion=0; fi
-if [ -z ${overshoot+x} ]; then overshoot=0; fi
+if [ -z ${diffusion+x} ]; then diffusion=1; fi
+if [ -z ${overshoot+x} ]; then overshoot=0.2; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${remove+x} ]; then remove=0; fi
 
 simulate
+
