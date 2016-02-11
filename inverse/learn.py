@@ -106,7 +106,7 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     #new_ys = y_trfm.fit_transform(ys)
     
     print()
-    for n_trees in [1024]:#[2**n for n in range(0,13)]:
+    for n_trees in [n for n in range(1, 2048)]:
         forest = Pipeline(steps=[
             ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
                 n_jobs=min(n_trees, 62),
@@ -135,12 +135,22 @@ def get_rc(num_ys):
         rows, cols = int(sqrt), int(sqrt)
     return rows, cols, sqrt
 
+def print_star(star, predict, y_names):
+    middles = np.mean(predict, 0)
+    stds = np.std(predict, 0)
+    outstr = star
+    num_ys = predict.shape[1]
+    for (pred_j, name) in enumerate(y_names[0:num_ys]):
+        (m, s) = (middles[pred_j], stds[pred_j])
+        outstr += r" & %.3g $\pm$ %.2g" % (m, s)
+    print(outstr + r' \\')
+
 def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
     ## Corner plot
     #truths = [np.NaN for i in range(len(y_names))]
     #if star == 'Sun' or star == 'Tagesstern':
     #    truths[0] = 1
-    #    truths[-1] = 4.57
+    #    truths[6] = 4.57
     figure = corner.corner(
         predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
         labels=[y_latex2[y_name] for y_name in y_names
@@ -151,13 +161,12 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
         show_titles=True, title_args={"fontsize": 16})
     plt.savefig(os.path.join(out_dir, star + '-corner.pdf'))
     plt.close()
-
     
     ## Regular histograms
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
     
-    outstr = star
+    #outstr = star
     num_ys = predict.shape[1]
     
     rows, cols, sqrt = get_rc(num_ys)
@@ -168,7 +177,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
     for (pred_j, name) in enumerate(y_names[0:num_ys]):
         (m, s) = (middles[pred_j], stds[pred_j])
         #outstr += "\t%.3g +/- %.3g" % (m, s)
-        outstr += r" & %.3g $\pm$ %.2g" % (m, s)
+        #outstr += r" & %.3g $\pm$ %.2g" % (m, s)
         
         if num_ys%2==0 or num_ys%3==0 or int(sqrt)==sqrt:
             ax = plt.subplot(rows, cols, pred_j+1)
@@ -197,7 +206,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
         ax.minorticks_on()
         plt.tight_layout()
     
-    print(outstr + r' \\')
+    #print(outstr + r' \\')
     #plt.subplots_adjust(top=0.9)
     plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
     plt.close()
@@ -223,6 +232,7 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     if not os.path.exists(cov_subdir):
         os.makedirs(cov_subdir)
     
+    didnt_work = []
     forest = None
     for star_fname in stars:
         star = os.path.split(star_fname)[-1].split("_")[0]
@@ -274,13 +284,18 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         
         #star_data = star_data.drop([i for i in star_data.columns 
         #    if i not in X_names], axis=1)
+        if not set(X_names).issubset(set(star_data.columns)):
+            didnt_work += [star]
+            continue
         star_X = star_data.loc[:,X_names]
         predict = forest.predict(star_X)
         #predict = y_trfm.inverse_transform(forest.predict(star_X))
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
             header=" ".join(y_names), comments='')
+        print_star(star, predict, y_names)
         plot_star(star+"_init", predict, y_names, out_dir)
         plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
+    print("\ncouldn't process", didnt_work)
 
 ################################################################################
 ### Start ######################################################################

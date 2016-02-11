@@ -6,22 +6,77 @@
 ## Plotting values
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
-paper.mgp <<- c(2, 0.15, 0)
+#paper.mgp <<- c(2, 0.15, 0)
 utils.font <<- "Palatino"
-hack.mgp <- c(2, 0.5, 0)
+#hack.mgp <- c(2, 0.5, 0)
 
-png_res <- 400
-cex.paper <- 0.8
-cex.slides <- 1.3
-cex.hack <- 1.4
-latex_pt_per_in <- 5 * 72.27
+#png_res <- 400
+#cex.paper <- 0.8
+#cex.slides <- 1.3
+#cex.hack <- 1.4
+#latex_pt_per_in <- 5 * 72.27
 
 blue <- "#0571b0"
 red <- "#ca0020"
 
+## Make the same plot as a pdf and a png suitable for papers and for slides
+# takes a plotting function plot_f that calls `plot` 
+make_plots <- function(plot_f, filename, 
+        filepath='plots', 
+        mar.slides=utils.mar, mar.paper=utils.mar,
+        mgp.slides=utils.mgp, mgp.paper=c(2, 0.15, 0),
+        hack.mgp=c(2, 0.5, 0), thin.hack=FALSE, 
+        cex.paper=0.8, cex.slides=1.3, cex.hack=1.4,
+        wide=TRUE, thin=TRUE, 
+        tall=TRUE, short=TRUE,
+        make_png=TRUE, make_pdf=TRUE, 
+        paper=TRUE, slides=TRUE, 
+        paper_pdf_width=6.97522, # inches
+        paper_pdf_height=4.17309,
+        slides_pdf_width=6.22665,
+        slides_pdf_height=4.1511,
+        latex_pt_per_in=5*72.27,
+        png_res=400,
+        font=utils.font, ...) {
+    
+    paper_png_width <- paper_pdf_width * latex_pt_per_in
+    paper_png_height <- paper_pdf_height * latex_pt_per_in
+    slides_png_width <- slides_pdf_width * latex_pt_per_in
+    slides_png_height <- slides_pdf_height * latex_pt_per_in
+    
+    args <- c(as.list(environment()), list(...))
+    
+    if (paper) {
+        do.call(widethin, c(list(
+                directory=file.path(filepath, 'paper'),
+                pdf_width=paper_pdf_width, 
+                pdf_height=paper_pdf_height, 
+                png_width=paper_png_width, 
+                png_height=paper_png_height,
+                text.cex=cex.paper,
+                mgp=mgp.paper,
+                mar=mar.paper), 
+            args))
+        
+    }
+    if (slides) {
+        do.call(widethin, c(list(
+                directory=file.path(filepath, 'slides'), 
+                slides_pdf_width, 
+                slides_pdf_height, 
+                slides_png_width, 
+                slides_png_height, 
+                text.cex=cex.slides, 
+                mgp=mgp.slides,
+                mar=mar.slides),
+            args))
+    }
+}
+
 widethin <- function(plot_f, filename, directory, 
-            pdf_width, pdf_height, png_width, png_height, text.cex, ...,
-            wide=T, thin=T) {
+        pdf_width, pdf_height, png_width, png_height, text.cex, 
+        wide=T, thin=T, ...) {
+    
     if (thin) {
         thin_dir <- file.path(directory, 'thin')
         dir.create(thin_dir, showWarnings=FALSE, recursive=TRUE)
@@ -39,8 +94,10 @@ widethin <- function(plot_f, filename, directory,
     }
 }
 
-tallshort <- function(plot_f, filename, directory, pdf_width, png_width, pdf_height, png_height, 
-        text.cex, ..., tall=T, short=T, make_png=T, make_pdf=T, thin.hack=F) {
+tallshort <- function(plot_f, filename, directory, 
+        pdf_width, png_width, pdf_height, png_height, text.cex, 
+        tall=T, short=T, thin.hack=F, ...) {
+    
     if (short) {
         short_dir <- file.path(directory, 'short')
         dir.create(short_dir, showWarnings=FALSE, recursive=TRUE)
@@ -59,8 +116,12 @@ tallshort <- function(plot_f, filename, directory, pdf_width, png_width, pdf_hei
 
 pdfpng <- function(plot_f, filename, directory, 
         pdf_width, pdf_height, png_width, png_height, 
-        text.cex, ..., font=utils.font, mar=utils.mar, thin.hack=F,
-        make_png=T, make_pdf=T, mgp=utils.mgp) {
+        text.cex, font=utils.font, mar=utils.mar, thin.hack=F,
+        make_png=T, make_pdf=T, mgp=utils.mgp, ...) {
+     
+    print(c("make_png", make_png))
+    print(c("make_pdf", make_pdf))
+    
     if (make_png) {
         png(file.path(directory, paste0(filename, '.png')),
             width=png_width, height=png_height, 
@@ -78,43 +139,6 @@ pdfpng <- function(plot_f, filename, directory,
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex, 
                mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
-    }
-}
-
-## Make the same plot as a pdf and a png suitable for papers and for slides
-# takes a plotting function plot_f that calls `plot` 
-make_plots <- function(plot_f, filename, ..., 
-        filepath='plots', mar=utils.mar, mgp=utils.mgp, 
-        wide=TRUE, thin=TRUE, 
-        tall=TRUE, short=TRUE,
-        make_png=TRUE, make_pdf=TRUE, 
-        paper=TRUE, slides=TRUE,
-        thin.hack=FALSE,
-        paper_pdf_width=6.97522, # inches
-        paper_pdf_height=4.17309,
-        slides_pdf_width=6.22665,
-        slides_pdf_height=4.1511,
-        font=utils.font) {
-    
-    paper_png_width <- paper_pdf_width * latex_pt_per_in
-    paper_png_height <- paper_pdf_height * latex_pt_per_in
-    slides_png_width <- slides_pdf_width * latex_pt_per_in
-    slides_png_height <- slides_pdf_height * latex_pt_per_in
-    
-    if (paper) {
-        directory <- file.path(filepath, 'paper')
-        widethin(plot_f, filename, directory, 
-            paper_pdf_width, paper_pdf_height, 
-            paper_png_width, paper_png_height, 
-            text.cex=cex.paper, mgp=paper.mgp, mar=mar, ...)
-        
-    }
-    if (slides) {
-        directory <- file.path(filepath, 'slides')
-        widethin(plot_f, filename, directory, 
-            slides_pdf_width, slides_pdf_height, 
-            slides_png_width, slides_png_height, 
-            text.cex=cex.slides, mgp=mgp, mar=mar, ...)
     }
 }
 

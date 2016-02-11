@@ -71,6 +71,13 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
         if (outf != FALSE) pchs = c(pchs, rep(l_deg+1, sum(not.nan)))
     }
     
+    # need 3 points to make something reasonable 
+    if (length(a)<=2) {
+        #DF[paste0(sep_name, "_median")] <- NA
+        #DF[paste0(sep_name, "_slope")] <- NA
+        return(DF)
+    }
+    
     # build expression for y label of plot
     if (outf != FALSE) {
         ylab <- if (sep_name == 'Dnu' && length(l_degs) > 1) 
@@ -89,13 +96,6 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
        else if (sep_name == 'dnu')   paste0(sep_name, l_degs, l_degs+2)
        else if (sep_name == 'r_sep') paste0(sep_name, l_degs, l_degs+2)
        else if (sep_name == 'r_avg') paste0(sep_name, l_degs, 1-l_degs)
-    
-    # need 3 points to make something reasonable 
-    if (length(a)<=2) {
-        DF[paste0(sep_name, "_median")] <- NA
-        DF[paste0(sep_name, "_slope")] <- NA
-        return(DF)
-    }
     
     fwhm <- (0.66*nu_max**0.88)/(2*sqrt(2*log(2)))
     gaussian_env <- dnorm(b, nu_max, fwhm)
@@ -183,7 +183,7 @@ seismology_plot <- function(a, b, fit, gaussian_env, w.median,
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
-        legend("topright", pch=l_degs+1, col=dnu.cl, cex=text.cex, #bty="n",
+        legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
                legend=paste0("\u2113=", l_degs), horiz=1)
 }
 

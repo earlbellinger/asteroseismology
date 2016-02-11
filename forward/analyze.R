@@ -41,26 +41,22 @@ combos <- combos[order(ages),]
 
 # Make inputs diagram
 X <- 1-combos$Y-combos$Z
-p = ggpairs(data=combos, axisLabels="show", upper="blank",#font=font, #
+p = ggpairs(data=combos, axisLabels="show", upper="blank",
         columnLabels=sapply(names(seis.DF)[1:6], 
             function (name) get_label_nameless(name)))
 for (subplot in grep('points', p$plots)) {
     p$plots[[subplot]] <- sub("))", ", colour=X))", p$plots[[subplot]])
 }
-#p <- putPlot(p, getPlot(p, 1, 1) + ylab(""), 1, 1)
-#for (ii in 1:6) {
-#    for (jj in (ii+1):6) {
-#        if (jj > 6) break
-#        p <- putPlot(p, getPlot(p, ii, jj) + 
-#            theme(axis.ticks=element_blank(), axis.line=element_blank(), 
-#                 axis.text=element_blank(), panel.grid.major= element_blank()),
-#            ii, jj)
-#    }
-#}
 number_ticks <- function(xs) {
     repr <- seq(min(xs), max(xs), length.out=1000)
     signif(as.numeric(quantile(repr, c(0.2, 0.8))), 2)
 }
+pp <- getPlot(p, 1, 1)
+pp <- pp + theme(axis.line=element_blank(),
+                 axis.text=element_blank(),
+                 axis.ticks=element_blank(),
+                 text=element_blank())
+p <- putPlot(p, pp, 1, 1)
 for (ii in 1:6) {
     for (jj in 1:6) {
         pp <- getPlot(p, ii, jj)
@@ -86,7 +82,8 @@ for (row_i in 3:6) {
 inputs_plot <- function(..., text.cex) {
     print(p, leftWidthProportion=0.4, bottomHeightProportion=0.5)
 }
-make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"))
+make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"),
+    short=FALSE, thin=FALSE, make_png=FALSE)
 
 
 

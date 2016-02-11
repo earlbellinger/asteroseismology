@@ -59,7 +59,7 @@ queue
 ## Parse command line arguments
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    -h) HELP=1; break;; #shift 2;;
+    -h) HELP=1; break;;
     -n) NICE=1; shift 1;;
     -p) OMP_NUM_THREADS="$2"; shift 2;;
 
