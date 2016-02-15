@@ -82,13 +82,13 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     if (outf != FALSE) {
         ylab <- if (sep_name == 'Dnu' && length(l_degs) > 1) 
                bquote(Delta*nu)
-           else if (sep_name == 'Dnu')   
+           else if (sep_name == 'Dnu') 
                bquote(Delta*nu[.(l_degs)])
            else if (sep_name == 'dnu')   
                bquote(delta*nu[.(l_degs)*','*.(l_degs+2)])
            else if (sep_name == 'r_sep') bquote(r[.(l_degs)*','*.(l_degs+2)])
            else if (sep_name == 'r_avg') bquote(r[.(l_degs)*','*.(1-l_degs)])
-        ylab <- bquote(.(ylab) / mu*Hz)
+        ylab <- as.expression(bquote(.(ylab) / mu*Hz))
     }
     
     sep_name <- if (sep_name == 'Dnu' && length(l_degs) > 1) paste0(sep_name)
@@ -171,7 +171,7 @@ seismology_plot <- function(a, b, fit, gaussian_env, w.median,
             normalize(gaussian_env)]
     plot(a~b, axes=FALSE, tck=0, xaxs='i',
          cex=1.5 * gaussian_env/max(gaussian_env), 
-         ylab=as.expression(ylab), 
+         ylab=ylab, 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
          xlim=range(freqs$nu), 
          #ylim=quantile(a, c(0.001, 0.999)), 

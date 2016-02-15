@@ -136,7 +136,7 @@ plot_HR <- function(DF, ev.DF, ...,
         col.pal[1:length(col.pal)], gradient='y', align='rb')
     mtext(expression("Core-hydrogen" ~ X[c]), 4, line=5.5, cex=text.cex)
     par(family="Luxi Mono")
-    legend("bottomleft", bty='n', xjust=1, cex=text.cex/2, col="gray", 
+    legend("bottom", bty='n', xjust=1, cex=text.cex/2, col="gray", 
         legend=c(
             as.expression(bquote(M == .(DF$M[1]))), 
             as.expression(bquote(Y == .(DF$Y[1]))), 
