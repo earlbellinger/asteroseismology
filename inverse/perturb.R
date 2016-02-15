@@ -79,7 +79,8 @@ process_dir(file.path("data", "kages"))
 process_dir(file.path("data", "basu"))
 process_dir(file.path("data", "hares"))
 
-star_names <- c("Tagesstern", "16CygA", "16CygB", "Sun")
+star_names <- c("16CygAlos", "16CygBlos", "16CygA", "16CygB", 
+    "Tagesstern", "Sun")
 star_dir <- file.path("data")
 for (star in star_names) process_star(star, star_dir)
 

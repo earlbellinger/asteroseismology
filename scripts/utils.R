@@ -23,7 +23,7 @@ red <- "#ca0020"
 # takes a plotting function plot_f that calls `plot` 
 make_plots <- function(plot_f, filename, 
         filepath='plots', 
-        mar.slides=utils.mar, mar.paper=utils.mar,
+        mar=utils.mar, 
         mgp.slides=utils.mgp, mgp.paper=c(2, 0.15, 0),
         hack.mgp=c(2, 0.5, 0), thin.hack=FALSE, 
         cex.paper=0.8, cex.slides=1.3, cex.hack=1.4,
@@ -53,9 +53,7 @@ make_plots <- function(plot_f, filename,
                 pdf_height=paper_pdf_height, 
                 png_width=paper_png_width, 
                 png_height=paper_png_height,
-                text.cex=cex.paper,
-                mgp=mgp.paper,
-                mar=mar.paper), 
+                text.cex=cex.paper), 
             args))
         
     }
@@ -67,8 +65,7 @@ make_plots <- function(plot_f, filename,
                 slides_png_width, 
                 slides_png_height, 
                 text.cex=cex.slides, 
-                mgp=mgp.slides,
-                mar=mar.slides),
+                mgp=mgp.slides),
             args))
     }
 }
@@ -116,11 +113,8 @@ tallshort <- function(plot_f, filename, directory,
 
 pdfpng <- function(plot_f, filename, directory, 
         pdf_width, pdf_height, png_width, png_height, 
-        text.cex, font=utils.font, mar=utils.mar, thin.hack=F,
+        text.cex, png_res, font=utils.font, mar=utils.mar, thin.hack=F,
         make_png=T, make_pdf=T, mgp=utils.mgp, ...) {
-     
-    print(c("make_png", make_png))
-    print(c("make_pdf", make_pdf))
     
     if (make_png) {
         png(file.path(directory, paste0(filename, '.png')),
@@ -128,6 +122,7 @@ pdfpng <- function(plot_f, filename, directory,
             family=utils.font, res=png_res, type='cairo')
         par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex, 
+               font=font,
                mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
     }
@@ -137,6 +132,7 @@ pdfpng <- function(plot_f, filename, directory,
             family=utils.font)
         par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex, 
+               font=font,
                mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
     }

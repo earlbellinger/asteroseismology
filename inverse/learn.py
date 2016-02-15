@@ -106,7 +106,7 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     #new_ys = y_trfm.fit_transform(ys)
     
     print()
-    for n_trees in [n for n in range(1, 2048)]:
+    for n_trees in [1024]:#[n for n in range(1, 2048)]:
         forest = Pipeline(steps=[
             ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
                 n_jobs=min(n_trees, 62),

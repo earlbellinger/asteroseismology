@@ -7,6 +7,8 @@
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 num_process=160
 mesh_delta_coeff=1.6
+mesh_delta_limit=0.2
+profile_interval=6
 
 logfile="mesa.log"
 msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
@@ -42,15 +44,15 @@ simulate() {
     fi
     
     mk
-    rn | tee -a "$logfile"
+    rn | tee "$logfile"
     while ! grep -q "$pmsuccess" "$logfile"; do
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff / 2" | bc -l)
-        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
-            echo "Couldn't achieve convergence"
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
+        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); then
+            echo "Couldn't achieve convergence" | tee -a "$logfile"
             exit 1
         fi
-        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
-            tee -a "$logfile"
+        echo "Retrying PMS with mesh_delta_coeff = $new_mesh_delta_coeff" | 
+            tee "$logfile"
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
         mesh_delta_coeff=$new_mesh_delta_coeff
         rn | tee -a "$logfile"
@@ -69,32 +71,40 @@ simulate() {
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
     if (( $(echo "$M < 1.1" | bc -l) )); then
-        change "profile_interval" "6" "10"
-        change "history_interval" "6" "10"
+        new_profile_interval=10
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 1" | bc -l) )); then
-        change "profile_interval" "10" "16"
-        change "history_interval" "10" "16"
+        new_profile_interval=16
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 0.9" | bc -l) )); then
-        change "profile_interval" "16" "22"
-        change "history_interval" "16" "22"
+        new_profile_interval=22
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 0.8" | bc -l) )); then
-        change "profile_interval" "22" "28"
-        change "history_interval" "22" "28"
+        new_profile_interval=28
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        profile_interval=$new_profile_interval
     fi
     
     rn | tee -a "$logfile"
-    while ! grep -q "$msuccess" "$logfile" || [ $(Rscript ../../discontinuity.R) == 1 ]; do
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff / 2" | bc -l)
-        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
-            echo "Couldn't achieve convergence"
+    while ! grep -q "$msuccess" "$logfile" \
+          || [ $(Rscript ../../discontinuity.R) == 1 ] \
+          && (( $(echo "$mesh_delta_coeff > $mesh_delta_limit" | bc -l) )); do
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.2" | bc -l)
+        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
+          then
+            echo "Couldn't achieve convergence" | tee -a "$logfile"
             exit 1
         fi
-        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
-            tee -a "$logfile"
-        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
+        mv LOGS/history.data history"$mesh_delta_coeff".dat
+        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff"
+        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff" |
+            tee "$logfile"
         mesh_delta_coeff=$new_mesh_delta_coeff
         rm -rf LOGS/*
         rn | tee -a "$logfile"
@@ -122,23 +132,6 @@ change() { #param initval newval
         sed -i.bak "s/\!$1 = $2/$1 = $2/g" inlist_1.0
     fi
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
-}
-
-run() { # success
-    rn | tee -a "$logfile"
-    while ! grep -q "$1" "$logfile"; do
-        new_mesh_delta_coeff=$(echo "$mesh_delta_coeff - 0.1" | bc -l)
-        if (( $(echo "$new_mesh_delta_coeff < 0.1" | bc -l) )); then
-            echo "Couldn't achieve convergence"
-            exit 1
-        fi
-        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff" | 
-            tee -a "$logfile"
-        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
-        mesh_delta_coeff=$new_mesh_delta_coeff
-        rm -rf LOGS/*
-        rn | tee -a "$logfile"
-    done
 }
 
 ## Parse command line arguments
