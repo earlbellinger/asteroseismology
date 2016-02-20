@@ -15,11 +15,16 @@ speed_of_light = 299792 # km/s
 perturb <- function(star, obs_data_file, freqs_data_file,
         n_perturbations=10000) {
     obs_data <<- read.table(obs_data_file, header=TRUE) 
-    freqs <<- read.table(freqs_data_file, header=TRUE) 
+    freqs <<- read.table(freqs_data_file, header=TRUE)
     seis.DF <- seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, 
         outf=star, filepath=file.path('plots', 'perturb')) 
     cols <<- length(seis.DF)
-    do.call(plyr:::rbind.fill, parallelMap(rand_inst, 1:n_perturbations)) 
+    start.time <- proc.time()
+    res <- do.call(plyr:::rbind.fill, parallelMap(rand_inst, 1:n_perturbations)) 
+    total.time <- proc.time() - start.time
+    print(paste("Total time:", total.time[[3]], 
+                "; Time per perturbation:", total.time[[3]]/n_perturbations))
+    return(res)
 }
 
 rand_inst <- function(n) {
@@ -67,10 +72,11 @@ process_star <- function(star, star_dir, out_dir="perturb") {
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
     result <- perturb(star, obs_data_file, freqs_data_file)
-    if (!is.null(result))  
+    if (!is.null(result)) {
         write.table(result, 
             file.path(out_dir, paste0(star, "_perturb.dat")), 
             quote=FALSE, sep='\t', row.names=FALSE)
+    }
 }
 
 ## Perturb every star 10k times and save the results

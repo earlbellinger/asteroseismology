@@ -74,9 +74,8 @@ plot_cygs <- function(name, cygA, cygB, ...,
     }
     
     par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(0.75,0,0))
-    plot(A, axes=F, col=red, lwd=2, 
+    plot(A, axes=F, col=red, lwd=2, yaxs='i', 
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
-        yaxs='i',
         xlab=get_label(name), ylab="", main="")
     magaxis(side=1, family=font, tcl=0.5, labels=1, 
             las=1, mgp=mgp, cex.axis=text.cex)

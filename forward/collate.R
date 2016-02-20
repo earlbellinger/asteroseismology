@@ -3,9 +3,12 @@
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
+source(file.path('..', 'scripts', 'utils.R'))
+
 library(lpSolve)
 library(parallel)
 library(parallelMap)
+library(magicaxis)
 
 args <- commandArgs(TRUE)
 sim_dir <- if (length(args)>0) args[1] else 'simulations'
@@ -35,22 +38,54 @@ load_data <- function(filename, num_points=100, space_var='X_c') {
     #}
     DF$age <- DF$age - min(DF$age) # set ZAMS age
     DF <- DF[DF$age <= 15,]
+    x <- DF[[space_var]]
     
-    nrow.DF <- length(DF[[space_var]])
+    nrow.DF <- length(x)
     if (nrow.DF < num_points) {
         print(paste(filename, "has too few points"))
         return(NULL)
     }
-    ideal <- seq(max(DF[[space_var]]), min(DF[[space_var]]), length=num_points)
-    cost.mat  <- outer(ideal, DF[[space_var]], function(x, y) abs(x-y))
+    ideal <- seq(max(x), min(x), length=num_points)
+    cost.mat  <- outer(ideal, x, function(x, y) abs(x-y))
     row.signs <- rep("==", num_points)
     row.rhs   <- rep(1, num_points)
     col.signs <- rep("<=", nrow.DF)
     col.rhs   <- rep(1, nrow.DF)
     sol <- lp.transport(cost.mat, "min", row.signs, row.rhs,
         col.signs, col.rhs)$solution
-    DF[apply(sol, 1, which.max),]
+    new.DF <- DF[apply(sol, 1, which.max),]
+    
+    y <- new.DF[[space_var]]
+    
+    make_plots(plot_spacing, paste0(basename(filename), "-spacing"), 
+        filepath=file.path('plots', sim_dir, "spacing"), 
+        x=x, y=y, ideal=ideal, num_points=num_points,
+        paper_pdf_height=3.25, slides_pdf_height=3.25,
+        mar=c(3, 1, 1, 1), thin=F, tall=F, slides=F)
+    
+    return(new.DF)
 }
+
+plot_spacing <- function(x, y, ideal, num_points, ...,
+        text.cex=1, mgp=utils.mgp, font="Palatino") {
+    plot(NA, ylim=c(0, 1), axes=F, ann=F, 
+        xlim=c(0, round(max(ideal) + 0.05, 1)), 
+        xaxs='i', yaxs='i')
+    #axis(1, tck=-0.05, text.cex)
+    magaxis(1, tck=-0.05, ratio=0.1, family=font, cex.axis=text.cex, usepar=1)
+    title(xlab=expression("Core-hydrogen abundance"~X[c]))
+    points(x, rep(0.35, length(x)), pch=4, cex=0.25, col='darkblue', xpd=NA)
+    points(y, rep(0.225, length(y)), pch=3, cex=0.25, col='darkred', xpd=NA)
+    points(ideal, rep(0.1, num_points), pch=20, cex=0.25, xpd=NA)
+    legend("top", text.width=c(0.15, 0.15, 0.2), 
+        legend=c("All models", 
+                 "Models selected", 
+                 "Equidistant spacing"), 
+       pch=c(4, 3, 20), col=c('darkblue', 'darkred', 'black'), horiz=1,
+       cex=text.cex)
+}
+
+# Load and combine data over all simulations 
 parallelStartMulticore(max(1, min(detectCores(), 62)))
 seis.DF <- do.call(rbind, parallelMap(load_data, simulations))
 seis.DF <- seis.DF[complete.cases(seis.DF),]

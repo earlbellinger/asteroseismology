@@ -8,6 +8,9 @@ utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
 utils.font <<- "Palatino"
+text.cex <- 1
+font <- "Palatino"
+mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
 
 #png_res <- 400
@@ -293,6 +296,22 @@ seis.latex <- list(
   r_sep13_slope  = "$\\langle\\frac{dr_{13}}{d\nu}\\rangle$", 
   r_avg10_median = "$\\langle r_{10}\\rangle$", 
   r_avg10_slope  = "$\\langle\\frac{dr_{10}}{d\nu}\\rangle$"
+)
+
+unicode.labs <- list(
+  radius         = "R",
+  log_g          = "log g", 
+  L              = "L", 
+  Teff           = "Teff", 
+  Fe.H           = "Fe/H", 
+  Dnu_median     = "<Δν>", 
+  Dnu0_median    = "<Δν₀>", 
+  dnu02_median   = "<δν₀₂>", 
+  r_sep02_median = "<r₀₂>", 
+  r_avg01_median = "<r₀₁>", 
+  dnu13_median   = "<δν₁₃>", 
+  r_sep13_median = "<r₁₃>", 
+  r_avg10_median = "<r₁₀>"
 )
 
 Z_levels <- list(

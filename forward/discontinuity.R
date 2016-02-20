@@ -1,4 +1,4 @@
-#### Mesh and scatterplot analysis of evolutionary tracks 
+#### Discontinuity detection in MESA evolutionary tracks 
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
@@ -16,35 +16,35 @@ if (any(decreasing_L)) {
                   max(decreasing_L))
     DF <- DF[-1:-pms,]
 }
-DF <- DF[floor(nrow(DF)*0.05):(nrow(DF)-floor(nrow(DF)*0.05)),] 
-#DF <- DF[-1:-floor(nrow(DF)*0.01),] 
+DF <- DF[-1:-floor(nrow(DF)*0.01),] # in case more PMS leaks in
 
-y <- DF$log_Teff
+y <- DF$surface_h1
 x <- DF$star_age
 
-new_xs <- seq(min(x), max(x), length=100000)
-spl <- splinefun(x, y)(new_xs)
-roc <- splinefun(x, y)(new_xs, 1)
+outliers <- abs(diff(y)) >= 0.01
+locs <- which(outliers)
+locs <- locs[c(1, which(diff(locs)>1)+1)]
 
-outliers <- boxplot.stats(roc, coef=15)$out
-locs <- which(roc %in% outliers)
-
-plot_ts <- function(text.cex=1, font="Palatino", mgp=c(2, 0.25, 0), ...) {
+plot_ts <- function(text.cex=1, font="Palatino", mgp=utils.mgp, ...) {
     plot(x, y, cex=0.01, pch=1,
          tcl=0, axes=FALSE, 
-         ylab=expression('Temperature' ~ 'lg'*(T[eff]/K)),
+         ylab=expression('Surface hydrogen' ~ "X"["surf"]),
          xlab=expression('Star age' ~ tau/'yr'))
     magaxis(side=1:4, family=font, tcl=0.25, mgp=mgp, las=1, 
             cex.axis=text.cex, labels=c(1,1,0,0))
-    points(new_xs[locs], spl[locs], col=adjustcolor("red", alpha=0.25), cex=5)
+    points(x[locs], y[locs], col=adjustcolor("red", alpha=0.75), cex=5)
 }
 
 inlist <- readLines("inlist_1.0")
 line_num <- grep('mesh_delta_coeff = ', inlist)
 mesh_delta <- sub(".+= ", "", inlist[line_num])
+line_num <- grep('max_years_for_timestep = ', inlist)
+time_step <- sub(".+= ", "", inlist[line_num])
 
 invisible(make_plots(plot_ts, 
-            paste0(basename(getwd()), "-discontinuity-", mesh_delta),
+            paste0(basename(getwd()), "-discontinuity-", 
+                time_step, "_", mesh_delta),
             filepath=file.path('..', '..', 'plots', 'discontinuity')))
 
-cat(as.numeric(length(outliers) > 0))
+cat(as.numeric(length(which(outliers)) > 0))
+

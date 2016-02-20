@@ -34,9 +34,12 @@ if not os.path.exists(cov_dir):
 
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|Dnu"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|Dnu_|slope"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
+
+maxs = data.max()
+mins = data.min()
 
 ################################################################################
 ### Helpers ####################################################################
@@ -106,7 +109,9 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     #new_ys = y_trfm.fit_transform(ys)
     
     print()
-    for n_trees in [1024]:#[n for n in range(1, 2048)]:
+    for n_trees in [1024]:
+    #list(range(4, 16)) + [18,20] + [2**n for n in range(4, 12)]:
+    #[n for n in range(4, 64)]:#[2**n for n in range(1, 12)]:
         forest = Pipeline(steps=[
             ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
                 n_jobs=min(n_trees, 62),
@@ -232,7 +237,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     if not os.path.exists(cov_subdir):
         os.makedirs(cov_subdir)
     
-    didnt_work = []
+    wrong_cols = []
+    outside = []
+    run_times = []
     forest = None
     for star_fname in stars:
         star = os.path.split(star_fname)[-1].split("_")[0]
@@ -244,7 +251,7 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         if forest is None: # train the regressor
             X_columns = star_data.columns
             out = train_regressor(data, X_columns)
-            forest, y_names, X_names = out#, y_trfm = out
+            forest, y_names, X_names = out
             
             ## Plot importances
             est = forest.steps[0][1]
@@ -278,24 +285,42 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             print(r"\colhead{Name} & "+\
                   ' & '.join([r"\colhead{" + y_latex2[yy] + r"}"
                               for yy in y_names]))
-            #forest, y_names, X_names = out#, y_trfm = out
         
-        #print()
-        
-        #star_data = star_data.drop([i for i in star_data.columns 
-        #    if i not in X_names], axis=1)
+        ## check that it has all of the right columns
         if not set(X_names).issubset(set(star_data.columns)):
-            didnt_work += [star]
+            wrong_cols += [star]
             continue
+        
+        ## check if all the params are within the grid
+        out_of_range = False
+        for X_name in set(X_names):
+            upper = maxs[X_name]
+            lower = mins[X_name]
+            X_vals = star_data.loc[:, X_name]
+            if np.any(X_vals > upper) or np.any(X_vals < lower):
+                #print(X_name, "is out of range")
+                #print(X_vals.min(), X_vals.max())
+                out_of_range = True
+                break
+        if out_of_range:
+            outside += [(star, X_name)]
+            continue
+        
         star_X = star_data.loc[:,X_names]
+        start = time()
         predict = forest.predict(star_X)
-        #predict = y_trfm.inverse_transform(forest.predict(star_X))
+        end = time()
+        run_times += [end-start]
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
             header=" ".join(y_names), comments='')
         print_star(star, predict, y_names)
-        plot_star(star+"_init", predict, y_names, out_dir)
-        plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
-    print("\ncouldn't process", didnt_work)
+        #plot_star(star+"_init", predict, y_names, out_dir)
+        #plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
+    print("\ntotal prediction time:", sum(run_times))
+    print("time per star:", sum(run_times)/len(run_times))
+    print("time per perturbation:", sum(run_times)/len(run_times)/10000)
+    print("\ncouldn't process", wrong_cols)
+    print("out of bounds", outside)
 
 ################################################################################
 ### Start ######################################################################
