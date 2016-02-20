@@ -5,14 +5,18 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=160
-mesh_delta_coeff=1.6
+num_process=200
+mesh_delta_coeff=1
 mesh_delta_limit=0.2
-profile_interval=6
+profile_interval=1
+max_years_for_timestep=1000000
+max_years_limit=1000
 
+pmslog="pms.log"
 logfile="mesa.log"
 msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
 pmsuccess="termination code: Lnuc_div_L_zams_limit"
+meshfail="failed in do_mesh"
 
 simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
@@ -40,22 +44,26 @@ simulate() {
     
     if (( $(echo "$diffusion > 0" | bc -l) )); then
        change "do_element_diffusion" ".false." ".true."
-       change 'diffusion_class_factor(:)' '1d0' "$diffusion"
+       change 'diffusion_class_factor(1)' '1' "$diffusion"
+       change 'diffusion_class_factor(2)' '1' "$diffusion"
+       change 'diffusion_class_factor(3)' '1' "$diffusion"
+       change 'diffusion_class_factor(4)' '1' "$diffusion"
     fi
     
     mk
-    rn | tee "$logfile"
-    while ! grep -q "$pmsuccess" "$logfile"; do
+    rn | tee "$pmslog"
+    while ! grep -q "$pmsuccess" "$pmslog"; do
         new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
-        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); then
-            echo "Couldn't achieve convergence" | tee -a "$logfile"
+        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
+          then
+            echo "Couldn't achieve convergence" | tee -a "$pmslog"
             exit 1
         fi
         echo "Retrying PMS with mesh_delta_coeff = $new_mesh_delta_coeff" | 
-            tee "$logfile"
+            tee "$pmslog"
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
         mesh_delta_coeff=$new_mesh_delta_coeff
-        rn | tee -a "$logfile"
+        rn | tee -a "$pmslog"
     done
     
     mv LOGS/history.data .
@@ -70,53 +78,83 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
+    if (( $(echo "$M < 1.2" | bc -l) )); then
+        new_profile_interval=5
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        profile_interval=$new_profile_interval
+    fi
     if (( $(echo "$M < 1.1" | bc -l) )); then
         new_profile_interval=10
         change "profile_interval" "$profile_interval" "$new_profile_interval"
         profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 1" | bc -l) )); then
-        new_profile_interval=16
+        new_profile_interval=15
         change "profile_interval" "$profile_interval" "$new_profile_interval"
         profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 0.9" | bc -l) )); then
-        new_profile_interval=22
+        new_profile_interval=20
         change "profile_interval" "$profile_interval" "$new_profile_interval"
         profile_interval=$new_profile_interval
     fi
     if (( $(echo "$M < 0.8" | bc -l) )); then
-        new_profile_interval=28
+        new_profile_interval=25
         change "profile_interval" "$profile_interval" "$new_profile_interval"
         profile_interval=$new_profile_interval
     fi
     
-    rn | tee -a "$logfile"
-    while ! grep -q "$msuccess" "$logfile" \
-          || [ $(Rscript ../../discontinuity.R) == 1 ] \
-          && (( $(echo "$mesh_delta_coeff > $mesh_delta_limit" | bc -l) )); do
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.2" | bc -l)
-        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
+    rn | tee "$logfile"
+    while ! grep -q "$msuccess" "$logfile" ||
+            [ $(Rscript ../../discontinuity.R) == 1 ]; do
+        
+        mv LOGS/history.data "history_""$mesh_delta_coeff""_"\
+"$max_years_for_timestep"".data"
+        
+        # decrease the mesh spacing
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
+        
+        # check that we're still within bounds
+        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) &&
+              $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) ));
           then
             echo "Couldn't achieve convergence" | tee -a "$logfile"
             exit 1
         fi
-        mv LOGS/history.data history"$mesh_delta_coeff".dat
-        echo "Retrying with mesh_delta_coeff = $new_mesh_delta_coeff"
-        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff" |
-            tee "$logfile"
-        mesh_delta_coeff=$new_mesh_delta_coeff
+        
         rm -rf LOGS/*
+        
+        # if the meshing failed, decrease timestep and reset meshing
+        if grep -q "$meshfail" "$logfile"; then
+            new_max_years_for_timestep=$(echo "scale=0;
+                $max_years_for_timestep/2" | bc -l)
+            new_mesh_delta_coeff=1
+            change "max_years_for_timestep" "$max_years_for_timestep" \
+                "$new_max_years_for_timestep" 
+            max_years_for_timestep=$new_max_years_for_timestep
+            new_profile_interval=$(echo "scale=0; $profile_interval * 2" |
+                bc -l)
+            change "profile_interval" "$profile_interval" \
+                "$new_profile_interval"
+            profile_interval=$new_profile_interval
+        fi
+        
+        change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
+        mesh_delta_coeff=$new_mesh_delta_coeff
+        echo "Retrying with mesh_delta_coeff = $mesh_delta_coeff" |
+            tee "$logfile"
+        echo "Retrying with max_years_for_timestep = $max_years_for_timestep" |
+            tee -a "$logfile"
         rn | tee -a "$logfile"
     done
     
     # only process ~200 or so adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
-    num_skip=1 # 1 means don't skip any, 2 means skip every other, etc.
-    if [ $num_files -gt $num_process ]; then
-        num_skip="$(echo "scale=0; $num_files/$num_process" | bc -l)"
+    if [ $num_files -lt $num_process ]; then
+        echo "Not enough logs generated" | tee -a "$logfile"
+        exit 1 # maybe some day I will change this to rerun with more profiles
     fi
-    find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | awk "NR%$num_skip==0" |
+    Rscript ../../fgong_enumerate.R "$num_process" | 
         xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
@@ -142,10 +180,10 @@ while [ "$#" -gt 0 ]; do
     -Y) Y="$2"; shift 2;;
     -Z) Z="$2"; shift 2;;
     -a) alpha="$2"; shift 2;;
-    -D) diffusion="$2"; shift 2;;
     -f) overshoot="$2"; shift 2;;
+    -D) diffusion="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
-    -r) remove="$2"; shift 2;;
+    -r) remove=1; shift 1;;
 
     *) echo "unknown option: $1" >&2; exit 1;;
   esac
@@ -156,10 +194,9 @@ if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.275; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
 if [ -z ${alpha+x} ]; then alpha=1.85; fi
-if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${overshoot+x} ]; then overshoot=0.2; fi
+if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${remove+x} ]; then remove=0; fi
 
 simulate
-

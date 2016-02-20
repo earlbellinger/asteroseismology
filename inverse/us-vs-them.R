@@ -54,10 +54,7 @@ plot_ages <- function(..., text.cex=1, mgp=utils.mgp, mar=utils.mar) {
 plot_masses <- function(..., text.cex=1, mgp=utils.mgp, mar=utils.mar) {
     lims <- range(0.7, kages$Mass-kages$dMassL, kages$Mass+kages$dMassH,
                   ml$Mass-ml$dMass, ml$Mass+ml$dMass)
-    plot(NA, axes=F,
-        ylab=expression("Mass from KAGES"~M/M["\u0298"]),
-        xlab=expression("Mass from Machine Learning"~
-            M/M["\u0298"]),
+    plot(NA, axes=F, ylab="", xlab="",
         xlim=lims, ylim=lims)
     abline(coef=c(0,1), lty=2)
     magaxis(side=1:4, family="Palatino", tcl=0.25, labels=c(1,1,0,0),
@@ -71,6 +68,8 @@ plot_masses <- function(..., text.cex=1, mgp=utils.mgp, mar=utils.mar) {
     with(kages, arrows(ml$Mass, Mass-dMassL, ml$Mass, Mass+dMassH, 
         length=0, angle=90, code=3, col="darkgray"))
     points(kages$Mass ~ ml$Mass, pch=1)
+    title(xlab=expression("Mass from Machine Learning"~M/M["☉"]))
+    title(ylab=expression("Mass from KAGES"~M/M["☉"]))
 }
 
 make_plots(plot_ages, 'kages', filepath=file.path('plots', 'comparison'))

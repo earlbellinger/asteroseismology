@@ -23,7 +23,7 @@ def main(arguments):
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')
-    parser.add_argument('-D', '--diffusion', default=[0, 2], nargs=2,
+    parser.add_argument('-D', '--diffusion', default=[10**-6, 10], nargs=2,
                         type=float, 
                         help='range of diffusion coefficient values')
     parser.add_argument('-f', '--overshoot', default=[0, 0.5], nargs=2,
@@ -37,7 +37,7 @@ def main(arguments):
                         help='offset for sobol numbers')
     parser.add_argument('-p', '--parallel', default=1, 
                         type=int, help='number of CPUs to use')
-    parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 0, 0], 
+    parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 1, 0], 
                         type=list,
                         help='booleans of whether to log M, Y, Z, alpha, D, f')
     args = parser.parse_args(arguments)
@@ -60,7 +60,7 @@ def dispatch(ranges, N, logs, directory, skip=0, parallel=r"$OMP_NUM_THREADS"):
             if (logs[j]):
                 vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -n -p %d dispatch.sh -d %s "\
-            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f -r 1"%\
+            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f -r"%\
             tuple([parallel, directory] + [val for val in vals])
         print(bash_cmd)
         #exit()

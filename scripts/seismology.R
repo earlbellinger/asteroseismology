@@ -9,6 +9,8 @@ library(matrixStats)
 library(magicaxis)
 library(RColorBrewer)
 
+fwhm_conversion <- (2*sqrt(2*log(2)))
+
 #dnu.cl <- brewer.pal(4, "BrBG")
 dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
 #c("#ca0020", "#f4a582", "#92c5de", "#0571b0")
@@ -57,8 +59,8 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
 # make a plot with filename 'outf' if outf != FALSE
 avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     sep_name <- deparse(substitute(f))
-    a <- c() # contains the computed quantity (e.g. large freq separations)
-    b <- c() # contains frequencies of the base mode
+    seps <- c() # contains the computed quantity (e.g. large freq separations)
+    nus <- c() # contains frequencies of the base mode
     pchs <- c() # if there's more than one l, get different symbols for each
     p_modes <- freqs[freqs$n >= 1,] 
     for (l_deg in l_degs) {
@@ -66,13 +68,13 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
         if (nrow(ell) == 0) next
         vals <- sapply(unique(ell$n), function(n) f(l_deg, n, freqs))
         not.nan <- complete.cases(vals)
-        a <- c(a, vals[not.nan])
-        b <- c(b, ell$nu[not.nan])
+        seps <- c(seps, vals[not.nan])
+        nus <- c(nus, ell$nu[not.nan])
         if (outf != FALSE) pchs = c(pchs, rep(l_deg+1, sum(not.nan)))
     }
     
     # need 3 points to make something reasonable 
-    if (length(a)<=2) {
+    if (length(seps)<=2) {
         #DF[paste0(sep_name, "_median")] <- NA
         #DF[paste0(sep_name, "_slope")] <- NA
         return(DF)
@@ -97,16 +99,17 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
        else if (sep_name == 'r_sep') paste0(sep_name, l_degs, l_degs+2)
        else if (sep_name == 'r_avg') paste0(sep_name, l_degs, 1-l_degs)
     
-    fwhm <- (0.66*nu_max**0.88)/(2*sqrt(2*log(2)))
-    gaussian_env <- dnorm(b, nu_max, fwhm)
-    w.median <- weightedMedian(a, gaussian_env)
+    fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
+    gaussian_env <- dnorm(nus, nu_max, fwhm)
+    w.median <- weightedMedian(seps, gaussian_env)
     DF[paste0(sep_name, "_median")] <- w.median
-    fit <- lm(a~b, weights=gaussian_env)
-    DF[paste0(sep_name, "_slope")] <- coef(fit)[2]
+    #fit <- lm(seps~nus, weights=gaussian_env)
+    #DF[paste0(sep_name, "_slope")] <- coef(fit)[2]
     
     if (outf != FALSE) make_plots(seismology_plot, 
         paste0(outf, '-', sep_name), 
-        a=a, b=b, fit=fit, gaussian_env=gaussian_env, 
+        seps=seps, nus=nus, #fit=fit, 
+        gaussian_env=gaussian_env, 
         w.median=w.median, nu_max=nu_max, l_degs=l_degs, 
         ylab=ylab, dnu.cl=dnu.cl, pchs=pchs, sep_name=sep_name, 
         freqs=freqs,
@@ -163,22 +166,22 @@ r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
 r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
-seismology_plot <- function(a, b, fit, gaussian_env, w.median, 
+seismology_plot <- function(seps, nus, #fit, 
+        gaussian_env, w.median, 
         nu_max, l_degs, ylab, dnu.cl, pchs, freqs, ..., 
         text.cex=1, mgp=utils.mgp, font=utils.font) {
     if (length(l_degs)==1)
         col.pal <- colorRampPalette(c(dnu.cl[1], dnu.cl[3]))(1001)[1+1000*
             normalize(gaussian_env)]
-    plot(a~b, axes=FALSE, tck=0, xaxs='i',
+    plot(seps~nus, axes=FALSE, tck=0, xaxs='i',
          cex=1.5 * gaussian_env/max(gaussian_env), 
          ylab=ylab, 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
          xlim=range(freqs$nu), 
-         #ylim=quantile(a, c(0.001, 0.999)), 
-         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], a), 
+         #ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], seps), 
          col=if (length(l_degs)==1) col.pal else dnu.cl[pchs], 
          pch=if (length(l_degs)==1) 1 else pchs)
-    abline(fit, lty=2)
+    abline(lm(seps~nus, weights=gaussian_env), lty=2)
     abline(v=nu_max, lty=3)
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)

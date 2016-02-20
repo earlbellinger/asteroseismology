@@ -5,7 +5,7 @@
       
       !show_net_species_info = .true.
       !show_net_reactions_info = .true.
-
+      
       create_pre_main_sequence_model = .true.
       
       save_model_when_terminate = .true.
@@ -18,22 +18,22 @@
       
       write_profile_when_terminate = .true.
       filename_for_profile_when_terminate = 'final_profile.data'
-
+      
       kappa_file_prefix = 'gs98'
       
       change_lnPgas_flag = .true.
       new_lnPgas_flag = .true.
-
+      
       !change_initial_net = .true.
       !new_net_name = 'o18_and_ne22.net'
-
+      
       pre_ms_relax_num_steps = 100
       pre_ms_T_c = 3e5 ! 3e5
       
       !new_surface_rotation_v = 0 ! changed from 2 solar (km sec^1)
       !change_rotation_flag = .true.
       !new_rotation_flag = .false.
-
+      
       pgstar_flag = .false.
       
       relax_initial_Y = .true.
@@ -58,7 +58,7 @@
       max_num_profile_models = -1
       
       min_timestep_limit = 1d-12
-      max_years_for_timestep = 1d6
+      max_years_for_timestep = 1000000
       !max_timestep = 3.15d14
       
       !report_ierr = .true. ! if true, produce terminal output when error
@@ -79,12 +79,12 @@
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
-      mesh_delta_coeff = 1.6
-      max_allowed_nz = 128000
+      mesh_delta_coeff = 1
+      max_allowed_nz = 20000
       
       photostep = 0
       write_profiles_flag = .false.
-      profile_interval = 6
+      profile_interval = 1
       history_interval = 1
       terminal_interval = 10000000
       write_header_frequency = 10000000
@@ -111,11 +111,15 @@
       
       !! Atomic diffusion
       do_element_diffusion = .false.
-      !diffusion_class_factor(:) = 1d0
+      !diffusion_class_factor(1) = 1
+      !diffusion_class_factor(2) = 1
+      !diffusion_class_factor(3) = 1
+      !diffusion_class_factor(4) = 1
       diffusion_dt_limit = 7d11 
       diffusion_T_full_on = 1d3
       diffusion_T_full_off = 1d3
-      diffusion_min_dq_ratio_at_surface = 50
+      !radiation_turbulence_coeff = 1
+      !diffusion_min_dq_ratio_at_surface = 50
       
       diffusion_calculates_ionization = .true.
       
