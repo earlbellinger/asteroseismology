@@ -16,7 +16,7 @@ if (any(decreasing_L)) {
                   max(decreasing_L))
     DF <- DF[-1:-pms,]
 }
-DF <- DF[-1:-floor(nrow(DF)*0.01),] # in case more PMS leaks in
+DF <- DF[-1:-floor(nrow(DF)*0.05),] # in case more PMS leaks in
 
 y <- DF$surface_h1
 x <- DF$star_age

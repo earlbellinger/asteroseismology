@@ -6,7 +6,7 @@
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 num_process=200
-mesh_delta_coeff=1
+mesh_delta_coeff=1.5
 mesh_delta_limit=0.2
 profile_interval=1
 max_years_for_timestep=1000000
@@ -16,7 +16,7 @@ pmslog="pms.log"
 logfile="mesa.log"
 msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
 pmsuccess="termination code: Lnuc_div_L_zams_limit"
-meshfail="failed in do_mesh"
+meshfail="terminated evolution: convergence problems"
 
 simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
@@ -68,7 +68,8 @@ simulate() {
     
     mv LOGS/history.data .
     
-    change "write_profiles_flag" ".false." ".true."
+    #change "write_profiles_flag" ".false." ".true."
+    change "max_years_for_timestep" "-1" "$max_years_for_timestep"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
     change "save_model_when_terminate" ".true." ".false."
@@ -78,31 +79,31 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
-    if (( $(echo "$M < 1.2" | bc -l) )); then
-        new_profile_interval=5
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
-        profile_interval=$new_profile_interval
-    fi
-    if (( $(echo "$M < 1.1" | bc -l) )); then
-        new_profile_interval=10
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
-        profile_interval=$new_profile_interval
-    fi
-    if (( $(echo "$M < 1" | bc -l) )); then
-        new_profile_interval=15
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
-        profile_interval=$new_profile_interval
-    fi
-    if (( $(echo "$M < 0.9" | bc -l) )); then
-        new_profile_interval=20
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
-        profile_interval=$new_profile_interval
-    fi
-    if (( $(echo "$M < 0.8" | bc -l) )); then
-        new_profile_interval=25
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
-        profile_interval=$new_profile_interval
-    fi
+    #if (( $(echo "$M < 1.2" | bc -l) )); then
+    #    new_profile_interval=5
+    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
+    #    profile_interval=$new_profile_interval
+    #fi
+    #if (( $(echo "$M < 1.1" | bc -l) )); then
+    #    new_profile_interval=10
+    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
+    #    profile_interval=$new_profile_interval
+    #fi
+    #if (( $(echo "$M < 1" | bc -l) )); then
+    #    new_profile_interval=15
+    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
+    #    profile_interval=$new_profile_interval
+    #fi
+    #if (( $(echo "$M < 0.9" | bc -l) )); then
+    #    new_profile_interval=20
+    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
+    #    profile_interval=$new_profile_interval
+    #fi
+    #if (( $(echo "$M < 0.8" | bc -l) )); then
+    #    new_profile_interval=25
+    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
+    #    profile_interval=$new_profile_interval
+    #fi
     
     rn | tee "$logfile"
     while ! grep -q "$msuccess" "$logfile" ||
@@ -132,11 +133,11 @@ simulate() {
             change "max_years_for_timestep" "$max_years_for_timestep" \
                 "$new_max_years_for_timestep" 
             max_years_for_timestep=$new_max_years_for_timestep
-            new_profile_interval=$(echo "scale=0; $profile_interval * 2" |
-                bc -l)
-            change "profile_interval" "$profile_interval" \
-                "$new_profile_interval"
-            profile_interval=$new_profile_interval
+            #new_profile_interval=$(echo "scale=0; $profile_interval * 2" |
+            #    bc -l)
+            #change "profile_interval" "$profile_interval" \
+            #    "$new_profile_interval"
+            #profile_interval=$new_profile_interval
         fi
         
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
@@ -147,6 +148,16 @@ simulate() {
             tee -a "$logfile"
         rn | tee -a "$logfile"
     done
+    
+    # enable profile writing and rerun track with good settings 
+    num_lines=$(cat LOGS/history.data | wc -l)
+    if (( $(echo "$num_lines > $num_process") )); then
+        new_profile_interval=$(echo "scale=0; 
+            ($num_lines-6)/($num_process*2)" | bc -l)
+        change "profile_interval" "$profile_interval" "$new_profile_interval"
+    fi
+    change "write_profiles_flag" ".false." ".true."
+    rn | tee -a "$logfile"
     
     # only process ~200 or so adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"

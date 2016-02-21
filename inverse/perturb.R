@@ -30,9 +30,12 @@ perturb <- function(star, obs_data_file, freqs_data_file,
 rand_inst <- function(n) {
     # Perturb observations by their uncertainties
     attach(obs_data)
-    obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
-        if (n==1) 0 else uncertainty)))
-    colnames(obs.DF) <- name
+    repeat {
+        obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
+            if (n==1) 0 else uncertainty)))
+        colnames(obs.DF) <- name
+        if (obs.DF[['Fe/H']] <= 0.4444) break # unrealistic
+    }
     
     # Correct frequencies for Doppler shift
     radial_velocity <- 
