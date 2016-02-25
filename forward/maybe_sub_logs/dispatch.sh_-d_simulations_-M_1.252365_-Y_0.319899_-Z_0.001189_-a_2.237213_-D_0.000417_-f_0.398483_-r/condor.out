@@ -761,3 +761,51 @@ ________________________________________________________________________________
    6.000000   2.213234   0.092195 -34.200302  -0.152334 -99.000000   0.000000   0.665704   0.000053   0.001166   0.401786   0.074028      2      0
  1.3300E+09  17.575861   1.013541 -99.000000   3.591678  -8.245907   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.125E-11        max_dt
 
+
+stop because have dropped below central lower limit for h1
+    0.9476162529E-03    0.1000000000E-02
+
+       2830   7.542442   9153.545   1.191957   1.191957   1.252365   1.106680   0.000948   0.000747   0.302530   0.541539  -1.869284   4675      0
+   5.299189   2.686067   0.215781 -24.438871  -0.019582 -99.000000   0.145685   0.997896   0.000031   0.001022   0.457269   0.129005      4      0
+ 1.8885E+09  18.029470   1.230888 -14.750470   3.451369  -8.394118   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.102E-09    varcontrol
+
+save photos/x830 for model 2830
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          27
+save final_profile.data.FGONG   2830
+ final_profile.data.FGONG for model 2830
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps       103.2        28.2         0         0      2830
+       2830   7.542442   9153.545   1.191957   1.191957   1.252365   1.106680   0.000948   0.000747   0.302530   0.541539  -1.869284   4675      0
+   5.299189   2.686067   0.215781 -24.438871  -0.019582 -99.000000   0.145685   0.997896   0.000031   0.001022   0.457269   0.129005      4      0
+ 1.8885E+09  18.029470   1.230888 -14.750470   3.451369  -8.394118   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.102E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 11:21:28
+Retrying with mesh_delta_coeff = .1
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 11:21:33
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+

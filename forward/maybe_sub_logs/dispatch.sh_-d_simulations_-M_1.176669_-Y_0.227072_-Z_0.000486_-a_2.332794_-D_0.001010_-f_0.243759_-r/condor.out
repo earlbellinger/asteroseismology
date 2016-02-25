@@ -1495,3 +1495,280 @@ save LOGS/profile230.data write fgong_plot.data
 save LOGS/profile230.data.FGONG   3874
  LOGS/profile230.data.FGONG for model 3874
        retry log10(dt/yr), log10(dt), retry_factor     1  3878        4.269287       11.768399        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3887        4.250935       11.750047        0.500000
+save LOGS/profile231.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile231.data.FGONG   3887
+ LOGS/profile231.data.FGONG for model 3887
+       retry log10(dt/yr), log10(dt), retry_factor     1  3894        4.268881       11.767992        0.500000
+save LOGS/profile232.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile232.data.FGONG   3900
+ LOGS/profile232.data.FGONG for model 3900
+       retry log10(dt/yr), log10(dt), retry_factor     1  3905        4.244485       11.743597        0.500000
+save LOGS/profile233.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile233.data.FGONG   3913
+ LOGS/profile233.data.FGONG for model 3913
+       retry log10(dt/yr), log10(dt), retry_factor     1  3914        4.247328       11.746440        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3918        4.263023       11.762135        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3926        4.256626       11.755737        0.500000
+save LOGS/profile234.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile234.data.FGONG   3926
+ LOGS/profile234.data.FGONG for model 3926
+       retry log10(dt/yr), log10(dt), retry_factor     1  3930        4.272321       11.771432        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3933        4.208835       11.707946        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3937        4.224530       11.723641        0.500000
+save LOGS/profile235.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile235.data.FGONG   3939
+ LOGS/profile235.data.FGONG for model 3939
+       retry log10(dt/yr), log10(dt), retry_factor     1  3947        4.263348       11.762459        0.500000
+save LOGS/profile236.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile236.data.FGONG   3952
+ LOGS/profile236.data.FGONG for model 3952
+       retry log10(dt/yr), log10(dt), retry_factor     1  3959        4.251031       11.750143        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3963        4.266726       11.765838        0.500000
+save LOGS/profile237.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile237.data.FGONG   3965
+ LOGS/profile237.data.FGONG for model 3965
+       retry log10(dt/yr), log10(dt), retry_factor     1  3967        4.282421       11.781533        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3970        4.218935       11.718046        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3974        4.234630       11.733741        0.500000
+save LOGS/profile238.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile238.data.FGONG   3978
+ LOGS/profile238.data.FGONG for model 3978
+       retry log10(dt/yr), log10(dt), retry_factor     1  3981        4.259887       11.758999        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  3988        4.274067       11.773178        0.500000
+save LOGS/profile239.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile239.data.FGONG   3991
+ LOGS/profile239.data.FGONG for model 3991
+       retry log10(dt/yr), log10(dt), retry_factor     1  3997        4.254256       11.753368        0.500000
+save LOGS/profile240.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile240.data.FGONG   4004
+ LOGS/profile240.data.FGONG for model 4004
+       retry log10(dt/yr), log10(dt), retry_factor     1  4011        4.243232       11.742344        0.500000
+save LOGS/profile241.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile241.data.FGONG   4017
+ LOGS/profile241.data.FGONG for model 4017
+       retry log10(dt/yr), log10(dt), retry_factor     1  4026        4.273015       11.772126        0.500000
+save LOGS/profile242.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile242.data.FGONG   4030
+ LOGS/profile242.data.FGONG for model 4030
+       retry log10(dt/yr), log10(dt), retry_factor     1  4035        4.260046       11.759158        0.500000
+save LOGS/profile243.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile243.data.FGONG   4043
+ LOGS/profile243.data.FGONG for model 4043
+       retry log10(dt/yr), log10(dt), retry_factor     1  4044        4.254117       11.753229        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4055        4.251170       11.750281        0.500000
+save LOGS/profile244.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile244.data.FGONG   4056
+ LOGS/profile244.data.FGONG for model 4056
+       retry log10(dt/yr), log10(dt), retry_factor     1  4066        4.259766       11.758878        0.500000
+save LOGS/profile245.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile245.data.FGONG   4069
+ LOGS/profile245.data.FGONG for model 4069
+       retry log10(dt/yr), log10(dt), retry_factor     1  4074        4.258800       11.757912        0.500000
+save LOGS/profile246.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile246.data.FGONG   4082
+ LOGS/profile246.data.FGONG for model 4082
+       retry log10(dt/yr), log10(dt), retry_factor     1  4084        4.261780       11.760892        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4093        4.254335       11.753447        0.500000
+save LOGS/profile247.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile247.data.FGONG   4095
+ LOGS/profile247.data.FGONG for model 4095
+       retry log10(dt/yr), log10(dt), retry_factor     1  4097        4.270030       11.769142        0.500000
+save LOGS/profile248.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile248.data.FGONG   4108
+ LOGS/profile248.data.FGONG for model 4108
+       retry log10(dt/yr), log10(dt), retry_factor     1  4109        4.249163       11.748275        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4113        4.264858       11.763970        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4121        4.263885       11.762997        0.500000
+save LOGS/profile249.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile249.data.FGONG   4121
+ LOGS/profile249.data.FGONG for model 4121
+       retry log10(dt/yr), log10(dt), retry_factor     1  4134        4.246688       11.745799        0.500000
+save LOGS/profile250.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile250.data.FGONG   4134
+ LOGS/profile250.data.FGONG for model 4134
+       retry log10(dt/yr), log10(dt), retry_factor     1  4144        4.258642       11.757753        0.500000
+save LOGS/profile251.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile251.data.FGONG   4147
+ LOGS/profile251.data.FGONG for model 4147
+       retry log10(dt/yr), log10(dt), retry_factor     1  4148        4.274337       11.773448        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4151        4.210850       11.709962        0.500000
+save LOGS/profile252.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile252.data.FGONG   4160
+ LOGS/profile252.data.FGONG for model 4160
+       retry log10(dt/yr), log10(dt), retry_factor     1  4166        4.243538       11.742649        0.500000
+save LOGS/profile253.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile253.data.FGONG   4173
+ LOGS/profile253.data.FGONG for model 4173
+       retry log10(dt/yr), log10(dt), retry_factor     1  4175        4.251620       11.750731        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4184        4.259560       11.758672        0.500000
+save LOGS/profile254.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile254.data.FGONG   4186
+ LOGS/profile254.data.FGONG for model 4186
+       retry log10(dt/yr), log10(dt), retry_factor     1  4195        4.243944       11.743056        0.500000
+save LOGS/profile255.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile255.data.FGONG   4199
+ LOGS/profile255.data.FGONG for model 4199
+       retry log10(dt/yr), log10(dt), retry_factor     1  4201        4.211836       11.710947        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4205        4.227531       11.726642        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4211        4.284210       11.783322        0.500000
+save LOGS/profile256.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile256.data.FGONG   4212
+ LOGS/profile256.data.FGONG for model 4212
+       retry log10(dt/yr), log10(dt), retry_factor     1  4214        4.220724       11.719836        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4218        4.236419       11.735531        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4222        4.252114       11.751226        0.500000
+save LOGS/profile257.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile257.data.FGONG   4225
+ LOGS/profile257.data.FGONG for model 4225
+       retry log10(dt/yr), log10(dt), retry_factor     1  4226        4.267809       11.766921        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4235        4.264725       11.763836        0.500000
+save LOGS/profile258.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile258.data.FGONG   4238
+ LOGS/profile258.data.FGONG for model 4238
+       retry log10(dt/yr), log10(dt), retry_factor     1  4242        4.289006       11.788118        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4245        4.225520       11.724632        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4249        4.241215       11.740327        0.500000
+save LOGS/profile259.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile259.data.FGONG   4251
+ LOGS/profile259.data.FGONG for model 4251
+       retry log10(dt/yr), log10(dt), retry_factor     1  4261        4.245287       11.744399        0.500000
+save LOGS/profile260.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile260.data.FGONG   4264
+ LOGS/profile260.data.FGONG for model 4264
+       retry log10(dt/yr), log10(dt), retry_factor     1  4271        4.256778       11.755889        0.500000
+save LOGS/profile261.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile261.data.FGONG   4277
+ LOGS/profile261.data.FGONG for model 4277
+       retry log10(dt/yr), log10(dt), retry_factor     1  4280        4.261687       11.760799        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4284        4.277382       11.776494        0.500000
+save LOGS/profile262.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile262.data.FGONG   4290
+ LOGS/profile262.data.FGONG for model 4290
+       retry log10(dt/yr), log10(dt), retry_factor     1  4292        4.270277       11.769389        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4302        4.249677       11.748788        0.500000
+save LOGS/profile263.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile263.data.FGONG   4303
+ LOGS/profile263.data.FGONG for model 4303
+       retry log10(dt/yr), log10(dt), retry_factor     1  4312        4.253362       11.752474        0.500000
+save LOGS/profile264.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile264.data.FGONG   4316
+ LOGS/profile264.data.FGONG for model 4316
+       retry log10(dt/yr), log10(dt), retry_factor     1  4321        4.263914       11.763025        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4325        4.279609       11.778720        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4328        4.216122       11.715234        0.500000
+save LOGS/profile265.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile265.data.FGONG   4329
+ LOGS/profile265.data.FGONG for model 4329
+       retry log10(dt/yr), log10(dt), retry_factor     1  4337        4.274743       11.773854        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4340        4.211256       11.710368        0.500000
+save LOGS/profile266.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile266.data.FGONG   4342
+ LOGS/profile266.data.FGONG for model 4342
+       retry log10(dt/yr), log10(dt), retry_factor     1  4344        4.226951       11.726063        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4352        4.265695       11.764806        0.500000
+save LOGS/profile267.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile267.data.FGONG   4355
+ LOGS/profile267.data.FGONG for model 4355
+       retry log10(dt/yr), log10(dt), retry_factor     1  4361        4.271165       11.770277        0.500000
+save LOGS/profile268.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile268.data.FGONG   4368
+ LOGS/profile268.data.FGONG for model 4368
+       retry log10(dt/yr), log10(dt), retry_factor     1  4369        4.268943       11.768054        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4379        4.249608       11.748719        0.500000
+save LOGS/profile269.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile269.data.FGONG   4381
+ LOGS/profile269.data.FGONG for model 4381
+       retry log10(dt/yr), log10(dt), retry_factor     1  4389        4.250102       11.749213        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4393        4.265797       11.764908        0.500000
+save LOGS/profile270.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile270.data.FGONG   4394
+ LOGS/profile270.data.FGONG for model 4394
+       retry log10(dt/yr), log10(dt), retry_factor     1  4397        4.281492       11.780603        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4400        4.218006       11.717117        0.500000
+save LOGS/profile271.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile271.data.FGONG   4407
+ LOGS/profile271.data.FGONG for model 4407
+       retry log10(dt/yr), log10(dt), retry_factor     1  4410        4.263074       11.762185        0.500000
+save LOGS/profile272.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile272.data.FGONG   4420
+ LOGS/profile272.data.FGONG for model 4420
+       retry log10(dt/yr), log10(dt), retry_factor     1  4421        4.251482       11.750593        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4425        4.267177       11.766288        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4429        4.282872       11.781983        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4432        4.219385       11.718497        0.500000
+save LOGS/profile273.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile273.data.FGONG   4433
+ LOGS/profile273.data.FGONG for model 4433
+       retry log10(dt/yr), log10(dt), retry_factor     1  4436        4.235080       11.734192        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4440        4.250775       11.749887        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4444        4.266470       11.765582        0.500000
+save LOGS/profile274.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile274.data.FGONG   4446
+ LOGS/profile274.data.FGONG for model 4446
+save LOGS/profile275.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile275.data.FGONG   4459
+ LOGS/profile275.data.FGONG for model 4459
+       retry log10(dt/yr), log10(dt), retry_factor     1  4464        4.247847       11.746959        0.500000
+save LOGS/profile276.data write fgong_plot.data
+                               s% atm_structure_num_pts          30
+save LOGS/profile276.data.FGONG   4472
+ LOGS/profile276.data.FGONG for model 4472
+       retry log10(dt/yr), log10(dt), retry_factor     1  4473        4.252066       11.751178        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4481        4.281373       11.780485        0.500000
+save LOGS/profile277.data write fgong_plot.data
+                               s% atm_structure_num_pts          31
+save LOGS/profile277.data.FGONG   4485
+ LOGS/profile277.data.FGONG for model 4485
+       retry log10(dt/yr), log10(dt), retry_factor     1  4491        4.246435       11.745547        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  4495        4.262130       11.761242        0.500000
+save LOGS/profile278.data write fgong_plot.data
+                               s% atm_structure_num_pts          29
+save LOGS/profile278.data.FGONG   4498
+ LOGS/profile278.data.FGONG for model 4498
+       retry log10(dt/yr), log10(dt), retry_factor     1  4499        4.277825       11.776937        0.500000

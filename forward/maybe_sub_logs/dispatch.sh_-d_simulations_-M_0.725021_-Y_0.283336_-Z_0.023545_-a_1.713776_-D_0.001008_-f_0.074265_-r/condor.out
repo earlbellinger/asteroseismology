@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:14:49
+TIME: 13:25:04
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -34,9 +34,3 @@ TIME: 11:14:49
                                         OMP_NUM_THREADS           2
 
 
-hydro_newton_step failed to converge
-       retry log10(dt/yr), log10(dt), retry_factor     1    14       -4.572704        2.926408        0.500000
-hydro_newton_step failed to converge
-       retry log10(dt/yr), log10(dt), retry_factor     1    19       -4.477828        3.021284        0.500000
-hydro_newton_step failed to converge
-       retry log10(dt/yr), log10(dt), retry_factor     1    23       -4.462133        3.036979        0.500000

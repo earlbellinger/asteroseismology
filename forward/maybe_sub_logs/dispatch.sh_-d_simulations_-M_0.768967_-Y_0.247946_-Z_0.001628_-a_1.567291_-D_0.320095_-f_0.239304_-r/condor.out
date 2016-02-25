@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:14:30
+TIME: 13:25:18
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -16,21 +16,4 @@ TIME: 11:14:30
 
 
                                         relax_num_steps
-
-
-                               finished relax_num_steps
-
- new_lnPgas_flag T
-                                        relax_initial_Z    1.6280000000000001D-03
-                                                  new z    1.6279999999993615D-03
-                                        relax_initial_Y    2.4794600000000000D-01
-                                                  new y    2.4794600000000033D-01
- net name basic.net
- do_element_diffusion T
- lnPgas_flag T
- kappa_file_prefix gs98
- kappa_lowT_prefix lowT_fa05_gs98
-   eos_file_prefix mesa
-                                        OMP_NUM_THREADS           2
-
 

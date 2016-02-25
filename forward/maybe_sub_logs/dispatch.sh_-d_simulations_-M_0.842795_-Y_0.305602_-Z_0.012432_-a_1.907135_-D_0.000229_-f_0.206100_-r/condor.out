@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:14:18
+TIME: 13:25:17
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -34,28 +34,3 @@ TIME: 11:14:18
                                         OMP_NUM_THREADS           2
 
 
-
-stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
-    0.1000047177E+01    0.9990000000E+00
-
-        816   7.114314   5497.277  -0.321003  -0.321003   0.842795   0.842795   0.681539   0.000778   0.305602   0.681870  -1.568538    558      0
-   6.025980   1.942429  -0.117291 -48.168440  -1.898576 -99.000000   0.000000   0.306007   0.005818   0.012432   0.305695   0.086944      2      0
- 4.3147E+07  17.180998  -0.321024 -99.000000   4.981057  -6.554434   0.000000   0.002009   0.001305  1.245E-02  1.244E-02 -0.963E-11  max increase
-
-save photos/x816 for model 816
-save final_profile.data write fgong_plot.data
-                               s% atm_structure_num_pts          65
-save final_profile.data.FGONG    816
- final_profile.data.FGONG for model 816
- saved to zams.mod
-termination code: Lnuc_div_L_zams_limit
-
-       runtime, prev time, retries, backups, steps         4.1        28.2         0         0       816
-        816   7.114314   5497.277  -0.321003  -0.321003   0.842795   0.842795   0.681539   0.000778   0.305602   0.681870  -1.568538    558      0
-   6.025980   1.942429  -0.117291 -48.168440  -1.898576 -99.000000   0.000000   0.306007   0.005818   0.012432   0.305695   0.086944      2      0
- 4.3147E+07  17.180998  -0.321024 -99.000000   4.981057  -6.554434   0.000000   0.002009   0.001305  1.245E-02  1.244E-02 -0.963E-11  max increase
-
-DATE: 2016-02-25
-TIME: 11:19:07
-DATE: 2016-02-25
-TIME: 11:19:08
