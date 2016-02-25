@@ -1,0 +1,763 @@
+DATE: 2016-02-25
+TIME: 02:58:46
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    6.7891199999999996D-01
+                                                    he3    3.4043691854299971D-05
+                                                    he4    3.1986495630814571D-01
+                                                    c12    2.0460375081277489D-04
+                                                    n14    5.9935025609435838D-05
+                                                    o16    5.5647855091336886D-04
+                                                   ne20    1.2481289400952466D-04
+                                                   mg24    2.4316977865489133D-04
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    1.1890000000000000D-03
+                                                  new z    1.1889999999989134D-03
+                                        relax_initial_Y    3.1989899999999999D-01
+                                                  new y    3.1989900000000038D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1000288271E+01    0.9990000000E+00
+
+        946   7.284960   9203.266   0.778725   0.778725   1.252365   1.252365   0.677977   0.000298   0.319686   0.678654  -1.943491    618      0
+   5.855423   2.045313  -0.015068 -39.392217  -0.743244 -99.000000   0.000000   0.320800   0.000555   0.001187   0.320149   0.063323      2      0
+ 1.1232E+07  17.453524   0.778600 -99.000000   3.298808  -8.514333   0.000000   0.000001   0.000125  1.223E-03  1.198E-03 -0.423E-12  max increase
+
+save photos/x946 for model 946
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          42
+save final_profile.data.FGONG    946
+ final_profile.data.FGONG for model 946
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         5.7        28.2         0         0       946
+        946   7.284960   9203.266   0.778725   0.778725   1.252365   1.252365   0.677977   0.000298   0.319686   0.678654  -1.943491    618      0
+   5.855423   2.045313  -0.015068 -39.392217  -0.743244 -99.000000   0.000000   0.320800   0.000555   0.001187   0.320149   0.063323      2      0
+ 1.1232E+07  17.453524   0.778600 -99.000000   3.298808  -8.514333   0.000000   0.000001   0.000125  1.223E-03  1.198E-03 -0.423E-12  max increase
+
+DATE: 2016-02-25
+TIME: 03:05:23
+DATE: 2016-02-25
+TIME: 03:05:23
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2289   7.376145   9309.203   1.019287   1.019287   1.252365   1.252365   0.333164   0.000734   0.316929   0.595112  -2.111955    639      0
+   6.000000   2.211800   0.095057 -34.171634  -0.142755 -99.000000   0.000000   0.665677   0.000052   0.001165   0.403696   0.073785      2      0
+ 1.3540E+09  17.575363   1.018733 -99.000000   3.588368  -8.251293   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.128E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9192207317E-03    0.1000000000E-02
+
+       2857   7.544747   9110.963   1.200189   1.200189   1.252365   1.103677   0.000919   0.000747   0.303133   0.538428  -1.882926    657      0
+   5.265373   2.683820   0.224620 -24.331481  -0.008515 -99.000000   0.148688   0.997925   0.000031   0.001030   0.460380   0.128111      2      0
+ 1.9150E+09  18.029476   1.240466 -14.449440   3.448463  -8.402522   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.105E-09    varcontrol
+
+save photos/x857 for model 2857
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2857
+ final_profile.data.FGONG for model 2857
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        14.3        28.2         0         0      2857
+       2857   7.544747   9110.963   1.200189   1.200189   1.252365   1.103677   0.000919   0.000747   0.303133   0.538428  -1.882926    657      0
+   5.265373   2.683820   0.224620 -24.331481  -0.008515 -99.000000   0.148688   0.997925   0.000031   0.001030   0.460380   0.128111      2      0
+ 1.9150E+09  18.029476   1.240466 -14.449440   3.448463  -8.402522   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.105E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 03:19:42
+Retrying with mesh_delta_coeff = 1.4
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 03:19:47
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2287   7.376100   9309.060   1.018824   1.018824   1.252365   1.252365   0.332988   0.000734   0.316962   0.595274  -2.111428    654      0
+   6.000000   2.212008   0.094840 -34.172737  -0.143472 -99.000000   0.000000   0.665853   0.000052   0.001166   0.403534   0.073818      2      0
+ 1.3520E+09  17.575446   1.018272 -14.449440   3.588844  -8.250730   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9905168453E-03    0.1000000000E-02
+
+       2853   7.543147   9100.577   1.199683   1.199683   1.252365   1.103187   0.000991   0.000747   0.303186   0.538877  -1.890844    675      0
+   5.288627   2.678165   0.224155 -24.427003  -0.008457 -99.000000   0.149178   0.997854   0.000031   0.001031   0.459931   0.128000      2      0
+ 1.9113E+09  18.022223   1.237554 -99.000000   3.454779  -8.395933   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.101E-09    varcontrol
+
+save photos/x853 for model 2853
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2853
+ final_profile.data.FGONG for model 2853
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        17.9        28.2         0         0      2853
+       2853   7.543147   9100.577   1.199683   1.199683   1.252365   1.103187   0.000991   0.000747   0.303186   0.538877  -1.890844    675      0
+   5.288627   2.678165   0.224155 -24.427003  -0.008457 -99.000000   0.149178   0.997854   0.000031   0.001031   0.459931   0.128000      2      0
+ 1.9113E+09  18.022223   1.237554 -99.000000   3.454779  -8.395933   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.101E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 03:37:46
+Retrying with mesh_delta_coeff = 1.3
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 03:37:52
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2289   7.376090   9309.265   1.019300   1.019300   1.252365   1.252365   0.333173   0.000734   0.316892   0.595107  -2.112054    711      0
+   6.000000   2.211672   0.095059 -34.171466  -0.142709 -99.000000   0.000000   0.665668   0.000052   0.001165   0.403701   0.073787      2      0
+ 1.3540E+09  17.575184   1.018747 -99.000000   3.588284  -8.251439   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9077589451E-03    0.1000000000E-02
+
+       2854   7.544740   9121.162   1.199247   1.199247   1.252365   1.104168   0.000908   0.000747   0.303156   0.538788  -1.878650    740      0
+   5.264493   2.685584   0.223285 -24.328271  -0.009960 -99.000000   0.148197   0.997936   0.000031   0.001030   0.460020   0.128291      2      0
+ 1.9120E+09  18.031241   1.239739 -14.051500   3.445521  -8.406746   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    varcontrol
+
+save photos/x854 for model 2854
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2854
+ final_profile.data.FGONG for model 2854
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        18.1        28.2         0         0      2854
+       2854   7.544740   9121.162   1.199247   1.199247   1.252365   1.104168   0.000908   0.000747   0.303156   0.538788  -1.878650    740      0
+   5.264493   2.685584   0.223285 -24.328271  -0.009960 -99.000000   0.148197   0.997936   0.000031   0.001030   0.460020   0.128291      2      0
+ 1.9120E+09  18.031241   1.239739 -14.051500   3.445521  -8.406746   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 03:56:02
+Retrying with mesh_delta_coeff = 1.2
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 03:56:07
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2286   7.375969   9309.888   1.018621   1.018621   1.252365   1.252365   0.333306   0.000734   0.316978   0.595352  -2.111269    806      0
+   6.000000   2.211772   0.094662 -34.176884  -0.143796 -99.000000   0.000000   0.665535   0.000052   0.001166   0.403456   0.073803      2      0
+ 1.3510E+09  17.575225   1.018069 -99.000000   3.588764  -8.250882   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.126E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.8959246342E-03    0.1000000000E-02
+
+       2852   7.544820   9127.720   1.198559   1.198559   1.252365   1.103677   0.000896   0.000747   0.303197   0.539026  -1.875502    825      0
+   5.265589   2.687008   0.222481 -24.317663  -0.011065 -99.000000   0.148688   0.997948   0.000031   0.001031   0.459782   0.128413      2      0
+ 1.9100E+09  18.032749   1.239379 -14.273349   3.443545  -8.409557   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.105E-09    varcontrol
+
+save photos/x852 for model 2852
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2852
+ final_profile.data.FGONG for model 2852
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        17.9        28.2         0         0      2852
+       2852   7.544820   9127.720   1.198559   1.198559   1.252365   1.103677   0.000896   0.000747   0.303197   0.539026  -1.875502    825      0
+   5.265589   2.687008   0.222481 -24.317663  -0.011065 -99.000000   0.148688   0.997948   0.000031   0.001031   0.459782   0.128413      2      0
+ 1.9100E+09  18.032749   1.239379 -14.273349   3.443545  -8.409557   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.105E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 04:14:02
+Retrying with mesh_delta_coeff = 1.1
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 04:14:07
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2284   7.375944   9310.185   1.018255   1.018255   1.252365   1.252365   0.333060   0.000734   0.316973   0.595511  -2.110349    898      0
+   6.000000   2.212196   0.094450 -34.176360  -0.145019 -99.000000   0.000000   0.665780   0.000052   0.001166   0.403296   0.073849      2      0
+ 1.3490E+09  17.575514   1.017700 -99.000000   3.588960  -8.249455   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.128E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.8909615309E-03    0.1000000000E-02
+
+       2849   7.544757   9135.034   1.197656   1.197656   1.252365   1.105393   0.000891   0.000747   0.303200   0.539380  -1.872679    928      0
+   5.267216   2.688086   0.221328 -24.319262  -0.012395 -99.000000   0.146972   0.997953   0.000031   0.001031   0.459428   0.128539      2      0
+ 1.9071E+09  18.033773   1.238465 -14.750470   3.443190  -8.409958   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    varcontrol
+
+save photos/x849 for model 2849
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2849
+ final_profile.data.FGONG for model 2849
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        21.0        28.2         0         0      2849
+       2849   7.544757   9135.034   1.197656   1.197656   1.252365   1.105393   0.000891   0.000747   0.303200   0.539380  -1.872679    928      0
+   5.267216   2.688086   0.221328 -24.319262  -0.012395 -99.000000   0.146972   0.997953   0.000031   0.001031   0.459428   0.128539      2      0
+ 1.9071E+09  18.033773   1.238465 -14.750470   3.443190  -8.409958   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 04:35:13
+Retrying with mesh_delta_coeff = 1.0
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 04:35:20
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2280   7.375795   9311.007   1.017375   1.017375   1.252365   1.252365   0.333221   0.000734   0.317031   0.595837  -2.109096    970      0
+   6.000000   2.212438   0.093933 -34.182794  -0.146747 -99.000000   0.000000   0.665620   0.000052   0.001167   0.402970   0.073877      2      0
+ 1.3450E+09  17.575683   1.016820 -99.000000   3.589499  -8.248887   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9542474754E-03    0.1000000000E-02
+
+       2845   7.543280   9125.322   1.196889   1.196889   1.252365   1.105883   0.000954   0.000747   0.303217   0.539815  -1.880041   1003      0
+   5.289841   2.682849   0.220875 -24.407282  -0.012695 -99.000000   0.146482   0.997890   0.000031   0.001031   0.458993   0.128436      2      0
+ 1.9034E+09  18.027059   1.235710 -14.449440   3.449102  -8.401188   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.101E-09    varcontrol
+
+save photos/x845 for model 2845
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2845
+ final_profile.data.FGONG for model 2845
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        21.9        28.2         0         0      2845
+       2845   7.543280   9125.322   1.196889   1.196889   1.252365   1.105883   0.000954   0.000747   0.303217   0.539815  -1.880041   1003      0
+   5.289841   2.682849   0.220875 -24.407282  -0.012695 -99.000000   0.146482   0.997890   0.000031   0.001031   0.458993   0.128436      2      0
+ 1.9034E+09  18.027059   1.235710 -14.449440   3.449102  -8.401188   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.101E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 04:57:18
+Retrying with mesh_delta_coeff = .9
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 04:57:23
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2278   7.375704   9311.135   1.016888   1.016888   1.252365   1.252365   0.333313   0.000734   0.317823   0.595995  -2.108812   1057      0
+   6.000000   2.212389   0.093679 -34.186542  -0.147167 -99.000000   0.000000   0.665527   0.000053   0.001173   0.402812   0.073883      2      0
+ 1.3430E+09  17.575585   1.016336 -99.000000   3.591107  -8.246058   0.000000   0.000005   0.000125  1.159E-03  1.192E-03  0.126E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9296108151E-03    0.1000000000E-02
+
+       2844   7.543708   9133.098   1.196405   1.196405   1.252365   1.105638   0.000930   0.000747   0.303685   0.539944  -1.875739   1087      0
+   5.282770   2.685266   0.220223 -24.379577  -0.013668 -99.000000   0.146727   0.997915   0.000031   0.001032   0.458864   0.128557      2      0
+ 1.9022E+09  18.029907   1.235887 -99.000000   3.443801  -8.411911   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.100E-09    varcontrol
+
+save photos/x844 for model 2844
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          27
+save final_profile.data.FGONG   2844
+ final_profile.data.FGONG for model 2844
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        28.3        28.2         0         0      2844
+       2844   7.543708   9133.098   1.196405   1.196405   1.252365   1.105638   0.000930   0.000747   0.303685   0.539944  -1.875739   1087      0
+   5.282770   2.685266   0.220223 -24.379577  -0.013668 -99.000000   0.146727   0.997915   0.000031   0.001032   0.458864   0.128557      2      0
+ 1.9022E+09  18.029907   1.235887 -99.000000   3.443801  -8.411911   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.100E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 05:25:45
+Retrying with mesh_delta_coeff = .8
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 05:25:51
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2274   7.375603   9311.207   1.016077   1.016077   1.252365   1.252365   0.332991   0.000734   0.317655   0.596310  -2.107370   1134      0
+   6.000000   2.212938   0.093269 -34.187585  -0.149099 -99.000000   0.000000   0.665850   0.000052   0.001172   0.402498   0.073955      2      0
+ 1.3390E+09  17.575888   1.015529 -99.000000   3.591515  -8.245118   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9347582100E-03    0.1000000000E-02
+
+       2840   7.543366   9138.156   1.195194   1.195194   1.252365   1.105760   0.000935   0.000747   0.303491   0.540400  -1.874104   1184      0
+   5.286430   2.685440   0.219021 -24.394824  -0.015293 -99.000000   0.146605   0.997909   0.000031   0.001031   0.458408   0.128673      2      0
+ 1.8983E+09  18.029746   1.234443 -99.000000   3.443015  -8.411856   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.995E-10    varcontrol
+
+save photos/x840 for model 2840
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          27
+save final_profile.data.FGONG   2840
+ final_profile.data.FGONG for model 2840
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        24.5        28.2         0         0      2840
+       2840   7.543366   9138.156   1.195194   1.195194   1.252365   1.105760   0.000935   0.000747   0.303491   0.540400  -1.874104   1184      0
+   5.286430   2.685440   0.219021 -24.394824  -0.015293 -99.000000   0.146605   0.997909   0.000031   0.001031   0.458408   0.128673      2      0
+ 1.8983E+09  18.029746   1.234443 -99.000000   3.443015  -8.411856   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.995E-10    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 05:50:23
+Retrying with mesh_delta_coeff = .7
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 05:50:30
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2276   7.375649   9311.004   1.016501   1.016501   1.252365   1.252365   0.333048   0.000734   0.317535   0.596148  -2.108130   1278      0
+   6.000000   2.212674   0.093497 -34.185923  -0.148092 -99.000000   0.000000   0.665793   0.000052   0.001171   0.402659   0.073928      2      0
+ 1.3410E+09  17.575695   1.015948 -14.750470   3.591028  -8.245806   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9472649913E-03    0.1000000000E-02
+
+       2841   7.543151   9133.969   1.195664   1.195664   1.252365   1.105883   0.000947   0.000747   0.303407   0.540280  -1.876518   1345      0
+   5.289312   2.684118   0.219449 -24.408643  -0.014498 -99.000000   0.146482   0.997897   0.000031   0.001030   0.458528   0.128602      2      0
+ 1.8993E+09  18.028206   1.234505 -14.273349   3.443795  -8.412781   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.984E-10    varcontrol
+
+save photos/x841 for model 2841
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2841
+ final_profile.data.FGONG for model 2841
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        35.5        28.2         0         0      2841
+       2841   7.543151   9133.969   1.195664   1.195664   1.252365   1.105883   0.000947   0.000747   0.303407   0.540280  -1.876518   1345      0
+   5.289312   2.684118   0.219449 -24.408643  -0.014498 -99.000000   0.146482   0.997897   0.000031   0.001030   0.458528   0.128602      2      0
+ 1.8993E+09  18.028206   1.234505 -14.273349   3.443795  -8.412781   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.984E-10    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 06:26:03
+Retrying with mesh_delta_coeff = .6
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 06:26:09
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2274   7.375533   9311.495   1.016052   1.016052   1.252365   1.252365   0.333167   0.000734   0.317291   0.596310  -2.107439   1567      0
+   6.000000   2.212747   0.093243 -34.189296  -0.149120 -99.000000   0.000000   0.665674   0.000053   0.001169   0.402498   0.073943      3      0
+ 1.3390E+09  17.575707   1.015531 -99.000000   3.590829  -8.246923   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.127E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9082430413E-03    0.1000000000E-02
+
+       2839   7.543768   9147.658   1.194529   1.194529   1.252365   1.105638   0.000908   0.000747   0.303155   0.540527  -1.868926   1629      0
+   5.282416   2.688183   0.218257 -24.367860  -0.016487 -99.000000   0.146727   0.997936   0.000031   0.001028   0.458281   0.128835      2      0
+ 1.8973E+09  18.032899   1.234722 -99.000000   3.439154  -8.417830   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.994E-10    varcontrol
+
+save photos/x839 for model 2839
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2839
+ final_profile.data.FGONG for model 2839
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        41.4        28.2         0         0      2839
+       2839   7.543768   9147.658   1.194529   1.194529   1.252365   1.105638   0.000908   0.000747   0.303155   0.540527  -1.868926   1629      0
+   5.282416   2.688183   0.218257 -24.367860  -0.016487 -99.000000   0.146727   0.997936   0.000031   0.001028   0.458281   0.128835      2      0
+ 1.8973E+09  18.032899   1.234722 -99.000000   3.439154  -8.417830   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.994E-10    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 07:07:34
+Retrying with mesh_delta_coeff = .5
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 07:07:42
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2270   7.375429   9311.642   1.015196   1.015196   1.252365   1.252365   0.332995   0.000734   0.317658   0.596626  -2.106412   1867      0
+   6.000000   2.213069   0.092785 -34.192671  -0.150496 -99.000000   0.000000   0.665846   0.000053   0.001172   0.402182   0.073992      2      0
+ 1.3350E+09  17.575848   1.014643 -14.750470   3.592096  -8.244543   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.126E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9729913367E-03    0.1000000000E-02
+
+       2835   7.542314   9137.443   1.193869   1.193869   1.252365   1.106619   0.000973   0.000747   0.303334   0.540952  -1.876610   1939      0
+   5.301473   2.682837   0.217868 -24.453948  -0.016676 -99.000000   0.145746   0.997871   0.000031   0.001028   0.457856   0.128713      2      0
+ 1.8936E+09  18.026099   1.232003 -99.000000   3.444935  -8.410378   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.968E-10    varcontrol
+
+save photos/x835 for model 2835
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2835
+ final_profile.data.FGONG for model 2835
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        47.4        28.2         0         0      2835
+       2835   7.542314   9137.443   1.193869   1.193869   1.252365   1.106619   0.000973   0.000747   0.303334   0.540952  -1.876610   1939      0
+   5.301473   2.682837   0.217868 -24.453948  -0.016676 -99.000000   0.145746   0.997871   0.000031   0.001028   0.457856   0.128713      2      0
+ 1.8936E+09  18.026099   1.232003 -99.000000   3.444935  -8.410378   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.968E-10    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 07:55:11
+Retrying with mesh_delta_coeff = .4
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 07:55:18
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2269   7.375378   9311.645   1.014962   1.014962   1.252365   1.252365   0.333038   0.000734   0.316757   0.596703  -2.106085   2233      0
+   6.000000   2.213115   0.092684 -34.194190  -0.151011 -99.000000   0.000000   0.665803   0.000053   0.001165   0.402104   0.074000      3      0
+ 1.3340E+09  17.575863   1.014442 -99.000000   3.590908  -8.247238   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.126E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9380935077E-03    0.1000000000E-02
+
+       2834   7.542889   9148.176   1.193223   1.193223   1.252365   1.106190   0.000938   0.000747   0.302446   0.541086  -1.870483   2328      0
+   5.293114   2.686233   0.217050 -24.416595  -0.017956 -99.000000   0.146175   0.997906   0.000031   0.001022   0.457722   0.128892      4      0
+ 1.8924E+09  18.030075   1.232405 -14.449440   3.440007  -8.416472   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.977E-10    varcontrol
+
+save photos/x834 for model 2834
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          27
+save final_profile.data.FGONG   2834
+ final_profile.data.FGONG for model 2834
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        44.6        28.2         0         0      2834
+       2834   7.542889   9148.176   1.193223   1.193223   1.252365   1.106190   0.000938   0.000747   0.302446   0.541086  -1.870483   2328      0
+   5.293114   2.686233   0.217050 -24.416595  -0.017956 -99.000000   0.146175   0.997906   0.000031   0.001022   0.457722   0.128892      4      0
+ 1.8924E+09  18.030075   1.232405 -14.449440   3.440007  -8.416472   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.977E-10    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 08:39:56
+Retrying with mesh_delta_coeff = .3
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 08:40:02
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2267   7.375285   9312.178   1.014552   1.014552   1.252365   1.252365   0.333100   0.000734   0.318018   0.596863  -2.105560   3132      0
+   6.000000   2.213171   0.092413 -34.197260  -0.151690 -99.000000   0.000000   0.665741   0.000053   0.001175   0.401945   0.074014      2      0
+ 1.3320E+09  17.575856   1.013999 -99.000000   3.592982  -8.243177   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.126E-11        max_dt
+
+
+stop because have dropped below central lower limit for h1
+    0.9239512593E-03    0.1000000000E-02
+
+       2832   7.543025   9156.452   1.192462   1.192462   1.252365   1.106680   0.000924   0.000747   0.303667   0.541315  -1.866910   3278      0
+   5.294169   2.687917   0.216102 -24.405198  -0.019174 -99.000000   0.145685   0.997920   0.000031   0.001031   0.457492   0.129024      4      0
+ 1.8904E+09  18.031900   1.232080 -99.000000   3.450780  -8.394004   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    varcontrol
+
+save photos/x832 for model 2832
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          26
+save final_profile.data.FGONG   2832
+ final_profile.data.FGONG for model 2832
+termination code: xa_central_lower_limit
+
+       runtime, prev time, retries, backups, steps        58.1        28.2         0         0      2832
+       2832   7.543025   9156.452   1.192462   1.192462   1.252365   1.106680   0.000924   0.000747   0.303667   0.541315  -1.866910   3278      0
+   5.294169   2.687917   0.216102 -24.405198  -0.019174 -99.000000   0.145685   0.997920   0.000031   0.001031   0.457492   0.129024      4      0
+ 1.8904E+09  18.031900   1.232080 -99.000000   3.450780  -8.394004   0.000000   0.000009   0.000125  1.156E-03  1.192E-03 -0.104E-09    lg_XH_cntr
+
+DATE: 2016-02-25
+TIME: 09:38:10
+Retrying with mesh_delta_coeff = .2
+Retrying with max_years_for_timestep = 1000000
+DATE: 2016-02-25
+TIME: 09:38:15
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       2265   7.375209   9312.056   1.014094   1.014094   1.252365   1.252365   0.333136   0.000734   0.316875   0.597021  -2.105100   4423      0
+   6.000000   2.213234   0.092195 -34.200302  -0.152334 -99.000000   0.000000   0.665704   0.000053   0.001166   0.401786   0.074028      2      0
+ 1.3300E+09  17.575861   1.013541 -99.000000   3.591678  -8.245907   0.000000   0.000005   0.000125  1.159E-03  1.193E-03  0.125E-11        max_dt
+

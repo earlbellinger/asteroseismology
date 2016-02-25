@@ -50,8 +50,7 @@ simulate() {
        change 'diffusion_class_factor(4)' '1' "$diffusion"
     fi
     
-    mk
-    rn | tee "$pmslog"
+    ./rn | tee "$pmslog"
     while ! grep -q "$pmsuccess" "$pmslog"; do
         new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
@@ -63,12 +62,11 @@ simulate() {
             tee "$pmslog"
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
         mesh_delta_coeff=$new_mesh_delta_coeff
-        rn | tee -a "$pmslog"
+        ./rn | tee -a "$pmslog"
     done
     
     mv LOGS/history.data .
     
-    #change "write_profiles_flag" ".false." ".true."
     change "max_years_for_timestep" "-1" "$max_years_for_timestep"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
@@ -79,33 +77,7 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
-    #if (( $(echo "$M < 1.2" | bc -l) )); then
-    #    new_profile_interval=5
-    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
-    #    profile_interval=$new_profile_interval
-    #fi
-    #if (( $(echo "$M < 1.1" | bc -l) )); then
-    #    new_profile_interval=10
-    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
-    #    profile_interval=$new_profile_interval
-    #fi
-    #if (( $(echo "$M < 1" | bc -l) )); then
-    #    new_profile_interval=15
-    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
-    #    profile_interval=$new_profile_interval
-    #fi
-    #if (( $(echo "$M < 0.9" | bc -l) )); then
-    #    new_profile_interval=20
-    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
-    #    profile_interval=$new_profile_interval
-    #fi
-    #if (( $(echo "$M < 0.8" | bc -l) )); then
-    #    new_profile_interval=25
-    #    change "profile_interval" "$profile_interval" "$new_profile_interval"
-    #    profile_interval=$new_profile_interval
-    #fi
-    
-    rn | tee "$logfile"
+    ./rn | tee "$logfile"
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
         
@@ -129,15 +101,10 @@ simulate() {
         if grep -q "$meshfail" "$logfile"; then
             new_max_years_for_timestep=$(echo "scale=0;
                 $max_years_for_timestep/2" | bc -l)
-            new_mesh_delta_coeff=1
+            new_mesh_delta_coeff=1.5
             change "max_years_for_timestep" "$max_years_for_timestep" \
                 "$new_max_years_for_timestep" 
             max_years_for_timestep=$new_max_years_for_timestep
-            #new_profile_interval=$(echo "scale=0; $profile_interval * 2" |
-            #    bc -l)
-            #change "profile_interval" "$profile_interval" \
-            #    "$new_profile_interval"
-            #profile_interval=$new_profile_interval
         fi
         
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
@@ -146,7 +113,7 @@ simulate() {
             tee "$logfile"
         echo "Retrying with max_years_for_timestep = $max_years_for_timestep" |
             tee -a "$logfile"
-        rn | tee -a "$logfile"
+        ./rn | tee -a "$logfile"
     done
     
     # enable profile writing and rerun track with good settings 
@@ -157,7 +124,7 @@ simulate() {
         change "profile_interval" "$profile_interval" "$new_profile_interval"
     fi
     change "write_profiles_flag" ".false." ".true."
-    rn | tee -a "$logfile"
+    ./rn | tee -a "$logfile"
     
     # only process ~200 or so adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"

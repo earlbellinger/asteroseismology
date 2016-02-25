@@ -1,0 +1,12 @@
+Universe     = vanilla
+getenv       = True
+Executable   = dispatch.sh_-d_simulations_-M_1.435068_-Y_0.321993_-Z_0.002265_-a_1.815216_-D_0.001427_-f_0.410751_-r.sh
+Output       = condor.out
+Error        = condor.error
+Log          = condor.log
+environment  = OMP_NUM_THREADS=2
+request_cpus = 2
+nice_user    = True
+
+queue
+

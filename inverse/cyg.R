@@ -15,6 +15,12 @@ metcalfe <- read.table(file.path('data', 'cyg.dat'), header=1)
 measA <- read.table(file.path('data', '16CygA-obs.dat'), header=1)
 measB <- read.table(file.path('data', '16CygB-obs.dat'), header=1)
 
+vermA <- data.frame(name="Y_surf", value=0.241, uncertainty=0.01)
+vermB <- data.frame(name="Y_surf", value=0.242, uncertainty=0.024)
+
+measA <- rbind(measA, vermA)
+measB <- rbind(measB, vermB)
+
 #red <- 'darkred'
 #blue <- 'blue'
 
@@ -57,29 +63,39 @@ plot_cygs <- function(name, cygA, cygB, ...,
         other_B <- density(rnorm(100000, means[2], stds[2]))
         xlim <- range(xlim, other_A$x, other_B$x)
         #ylim <- range(ylim, other_A$y, other_B$y)
-        other_name <- "int"
-        other_citation <- "White et al. 2013"
+        other_name <- if (name %in% vermA$name) 
+            "ast" else "int"
+        other_citation <- if (name %in% vermA$name) 
+            "Verma et al. 2014" else "White et al. 2013"
     }
     
     
     #A$y <- A$y / max(ylim)
     #B$y <- B$y / max(ylim)
+    xlim[1] <- xlim[1] - xlim[1] * 0.1
+    xlim[2] <- xlim[2] + xlim[2] * 0.05
     
     if (name == "radius") {
         xlim[1] <- xlim[1] - xlim[1]*0.05
+        xlim[2] <- xlim[2] + xlim[2]*0.15
+    }
+    
+    if (name == "Y_surf") {
+        xlim[2] <- xlim[2] + xlim[2]*0.15
     }
     
     if (name == "L") {
         xlim[1] <- xlim[1] - xlim[1]*0.2
+        xlim[2] <- xlim[2] + xlim[2]*0.2
     }
     
     par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(0.75,0,0))
-    plot(A, axes=F, col=red, lwd=2, yaxs='i', 
+    plot(A, axes=F, col=red, lwd=1.5, yaxs='i', lty=2,
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
-        xlab=get_label(name), ylab="", main="")
+        xlab=as.expression(get_label(name)), ylab="", main="")
     magaxis(side=1, family=font, tcl=0.5, labels=1, 
             las=1, mgp=mgp, cex.axis=text.cex)
-    lines(B, col=blue, lwd=2)
+    lines(B, col=blue, lwd=1.5, lty=2)
     if (has_other) {
         #arrows(mean(cygB[[name]])-2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
         #       mean(cygB[[name]])+2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
@@ -88,9 +104,9 @@ plot_cygs <- function(name, cygA, cygB, ...,
         #       mean(cygA[[name]])+2*sqrt(var(cygA[[name]])), 1.1*mean(A$y), 
         #    lty=1, code=3, col=red)
         arrows(means[1]-2*stds[1], mean(A$y), means[1]+2*stds[1], mean(A$y), 
-            lty=2, code=3, col=red)
+            code=3, col=red, length=0.1)
         arrows(means[2]-2*stds[2], mean(B$y), means[2]+2*stds[2], mean(B$y),
-            lty=2, code=3, col=blue)
+            code=3, col=blue, length=0.1)
         #lines(other_A, lty=2, col=red)
         #lines(other_B, lty=2, col=blue)
     }
@@ -109,12 +125,13 @@ plot_cygs <- function(name, cygA, cygB, ...,
             as.expression(bquote(epsilon[.(other_name)]==.( eps_Bm )*"%"))
         )
     }
-    legend("left", bty='n', cex=text.cex, inset=c(-0.075, 0),
-        text.col=c("darkred", "blue", NA),
+    legend("topleft", bty='n', cex=text.cex, inset=c(-0.075, 0),
+        text.col=c(red, blue, NA),
         legend=uncertainties,
     )
     
-    if (name == "L" || (name == "age" && has_other)) {
+    if (name == "L" || name == "radius" || name == "Y_surf" || 
+           (name == "age" && has_other)) {
         par(xpd=NA)
         legend("topright", bty='n', cex=text.cex,
             inset=c(-0.075,0),
@@ -122,9 +139,9 @@ plot_cygs <- function(name, cygA, cygB, ...,
             #lwd=c(2,2,1,1), 
             #col=c("darkred", "blue", "darkred", "blue"),
             pch=c(NA, NA, 20, 20),
-            lty=c(1, 2, NA, NA),
-            lwd=c(2, 1, NA, NA),
-            col=c("black", "black", "darkred", "blue"),
+            lty=c(2, 1, NA, NA),
+            lwd=c(1.5, 1, NA, NA),
+            col=c("black", "black", red, blue),
             c("Machine learning",
               other_citation,
               "16 Cyg A",
@@ -137,20 +154,33 @@ plot_cygs <- function(name, cygA, cygB, ...,
 for (name in names(cygA)) {
     make_plots(plot_cygs, paste0("cyg-", name), 
         filepath=file.path('plots', 'comparison'),
-        name=name, cygA=cygA, cygB=cygB)
+        name=name, cygA=cygA, cygB=cygB,
+        wide=F, tall=F)
 }
 
 cygA <- read.table(file.path('learn_covs', 'hares', '16CygA.dat'), header=1)
 cygB <- read.table(file.path('learn_covs', 'hares', '16CygB.dat'), header=1)
 make_plots(plot_cygs, "cyg-radius", 
     filepath=file.path('plots', 'comparison'),
-    name="radius", cygA=cygA, cygB=cygB)
+    name="radius", cygA=cygA, cygB=cygB,
+    wide=F, tall=F)
 
 cygA <- read.table(file.path('learn_covs', 'kages', '16CygA.dat'), header=1)
 cygB <- read.table(file.path('learn_covs', 'kages', '16CygB.dat'), header=1)
 make_plots(plot_cygs, "cyg-L", 
     filepath=file.path('plots', 'comparison'),
-    name="L", cygA=cygA, cygB=cygB)
+    name="L", cygA=cygA, cygB=cygB,
+    wide=F, tall=F)
 
+cygA <- read.table(file.path('learn_covs', 'perturb', '16CygA.dat'), header=1)
+cygB <- read.table(file.path('learn_covs', 'perturb', '16CygB.dat'), header=1)
+make_plots(plot_cygs, "cyg-Y_surf", 
+    filepath=file.path('plots', 'comparison'),
+    name="Y_surf", cygA=cygA, cygB=cygB,
+    wide=F, tall=F)
+make_plots(plot_cygs, "cyg-X_c", 
+    filepath=file.path('plots', 'comparison'),
+    name="X_c", cygA=cygA, cygB=cygB,
+    wide=F, tall=F)
 
 

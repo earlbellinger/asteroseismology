@@ -1,0 +1,73 @@
+000 (20795.000.000) 02/24 21:35:17 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20795.000.000) 02/25 05:05:47 Job executing on host: <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+006 (20795.000.000) 02/25 05:05:56 Image size of job updated: 1
+	3  -  MemoryUsage of job (MB)
+	2068  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 05:10:57 Image size of job updated: 1143920
+	933  -  MemoryUsage of job (MB)
+	954608  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 05:15:58 Image size of job updated: 1144936
+	933  -  MemoryUsage of job (MB)
+	954608  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 05:25:58 Image size of job updated: 1242800
+	1062  -  MemoryUsage of job (MB)
+	1086692  -  ResidentSetSize of job (KB)
+...
+022 (20795.000.000) 02/25 05:32:24 Job disconnected, attempting to reconnect
+    Socket between submit and execute hosts closed unexpectedly
+    Trying to reconnect to slot1@seismo25.mps.mpg.de <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+024 (20795.000.000) 02/25 06:12:27 Job reconnection failed
+    Job disconnected too long: JobLeaseDuration (2400 seconds) expired
+    Can not reconnect to slot1@seismo25.mps.mpg.de, rescheduling job
+...
+001 (20795.000.000) 02/25 06:23:47 Job executing on host: <134.76.239.90:23525?addrs=134.76.239.90-23525>
+...
+006 (20795.000.000) 02/25 06:53:59 Image size of job updated: 1385552
+	1221  -  MemoryUsage of job (MB)
+	1250000  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 07:09:01 Image size of job updated: 1506500
+	1339  -  MemoryUsage of job (MB)
+	1370468  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 07:14:01 Image size of job updated: 1506500
+	1339  -  MemoryUsage of job (MB)
+	1370652  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 07:19:02 Image size of job updated: 1506500
+	1339  -  MemoryUsage of job (MB)
+	1370804  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 07:29:02 Image size of job updated: 1533096
+	1366  -  MemoryUsage of job (MB)
+	1398288  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 07:34:03 Image size of job updated: 1557632
+	1390  -  MemoryUsage of job (MB)
+	1422852  -  ResidentSetSize of job (KB)
+...
+006 (20795.000.000) 02/25 08:34:09 Image size of job updated: 1557640
+	1403  -  MemoryUsage of job (MB)
+	1436576  -  ResidentSetSize of job (KB)
+...
+005 (20795.000.000) 02/25 09:33:52 Job terminated.
+	(1) Normal termination (return value 127)
+		Usr 0 05:14:16, Sys 0 00:01:23  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 05:14:16, Sys 0 00:01:23  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108777
+	   Memory (MB)          :     1403     1221      1221
+...

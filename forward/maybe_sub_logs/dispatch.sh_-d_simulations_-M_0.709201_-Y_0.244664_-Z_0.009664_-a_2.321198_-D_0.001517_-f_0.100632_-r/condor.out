@@ -1,0 +1,36 @@
+DATE: 2016-02-25
+TIME: 11:14:37
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.4567200000000000D-01
+                                                    he3    2.6037173682444926D-05
+                                                    he4    2.4463796282631756D-01
+                                                    c12    1.6629862471443776D-03
+                                                    n14    4.8714220983144696D-04
+                                                    o16    4.5229678015364337D-03
+                                                   ne20    1.0144590476939036D-03
+                                                   mg24    1.9764446937938444D-03
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    9.6640000000000007D-03
+                                                  new z    9.6640000000004639D-03
+                                        relax_initial_Y    2.4466399999999999D-01
+                                                  new y    2.4466399999999991D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+

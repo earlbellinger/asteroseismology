@@ -1,0 +1,76 @@
+matrixStats v0.14.2 (2015-06-23) successfully loaded. See ?matrixStats for help.
+Loading required package: MASS
+Loading required package: plotrix
+Loading required package: sm
+Package 'sm', version 2.2-5.4: type help(sm) for summary information
+
+Attaching package: ‘sm’
+
+The following object is masked from ‘package:MASS’:
+
+    muscle
+
+Starting parallelization in mode=multicore with cpus=32.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.
+Mapping in parallel: mode = multicore; cpus = 32; elements = 10000.

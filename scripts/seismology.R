@@ -170,6 +170,7 @@ seismology_plot <- function(seps, nus, #fit,
         gaussian_env, w.median, 
         nu_max, l_degs, ylab, dnu.cl, pchs, freqs, ..., 
         text.cex=1, mgp=utils.mgp, font=utils.font) {
+    fit <- lm(seps~nus, weights=gaussian_env)
     if (length(l_degs)==1)
         col.pal <- colorRampPalette(c(dnu.cl[1], dnu.cl[3]))(1001)[1+1000*
             normalize(gaussian_env)]
@@ -178,10 +179,10 @@ seismology_plot <- function(seps, nus, #fit,
          ylab=ylab, 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
          xlim=range(freqs$nu), 
-         #ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], seps), 
+         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], seps), 
          col=if (length(l_degs)==1) col.pal else dnu.cl[pchs], 
          pch=if (length(l_degs)==1) 1 else pchs)
-    abline(lm(seps~nus, weights=gaussian_env), lty=2)
+    abline(fit, lty=2)
     abline(v=nu_max, lty=3)
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)

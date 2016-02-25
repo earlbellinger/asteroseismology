@@ -1,0 +1,61 @@
+DATE: 2016-02-25
+TIME: 11:14:49
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.4008800000000008D-01
+                                                    he3    2.4740231608139114D-05
+                                                    he4    2.3245225976839184D-01
+                                                    c12    4.7210293553813908D-03
+                                                    n14    1.3829414866231042D-03
+                                                    o16    1.2840192636087690D-02
+                                                   ne20    2.8799341859977344D-03
+                                                   mg24    5.6109023359099570D-03
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    2.7435000000000001D-02
+                                                  new z    2.7435000000000449D-02
+                                        relax_initial_Y    2.3247699999999999D-01
+                                                  new y    2.3247699999999974D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1002253530E+01    0.9990000000E+00
+
+        812   7.093963   5051.358  -0.410661  -0.410661   0.969357   0.969357   0.739591   0.001565   0.232477   0.739987  -1.729378    552      0
+   6.181652   1.832597  -0.089119 -49.777483  -1.981579 -99.000000   0.000000   0.232948   0.012840   0.027435   0.232575   0.082157      4      0
+ 5.7873E+07  17.068467  -0.411638 -99.000000   4.848551  -6.672008   0.000000   0.004565   0.002880  2.746E-02  2.744E-02 -0.772E-11  max increase
+
+save photos/x812 for model 812
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          68
+save final_profile.data.FGONG    812
+ final_profile.data.FGONG for model 812
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         4.2        28.2         0         0       812
+        812   7.093963   5051.358  -0.410661  -0.410661   0.969357   0.969357   0.739591   0.001565   0.232477   0.739987  -1.729378    552      0
+   6.181652   1.832597  -0.089119 -49.777483  -1.981579 -99.000000   0.000000   0.232948   0.012840   0.027435   0.232575   0.082157      4      0
+ 5.7873E+07  17.068467  -0.411638 -99.000000   4.848551  -6.672008   0.000000   0.004565   0.002880  2.746E-02  2.744E-02 -0.772E-11  max increase
+
+DATE: 2016-02-25
+TIME: 11:19:46
+DATE: 2016-02-25
+TIME: 11:19:47

@@ -3,7 +3,7 @@ inverse/perturb/**
 **/data/**
 **/maybe_sub_logs**/**
 **/**plots**/**
-**/learn_covs/**
+**/learn_**/**
 **/__pycache__/**
 **.png
 **.pdf

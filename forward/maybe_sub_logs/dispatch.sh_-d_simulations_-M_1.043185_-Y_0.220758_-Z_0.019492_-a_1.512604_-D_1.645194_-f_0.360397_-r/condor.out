@@ -1,0 +1,56 @@
+DATE: 2016-02-25
+TIME: 11:14:30
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.5974999999999970D-01
+                                                    he3    2.3493094152753062D-05
+                                                    he4    2.2073450690584723D-01
+                                                    c12    3.3541937012974221D-03
+                                                    n14    9.8255131974695647D-04
+                                                    o16    9.1226912652678394D-03
+                                                   ne20    2.0461336669753334D-03
+                                                   mg24    3.9864300467125106D-03
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110
+ first model is slow to converge: num tries         120
+ first model is slow to converge: num tries         130
+ first model is slow to converge: num tries         140
+ first model is slow to converge: num tries         150
+ first model is slow to converge: num tries         160
+ first model is slow to converge: num tries         170
+ first model is slow to converge: num tries         180
+ first model is slow to converge: num tries         190
+ first model is slow to converge: num tries         200
+ first model is slow to converge: num tries         210
+ first model is slow to converge: num tries         220
+ first model is slow to converge: num tries         230
+ first model is slow to converge: num tries         240
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    1.9491999999999999D-02
+                                                  new z    1.9491999999999957D-02
+                                        relax_initial_Y    2.2075800000000001D-01
+                                                  new y    2.2075799999999984D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+

@@ -1,0 +1,51 @@
+DATE: 2016-02-25
+TIME: 11:14:17
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.6253900000000008D-01
+                                                    he3    2.4590604911128048D-05
+                                                    he4    2.3104640939508891D-01
+                                                    c12    1.0995945901544474D-03
+                                                    n14    3.2210665571429510D-04
+                                                    o16    2.9906626916202223D-03
+                                                   ne20    6.7077745392839911D-04
+                                                   mg24    1.3068586085826438D-03
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+ have reached retry limit so now backup
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -8.204120       -0.705008        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -8.505150       -1.006038        0.500000
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110
+ first model is slow to converge: num tries         120
+ first model is slow to converge: num tries         130
+ first model is slow to converge: num tries         140
+ first model is slow to converge: num tries         150
+ first model is slow to converge: num tries         160
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    6.3899999999999998D-03
+                                                  new z    6.3899999999995696D-03
+                                        relax_initial_Y    2.3107100000000000D-01
+                                                  new y    2.3107100000000003D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
