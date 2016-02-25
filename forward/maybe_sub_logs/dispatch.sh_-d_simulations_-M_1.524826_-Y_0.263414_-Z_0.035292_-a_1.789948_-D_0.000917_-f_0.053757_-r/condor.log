@@ -1,0 +1,57 @@
+000 (20804.000.000) 02/24 21:35:17 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20804.000.000) 02/25 05:09:48 Job executing on host: <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+006 (20804.000.000) 02/25 05:09:56 Image size of job updated: 1
+	3  -  MemoryUsage of job (MB)
+	2068  -  ResidentSetSize of job (KB)
+...
+006 (20804.000.000) 02/25 05:14:56 Image size of job updated: 1142604
+	936  -  MemoryUsage of job (MB)
+	957584  -  ResidentSetSize of job (KB)
+...
+006 (20804.000.000) 02/25 05:19:57 Image size of job updated: 1147816
+	975  -  MemoryUsage of job (MB)
+	997672  -  ResidentSetSize of job (KB)
+...
+006 (20804.000.000) 02/25 05:24:57 Image size of job updated: 1407908
+	1203  -  MemoryUsage of job (MB)
+	1231708  -  ResidentSetSize of job (KB)
+...
+022 (20804.000.000) 02/25 05:31:22 Job disconnected, attempting to reconnect
+    Socket between submit and execute hosts closed unexpectedly
+    Trying to reconnect to slot1@seismo25.mps.mpg.de <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+024 (20804.000.000) 02/25 06:11:23 Job reconnection failed
+    Job disconnected too long: JobLeaseDuration (2400 seconds) expired
+    Can not reconnect to slot1@seismo25.mps.mpg.de, rescheduling job
+...
+001 (20804.000.000) 02/25 06:24:47 Job executing on host: <134.76.239.91:19968?addrs=134.76.239.91-19968>
+...
+006 (20804.000.000) 02/25 06:54:59 Image size of job updated: 1574004
+	1354  -  MemoryUsage of job (MB)
+	1385824  -  ResidentSetSize of job (KB)
+...
+006 (20804.000.000) 02/25 07:00:00 Image size of job updated: 1598540
+	1378  -  MemoryUsage of job (MB)
+	1410684  -  ResidentSetSize of job (KB)
+...
+006 (20804.000.000) 02/25 07:05:01 Image size of job updated: 1623076
+	1378  -  MemoryUsage of job (MB)
+	1410684  -  ResidentSetSize of job (KB)
+...
+005 (20804.000.000) 02/25 08:43:18 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 03:45:44, Sys 0 00:00:29  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 03:45:44, Sys 0 00:00:29  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108652
+	   Memory (MB)          :     1378     1221      1221
+...

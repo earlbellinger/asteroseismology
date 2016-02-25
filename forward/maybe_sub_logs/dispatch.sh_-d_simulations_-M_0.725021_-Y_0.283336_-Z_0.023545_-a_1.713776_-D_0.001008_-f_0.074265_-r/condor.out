@@ -1,0 +1,42 @@
+DATE: 2016-02-25
+TIME: 11:14:49
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    6.9311900000000004D-01
+                                                    he3    3.0152652791130750D-05
+                                                    he4    2.8330584734720887D-01
+                                                    c12    4.0516360915784583D-03
+                                                    n14    1.1868546492633874D-03
+                                                    o16    1.1019585770609989D-02
+                                                   ne20    2.4715892257815473D-03
+                                                   mg24    4.8153342627665456D-03
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    2.3545000000000000D-02
+                                                  new z    2.3545000000000489D-02
+                                        relax_initial_Y    2.8333599999999998D-01
+                                                  new y    2.8333599999999998D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           2
+
+
+hydro_newton_step failed to converge
+       retry log10(dt/yr), log10(dt), retry_factor     1    14       -4.572704        2.926408        0.500000
+hydro_newton_step failed to converge
+       retry log10(dt/yr), log10(dt), retry_factor     1    19       -4.477828        3.021284        0.500000
+hydro_newton_step failed to converge
+       retry log10(dt/yr), log10(dt), retry_factor     1    23       -4.462133        3.036979        0.500000

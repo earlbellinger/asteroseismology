@@ -145,23 +145,23 @@ pdfpng <- function(plot_f, filename, directory,
 ### Metadata for the grid ####################################################
 ##############################################################################
 
-get_label <- function(symbol) as.expression(bquote(
+get_label <- function(symbol) bquote(
         .(seis.names[[symbol]])
       ~ .(seis.labs[[symbol]])
       * .(seis.units[[symbol]])
-))
+)
 
-get_label_nameless <- function(symbol) as.expression(bquote(
+get_label_nameless <- function(symbol) bquote(
         .(seis.labs[[symbol]])
       * .(seis.units[[symbol]])
-))
+)
 
 seis.names <- list(
   M              = "Mass", 
   Y              = "Initial helium", 
   Z              = "Initial metallicity",
   alpha          = "Mixing length parameter", 
-  diffusion      = "Diffusion coefficient",
+  diffusion      = "Diffusion factor",
   overshoot      = "Overshoot",
   age            = "Age", 
   radius         = "Radius", 
@@ -229,21 +229,21 @@ seis.labs <- list(
 )
 
 seis.units <- list(
-  M              = bquote("/"*M["\u0298"]), 
+  M              = bquote("/"*M["☉"]), 
   Y              = bquote(), 
   Z              = bquote(),
   alpha          = bquote(), 
   diffusion      = bquote(), 
   overshoot      = bquote(), 
   age            = bquote("/Gyr"), 
-  radius         = bquote("/"*R["\u0298"]), 
+  radius         = bquote("/"*R["☉"]), 
   mass_X         = bquote(), 
   mass_Y         = bquote(), 
   X_surf         = bquote(),
   Y_surf         = bquote(),
-  X_c            = bquote(), 
+  X_c            = bquote("/"*M["*"]), 
   log_g          = bquote(" (cgs)"), 
-  L              = bquote("/"*L["\u0298"]), 
+  L              = bquote("/"*L["☉"]), 
   Teff           = bquote("/"*K), 
   Fe.H           = bquote(), 
   Dnu_median     = bquote("/"*mu*Hz), 

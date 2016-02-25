@@ -1,0 +1,93 @@
+000 (20708.000.000) 02/24 21:35:12 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20708.000.000) 02/25 04:08:46 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
+...
+006 (20708.000.000) 02/25 04:08:55 Image size of job updated: 827416
+	626  -  MemoryUsage of job (MB)
+	640028  -  ResidentSetSize of job (KB)
+...
+006 (20708.000.000) 02/25 04:13:56 Image size of job updated: 1143348
+	931  -  MemoryUsage of job (MB)
+	952632  -  ResidentSetSize of job (KB)
+...
+006 (20708.000.000) 02/25 04:18:57 Image size of job updated: 1145828
+	931  -  MemoryUsage of job (MB)
+	952632  -  ResidentSetSize of job (KB)
+...
+006 (20708.000.000) 02/25 04:28:57 Image size of job updated: 1145828
+	931  -  MemoryUsage of job (MB)
+	952916  -  ResidentSetSize of job (KB)
+...
+006 (20708.000.000) 02/25 04:33:58 Image size of job updated: 1147088
+	940  -  MemoryUsage of job (MB)
+	962124  -  ResidentSetSize of job (KB)
+...
+006 (20708.000.000) 02/25 04:43:58 Image size of job updated: 1147088
+	940  -  MemoryUsage of job (MB)
+	962128  -  ResidentSetSize of job (KB)
+...
+004 (20708.000.000) 02/25 10:09:11 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 10:29:16, Sys 0 00:01:52  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108670
+	   Memory (MB)          :      940        1         1
+...
+001 (20708.000.000) 02/25 10:11:11 Job executing on host: <134.76.239.90:23525?addrs=134.76.239.90-23525>
+...
+004 (20708.000.000) 02/25 10:49:46 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 01:08:56, Sys 0 00:00:14  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108691
+	   Memory (MB)          :      977      977       977
+...
+001 (20708.000.000) 02/25 10:50:42 Job executing on host: <134.76.239.84:12289?addrs=134.76.239.84-12289>
+...
+004 (20708.000.000) 02/25 10:52:28 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:03:08, Sys 0 00:00:01  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108526
+	   Memory (MB)          :      977      977       977
+...
+001 (20708.000.000) 02/25 10:54:27 Job executing on host: <134.76.239.87:13734?addrs=134.76.239.87-13734>
+...
+004 (20708.000.000) 02/25 11:04:25 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:17:26, Sys 0 00:00:05  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108605
+	   Memory (MB)          :      977      977       977
+...
+001 (20708.000.000) 02/25 11:06:25 Job executing on host: <134.76.239.90:23525?addrs=134.76.239.90-23525>
+...
+004 (20708.000.000) 02/25 11:08:07 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:02:20, Sys 0 00:00:01  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108668
+	   Memory (MB)          :      977      977       977
+...
+001 (20708.000.000) 02/25 11:11:06 Job executing on host: <134.76.239.90:23525?addrs=134.76.239.90-23525>
+...

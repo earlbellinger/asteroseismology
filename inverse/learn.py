@@ -23,6 +23,7 @@ import corner
 
 plot_dir = 'learn_plots'
 cov_dir = 'learn_covs'
+table_dir = 'learn_tables'
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
 
@@ -32,9 +33,12 @@ if not os.path.exists(perturb_dir):
 if not os.path.exists(cov_dir):
     os.makedirs(cov_dir)
 
+if not os.path.exists(table_dir):
+    os.makedirs(table_dir)
+
 ### Load grid of models 
 data = pd.read_csv('../forward/simulations.dat', sep='\t')
-exclude = "nu_max|radial_velocity|Dnu_|slope"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|Dnu_|slope|mass_cc"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -49,13 +53,10 @@ y_latex = {
     "Y": r"Initial helium Y$_0$", 
     "Z": r"Initial metallicity Z$_0$", 
     "alpha": r"Mixing length $\alpha_{\mathrm{MLT}}$", 
-    "diffusion": r"Diffusion coefficient D",
-    "overshoot": r"Overshoot f",
+    "diffusion": r"Diffusion factor D",
+    "overshoot": r"Overshoot $\alpha_{\mathrm{ov}}$", 
     "age": r"Age $\tau/$Gyr", 
     "radius": r"Radius R$/$R$_\odot$", 
-#    "H": r"Hydrogen fraction X", 
-#    "He": r"Helium fraction Y",
-#    "Hc": r"Core-hydrogen fraction X$_c$",
     "mass_X": r"Hydrogen mass-fraction X", 
     "mass_Y": r"Helium mass-fraction Y",
     "X_surf": r"Surface hydrogen X$_{\mathrm{surf}}$", 
@@ -66,24 +67,21 @@ y_latex = {
     "mass_cc": r"Convective core mass-fraction M$_{\mathrm{cc}}$"
 }
 
-y_latex2 = {
+y_latex_short = {
     "M": r"M$/$M$_\odot$", 
     "Y": r"Y$_0$", 
     "Z": r"Z$_0$", 
     "alpha": r"$\alpha_{\mathrm{MLT}}$", 
     "diffusion": r"D",
-    "overshoot": r"f",
+    "overshoot": r"$\alpha_{\mathrm{ov}}$",
     "age": r"$\tau/$Gyr", 
     "radius": r"R$/$R$_\odot$", 
-#    "H": r"X", 
-#    "He": r"Y",
-#    "Hc": r"X$_\mathrm{c}$",
     "mass_X": r"X", 
     "mass_Y": r"Y",
-    "X_surf": r"X", 
-    "Y_surf": r"Y",
-    "X_c": r"X$_c$",
-    "log_g": r"log g (cgs)", 
+    "X_surf": r"X$_{\mathrm{surf}}$", 
+    "Y_surf": r"Y$_{\mathrm{surf}}$",
+    "X_c": r"X$_{\mathrm{c}}$/M$_*$",
+    "log_g": r"log g", 
     "L": r"L$/$L$_\odot$",
     "mass_cc": r"M$_{\mathrm{cc}}$"
 }
@@ -93,20 +91,11 @@ y_latex2 = {
 #all_ys = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age', 
 #    'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
 y_init = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot']
-y_curr = ['age', 'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
+y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf']#, 'mass_cc']
 
 def train_regressor(data, X_columns, y_show=y_init+y_curr):
     X = data.loc[:,X_columns]
     ys = data.loc[:, [i for i in y_show if i not in X_columns]]
-    #ys = data.drop(X_columns, axis=1).loc[:, y_show]
-    
-    #ys = ys.drop([i for i in y_show if re.search(ys.columns, i)], axis=1)
-    #data.drop(X_columns, axis=1)
-    #drop_cols = [i for i in ys.columns 
-    #        if re.search(y_exclude, i) if i in ys.columns]
-    #ys = ys.drop(drop_cols, axis=1)
-    #y_trfm = Pipeline(steps=[('scaler', MinMaxScaler())])#, ('pca', PCA())])
-    #new_ys = y_trfm.fit_transform(ys)
     
     print()
     for n_trees in [1024]:
@@ -127,7 +116,7 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     
     y_names = ys.columns
     X_names = X.columns
-    return [forest, y_names, X_names]#, y_trfm]
+    return [forest, y_names, X_names]
 
 def get_rc(num_ys):
     rows = (num_ys+(1 if num_ys%2 else 0)) // 2
@@ -140,30 +129,44 @@ def get_rc(num_ys):
         rows, cols = int(sqrt), int(sqrt)
     return rows, cols, sqrt
 
-def print_star(star, predict, y_names):
+def print_star(star, predict, y_names, table_curr, table_init):
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
     outstr = star
-    num_ys = predict.shape[1]
-    for (pred_j, name) in enumerate(y_names[0:num_ys]):
+    initstr = "\n" + star
+    currstr = "\n" + star
+    for (pred_j, name) in enumerate(y_names):
         (m, s) = (middles[pred_j], stds[pred_j])
-        outstr += r" & %.3g $\pm$ %.2g" % (m, s)
-    print(outstr + r' \\')
+        outstr += "\t%.3g±%.2g" % (m, s)
+        if name in y_init:
+            initstr += r" & %.3g $\pm$ %.2g" % (m, s)
+        if name in y_curr:
+            currstr += r" & %.3g $\pm$ %.2g" % (m, s)
+    print(outstr)
+    table_curr.write(currstr + r' \\')
+    table_init.write(initstr + r' \\')
 
 def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
     ## Corner plot
-    #truths = [np.NaN for i in range(len(y_names))]
-    #if star == 'Sun' or star == 'Tagesstern':
-    #    truths[0] = 1
-    #    truths[6] = 4.57
+    predict_cols = [i for i,y in enumerate(y_names) if y in y_show]
+    #truths = [np.NaN for i in range(len(predict_cols))]
+    #if star[:3] == 'Sun' or star[:10] == 'Tagesstern':
+    #    if y_show==y_init:
+    #        truths[0] = 1
+    #    else:
+    #        truths[0] = 4.57
     figure = corner.corner(
-        predict[:,[i for i,y in enumerate(y_names) if y in y_show]], 
-        labels=[y_latex2[y_name] for y_name in y_names
+        predict[:,predict_cols], 
+        labels=[y_latex_short[y_name] for y_name in y_names
                 if y_name in y_show],
         title_fmt='.2g',
         #truths=truths,
         quantiles=[0.16, 0.5, 0.84],
-        show_titles=True, title_args={"fontsize": 16})
+        show_titles=True, 
+        fill_contours=True, ret=True, 
+        bins=50, smooth=1.0,
+        title_args={"fontsize": 12})
+    figure.set_size_inches(2*6.97522, 4*4.17309)
     plt.savefig(os.path.join(out_dir, star + '-corner.pdf'))
     plt.close()
     
@@ -178,11 +181,8 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
     
     plt.figure(figsize=(6.97522*2, 4.17309*2), dpi=400, 
         facecolor='w', edgecolor='k')
-    #plt.suptitle(star)
     for (pred_j, name) in enumerate(y_names[0:num_ys]):
         (m, s) = (middles[pred_j], stds[pred_j])
-        #outstr += "\t%.3g +/- %.3g" % (m, s)
-        #outstr += r" & %.3g $\pm$ %.2g" % (m, s)
         
         if num_ys%2==0 or num_ys%3==0 or int(sqrt)==sqrt:
             ax = plt.subplot(rows, cols, pred_j+1)
@@ -198,7 +198,7 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
         P.plot(bins, y, 'b--', linewidth=1.5)
         
         ax.annotate(r"$\epsilon = %.3g\%%$" % (s/m*100),
-            xy=(0.5, 0.125), xycoords='axes fraction', #fontsize=16,
+            xy=(0.5, 0.125), xycoords='axes fraction',
             horizontalalignment='center', verticalalignment='center')
         
         P.xlabel(y_latex[y_names[pred_j]])
@@ -211,8 +211,6 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
         ax.minorticks_on()
         plt.tight_layout()
     
-    #print(outstr + r' \\')
-    #plt.subplots_adjust(top=0.9)
     plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
     plt.close()
 
@@ -237,13 +235,18 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     if not os.path.exists(cov_subdir):
         os.makedirs(cov_subdir)
     
+    basename = os.path.basename(directory)
+    table_curr_fname = os.path.join(table_dir, basename+"_curr.dat")
+    table_init_fname = os.path.join(table_dir, basename+"_init.dat")
+    table_curr = open(table_curr_fname, 'w')
+    table_init = open(table_init_fname, 'w')
+    
     wrong_cols = []
     outside = []
     run_times = []
     forest = None
     for star_fname in stars:
         star = os.path.split(star_fname)[-1].split("_")[0]
-        #star_fname = os.path.join(perturb_dir, directory, star)
         star_data = pd.read_csv(star_fname, sep='\t')
         star_data = star_data.drop([i for i in star_data.columns 
             if re.search(exclude, i)], axis=1).dropna()
@@ -260,8 +263,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             import_dist = np.array([tree.feature_importances_ 
                 for tree in est.estimators_])
             
-            np.savetxt(os.path.join(cov_dir, 'feature-importance-'+star+'.dat'),
-                import_dist, header=" ".join(X_names[indices]), comments='')
+            np.savetxt(os.path.join(cov_dir, 'feature-importance-' + \
+                    basename + '.dat'),
+                import_dist, header=" ".join(X_names), comments='')
             
             import_dist = import_dist.T[indices][::-1].T
             
@@ -277,14 +281,22 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
                        np.array(X_names)[indices][::-1])
             plt.xlabel("Feature importance")
             plt.tight_layout()
-            plt.savefig(os.path.join(plot_dir, 'feature_importance' + \
-                star + '.pdf'))
+            plt.savefig(os.path.join(plot_dir, 'feature_importance-' + \
+                basename + '.pdf'))
             plt.close()
             
             print()
-            print(r"\colhead{Name} & "+\
-                  ' & '.join([r"\colhead{" + y_latex2[yy] + r"}"
-                              for yy in y_names]))
+            print("Name\t"+"\t".join(y_names))
+            table_curr.write(
+                r"\tablehead{\colhead{Name} & "+\
+                ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
+                            for yy in y_names if yy in y_curr]) +\
+                r"}\startdata" )
+            table_init.write(
+                r"\tablehead{\colhead{Name} & "+\
+                ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
+                            for yy in y_names if yy in y_init]) +\
+                r"}\startdata" )
         
         ## check that it has all of the right columns
         if not set(X_names).issubset(set(star_data.columns)):
@@ -313,9 +325,12 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         run_times += [end-start]
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
             header=" ".join(y_names), comments='')
-        print_star(star, predict, y_names)
+        print_star(star, predict, y_names, table_curr, table_init)
         #plot_star(star+"_init", predict, y_names, out_dir)
         #plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
+    
+    table_curr.close()
+    table_init.close()
     print("\ntotal prediction time:", sum(run_times))
     print("time per star:", sum(run_times)/len(run_times))
     print("time per perturbation:", sum(run_times)/len(run_times)/10000)

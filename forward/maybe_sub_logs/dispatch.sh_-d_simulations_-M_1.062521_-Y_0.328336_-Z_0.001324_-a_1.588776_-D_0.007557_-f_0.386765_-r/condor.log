@@ -1,0 +1,113 @@
+000 (20581.000.000) 02/24 21:35:05 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20581.000.000) 02/25 02:38:43 Job executing on host: <134.76.239.78:21556?addrs=134.76.239.78-21556>
+...
+006 (20581.000.000) 02/25 02:38:52 Image size of job updated: 1
+	3  -  MemoryUsage of job (MB)
+	2076  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 02:43:53 Image size of job updated: 1139380
+	921  -  MemoryUsage of job (MB)
+	942160  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 02:48:53 Image size of job updated: 1145476
+	927  -  MemoryUsage of job (MB)
+	948268  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 02:53:53 Image size of job updated: 1145476
+	928  -  MemoryUsage of job (MB)
+	950008  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:08:55 Image size of job updated: 1145476
+	929  -  MemoryUsage of job (MB)
+	950600  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:13:56 Image size of job updated: 1145476
+	930  -  MemoryUsage of job (MB)
+	951936  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:28:57 Image size of job updated: 1145476
+	932  -  MemoryUsage of job (MB)
+	953448  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:33:58 Image size of job updated: 1145476
+	935  -  MemoryUsage of job (MB)
+	957316  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:38:59 Image size of job updated: 1145476
+	936  -  MemoryUsage of job (MB)
+	957532  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:43:59 Image size of job updated: 1145476
+	938  -  MemoryUsage of job (MB)
+	960300  -  ResidentSetSize of job (KB)
+...
+006 (20581.000.000) 02/25 03:49:00 Image size of job updated: 1145476
+	938  -  MemoryUsage of job (MB)
+	960304  -  ResidentSetSize of job (KB)
+...
+004 (20581.000.000) 02/25 10:08:52 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 13:06:12, Sys 0 00:02:54  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108752
+	   Memory (MB)          :      938        1         1
+...
+001 (20581.000.000) 02/25 10:10:18 Job executing on host: <134.76.239.83:20501?addrs=134.76.239.83-20501>
+...
+004 (20581.000.000) 02/25 10:49:49 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 01:11:13, Sys 0 00:00:25  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108609
+	   Memory (MB)          :      977      977       977
+...
+001 (20581.000.000) 02/25 10:50:42 Job executing on host: <134.76.239.90:23525?addrs=134.76.239.90-23525>
+...
+004 (20581.000.000) 02/25 10:52:28 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:02:21, Sys 0 00:00:01  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108674
+	   Memory (MB)          :      977      977       977
+...
+001 (20581.000.000) 02/25 10:54:27 Job executing on host: <134.76.239.88:25067?addrs=134.76.239.88-25067>
+...
+004 (20581.000.000) 02/25 11:04:25 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:17:12, Sys 0 00:00:06  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108598
+	   Memory (MB)          :      977      977       977
+...
+001 (20581.000.000) 02/25 11:06:25 Job executing on host: <134.76.239.84:12289?addrs=134.76.239.84-12289>
+...
+004 (20581.000.000) 02/25 11:08:07 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:03:01, Sys 0 00:00:02  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108516
+	   Memory (MB)          :      977      977       977
+...
+001 (20581.000.000) 02/25 11:11:06 Job executing on host: <134.76.239.83:20501?addrs=134.76.239.83-20501>
+...

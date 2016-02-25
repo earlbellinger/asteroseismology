@@ -1,0 +1,29 @@
+DATE: 2016-02-25
+TIME: 11:14:40
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.6134800000000002D-01
+                                                    he3    2.5164209389712459D-05
+                                                    he4    2.3643583579061028D-01
+                                                    c12    3.7702844241446803D-04
+                                                    n14    1.1044376880595260D-04
+                                                    o16    1.0254369260313085D-03
+                                                   ne20    2.2999583748938292D-04
+                                                   mg24    4.4809502525894199D-04
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+ have reached retry limit so now backup
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -8.204120       -0.705008        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -8.505150       -1.006038        0.500000
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110

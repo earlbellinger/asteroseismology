@@ -1,0 +1,103 @@
+000 (20770.000.000) 02/24 21:35:15 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20770.000.000) 02/25 04:47:47 Job executing on host: <134.76.239.89:24193?addrs=134.76.239.89-24193>
+...
+006 (20770.000.000) 02/25 04:47:56 Image size of job updated: 827416
+	627  -  MemoryUsage of job (MB)
+	641368  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 04:52:56 Image size of job updated: 1147048
+	938  -  MemoryUsage of job (MB)
+	960416  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:17:59 Image size of job updated: 1241560
+	1072  -  MemoryUsage of job (MB)
+	1096832  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:23:00 Image size of job updated: 1241560
+	1072  -  MemoryUsage of job (MB)
+	1096840  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:33:00 Image size of job updated: 1241976
+	1072  -  MemoryUsage of job (MB)
+	1097180  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:38:01 Image size of job updated: 1241976
+	1072  -  MemoryUsage of job (MB)
+	1097184  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:43:01 Image size of job updated: 1428460
+	1216  -  MemoryUsage of job (MB)
+	1244452  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:48:01 Image size of job updated: 1428460
+	1216  -  MemoryUsage of job (MB)
+	1244788  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 05:53:02 Image size of job updated: 1428460
+	1216  -  MemoryUsage of job (MB)
+	1244792  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 06:03:03 Image size of job updated: 1428460
+	1216  -  MemoryUsage of job (MB)
+	1245112  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 06:18:05 Image size of job updated: 1428460
+	1216  -  MemoryUsage of job (MB)
+	1245116  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 06:28:06 Image size of job updated: 1428472
+	1217  -  MemoryUsage of job (MB)
+	1245208  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 06:33:07 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1245320  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 07:23:12 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1245472  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 07:33:13 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1245808  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 07:38:14 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1245812  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 07:48:14 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1246136  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 07:58:15 Image size of job updated: 1431448
+	1217  -  MemoryUsage of job (MB)
+	1246144  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 08:13:17 Image size of job updated: 1431448
+	1218  -  MemoryUsage of job (MB)
+	1246232  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 08:18:17 Image size of job updated: 1431448
+	1218  -  MemoryUsage of job (MB)
+	1246320  -  ResidentSetSize of job (KB)
+...
+006 (20770.000.000) 02/25 09:30:13 Image size of job updated: 11146432
+	1218  -  MemoryUsage of job (MB)
+	1246320  -  ResidentSetSize of job (KB)
+...
+005 (20770.000.000) 02/25 09:30:13 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 08:02:42, Sys 0 00:01:04  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 08:02:42, Sys 0 00:01:04  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108775
+	   Memory (MB)          :     1218        1         1
+...

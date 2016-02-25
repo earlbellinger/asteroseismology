@@ -1,0 +1,69 @@
+000 (20652.000.000) 02/24 21:35:09 Job submitted from host: <134.76.239.76:13753?addrs=134.76.239.76-13753>
+...
+001 (20652.000.000) 02/25 03:32:45 Job executing on host: <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+006 (20652.000.000) 02/25 03:32:54 Image size of job updated: 1
+	3  -  MemoryUsage of job (MB)
+	2076  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 03:37:55 Image size of job updated: 1144320
+	932  -  MemoryUsage of job (MB)
+	953520  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 03:42:55 Image size of job updated: 1144880
+	932  -  MemoryUsage of job (MB)
+	953520  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 03:47:55 Image size of job updated: 1244048
+	1072  -  MemoryUsage of job (MB)
+	1096756  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 03:52:56 Image size of job updated: 1247724
+	1073  -  MemoryUsage of job (MB)
+	1098716  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 03:57:57 Image size of job updated: 1250704
+	1077  -  MemoryUsage of job (MB)
+	1102060  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 04:02:57 Image size of job updated: 1527260
+	1306  -  MemoryUsage of job (MB)
+	1337064  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 04:07:58 Image size of job updated: 1527260
+	1307  -  MemoryUsage of job (MB)
+	1337700  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 04:43:01 Image size of job updated: 1527260
+	1309  -  MemoryUsage of job (MB)
+	1339824  -  ResidentSetSize of job (KB)
+...
+006 (20652.000.000) 02/25 04:48:02 Image size of job updated: 1527260
+	1309  -  MemoryUsage of job (MB)
+	1340156  -  ResidentSetSize of job (KB)
+...
+022 (20652.000.000) 02/25 05:34:31 Job disconnected, attempting to reconnect
+    Socket between submit and execute hosts closed unexpectedly
+    Trying to reconnect to slot1@seismo25.mps.mpg.de <134.76.239.85:29523?addrs=134.76.239.85-29523>
+...
+024 (20652.000.000) 02/25 06:14:34 Job reconnection failed
+    Job disconnected too long: JobLeaseDuration (2400 seconds) expired
+    Can not reconnect to slot1@seismo25.mps.mpg.de, rescheduling job
+...
+001 (20652.000.000) 02/25 06:17:48 Job executing on host: <134.76.239.88:25067?addrs=134.76.239.88-25067>
+...
+005 (20652.000.000) 02/25 08:30:19 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 03:33:24, Sys 0 00:00:45  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 03:33:24, Sys 0 00:00:45  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108682
+	   Memory (MB)          :     1465     1465      1465
+...

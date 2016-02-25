@@ -33,9 +33,7 @@ load_data <- function(filename, num_points=100, space_var='X_c') {
                    max(decreasing_L))
         print(paste(filename, "Clipping", pms, "points"))
         DF <- DF[-1:-pms,]
-    } #else {
-        #print(paste(filename, "has no PMS to be clipped"))
-    #}
+    } 
     DF$age <- DF$age - min(DF$age) # set ZAMS age
     DF <- DF[DF$age <= 15,]
     x <- DF[[space_var]]

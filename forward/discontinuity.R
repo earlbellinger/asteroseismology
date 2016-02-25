@@ -39,7 +39,7 @@ inlist <- readLines("inlist_1.0")
 line_num <- grep('mesh_delta_coeff = ', inlist)
 mesh_delta <- sub(".+= ", "", inlist[line_num])
 line_num <- grep('max_years_for_timestep = ', inlist)
-time_step <- sub(".+= ", "", inlist[line_num])
+time_step <- strsplit(sub(".+= ", "", inlist[line_num]), " ")[[1]][1]
 
 invisible(make_plots(plot_ts, 
             paste0(basename(getwd()), "-discontinuity-", 
