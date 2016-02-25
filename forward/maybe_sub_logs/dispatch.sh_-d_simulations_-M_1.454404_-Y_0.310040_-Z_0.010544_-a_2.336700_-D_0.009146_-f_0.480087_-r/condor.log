@@ -115,3 +115,55 @@
 ...
 001 (19959.000.000) 02/25 11:11:06 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
 ...
+004 (19959.000.000) 02/25 11:30:52 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:29:33, Sys 0 00:00:05  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108562
+	   Memory (MB)          :     1221     1221      1221
+...
+001 (19959.000.000) 02/25 11:32:40 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
+...
+004 (19959.000.000) 02/25 11:45:13 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:17:32, Sys 0 00:00:06  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108556
+	   Memory (MB)          :     1221     1221      1221
+...
+001 (19959.000.000) 02/25 11:47:57 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
+...
+004 (19959.000.000) 02/25 11:57:15 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 00:12:31, Sys 0 00:00:04  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108554
+	   Memory (MB)          :     1221     1221      1221
+...
+001 (19959.000.000) 02/25 11:59:18 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
+...
+004 (19959.000.000) 02/25 13:21:06 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 02:20:31, Sys 0 00:00:43  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 2         2
+	   Disk (KB)            :        1        1   5108547
+	   Memory (MB)          :     1221     1221      1221
+...
+001 (19959.000.000) 02/25 13:23:09 Job executing on host: <134.76.239.79:12046?addrs=134.76.239.79-12046>
+...

@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:14:17
+TIME: 13:25:18
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -16,68 +16,4 @@ TIME: 11:14:17
 
 
                                         relax_num_steps
-
-
-                               finished relax_num_steps
-
- new_lnPgas_flag T
-                                        relax_initial_Z    9.5799999999999998D-04
-                                                  new z    9.5800000000048288D-04
-                                        relax_initial_Y    2.8052400000000000D-01
-                                                  new y    2.8052399999999988D-01
- net name basic.net
- do_element_diffusion T
- lnPgas_flag T
- kappa_file_prefix gs98
- kappa_lowT_prefix lowT_fa05_gs98
-   eos_file_prefix mesa
-                                        OMP_NUM_THREADS           2
-
-
-
-stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
-    0.1002902021E+01    0.9990000000E+00
-
-        886   7.207906   7345.488   0.356733   0.356733   1.041428   1.041428   0.717871   0.000227   0.251427   0.718406  -1.677632    588      0
-   5.584780   2.028328  -0.030788 -43.306266  -1.256014 -99.000000   0.000000   0.281145   0.000448   0.000742   0.280634   0.073335      4      0
- 1.4274E+07  17.373243   0.355474 -99.000000   4.210501  -7.482360   0.000000   0.000012   0.000101  9.835E-04  9.604E-04 -0.106E-10  max increase
-
-save photos/x886 for model 886
-save final_profile.data write fgong_plot.data
-                               s% atm_structure_num_pts          47
-save final_profile.data.FGONG    886
- final_profile.data.FGONG for model 886
- saved to zams.mod
-termination code: Lnuc_div_L_zams_limit
-
-       runtime, prev time, retries, backups, steps         4.8        28.2         0         0       886
-        886   7.207906   7345.488   0.356733   0.356733   1.041428   1.041428   0.717871   0.000227   0.251427   0.718406  -1.677632    588      0
-   5.584780   2.028328  -0.030788 -43.306266  -1.256014 -99.000000   0.000000   0.281145   0.000448   0.000742   0.280634   0.073335      4      0
- 1.4274E+07  17.373243   0.355474 -99.000000   4.210501  -7.482360   0.000000   0.000012   0.000101  9.835E-04  9.604E-04 -0.106E-10  max increase
-
-DATE: 2016-02-25
-TIME: 11:19:46
-DATE: 2016-02-25
-TIME: 11:19:47
-                                         version_number        8118
- read inlist_1.0
-load saved model zams.mod
-
- new_lnPgas_flag T
- net name basic.net
- do_element_diffusion T
- lnPgas_flag T
-                       which_atm_option: Eddington_grey
- kappa_file_prefix gs98
- kappa_lowT_prefix lowT_fa05_gs98
-   eos_file_prefix mesa
-                                        OMP_NUM_THREADS           2
-
-
-__________________________________________________________________________________________________________________________________________________
-
-       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
-   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
-     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
-__________________________________________________________________________________________________________________________________________________
 

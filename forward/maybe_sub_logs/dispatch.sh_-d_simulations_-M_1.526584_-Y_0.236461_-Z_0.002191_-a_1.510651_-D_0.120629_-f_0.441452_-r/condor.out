@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:14:40
+TIME: 13:25:13
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -25,5 +25,3 @@ TIME: 11:14:40
  first model is slow to converge: num tries          70
  first model is slow to converge: num tries          80
  first model is slow to converge: num tries          90
- first model is slow to converge: num tries         100
- first model is slow to converge: num tries         110

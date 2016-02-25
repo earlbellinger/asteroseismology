@@ -1,5 +1,5 @@
 DATE: 2016-02-25
-TIME: 11:13:56
+TIME: 13:25:13
                                          version_number        8118
  read inlist_1.0
  create pre-main-sequence model
@@ -33,51 +33,4 @@ TIME: 11:13:56
    eos_file_prefix mesa
                                         OMP_NUM_THREADS           2
 
-
-
-stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
-    0.1003619753E+01    0.9990000000E+00
-
-        805   7.113542   5823.619  -0.245463  -0.245463   0.772482   0.772482   0.700384   0.000172   0.296227   0.700538  -1.403658    544      0
-   5.593743   2.002098  -0.130386 -48.135417  -1.885878 -99.000000   0.000000   0.296446   0.001483   0.003168   0.296293   0.090070      2      0
- 3.0182E+07  17.247504  -0.247033 -99.000000   4.982444  -6.585276   0.000000   0.000534   0.000333  3.170E-03  3.168E-03 -0.475E-10    varcontrol
-
-save photos/x805 for model 805
-save final_profile.data write fgong_plot.data
-                               s% atm_structure_num_pts          61
-save final_profile.data.FGONG    805
- final_profile.data.FGONG for model 805
- saved to zams.mod
-termination code: Lnuc_div_L_zams_limit
-
-       runtime, prev time, retries, backups, steps         4.3        28.2         0         0       805
-        805   7.113542   5823.619  -0.245463  -0.245463   0.772482   0.772482   0.700384   0.000172   0.296227   0.700538  -1.403658    544      0
-   5.593743   2.002098  -0.130386 -48.135417  -1.885878 -99.000000   0.000000   0.296446   0.001483   0.003168   0.296293   0.090070      2      0
- 3.0182E+07  17.247504  -0.247033 -99.000000   4.982444  -6.585276   0.000000   0.000534   0.000333  3.170E-03  3.168E-03 -0.475E-10    varcontrol
-
-DATE: 2016-02-25
-TIME: 11:18:59
-DATE: 2016-02-25
-TIME: 11:18:59
-                                         version_number        8118
- read inlist_1.0
-load saved model zams.mod
-
- new_lnPgas_flag T
- net name basic.net
- do_element_diffusion T
- lnPgas_flag T
-                       which_atm_option: Eddington_grey
- kappa_file_prefix gs98
- kappa_lowT_prefix lowT_fa05_gs98
-   eos_file_prefix mesa
-                                        OMP_NUM_THREADS           2
-
-
-__________________________________________________________________________________________________________________________________________________
-
-       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
-   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
-     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
-__________________________________________________________________________________________________________________________________________________
 
