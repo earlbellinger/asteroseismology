@@ -133,9 +133,9 @@ oob_plot <- function(max_n=1024, plotboth=0, y='oob_estimate', ...,
                col=c("black", blue, red), cex=text.cex,
                legend=c("Fit using all observables",
                         expression("Fit without"~log~g*", "*
-                                   delta*nu[1*","*3]* ", or"~r[1*","*3]),
+                                   delta*nu[1*","*3]* ", and"~r[1*","*3]),
                         expression("Fit without"~L*", "*log~g*", "*
-                                   delta*nu[1*","*3]* ", or"~r[1*","*3])))
+                                   delta*nu[1*","*3]* ", and"~r[1*","*3])))
     }
 }
 

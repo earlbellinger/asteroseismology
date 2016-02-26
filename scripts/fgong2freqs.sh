@@ -52,15 +52,14 @@ if [ ! -e "$fname.amdl" ]
     exit 1
 fi
 
-## Create a redistribute file and pass it to ADIPLS' redistrb 
-# rerun with fewer points if the redistribution failed 
-for nn in 9602 8602 7602 6602 5602 4602 3602 2602 1602; do
-    echo "
+## Function to create a redistribute file and pass it to ADIPLS' redistrb 
+run_redistrb() {
+        echo "
 2 '$fname.amdl'    @    
 3 '$fname.model'    @
 -1 ''        @
 nn  ,icnmsh
-$nn,      ,,  @
+$1,      ,,  @
 icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
 211  ,      ,     ,0.013,      ,5.    ,      , 
 11   ,      ,     ,   64,      ,5.    ,      , @
@@ -73,16 +72,29 @@ nmodel,kmodel,itsaml,ioldex
 " > "redistrb-$fname.in"
     (egrep '# *$|@ *$' "redistrb-$fname.in" | sed -e 's/ *[#,@] *$//') | \
         $aprgdir/adiajobs/redistrb.c.d.x
-    if [ -e "$fname.model" ]; then break; fi
-    echo "Failed with nn = $nn, retrying with smaller nn"
-    sleep 1
-done
+}
 
-## Check that the redistribution was successful
-if [ ! -e "$fname.model" ]; then
-    echo "Error: Redistribution of $fname failed"
-    exit 1
-fi
+## Function to run ADIPLS 
+run_adipls() { 
+    (egrep '# *$|@ *$' adipls-"$fname".in | sed -e 's/ *[#,@] *$//') | \
+        $aprgdir/adipls/adipls.c.d.x
+
+    ## Check that the .agsm file was created successfully
+    if [ ! -e "$fname.agsm" ]; then
+        echo "Error: Failed to generate $fname.agsm"
+        exit 1
+    fi
+    ## Convert .agsm to .dat using set-obs
+    (echo 16; echo "$fname.agsm"; echo "$fname.dat"; echo "2") | \
+        $aprgdir/adiajobs/set-obs.d.x
+
+    ## Check that the frequencies were created, and remove the extra text 
+    if [ ! -e "$fname.dat" ]; then
+        echo "Error: Failed to generate frequency information $fname.dat"
+        exit 1
+    fi
+    cp "$fname.dat" "$fname.dat.bak"
+}
 
 ## Create an adipls.in file with some decent (?) settings 
 echo "
@@ -138,27 +150,34 @@ dgn:
         ,      ,      ,      , @
 " > "adipls-$fname.in"
 
-### Time to Run ADIPLS!
-(egrep '# *$|@ *$' adipls-"$fname".in | sed -e 's/ *[#,@] *$//') | \
-    $aprgdir/adipls/adipls.c.d.x
+# rerun with fewer points if redistribution or adipls fails 
+for nn in 10000 9000 8000 7000 6000 5000 4000 3000 2000 1000; do
+    rm -f "$fname.model"
+    run_redistrb $nn
+    if [ ! -e "$fname.model" ]; then 
+        if [ $nn -eq 1000 ]; then
+            echo "Error: Redistribution of $fname failed"
+            exit 1
+        fi
+        echo "Warning: Failed with nn = $nn, retrying redistrb"
+        continue 
+    fi
+    run_adipls
+    num_freqs=$(cat "$fname.dat" | wc -l)
+    if (( $(echo "$num_freqs < 75" | bc -l) )); then 
+        if [ $nn -eq 1000 ]; then
+            echo "Error: Obtaining frequencies of $fname failed"
+            exit 1
+        fi
+        echo "Warning: Too few frequencies with nn = $nn, retrying"
+        continue
+    fi
+    break
+done
 
-## Check that the .agsm file was created successfully, and convert it to freqs 
-if [ ! -e "$fname.agsm" ]; then
-    echo "Error: Failed to generate $fname.agsm"
-    exit 1
-fi
-(echo 16; echo "$fname.agsm"; echo "$fname.dat"; echo "2") | \
-	$aprgdir/adiajobs/set-obs.d.x
-
-## Check that the frequencies were created, and remove the extra text 
-if [ ! -e "$fname.dat" ]; then
-    echo "Error: Failed to generate frequency information $fname.dat"
-    exit 1
-fi
-cp "$fname.dat" "$fname.dat.bak"
 cat "$fname.dat.bak" | cut -b 1-36 | \
     awk -v FIELDWIDTHS="5 7 10 13" -v OFS=, '{print $1,$2,$3,$4}' | \
-    sed "s\,\ \g" | tr -s ' ' >| "$fname.dat"
+    sed "s/,/ /g" | tr -s ' ' >| "$fname.dat"
 
 ### Hooray!
 cp "$fname.dat" ..

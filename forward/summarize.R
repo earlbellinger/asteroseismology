@@ -48,13 +48,8 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     #acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, #acoustic_cutoff=acoustic_cutoff, 
-        outf=ifelse(sample(0:10000, 1)==0, gsub("/", "-", freqs_file), FALSE),
+        outf=ifelse(sample(0:1000, 1) == 0, gsub("/", "-", freqs_file), FALSE),
         filepath=file.path('plots', 'separation'))
-    
-    if (length(seis.DF) != 16) {
-        print(paste(pro_file, "doesn't have 16 columns"))
-        print(seis.DF)
-    }
     
     if (all(is.na(seis.DF))) return(NULL)
     merge(rbind(obs.DF), rbind(seis.DF))
