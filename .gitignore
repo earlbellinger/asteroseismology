@@ -1,6 +1,8 @@
 forward/simulations**/**
 inverse/perturb/**
 **/data/**
+**/maybe_sub_logs**
+**/maybe_sub_logs/**
 **/maybe_sub_logs**/**
 **/**plots**/**
 **/learn_**/**
