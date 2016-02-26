@@ -174,7 +174,7 @@ seismology_plot <- function(seps, nus, #fit,
     if (length(l_degs)==1)
         col.pal <- colorRampPalette(c(dnu.cl[1], dnu.cl[3]))(1001)[1+1000*
             normalize(gaussian_env)]
-    plot(seps~nus, axes=FALSE, tck=0, xaxs='i',
+    plot(seps~nus, axes=FALSE, tck=0, #xaxs='i',
          cex=1.5 * gaussian_env/max(gaussian_env), 
          ylab=ylab, 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
@@ -188,6 +188,6 @@ seismology_plot <- function(seps, nus, #fit,
         las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
         legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
-               legend=paste0("\u2113=", l_degs), horiz=1)
+               legend=paste0("l=", l_degs), horiz=1)
 }
 

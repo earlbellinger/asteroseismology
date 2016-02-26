@@ -6,8 +6,10 @@
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 num_process=200
-mesh_delta_coeff=1.5
+init_mesh_delta_coeff=1
+mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.2
+mesh_delta_upper=4
 profile_interval=1
 max_years_for_timestep=1000000
 max_years_limit=1000
@@ -16,7 +18,9 @@ pmslog="pms.log"
 logfile="mesa.log"
 msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
 pmsuccess="termination code: Lnuc_div_L_zams_limit"
-meshfail="terminated evolution: convergence problems"
+
+meshfail="mesh_plan problem"
+convfail="terminated evolution: convergence problems"
 
 simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
@@ -52,7 +56,7 @@ simulate() {
     
     ./rn | tee "$pmslog"
     while ! grep -q "$pmsuccess" "$pmslog"; do
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
           then
             echo "Couldn't achieve convergence" | tee -a "$pmslog"
@@ -85,26 +89,34 @@ simulate() {
 "$max_years_for_timestep"".data"
         
         # decrease the mesh spacing
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff - 0.1" | bc -l)
+        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
         
         # check that we're still within bounds
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) &&
-              $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) ));
+              $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) )) ||
+           (( $(echo "$new_mesh_delta_coeff > $mesh_delta_upper" | bc -l) ));
           then
             echo "Couldn't achieve convergence" | tee -a "$logfile"
             exit 1
         fi
         
-        rm -rf LOGS/*
+        #rm -rf LOGS/*
         
         # if the meshing failed, decrease timestep and reset meshing
-        if grep -q "$meshfail" "$logfile"; then
+        if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )) ||
+                grep -q "$meshfail" "$logfile"; then
             new_max_years_for_timestep=$(echo "scale=0;
                 $max_years_for_timestep/2" | bc -l)
-            new_mesh_delta_coeff=1.5
+            new_mesh_delta_coeff=$init_mesh_delta_coeff
             change "max_years_for_timestep" "$max_years_for_timestep" \
                 "$new_max_years_for_timestep" 
             max_years_for_timestep=$new_max_years_for_timestep
+        fi
+        
+        # if there are convergence problems, decrease the number of points used
+        if grep -q "$convfail" "$logfile"; then
+            new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 1.2" |
+                bc -l)
         fi
         
         change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
