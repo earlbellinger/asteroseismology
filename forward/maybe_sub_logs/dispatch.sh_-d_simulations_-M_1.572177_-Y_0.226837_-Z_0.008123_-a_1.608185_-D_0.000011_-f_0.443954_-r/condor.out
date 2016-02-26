@@ -1,0 +1,99 @@
+DATE: 2016-02-26
+TIME: 16:59:53
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.6504000000000005D-01
+                                                    he3    2.4140022098080472D-05
+                                                    he4    2.2681285997790199D-01
+                                                    c12    1.3978101495813269D-03
+                                                    n14    4.0946359379769162D-04
+                                                    o16    3.8017453903022450D-03
+                                                   ne20    8.5269565856971026D-04
+                                                   mg24    1.6612852077491291D-03
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+ have reached retry limit so now backup
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -8.204120       -0.705008        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -8.505150       -1.006038        0.500000
+ have reached retry limit so now backup
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110
+ first model is slow to converge: num tries         120
+ first model is slow to converge: num tries         130
+ first model is slow to converge: num tries         140
+ first model is slow to converge: num tries         150
+ first model is slow to converge: num tries         160
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    8.1230000000000000D-03
+                                                  new z    8.1230000000002030D-03
+                                        relax_initial_Y    2.2683700000000001D-01
+                                                  new y    2.2683700000000015D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1000449483E+01    0.9990000000E+00
+
+        947   7.276324   8017.491   0.817768   0.817768   1.572177   1.572177   0.763698   0.002033   0.226832   0.764635  -2.133553    884      0
+   5.930243   1.931442   0.124225 -40.391199  -0.718350 -99.000000   0.000000   0.227948   0.003797   0.008123   0.227174   0.057254      2      0
+ 1.9530E+07  17.358176   0.817572 -99.000000   3.725463  -8.012306   0.000000   0.000010   0.000853  8.354E-03  8.190E-03 -0.728E-12  max increase
+
+save photos/x947 for model 947
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          53
+save final_profile.data.FGONG    947
+ final_profile.data.FGONG for model 947
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.5        28.2         0         0       947
+        947   7.276324   8017.491   0.817768   0.817768   1.572177   1.572177   0.763698   0.002033   0.226832   0.764635  -2.133553    884      0
+   5.930243   1.931442   0.124225 -40.391199  -0.718350 -99.000000   0.000000   0.227948   0.003797   0.008123   0.227174   0.057254      2      0
+ 1.9530E+07  17.358176   0.817572 -99.000000   3.725463  -8.012306   0.000000   0.000010   0.000853  8.354E-03  8.190E-03 -0.728E-12  max increase
+
+DATE: 2016-02-26
+TIME: 17:11:36
+DATE: 2016-02-26
+TIME: 17:11:36
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+

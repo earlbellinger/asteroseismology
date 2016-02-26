@@ -52,6 +52,9 @@ simulate() {
        change 'diffusion_class_factor(2)' '1' "$diffusion"
        change 'diffusion_class_factor(3)' '1' "$diffusion"
        change 'diffusion_class_factor(4)' '1' "$diffusion"
+       if [ $light -eq 1 ]; then
+           change 'diffusion_num_classes' '4' '2'
+       fi
     fi
     
     ./rn | tee "$pmslog"
@@ -173,6 +176,7 @@ while [ "$#" -gt 0 ]; do
     -f) overshoot="$2"; shift 2;;
     -D) diffusion="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
+    -l) light=1; shift 1;;
     -r) remove=1; shift 1;;
 
     *) echo "unknown option: $1" >&2; exit 1;;
@@ -181,12 +185,13 @@ done
 
 # set defaults if they weren't supplied
 if [ -z ${M+x} ]; then M=1; fi
-if [ -z ${Y+x} ]; then Y=0.275; fi
+if [ -z ${Y+x} ]; then Y=0.27; fi
 if [ -z ${Z+x} ]; then Z=0.018; fi
-if [ -z ${alpha+x} ]; then alpha=1.85; fi
+if [ -z ${alpha+x} ]; then alpha=1.9; fi
 if [ -z ${overshoot+x} ]; then overshoot=0.2; fi
 if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
+if [ -z ${light+x} ]; then light=0; fi
 if [ -z ${remove+x} ]; then remove=0; fi
 
 simulate

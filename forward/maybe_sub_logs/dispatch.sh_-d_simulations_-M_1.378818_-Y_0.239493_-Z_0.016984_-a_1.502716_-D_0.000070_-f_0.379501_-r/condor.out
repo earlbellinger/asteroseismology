@@ -1,0 +1,85 @@
+DATE: 2016-02-26
+TIME: 16:59:32
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.4352299999999993D-01
+                                                    he3    2.5486875211431936D-05
+                                                    he4    2.3946751312478856D-01
+                                                    c12    2.9226157307016012D-03
+                                                    n14    8.5612823797364898D-04
+                                                    o16    7.9488912604817104D-03
+                                                   ne20    1.7828613892832534D-03
+                                                   mg24    3.4735033815598958D-03
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    1.6983999999999999D-02
+                                                  new z    1.6984000000000013D-02
+                                        relax_initial_Y    2.3949300000000001D-01
+                                                  new y    2.3949299999999996D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1005099339E+01    0.9990000000E+00
+
+        860   7.195626   6172.408   0.441701   0.441701   1.378818   1.378818   0.743300   0.001428   0.239493   0.743456  -2.160106    808      0
+   5.000672   1.804995   0.162353 -44.499759  -0.949920 -99.000000   0.000000   0.239635   0.007949   0.016984   0.239538   0.063291      2      0
+ 2.0183E+07  17.143613   0.439492 -99.000000   4.505658  -7.106484   0.000000   0.002432   0.001783  1.707E-02  1.701E-02 -0.271E-09    varcontrol
+
+save photos/x860 for model 860
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          56
+save final_profile.data.FGONG    860
+ final_profile.data.FGONG for model 860
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.1        28.2         0         0       860
+        860   7.195626   6172.408   0.441701   0.441701   1.378818   1.378818   0.743300   0.001428   0.239493   0.743456  -2.160106    808      0
+   5.000672   1.804995   0.162353 -44.499759  -0.949920 -99.000000   0.000000   0.239635   0.007949   0.016984   0.239538   0.063291      2      0
+ 2.0183E+07  17.143613   0.439492 -99.000000   4.505658  -7.106484   0.000000   0.002432   0.001783  1.707E-02  1.701E-02 -0.271E-09    varcontrol
+
+DATE: 2016-02-26
+TIME: 17:09:40
+DATE: 2016-02-26
+TIME: 17:09:40
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+

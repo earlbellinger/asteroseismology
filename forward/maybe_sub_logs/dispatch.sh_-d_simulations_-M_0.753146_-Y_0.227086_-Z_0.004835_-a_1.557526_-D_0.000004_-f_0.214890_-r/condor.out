@@ -1,0 +1,83 @@
+DATE: 2016-02-26
+TIME: 16:59:52
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.6807899999999996D-01
+                                                    he3    2.4166520709428804D-05
+                                                    he4    2.2706183347929060D-01
+                                                    c12    8.3200936516379675D-04
+                                                    n14    2.4372232869774492D-04
+                                                    o16    2.2628879677595503D-03
+                                                   ne20    5.0754444283939804D-04
+                                                   mg24    9.8883589553943252D-04
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    4.8349999999999999D-03
+                                                  new z    4.8350000000003399D-03
+                                        relax_initial_Y    2.2708600000000001D-01
+                                                  new y    2.2708599999999993D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1008371067E+01    0.9990000000E+00
+
+        780   7.065343   5179.887  -0.498293  -0.498293   0.753146   0.753146   0.767739   0.000249   0.227086   0.767999  -1.280398    784      0
+   5.844446   1.962257  -0.156081 -51.109031  -2.103027 -99.000000   0.000000   0.227425   0.002263   0.004835   0.227166   0.095018      2      0
+ 5.0293E+07  17.181584  -0.501914 -99.000000   5.182691  -6.362626   0.000000   0.000827   0.000508  4.836E-03  4.835E-03 -0.222E-10    varcontrol
+
+save photos/x780 for model 780
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          65
+save final_profile.data.FGONG    780
+ final_profile.data.FGONG for model 780
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.7        28.2         0         0       780
+        780   7.065343   5179.887  -0.498293  -0.498293   0.753146   0.753146   0.767739   0.000249   0.227086   0.767999  -1.280398    784      0
+   5.844446   1.962257  -0.156081 -51.109031  -2.103027 -99.000000   0.000000   0.227425   0.002263   0.004835   0.227166   0.095018      2      0
+ 5.0293E+07  17.181584  -0.501914 -99.000000   5.182691  -6.362626   0.000000   0.000827   0.000508  4.836E-03  4.835E-03 -0.222E-10    varcontrol
+
+DATE: 2016-02-26
+TIME: 17:10:22
+DATE: 2016-02-26
+TIME: 17:10:23
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+

@@ -1,0 +1,87 @@
+DATE: 2016-02-26
+TIME: 16:59:54
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.2641500000000003D-01
+                                                    he3    2.8755888638733628D-05
+                                                    he4    2.7018224411136127D-01
+                                                    c12    5.8059971004398867D-04
+                                                    n14    1.7007634685133437D-04
+                                                    o16    1.5791073429619067D-03
+                                                   ne20    3.5417889351399182D-04
+                                                   mg24    6.9003770662876690D-04
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    3.3739999999999998D-03
+                                                  new z    3.3739999999998159D-03
+                                        relax_initial_Y    2.7021099999999998D-01
+                                                  new y    2.7021100000000003D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.9996129954E+00    0.9990000000E+00
+
+        920   7.251942   7903.541   0.634008   0.634008   1.273459   1.273459   0.725000   0.000844   0.268171   0.726120  -1.891438    878      0
+   6.038397   2.004516   0.044961 -41.228306  -0.953134 -99.000000   0.000000   0.271530   0.001578   0.003315   0.270487   0.064934      3      0
+ 1.7172E+07  17.395159   0.634176 -99.000000   3.867173  -7.848185   0.000000   0.000004   0.000354  3.470E-03  3.393E-03 -0.107E-11  max increase
+
+save photos/x920 for model 920
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          80
+save final_profile.data.FGONG    920
+ final_profile.data.FGONG for model 920
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.8        28.2         0         0       920
+        920   7.251942   7903.541   0.634008   0.634008   1.273459   1.273459   0.725000   0.000844   0.268171   0.726120  -1.891438    878      0
+   6.038397   2.004516   0.044961 -41.228306  -0.953134 -99.000000   0.000000   0.271530   0.001578   0.003315   0.270487   0.064934      3      0
+ 1.7172E+07  17.395159   0.634176 -99.000000   3.867173  -7.848185   0.000000   0.000004   0.000354  3.470E-03  3.393E-03 -0.107E-11  max increase
+
+DATE: 2016-02-26
+TIME: 17:10:17
+DATE: 2016-02-26
+TIME: 17:10:18
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        921   7.251973   7914.668   0.634366   0.634366   1.273459   1.273459   0.724824   0.000845   0.267922   0.726086  -1.891401    878      0
+   6.000000   2.004624   0.043695 -41.225871  -0.953514 -99.000000   0.000000   0.271706   0.001577   0.003308   0.270521   0.064939      9      0
+ 1.8172E+07  17.395242   0.634090 -15.051500   4.332799  -7.389156   0.000000   0.000004   0.000354  3.470E-03  3.393E-03 -0.860E-11              
+

@@ -1,0 +1,89 @@
+DATE: 2016-02-26
+TIME: 16:59:51
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    6.7033999999999994D-01
+                                                    he3    3.4941558456492323D-05
+                                                    he4    3.2830105844154356D-01
+                                                    c12    2.2783462243575547D-04
+                                                    n14    6.6740095800582719D-05
+                                                    o16    6.1966156552506187D-04
+                                                   ne20    1.3898424866998338D-04
+                                                   mg24    2.7077946756860847D-04
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    1.3240000000000001D-03
+                                                  new z    1.3239999999992344D-03
+                                        relax_initial_Y    3.2833600000000002D-01
+                                                  new y    3.2833600000000013D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1000245827E+01    0.9990000000E+00
+
+        931   7.239665   7892.836   0.485517   0.485517   1.062521   1.062521   0.669325   0.000331   0.321182   0.670035  -1.774885    889      0
+   6.170194   2.049287  -0.028245 -41.523763  -1.104425 -99.000000   0.000000   0.329314   0.000619   0.001258   0.328631   0.070785      2      0
+ 1.8815E+07  17.409583   0.485410 -15.051500   3.952321  -7.743056   0.000000   0.000002   0.000139  1.362E-03  1.334E-03  0.162E-12  max increase
+
+save photos/x931 for model 931
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          59
+save final_profile.data.FGONG    931
+ final_profile.data.FGONG for model 931
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.7        28.2         0         0       931
+        931   7.239665   7892.836   0.485517   0.485517   1.062521   1.062521   0.669325   0.000331   0.321182   0.670035  -1.774885    889      0
+   6.170194   2.049287  -0.028245 -41.523763  -1.104425 -99.000000   0.000000   0.329314   0.000619   0.001258   0.328631   0.070785      2      0
+ 1.8815E+07  17.409583   0.485410 -15.051500   3.952321  -7.743056   0.000000   0.000002   0.000139  1.362E-03  1.334E-03  0.162E-12  max increase
+
+DATE: 2016-02-26
+TIME: 17:10:15
+DATE: 2016-02-26
+TIME: 17:10:15
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       retry log10(dt/yr), log10(dt), retry_factor     1  1214        5.397940       12.897052        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     1  1215        5.176091       12.675203        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2  1215        4.875061       12.374173        0.500000
+ have reached retry limit so now backup
+       retry log10(dt/yr), log10(dt), retry_factor     1  1215        4.574031       12.073143        0.500000
+       retry log10(dt/yr), log10(dt), retry_factor     2  1215        4.273001       11.772113        0.500000
