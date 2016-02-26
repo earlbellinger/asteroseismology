@@ -50,10 +50,13 @@ simulate() {
        change "do_element_diffusion" ".false." ".true."
        change 'diffusion_class_factor(1)' '1' "$diffusion"
        change 'diffusion_class_factor(2)' '1' "$diffusion"
-       change 'diffusion_class_factor(3)' '1' "$diffusion"
-       change 'diffusion_class_factor(4)' '1' "$diffusion"
-       if [ $light -eq 1 ]; then
+       if [ ! $light -eq 1 ]; then
+           change 'diffusion_class_factor(3)' '1' "$diffusion"
+           change 'diffusion_class_factor(4)' '1' "$diffusion"
+       else
            change 'diffusion_num_classes' '4' '2'
+           change 'diffusion_class_factor(3)' '1' '0'
+           change 'diffusion_class_factor(4)' '1' '0'
        fi
     fi
     
