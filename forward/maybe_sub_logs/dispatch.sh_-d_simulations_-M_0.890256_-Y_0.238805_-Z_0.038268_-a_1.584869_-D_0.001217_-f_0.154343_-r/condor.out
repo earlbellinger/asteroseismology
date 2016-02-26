@@ -1,0 +1,121 @@
+DATE: 2016-02-26
+TIME: 16:59:45
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    7.2292700000000010D-01
+                                                    he3    2.5413658164814850D-05
+                                                    he4    2.3877958634183519D-01
+                                                    c12    6.5851777427277675D-03
+                                                    n14    1.9290105635171608D-03
+                                                    o16    1.7910278541928452D-02
+                                                   ne20    4.0171066677514872D-03
+                                                   mg24    7.8264264840752201D-03
+
+
+                                        relax_num_steps
+
+       retry log10(dt/yr), log10(dt), retry_factor     1     1       -5.602060        1.897052        0.500000
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110
+ first model is slow to converge: num tries         120
+ first model is slow to converge: num tries         130
+ first model is slow to converge: num tries         140
+ first model is slow to converge: num tries         150
+ first model is slow to converge: num tries         160
+ first model is slow to converge: num tries         170
+ first model is slow to converge: num tries         180
+ first model is slow to converge: num tries         190
+ first model is slow to converge: num tries         200
+ first model is slow to converge: num tries         210
+ first model is slow to converge: num tries         220
+ first model is slow to converge: num tries         230
+ first model is slow to converge: num tries         240
+ first model is slow to converge: num tries         250
+hydro_newton_step failed to converge
+       retry log10(dt/yr), log10(dt), retry_factor     2     1       -5.903090        1.596022        0.500000
+ first model is slow to converge: num tries          70
+ first model is slow to converge: num tries          80
+ first model is slow to converge: num tries          90
+ first model is slow to converge: num tries         100
+ first model is slow to converge: num tries         110
+ first model is slow to converge: num tries         120
+ first model is slow to converge: num tries         130
+ first model is slow to converge: num tries         140
+ first model is slow to converge: num tries         150
+ first model is slow to converge: num tries         160
+ first model is slow to converge: num tries         170
+ first model is slow to converge: num tries         180
+ first model is slow to converge: num tries         190
+ first model is slow to converge: num tries         200
+ first model is slow to converge: num tries         210
+ first model is slow to converge: num tries         220
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    3.8268000000000003D-02
+                                                  new z    3.8268000000000080D-02
+                                        relax_initial_Y    2.3880499999999999D-01
+                                                  new y    2.3880500000000013D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.1003962005E+01    0.9990000000E+00
+
+        797   7.064328   4456.634  -0.646745  -0.646745   0.890256   0.890256   0.722458   0.002006   0.238805   0.722835  -1.692045    793      0
+   6.229996   1.807758  -0.098729 -51.401791  -2.231808 -99.000000   0.000000   0.239263   0.017910   0.038268   0.238896   0.087302      4      0
+ 7.8854E+07  17.007719  -0.648462 -16.556650   4.877655  -6.576572   0.000000   0.006519   0.004017  3.828E-02  3.827E-02 -0.941E-11    varcontrol
+
+save photos/x797 for model 797
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          71
+save final_profile.data.FGONG    797
+ final_profile.data.FGONG for model 797
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         7.5        28.2         0         0       797
+        797   7.064328   4456.634  -0.646745  -0.646745   0.890256   0.890256   0.722458   0.002006   0.238805   0.722835  -1.692045    793      0
+   6.229996   1.807758  -0.098729 -51.401791  -2.231808 -99.000000   0.000000   0.239263   0.017910   0.038268   0.238896   0.087302      4      0
+ 7.8854E+07  17.007719  -0.648462 -16.556650   4.877655  -6.576572   0.000000   0.006519   0.004017  3.828E-02  3.827E-02 -0.941E-11    varcontrol
+
+DATE: 2016-02-26
+TIME: 17:14:07
+DATE: 2016-02-26
+TIME: 17:14:07
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+

@@ -1,0 +1,89 @@
+DATE: 2016-02-26
+TIME: 16:59:23
+                                         version_number        8118
+ read inlist_1.0
+ create pre-main-sequence model
+                                                species           8
+ abundances
+                                                     h1    6.8677999999999995D-01
+                                                    he3    3.2944691214162447D-05
+                                                    he4    3.0953905530878589D-01
+                                                    c12    6.2774977541211303D-04
+                                                    n14    1.8388811894299564D-04
+                                                    o16    1.7073454615071225D-03
+                                                   ne20    3.8294149482484920D-04
+                                                   mg24    7.4607514931290461D-04
+
+
+                                        relax_num_steps
+
+
+                               finished relax_num_steps
+
+ new_lnPgas_flag T
+                                        relax_initial_Z    3.6480000000000002D-03
+                                                  new z    3.6480000000008515D-03
+                                        relax_initial_Y    3.0957200000000001D-01
+                                                  new y    3.0957199999999985D-01
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+hydro_newton_step failed to converge
+       retry log10(dt/yr), log10(dt), retry_factor     1    24       -3.780891        3.718220        0.500000
+
+stop because Lnuc_div_L >= Lnuc_div_L_zams_limit
+    0.9994141779E+00    0.9990000000E+00
+
+        877   7.199050   6812.180   0.266630   0.266630   1.007919   1.007919   0.684805   0.000912   0.309453   0.686437  -1.669590    786      1
+   6.394777   2.027276  -0.009614 -43.629560  -1.356927 -99.000000   0.000000   0.311443   0.001707   0.003646   0.309901   0.075958      4      0
+ 2.9939E+07  17.352235   0.266885 -99.000000   4.444764  -7.186689   0.000000   0.000004   0.000383  3.752E-03  3.662E-03  0.199E-12  max increase
+
+save photos/x877 for model 877
+save final_profile.data write fgong_plot.data
+                               s% atm_structure_num_pts          54
+save final_profile.data.FGONG    877
+ final_profile.data.FGONG for model 877
+ saved to zams.mod
+termination code: Lnuc_div_L_zams_limit
+
+       runtime, prev time, retries, backups, steps         8.0        28.2         1         0       877
+        877   7.199050   6812.180   0.266630   0.266630   1.007919   1.007919   0.684805   0.000912   0.309453   0.686437  -1.669590    786      1
+   6.394777   2.027276  -0.009614 -43.629560  -1.356927 -99.000000   0.000000   0.311443   0.001707   0.003646   0.309901   0.075958      4      0
+ 2.9939E+07  17.352235   0.266885 -99.000000   4.444764  -7.186689   0.000000   0.000004   0.000383  3.752E-03  3.662E-03  0.199E-12  max increase
+
+DATE: 2016-02-26
+TIME: 17:09:29
+DATE: 2016-02-26
+TIME: 17:09:29
+                                         version_number        8118
+ read inlist_1.0
+load saved model zams.mod
+
+ new_lnPgas_flag T
+ net name basic.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        879   7.199049   6980.186   0.267346   0.267346   1.007919   1.007919   0.684582   0.000912   0.309529   0.686403  -1.668747    779      0
+   5.903090   2.027687  -0.030630 -43.628030  -1.357466 -99.000000   0.000000   0.311666   0.001707   0.003647   0.309935   0.075990      4      0
+ 3.1739E+07  17.352575   0.267176 -99.000000   4.788936  -6.854851   0.000000   0.000004   0.000383  3.752E-03  3.662E-03 -0.991E-13  max decrease
+
