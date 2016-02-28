@@ -209,7 +209,7 @@ seis.labs <- list(
   log_g          = bquote(log~g), 
   L              = bquote(L), 
   Teff           = bquote(T["eff"]), 
-  Fe.H           = bquote("Fe"/"H"), 
+  Fe.H           = bquote("[Fe"/"H]"), 
   Dnu_median     = bquote("<"*Delta*nu*">"), 
   Dnu_slope      = bquote("<"*d*Delta*nu/d*nu*">"), 
   Dnu0_median    = bquote("<"*Delta*nu[0]*">"), 

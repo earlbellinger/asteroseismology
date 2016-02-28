@@ -11,8 +11,8 @@ mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.2
 mesh_delta_upper=4
 profile_interval=1
-max_years_for_timestep=1000000
-max_years_limit=1000
+max_years_for_timestep=5000000
+max_years_limit=100000
 
 pmslog="pms.log"
 logfile="mesa.log"
@@ -24,7 +24,7 @@ convfail="terminated evolution: convergence problems"
 
 simulate() {
     expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
-"_""diffusion=$diffusion""_""overshoot=$overshoot"
+"_""overshoot=$overshoot""_""diffusion=$diffusion"
     dirname="$directory/$expname"
     
     mkdir -p "$dirname"
@@ -39,12 +39,14 @@ simulate() {
     change "new_Z" '-1' "$Z"
     change 'mixing_length_alpha' '2.1' "$alpha"
     
-    change 'step_overshoot_f_above_nonburn_core' '0.005' "$overshoot"
-    change 'step_overshoot_f_above_nonburn_shell' '0.005' "$overshoot"
-    change 'step_overshoot_f_below_nonburn_shell' '0.005' "$overshoot"
-    change 'step_overshoot_f_above_burn_h_core' '0.005' "$overshoot"
-    change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
-    change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
+    if (( $(echo "$overshoot > 0" | bc -l) )); then
+        change 'step_overshoot_f_above_nonburn_core' '0.005' "$overshoot"
+        change 'step_overshoot_f_above_nonburn_shell' '0.005' "$overshoot"
+        change 'step_overshoot_f_below_nonburn_shell' '0.005' "$overshoot"
+        change 'step_overshoot_f_above_burn_h_core' '0.005' "$overshoot"
+        change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
+        change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
+    fi
     
     if (( $(echo "$diffusion > 0" | bc -l) )); then
        change "do_element_diffusion" ".false." ".true."
@@ -77,7 +79,6 @@ simulate() {
     
     mv LOGS/history.data .
     
-    change "max_years_for_timestep" "-1" "$max_years_for_timestep"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
     change "save_model_when_terminate" ".true." ".false."
@@ -87,7 +88,15 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
+    change "max_years_for_timestep" "-1" "$max_years_for_timestep"
+    
     ./rn | tee "$logfile"
+    
+    #num_lines=$(cat LOGS/history.data | wc -l)
+    #if grep -q "$msuccess" "$logfile" && 
+    #        (( $(echo "$num_lines < 2*$num_process" | bc -l) )); do
+    #done
+    
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
         

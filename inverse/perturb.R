@@ -34,7 +34,7 @@ rand_inst <- function(n) {
         obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
             if (n==1) 0 else uncertainty)))
         colnames(obs.DF) <- name
-        if (obs.DF[['Fe/H']] <= 0.4444) break # unrealistic
+        if (obs.DF[['Fe/H']] <= 0.4) break # Fe/H > 0.4 is probably not possible
     }
     
     # Correct frequencies for Doppler shift
@@ -88,7 +88,7 @@ process_dir(file.path("data", "kages"))
 process_dir(file.path("data", "basu"))
 process_dir(file.path("data", "hares"))
 
-star_names <- c("16CygAlos", "16CygBlos", "16CygA", "16CygB", 
+star_names <- c("16CygA_amp", "16CygB_amp", "16CygA", "16CygB", 
     "Tagesstern", "Sun")
 star_dir <- file.path("data")
 for (star in star_names) process_star(star, star_dir)

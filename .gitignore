@@ -1,11 +1,12 @@
 forward/simulations**/**
 inverse/perturb/**
-**/data/**
-**/maybe_sub_logs**
+**/*data*/**
 **/maybe_sub_logs/**
-**/maybe_sub_logs**/**
-**/**plots**/**
-**/learn_**/**
+**/maybe_sub_logs*/**
+**/*plots*/**
+**/learn_*/**
+**/learn_covs*/**
+**/learn_tables*/**
 **/__pycache__/**
 **.png
 **.pdf

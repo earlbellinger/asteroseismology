@@ -19,11 +19,13 @@ mpl.rc('text', usetex='true')
 mpl.rc('text', dvipnghack='true') 
 mpl.rcParams.update({'font.size': 16}) 
 import pylab as P
-import corner
+#import corner
 
-plot_dir = 'learn_plots'
-cov_dir = 'learn_covs'
-table_dir = 'learn_tables'
+simulations_filename = os.path.join('..', 'forward', 'simulations-amp.dat')
+bname = os.path.basename(simulations_filename).split('.')[0]
+plot_dir = 'learn_plots-'+bname
+cov_dir = 'learn_covs-'+bname
+table_dir = 'learn_tables-'+bname
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
 
@@ -37,7 +39,7 @@ if not os.path.exists(table_dir):
     os.makedirs(table_dir)
 
 ### Load grid of models 
-data = pd.read_csv('../forward/simulations.dat', sep='\t')
+data = pd.read_csv(simulations_filename, sep='\t')
 exclude = "nu_max|radial_velocity|Dnu_|slope|mass_cc"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
@@ -310,8 +312,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             lower = mins[X_name]
             X_vals = star_data.loc[:, X_name]
             if np.any(X_vals > upper) or np.any(X_vals < lower):
-                #print(X_name, "is out of range")
-                #print(X_vals.min(), X_vals.max())
+                print(X_name, "is out of range")
+                print(star, X_vals.min(), lower, X_vals.max(), upper)
                 out_of_range = True
                 break
         if out_of_range:
