@@ -7,8 +7,10 @@ source(file.path('..', 'scripts', 'utils.R'))
 
 library(magicaxis)
 
-cygA <- read.table(file.path('learn_covs', 'perturb', '16CygA.dat'), header=1)
-cygB <- read.table(file.path('learn_covs', 'perturb', '16CygB.dat'), header=1)
+cygA <- read.table(file.path('learn_covs-simulations-amp2', 
+    'perturb', '16CygAamp.dat'), header=1)
+cygB <- read.table(file.path('learn_covs-simulations-amp2', 
+    'perturb', '16CygBamp.dat'), header=1)
 
 metcalfe <- read.table(file.path('data', 'cyg.dat'), header=1)
 
@@ -92,10 +94,11 @@ plot_cygs <- function(name, cygA, cygB, ...,
     par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(0.75,0,0))
     plot(A, axes=F, col=red, lwd=1.5, yaxs='i', lty=2,
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
-        xlab=as.expression(get_label(name)), ylab="", main="")
+        xlab="", ylab="", main="")
     magaxis(side=1, family=font, tcl=0.5, labels=1, 
             las=1, mgp=mgp, cex.axis=text.cex)
     lines(B, col=blue, lwd=1.5, lty=2)
+    title(xlab=get_label(name))
     if (has_other) {
         #arrows(mean(cygB[[name]])-2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
         #       mean(cygB[[name]])+2*sqrt(var(cygB[[name]])), 1.1*mean(B$y), 
@@ -103,9 +106,11 @@ plot_cygs <- function(name, cygA, cygB, ...,
         #arrows(mean(cygA[[name]])-2*sqrt(var(cygA[[name]])), 1.1*mean(A$y), 
         #       mean(cygA[[name]])+2*sqrt(var(cygA[[name]])), 1.1*mean(A$y), 
         #    lty=1, code=3, col=red)
-        arrows(means[1]-2*stds[1], mean(A$y), means[1]+2*stds[1], mean(A$y), 
+        apos <- quantile(A$y, .6)
+        bpos <- quantile(B$y, .5)
+        arrows(means[1]-2*stds[1], apos, means[1]+2*stds[1], apos, 
             code=3, col=red, length=0.1)
-        arrows(means[2]-2*stds[2], mean(B$y), means[2]+2*stds[2], mean(B$y),
+        arrows(means[2]-2*stds[2], bpos, means[2]+2*stds[2], bpos,
             code=3, col=blue, length=0.1)
         #lines(other_A, lty=2, col=red)
         #lines(other_B, lty=2, col=blue)
@@ -126,7 +131,7 @@ plot_cygs <- function(name, cygA, cygB, ...,
         )
     }
     legend("topleft", bty='n', cex=text.cex, inset=c(-0.075, 0),
-        text.col=c(red, blue, NA),
+        text.col=c(red, blue, NA), #xjust=1, strwidth("1,000,000"),
         legend=uncertainties,
     )
     
@@ -158,22 +163,22 @@ for (name in names(cygA)) {
         wide=F, tall=F)
 }
 
-cygA <- read.table(file.path('learn_covs', 'hares', '16CygA.dat'), header=1)
-cygB <- read.table(file.path('learn_covs', 'hares', '16CygB.dat'), header=1)
+cygA <- read.table(file.path('learn_covs-simulations', 'hares', '16CygA.dat'), header=1)
+cygB <- read.table(file.path('learn_covs-simulations', 'hares', '16CygB.dat'), header=1)
 make_plots(plot_cygs, "cyg-radius", 
     filepath=file.path('plots', 'comparison'),
     name="radius", cygA=cygA, cygB=cygB,
     wide=F, tall=F)
 
-cygA <- read.table(file.path('learn_covs', 'kages', '16CygA.dat'), header=1)
-cygB <- read.table(file.path('learn_covs', 'kages', '16CygB.dat'), header=1)
+cygA <- read.table(file.path('learn_covs-simulations', 'kages', '16CygA.dat'), header=1)
+cygB <- read.table(file.path('learn_covs-simulations', 'kages', '16CygB.dat'), header=1)
 make_plots(plot_cygs, "cyg-L", 
     filepath=file.path('plots', 'comparison'),
     name="L", cygA=cygA, cygB=cygB,
     wide=F, tall=F)
 
-cygA <- read.table(file.path('learn_covs', 'perturb', '16CygA.dat'), header=1)
-cygB <- read.table(file.path('learn_covs', 'perturb', '16CygB.dat'), header=1)
+cygA <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygA.dat'), header=1)
+cygB <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygB.dat'), header=1)
 make_plots(plot_cygs, "cyg-Y_surf", 
     filepath=file.path('plots', 'comparison'),
     name="Y_surf", cygA=cygA, cygB=cygB,

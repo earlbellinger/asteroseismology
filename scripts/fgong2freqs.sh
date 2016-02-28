@@ -151,7 +151,7 @@ dgn:
 " > "adipls-$fname.in"
 
 # rerun with fewer points if redistribution or adipls fails 
-for nn in 9000 8000 7000 6000 5000 4000 3000 2000 1000; do
+for nn in 6000 5000 4000 3000 2000 1000; do
     rm -f "$fname.model"
     run_redistrb $nn
     if [ ! -e "$fname.model" ]; then 

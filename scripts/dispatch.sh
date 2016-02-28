@@ -89,13 +89,14 @@ simulate() {
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
     change "max_years_for_timestep" "-1" "$max_years_for_timestep"
+    change "min_timestep_limit" "1d-12" "1d12"
     
     ./rn | tee "$logfile"
     
-    #num_lines=$(cat LOGS/history.data | wc -l)
-    #if grep -q "$msuccess" "$logfile" && 
-    #        (( $(echo "$num_lines < 2*$num_process" | bc -l) )); do
-    #done
+    num_lines=$(cat LOGS/history.data | wc -l)
+    if (( $(echo "$num_lines < 2*$num_process" | bc -l) )); then
+        echo "Only calculated $num_lines models"
+    fi
     
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
@@ -114,8 +115,6 @@ simulate() {
             echo "Couldn't achieve convergence" | tee -a "$logfile"
             exit 1
         fi
-        
-        #rm -rf LOGS/*
         
         # if the meshing failed, decrease timestep and reset meshing
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )) ||
@@ -148,7 +147,9 @@ simulate() {
     if (( $(echo "$num_lines > $num_process") )); then
         new_profile_interval=$(echo "scale=0; 
             ($num_lines-6)/($num_process*2)" | bc -l)
-        change "profile_interval" "$profile_interval" "$new_profile_interval"
+        if (( $(echo "new_profile_interval > 1" | bc -l) )); then
+            change "profile_interval" "$profile_interval" "$new_profile_interval"
+        fi
     fi
     change "write_profiles_flag" ".false." ".true."
     ./rn | tee -a "$logfile"
@@ -156,7 +157,8 @@ simulate() {
     # only process ~200 or so adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
     if [ $num_files -lt $num_process ]; then
-        echo "Not enough logs generated" | tee -a "$logfile"
+        echo "Not enough logs generated ($num_files < $num_process)" | 
+            tee -a "$logfile"
         exit 1 # maybe some day I will change this to rerun with more profiles
     fi
     Rscript ../../fgong_enumerate.R "$num_process" | 
@@ -185,10 +187,10 @@ while [ "$#" -gt 0 ]; do
     -Y) Y="$2"; shift 2;;
     -Z) Z="$2"; shift 2;;
     -a) alpha="$2"; shift 2;;
-    -f) overshoot="$2"; shift 2;;
+    -o) overshoot="$2"; shift 2;;
     -D) diffusion="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
-    -l) light=1; shift 1;;
+    -L) light=1; shift 1;;
     -r) remove=1; shift 1;;
 
     *) echo "unknown option: $1" >&2; exit 1;;
