@@ -57,7 +57,7 @@
       
       max_num_profile_models = -1
       
-      min_timestep_limit = 1!d-12
+      min_timestep_limit = 1d12
       max_years_for_timestep = -1
       !max_timestep = 3.15d14
       
