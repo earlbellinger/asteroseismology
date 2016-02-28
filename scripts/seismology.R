@@ -188,6 +188,6 @@ seismology_plot <- function(seps, nus, #fit,
         las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
         legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
-               legend=paste0("l=", l_degs), horiz=1)
+               legend=paste0("\u2113=", l_degs), horiz=1)
 }
 

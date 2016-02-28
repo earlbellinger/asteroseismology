@@ -57,7 +57,7 @@
       
       max_num_profile_models = -1
       
-      min_timestep_limit = 1d12
+      min_timestep_limit = 1d-12
       max_years_for_timestep = -1
       !max_timestep = 3.15d14
       
@@ -93,6 +93,7 @@
       !smooth_convective_bdy = .false.
       !convective_bdy_weight = 1
       !convective_bdy_dq_limit = 1d-4
+      T_mix_limit = 1d4
       
       !! Overshooting controls 
       !step_overshoot_f_above_nonburn_core = 0.005
@@ -119,7 +120,7 @@
       diffusion_T_full_on = 1d3
       diffusion_T_full_off = 1d3
       !radiation_turbulence_coeff = 1
-      !diffusion_min_dq_ratio_at_surface = 50
+      diffusion_min_dq_ratio_at_surface = 25
       
       diffusion_calculates_ionization = .true.
       

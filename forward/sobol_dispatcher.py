@@ -25,8 +25,8 @@ def main(arguments):
                         help='range of mixing length parameter values')
     parser.add_argument('-D', '--diffusion', default=[10**-6, 10], nargs=2,
                         type=float, 
-                        help='range of diffusion coefficient values')
-    parser.add_argument('-f', '--overshoot', default=[0, 0.5], nargs=2,
+                        help='range of diffusion factors')
+    parser.add_argument('-o', '--overshoot', default=[0, 0.5], nargs=2,
                         type=float, 
                         help='range of overshoot values')
     parser.add_argument('-N', default=1000, help='number of tracks to generate',
@@ -37,9 +37,13 @@ def main(arguments):
                         help='offset for sobol numbers')
     parser.add_argument('-p', '--parallel', default=1, 
                         type=int, help='number of CPUs to use')
+    parser.add_argument('-L', '--light', default=False, action='store_true',
+                        help='only calculate light element diffusion')
+    parser.add_argument('-r', '--remove', default=False, action='store_true',
+                        help='delete models upon completion')
     parser.add_argument('-l', '--logs', default=[0, 0, 1, 0, 1, 0], 
                         type=list,
-                        help='booleans of whether to log M, Y, Z, alpha, D, f')
+                        help='booleans of whether to log M, Y, Z, alpha, D, o')
     args = parser.parse_args(arguments)
     print(args)
     ranges = np.vstack((args.M, args.Y, args.Z, args.alpha,
@@ -49,9 +53,11 @@ def main(arguments):
             ranges[i] = np.log10(ranges[i])
     print(ranges)
     dispatch(ranges=ranges, N=args.N, logs=args.logs, 
-        directory=args.directory, skip=args.skip, parallel=args.parallel)
+        directory=args.directory, light=args.light, remove=args.remove,
+        skip=args.skip, parallel=args.parallel)
 
-def dispatch(ranges, N, logs, directory, skip=0, parallel=r"$OMP_NUM_THREADS"):
+def dispatch(ranges, N, logs, directory, light=0, remove=0, skip=0, 
+             parallel=r"$OMP_NUM_THREADS"):
     shift = ranges[:,0]
     scale = np.array([(b-a) for a,b in ranges])
     for i in range(skip, N+skip):
@@ -60,8 +66,9 @@ def dispatch(ranges, N, logs, directory, skip=0, parallel=r"$OMP_NUM_THREADS"):
             if (logs[j]):
                 vals[j] = 10**val
         bash_cmd = "maybe_sub.sh -n -p %d dispatch.sh -d %s "\
-            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -f %.6f -r"%\
-            tuple([parallel, directory] + [val for val in vals])
+            "-M %.6f -Y %.6f -Z %.6f -a %.6f -D %.6f -o %.6f %s %s"%\
+            tuple([parallel, directory] + [val for val in vals] +
+                  ["-r" if remove else ""] + ["-L" if light else ""])
         print(bash_cmd)
         #exit()
         subprocess.Popen(bash_cmd.split(), shell=False)

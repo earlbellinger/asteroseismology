@@ -12,7 +12,7 @@ library(magicaxis)
 #############################################################
 kages <- read.table(file.path('data', 'kages.dat'), header=1)
 
-data_dir <- file.path('learn_covs', 'kages')
+data_dir <- file.path('learn_covs-simulations', 'kages')
 ml <- do.call(plyr:::rbind.fill, Map(function(cov) {
         name <- sub('.dat', '', basename(cov))
         if (!name %in% kages$KIC) 
@@ -57,9 +57,10 @@ plot_comparison <- function(qty, ...,
                      ml[[qty]]+ml[[high]])
     
     #ml.sigma <- (ml[[qty]] * (ml[[high]]-ml[[low]])) / 2
-    #kg.sigma <- (kages[[qty]] * (kages[[high]]-kages[[qty]])) / 2
-    ml.sigma <- ml[[paste0(qty, '_s')]]
-    distance <- abs(ml[[qty]] - kages[[qty]]) / ml.sigma
+    #kg.sigma <- (kages[[qty]] * (kages[[high]]-kages[[low]])) / 2
+    sigma <- ml[[paste0(qty, '_s')]] + 
+        ((kages[[qty]]+kages[[high]]) - (kages[[qty]]-kages[[low]])) / 2
+    distance <- abs(ml[[qty]] - kages[[qty]]) / sigma
     #distance <- if (distance<2*ml.sigma) 0 else distance
     #dist2 <- abs(ml[[qty]] - kages[[qty]]) / kg.sigma
     #distance <- (dist1+dist2)/2
@@ -99,7 +100,7 @@ for (qty in c("Age", "Mass", "Luminosity", "Radius", "logg")) {
 ### Comparison with Hare-and-Hound ##########################
 #############################################################
 basu <- read.table(file.path('data', 'basu.dat'), header=1)
-data_dir <- file.path('learn_covs', 'basu')
+data_dir <- file.path('learn_covs-simulations', 'basu')
 ml <- do.call(plyr:::rbind.fill, Map(function(cov) {
         name <- sub('.dat', '', basename(cov))
         if (!name %in% basu$Model) 
