@@ -11,7 +11,7 @@ mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.2
 mesh_delta_upper=4
 profile_interval=1
-max_years_for_timestep=5000000
+max_years_for_timestep=10000000
 max_years_limit=100000
 
 pmslog="pms.log"
@@ -48,20 +48,6 @@ simulate() {
         change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
     fi
     
-    if (( $(echo "$diffusion > 0" | bc -l) )); then
-       change "do_element_diffusion" ".false." ".true."
-       change 'diffusion_class_factor(1)' '1' "$diffusion"
-       change 'diffusion_class_factor(2)' '1' "$diffusion"
-       if [ ! $light -eq 1 ]; then
-           change 'diffusion_class_factor(3)' '1' "$diffusion"
-           change 'diffusion_class_factor(4)' '1' "$diffusion"
-       else
-           change 'diffusion_num_classes' '4' '2'
-           change 'diffusion_class_factor(3)' '1' '0'
-           change 'diffusion_class_factor(4)' '1' '0'
-       fi
-    fi
-    
     ./rn | tee "$pmslog"
     while ! grep -q "$pmsuccess" "$pmslog"; do
         new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
@@ -78,6 +64,19 @@ simulate() {
     done
     
     mv LOGS/history.data .
+    
+    if (( $(echo "$diffusion > 0" | bc -l) )); then
+       change "do_element_diffusion" ".false." ".true."
+       change 'diffusion_class_factor(1)' '1' "$diffusion"
+       change 'diffusion_class_factor(2)' '1' "$diffusion"
+       change 'diffusion_class_factor(3)' '1' "$diffusion"
+       change 'diffusion_class_factor(4)' '1' "$diffusion"
+       change 'diffusion_class_factor(5)' '1' "$diffusion"
+       if [ $light -eq 1 ]; then
+           change 'diffusion_class_representative(4)' "'o16'" "'he4'"
+           change 'diffusion_class_representative(5)' "'fe56'" "'he4'"
+       fi
+    fi
     
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."

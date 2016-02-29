@@ -86,15 +86,17 @@ data3 <- read.table(header=0, col.names=c("n_trees", "oob_estimate", "time"),
 
 oob_plot <- function(max_n=1024, plotboth=0, y='oob_estimate', ..., 
         text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
-    plot(data$n_trees, data[[y]], 
+    plot(data$n_trees, if (y=="oob_estimate") 1-data[[y]] else data[[y]], 
          axes=FALSE, pch=20, cex=1, tcl=0,
          xlab="Number of Decision Trees in Forest",
-         ylab=if (y=='oob_estimate') "Out-of-Bag Accuracy" else 
+         ylab=if (y=='oob_estimate') "Out-of-Bag Error Rate" else 
               "Training time t/s",
          xaxs='i', yaxs='i', 
-         log=if (y=='oob_estimate') 'x' else 'xy',
-         ylim=if (y=='oob_estimate') c(0, 1) else range(1, 60, data[[y]]))
-    lines(data$n_trees, data[[y]], type='l')
+         log='xy',#if (y=='oob_estimate') 'x' else 'xy',
+         ylim=if (y=='oob_estimate') range(10**-2, 1) else
+             range(1, 60, data[[y]]))
+    lines(data$n_trees, 
+        if (y=='oob_estimate') 1-data[[y]] else data[[y]], type='l')
     minor <- 32
     axis(1, at=seq(minor, max_n, minor), labels=FALSE, tcl=-0.125)
     axis(3, at=seq(minor, max_n, minor), labels=FALSE, tcl=-0.125)
@@ -122,13 +124,21 @@ oob_plot <- function(max_n=1024, plotboth=0, y='oob_estimate', ...,
     #       lty=3, col='darkred')
     ##lines(data3$n_trees, data3$oob_estimate, lty=3)
     if (plotboth) {
-        points(data2$n_trees, data2[[y]], col=blue, cex=0.5)
-        lines(data2$n_trees, data2[[y]], lty=3, col=blue)
-        points(data3$n_trees, data3[[y]], pch=3, col=red, cex=0.5)
-        lines(data3$n_trees, data3[[y]], lty=4, col=red)
+        points(data2$n_trees, 
+            if (y=='oob_estimate') 1-data2[[y]] else data2[[y]], 
+            col=blue, cex=0.5)
+        lines(data2$n_trees, 
+            if (y=='oob_estimate') 1-data2[[y]] else data2[[y]], 
+            lty=3, col=blue)
+        points(data3$n_trees, 
+            if (y=='oob_estimate') 1-data2[[y]] else data3[[y]], 
+            pch=3, col=red, cex=0.5)
+        lines(data3$n_trees, 
+            if (y=='oob_estimate') 1-data2[[y]] else data3[[y]], 
+            lty=4, col=red)
     }
     if (plotlegend) {
-        legend("bottomright", bty='n', xjust=1, yjust=1,
+        legend("topright", bty='n', xjust=1, yjust=1,
                lty=c(2,3,4), pch=c(20, 1, 3),
                col=c("black", blue, red), cex=text.cex,
                legend=c("Fit using all observables",

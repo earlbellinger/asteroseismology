@@ -112,28 +112,34 @@
       
       !! Atomic diffusion
       do_element_diffusion = .false.
+      !diffusion_dt_limit = 7d11 
+      !diffusion_T_full_on = 1d3
+      !diffusion_T_full_off = 1d3
+      !radiation_turbulence_coeff = 1
+      !diffusion_min_dq_ratio_at_surface = 75
+      
+      diffusion_calculates_ionization = .false.
+      diffusion_use_isolve = .true.
+      diffusion_use_cgs_solver = .true.
+      
+      diffusion_num_classes = 5
       !diffusion_class_factor(1) = 1
       !diffusion_class_factor(2) = 1
       !diffusion_class_factor(3) = 1
       !diffusion_class_factor(4) = 1
-      diffusion_dt_limit = 7d11 
-      diffusion_T_full_on = 1d3
-      diffusion_T_full_off = 1d3
-      !radiation_turbulence_coeff = 1
-      diffusion_min_dq_ratio_at_surface = 25
+      !diffusion_class_factor(5) = 1
       
-      diffusion_calculates_ionization = .true.
+      !diffusion_class_representative(1) = 'h1'
+      !diffusion_class_representative(2) = 'he3'
+      !diffusion_class_representative(3) = 'he4'
+      !diffusion_class_representative(4) = 'o16'
+      !diffusion_class_representative(5) = 'fe56'
       
-      diffusion_num_classes = 4 
-      diffusion_class_representative(1) = 'h1'
-      diffusion_class_representative(2) = 'he4'
-      diffusion_class_representative(3) = 'o16'
-      diffusion_class_representative(4) = 'fe56'
-      
-      diffusion_class_A_max(1) = 2
-      diffusion_class_A_max(2) = 4
-      diffusion_class_A_max(3) = 16
-      diffusion_class_A_max(4) = 10000
+      !diffusion_class_A_max(1) = 2
+      !diffusion_class_A_max(2) = 3
+      !diffusion_class_A_max(3) = 4
+      !diffusion_class_A_max(4) = 16
+      !diffusion_class_A_max(5) = 10000
       
       calculate_Brunt_N2 = .true.
       write_pulse_info_with_profile = .true.
