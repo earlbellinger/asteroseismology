@@ -21,7 +21,7 @@ mpl.rcParams.update({'font.size': 16})
 import pylab as P
 #import corner
 
-simulations_filename = os.path.join('..', 'forward', 'simulations-amp2.dat')
+simulations_filename = os.path.join('..', 'forward', 'simulations-amp.dat')
 bname = os.path.basename(simulations_filename).split('.')[0]
 plot_dir = 'learn_plots-'+bname
 cov_dir = 'learn_covs-'+bname

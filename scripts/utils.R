@@ -27,7 +27,9 @@ red <- "#ca0020"
 make_plots <- function(plot_f, filename, 
         filepath='plots', 
         mar=utils.mar, 
-        mgp.slides=utils.mgp, mgp.paper=c(2, 0.15, 0),
+        mar.paper=c(2.5, 3, 1, 1),
+        mgp.slides=utils.mgp, 
+        mgp.paper=c(1.5, 0.15, 0),
         hack.mgp=c(2, 0.5, 0), thin.hack=FALSE, 
         cex.paper=0.8, cex.slides=1.3, cex.hack=1.4,
         wide=TRUE, thin=TRUE, 
@@ -49,17 +51,6 @@ make_plots <- function(plot_f, filename,
     
     args <- c(as.list(environment()), list(...))
     
-    if (paper) {
-        do.call(widethin, c(list(
-                directory=file.path(filepath, 'paper'),
-                pdf_width=paper_pdf_width, 
-                pdf_height=paper_pdf_height, 
-                png_width=paper_png_width, 
-                png_height=paper_png_height,
-                text.cex=cex.paper), 
-            args))
-        
-    }
     if (slides) {
         do.call(widethin, c(list(
                 directory=file.path(filepath, 'slides'), 
@@ -69,6 +60,19 @@ make_plots <- function(plot_f, filename,
                 slides_png_height, 
                 text.cex=cex.slides, 
                 mgp=mgp.slides),
+            args))
+    }
+    if (paper) {
+        args$mar <- mar.paper
+        do.call(widethin, c(list(
+                directory=file.path(filepath, 'paper'),
+                pdf_width=paper_pdf_width, 
+                pdf_height=paper_pdf_height, 
+                png_width=paper_png_width, 
+                png_height=paper_png_height,
+                mgp=mgp.paper,
+                #mar=mar.paper,
+                text.cex=cex.paper), 
             args))
     }
 }
@@ -229,21 +233,21 @@ seis.labs <- list(
 )
 
 seis.units <- list(
-  M              = bquote("/"*M["\u0298"]), 
+  M              = bquote("/"*M["☉"]), 
   Y              = bquote(), 
   Z              = bquote(),
   alpha          = bquote(), 
   diffusion      = bquote(), 
   overshoot      = bquote(), 
   age            = bquote("/Gyr"), 
-  radius         = bquote("/"*R["\u0298"]), 
+  radius         = bquote("/"*R["☉"]), 
   mass_X         = bquote(), 
   mass_Y         = bquote(), 
   X_surf         = bquote(),
   Y_surf         = bquote(),
   X_c            = bquote("/"*M["*"]), 
   log_g          = bquote(" (cgs)"), 
-  L              = bquote("/"*L["\u0298"]), 
+  L              = bquote("/"*L["☉"]), 
   Teff           = bquote("/"*K), 
   Fe.H           = bquote(), 
   Dnu_median     = bquote("/"*mu*Hz), 
