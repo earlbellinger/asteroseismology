@@ -112,7 +112,7 @@
       
       !! Atomic diffusion
       do_element_diffusion = .false.
-      !diffusion_dt_limit = 7d11 
+      diffusion_dt_limit = 3d12 
       !diffusion_T_full_on = 1d3
       !diffusion_T_full_off = 1d3
       !radiation_turbulence_coeff = 1

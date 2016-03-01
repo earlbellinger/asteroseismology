@@ -12,7 +12,7 @@ mesh_delta_limit=0.2
 mesh_delta_upper=4
 profile_interval=1
 max_years_for_timestep=1000000
-max_years_limit=100000
+max_years_limit=1000
 
 pmslog="pms.log"
 logfile="mesa.log"
