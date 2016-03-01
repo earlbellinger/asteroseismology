@@ -53,3 +53,4 @@ sol <- lp.transport(cost.mat, "min", row.signs, row.rhs,
 col.signs, col.rhs)$solution
 new.DF <- model_candidates[apply(sol, 1, which.max),]
 for (fname in new.DF$filename) cat(paste0(fname, ".FGONG\n"))
+
