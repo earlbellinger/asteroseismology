@@ -5,13 +5,13 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=200
+num_process=100
 init_mesh_delta_coeff=1
 mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.2
 mesh_delta_upper=4
 profile_interval=1
-max_years_for_timestep=10000000
+max_years_for_timestep=1000000
 max_years_limit=100000
 
 pmslog="pms.log"
@@ -49,6 +49,7 @@ simulate() {
     fi
     
     ./rn | tee "$pmslog"
+    
     while ! grep -q "$pmsuccess" "$pmslog"; do
         new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
@@ -78,6 +79,8 @@ simulate() {
        fi
     fi
     
+    change "max_years_for_timestep" "-1" "$max_years_for_timestep"
+    change "min_timestep_limit" "1d-12" "1d12"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
     change "save_model_when_terminate" ".true." ".false."
@@ -87,15 +90,7 @@ simulate() {
     change 'relax_initial_Z' '.true.' '.false.'
     change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
     
-    change "max_years_for_timestep" "-1" "$max_years_for_timestep"
-    change "min_timestep_limit" "1d-12" "1d12"
-    
     ./rn | tee "$logfile"
-    
-    num_lines=$(cat LOGS/history.data | wc -l)
-    if (( $(echo "$num_lines < 2*$num_process" | bc -l) )); then
-        echo "Only calculated $num_lines models"
-    fi
     
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
@@ -142,18 +137,28 @@ simulate() {
     done
     
     # enable profile writing and rerun track with good settings 
-    num_lines=$(cat LOGS/history.data | wc -l)
-    if (( $(echo "$num_lines > $num_process") )); then
+    change "write_profiles_flag" ".false." ".true."
+    
+    tmp=$(Rscript ../../profile_interval.R)
+    set $tmp
+    num_lines=$1
+    max_age=$2
+    if [ $num_lines -eq 1 ]; then
+        "Fully radiative track"
+        exit 1
+    fi
+    if [ $num_lines -gt $num_process ]; then
         new_profile_interval=$(echo "scale=0; 
-            ($num_lines-6)/($num_process*2)" | bc -l)
+            ($num_lines)/($num_process*2)" | bc -l)
         if (( $(echo "new_profile_interval > 1" | bc -l) )); then
-            change "profile_interval" "$profile_interval" "$new_profile_interval"
+            change "profile_interval" "$profile_interval" \
+                "$new_profile_interval"
         fi
     fi
-    change "write_profiles_flag" ".false." ".true."
+    change "max_age" "16e9" "$max_age"
     ./rn | tee -a "$logfile"
     
-    # only process ~200 or so adipls files 
+    # only process some of the adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
     if [ $num_files -lt $num_process ]; then
         echo "Not enough logs generated ($num_files < $num_process)" | 

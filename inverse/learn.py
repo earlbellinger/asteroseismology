@@ -19,9 +19,14 @@ mpl.rc('text', usetex='true')
 mpl.rc('text', dvipnghack='true') 
 mpl.rcParams.update({'font.size': 16}) 
 import pylab as P
+from sys import argv
 #import corner
 
-simulations_filename = os.path.join('..', 'forward', 'simulations-amp.dat')
+if len(argv) > 1:
+    simulations_filename = argv[1]
+else:
+    simulations_filename = os.path.join('..', 'forward', 'simulations.dat')
+
 bname = os.path.basename(simulations_filename).split('.')[0]
 plot_dir = 'learn_plots-'+bname
 cov_dir = 'learn_covs-'+bname
