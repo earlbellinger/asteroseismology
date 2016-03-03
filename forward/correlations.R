@@ -39,54 +39,6 @@ ages <- unlist(Map(function(i) max(merge(seis.DF, combos[i,])$age),
     1:nrow(combos)))
 combos <- combos[order(ages),]
 
-# Make inputs diagram
-X <- 1-combos$Y-combos$Z
-p = ggpairs(data=combos, axisLabels="show", upper="blank",
-        columnLabels=sapply(names(seis.DF)[1:6], 
-            function (name) get_label_nameless(name)))
-for (subplot in grep('points', p$plots)) {
-    p$plots[[subplot]] <- sub("))", ", colour=X))", p$plots[[subplot]])
-}
-number_ticks <- function(xs) {
-    repr <- seq(min(xs), max(xs), length.out=1000)
-    signif(as.numeric(quantile(repr, c(0.2, 0.8))), 2)
-}
-pp <- getPlot(p, 1, 1)
-pp <- pp + theme(axis.line=element_blank(),
-                 axis.text=element_blank(),
-                 axis.ticks=element_blank(),
-                 text=element_blank())
-p <- putPlot(p, pp, 1, 1)
-for (ii in 1:6) {
-    for (jj in 1:6) {
-        pp <- getPlot(p, ii, jj)
-        pp <- pp + scale_x_continuous(breaks=number_ticks) + 
-                   scale_y_continuous(breaks=number_ticks)
-        p <- putPlot(p, pp, ii, jj)
-    }
-}
-for (col_j in c(1,2,4)) {
-    zplot <- getPlot(p, 3, col_j)
-    log_zplot <- zplot + scale_y_log10(limits=c(0.0004, 0.04))
-    log_zplot$subtype <- 'logpoints'
-    log_zplot$type <- 'logcontinuous'
-    p <- putPlot(p, log_zplot, 3, col_j)
-}
-for (row_i in 3:6) {
-    zplot <- getPlot(p, row_i, 3)
-    log_zplot <- zplot + scale_x_log10(limits=c(0.0004, 0.04))
-    log_zplot$subtype <- 'logpoints'
-    log_zplot$type <- 'logcontinuous'
-    p <- putPlot(p, log_zplot, row_i, 3)
-}
-inputs_plot <- function(..., text.cex) {
-    print(p, leftWidthProportion=0.4, bottomHeightProportion=0.5)
-}
-make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"),
-    short=FALSE, thin=FALSE, make_png=FALSE)
-
-
-
 ## Make scatter and contour plots of X-R and C-D diagrams for all model vars
 for (Z in names(seis.DF)[1:9]) {
     scatter_mesh('Teff', 'L', Z)

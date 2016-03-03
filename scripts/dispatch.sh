@@ -5,14 +5,14 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=100
+min_process=10
+num_process=200
 init_mesh_delta_coeff=1
 mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.2
 mesh_delta_upper=4
-profile_interval=1
 max_years_for_timestep=1000000
-max_years_limit=1000
+max_years_limit=100000
 
 pmslog="pms.log"
 logfile="mesa.log"
@@ -55,6 +55,7 @@ simulate() {
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
           then
             echo "Couldn't achieve convergence" | tee -a "$pmslog"
+            cleanup
             exit 1
         fi
         echo "Retrying PMS with mesh_delta_coeff = $new_mesh_delta_coeff" | 
@@ -80,7 +81,7 @@ simulate() {
     fi
     
     change "max_years_for_timestep" "-1" "$max_years_for_timestep"
-    change "min_timestep_limit" "1d-12" "1d12"
+    change "min_timestep_limit" "1d-12" "1d9"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
     change "save_model_when_terminate" ".true." ".false."
@@ -95,6 +96,17 @@ simulate() {
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
         
+        tmp=$(Rscript ../../profile_interval.R)
+        tmp=(${tmp//;/ })
+        num_lines=${tmp[0]}
+        max_age=${tmp[1]}
+        if [ $num_lines -lt $min_process ] && 
+           [ $(cat LOGS/history.data | wc -l) -gt $num_process ]; then
+            echo "Fully radiative track"
+            cleanup
+            exit 1
+        fi
+        
         mv LOGS/history.data "history_""$mesh_delta_coeff""_"\
 "$max_years_for_timestep"".data"
         
@@ -107,6 +119,7 @@ simulate() {
            (( $(echo "$new_mesh_delta_coeff > $mesh_delta_upper" | bc -l) ));
           then
             echo "Couldn't achieve convergence" | tee -a "$logfile"
+            cleanup
             exit 1
         fi
         
@@ -140,19 +153,19 @@ simulate() {
     change "write_profiles_flag" ".false." ".true."
     
     tmp=$(Rscript ../../profile_interval.R)
-    set $tmp
-    num_lines=$1
-    max_age=$2
-    if [ $num_lines -eq 1 ]; then
-        "Fully radiative track"
+    tmp=(${tmp//;/ })
+    num_lines=${tmp[0]}
+    max_age=${tmp[1]}
+    if [ $num_lines -lt 10 ]; then
+        echo "Fully radiative track"
+        cleanup
         exit 1
     fi
     if [ $num_lines -gt $num_process ]; then
         new_profile_interval=$(echo "scale=0; 
-            ($num_lines)/($num_process*2)" | bc -l)
-        if (( $(echo "new_profile_interval > 1" | bc -l) )); then
-            change "profile_interval" "$profile_interval" \
-                "$new_profile_interval"
+            $num_lines / $num_process" | bc -l)
+        if [ $new_profile_interval -gt 1 ]; then
+            change "profile_interval" "1" "$new_profile_interval"
         fi
     fi
     change "max_age" "16e9" "$max_age"
@@ -160,10 +173,10 @@ simulate() {
     
     # only process some of the adipls files 
     num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
-    if [ $num_files -lt $num_process ]; then
-        echo "Not enough logs generated ($num_files < $num_process)" | 
+    if [ $num_files -lt $min_process ]; then
+        echo "Small number of logs generated ($num_files < $min_process)" | 
             tee -a "$logfile"
-        exit 1 # maybe some day I will change this to rerun with more profiles
+        #exit 1 # maybe some day I will change this to rerun with more profiles
     fi
     Rscript ../../fgong_enumerate.R "$num_process" | 
         xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
@@ -171,9 +184,7 @@ simulate() {
     
     cd ../..
     Rscript summarize.R "$dirname"
-    if [ $remove -eq 1 ]; then
-        rm -rf "$dirname"
-    fi
+    cleanup
 }
 
 change() { #param initval newval
@@ -181,6 +192,13 @@ change() { #param initval newval
         sed -i.bak "s/\!$1 = $2/$1 = $2/g" inlist_1.0
     fi
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
+    sleep 1
+}
+
+cleanup() {
+    if [ $remove -eq 1 ]; then
+        rm -rf "$dirname"
+    fi
 }
 
 ## Parse command line arguments

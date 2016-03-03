@@ -9,16 +9,25 @@ maybe_sub() {
     cmd=$*
     
     ## Check if it should be run in parallel
-    threads="request_cpus = 1"
+    threads=""
     if [ "$OMP_NUM_THREADS" -gt 1 ]; then
         threads="environment  = OMP_NUM_THREADS=$OMP_NUM_THREADS
-request_cpus = $OMP_NUM_THREADS"
+request_cpus = $OMP_NUM_THREADS
+"
+    fi
+    
+    ## Set memory consumption
+    image_size=""
+    if [ "$MEMORY" -gt 0 ]; then
+        image_size="image_size   = $MEMORY
+"
     fi
     
     ## Check niceness control
-    nice="nice_user    = False"
+    nice=""
     if [ $NICE -gt 0 ]; then
-        nice="nice_user    = True"
+        nice="nice_user    = True
+"
     fi
     
     name=${cmd// /_}
@@ -43,9 +52,7 @@ Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
-$threads
-$nice
-
+$threads$image_size$nice
 queue
 " > "condor.job"
         condor_submit "condor.job"
@@ -62,6 +69,7 @@ while [ "$#" -gt 0 ]; do
     -h) HELP=1; break;;
     -n) NICE=1; shift 1;;
     -p) OMP_NUM_THREADS="$2"; shift 2;;
+    -m) MEMORY="$2"; shift 2;;
 
      *) break;;
   esac
@@ -70,6 +78,7 @@ done
 if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${OMP_NUM_THREADS+x} ]; then OMP_NUM_THREADS=1; fi
 if [ -z ${NICE+x} ]; then NICE=0; fi
+if [ -z ${MEMORY+x} ]; then MEMORY=0; fi
 
 if [ $HELP -gt 0 ]; then
     echo "                        _                      _     ";
@@ -89,6 +98,7 @@ if [ $HELP -gt 0 ]; then
     echo "  -h   : show this helpful message and quit"
     echo "  -n   : run as nice job"
     echo "  -p # : set the number of threads to run in parallel"
+    echo "  -m # : set the memory consumption of the job"
     echo
     exit
 fi

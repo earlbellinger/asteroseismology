@@ -18,18 +18,18 @@ if (any(decreasing_L)) {
 }
 DF <- DF[-1:-floor(nrow(DF)*0.1),] # in case more PMS leaks in
 
-cutoff <- 10**-3
-mx1_diff <- abs(DF$mx1_top - DF$mx1_bot)
-mx2_diff <- abs(DF$mx2_top - DF$mx2_bot)
+cutoff <- 0
+mx1_diff <- abs(DF$conv_mx1_top - DF$conv_mx1_bot)
+mx2_diff <- abs(DF$conv_mx2_top - DF$conv_mx2_bot)
 radiative <- with(DF, 
-    mass_conv_core <= 0 & mx1_diff <= cutoff & mx2_diff <= 0 |
-    mass_conv_core  > 0 & mx2_diff <= 0)
+    mass_conv_core <= 0 & mx1_diff <= cutoff & mx2_diff <= cutoff |
+    mass_conv_core  > 0 & mx2_diff <= cutoff)
 if (any(radiative)) DF <- DF[1:min(which(radiative)),]
 
 y <- DF$surface_h1
 x <- DF$star_age
 
-outliers <- abs(diff(y)) >= 0.01
+outliers <- abs(diff(y)) >= 10**-3
 locs <- which(outliers)
 locs <- locs[c(1, which(diff(locs)>1)+1)]
 
@@ -49,10 +49,12 @@ mesh_delta <- sub(".+= ", "", inlist[line_num])
 line_num <- grep('max_years_for_timestep = ', inlist)
 time_step <- strsplit(sub(".+= ", "", inlist[line_num]), " ")[[1]][1]
 
-invisible(make_plots(plot_ts, 
-            paste0(basename(getwd()), "-discontinuity-", 
-                time_step, "_", mesh_delta),
-            filepath=file.path('..', '..', 'plots', 'discontinuity')))
+if (nrow(DF) > 1) {
+    invisible(make_plots(plot_ts, 
+                paste0(basename(getwd()), "-discontinuity-", 
+                    time_step, "_", mesh_delta),
+                filepath=file.path('..', '..', 'plots', 'discontinuity')))
+}
 
 cat(as.numeric(length(which(outliers)) > 0))
 

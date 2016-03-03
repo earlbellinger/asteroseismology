@@ -92,7 +92,7 @@ parse_dir <- function(directory, min_num_models=15) {
     }
     
     ## call summarize on all pairs 
-    parallelStartMulticore(max(1, detectCores()))
+    parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
     obs.DF <- do.call(plyr:::rbind.fill, 
         parallelMap(function(pro_file, freqs_file)
                 summarize(pro_file, freqs_file, ev.DF), 
