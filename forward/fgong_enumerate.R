@@ -42,7 +42,7 @@ model_candidates <- model_candidates[in_main_sequence,]
 x <- model_candidates$center_h1
 
 nrow.DF <- length(x)
-if (nrow.DF < num_points) return(NULL)
+if (nrow.DF < num_points) num_points <- nrow.DF
 ideal <- seq(max(x), min(x), length=num_points)
 cost.mat  <- outer(ideal, x, function(x, y) abs(x-y))
 row.signs <- rep("==", num_points)
