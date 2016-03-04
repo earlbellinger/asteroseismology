@@ -83,14 +83,16 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     # build expression for y label of plot
     if (outf != FALSE) {
         ylab <- if (sep_name == 'Dnu' && length(l_degs) > 1) 
-               bquote(Delta*nu)
+               bquote(Delta*nu / mu*Hz)
            else if (sep_name == 'Dnu') 
-               bquote(Delta*nu[.(l_degs)])
-           else if (sep_name == 'dnu')   
-               bquote(delta*nu[.(l_degs)*','*.(l_degs+2)])
-           else if (sep_name == 'r_sep') bquote(r[.(l_degs)*','*.(l_degs+2)])
-           else if (sep_name == 'r_avg') bquote(r[.(l_degs)*','*.(1-l_degs)])
-        ylab <- as.expression(bquote(.(ylab) / mu*Hz))
+               bquote(Delta*nu[.(l_degs)] / mu*Hz)
+           else if (sep_name == 'dnu')
+               bquote(delta*nu[.(l_degs)*','*.(l_degs+2)] / mu*Hz)
+           else if (sep_name == 'r_sep') 
+               bquote(r[.(l_degs)*','*.(l_degs+2)])
+           else if (sep_name == 'r_avg') 
+               bquote(r[.(l_degs)*','*.(1-l_degs)])
+       ylab <- as.expression(ylab)
     }
     
     sep_name <- if (sep_name == 'Dnu' && length(l_degs) > 1) paste0(sep_name)
@@ -178,8 +180,11 @@ seismology_plot <- function(seps, nus, #fit,
          cex=1.5 * gaussian_env/max(gaussian_env), 
          ylab=ylab, 
          xlab=expression("Frequency" ~ nu / mu*Hz), 
-         xlim=range(freqs$nu), 
-         ylim=range(w.median, coef(fit)[1], 2*w.median-coef(fit)[1], seps), 
+         #xlim=c(1000, max(freqs$nu)), 
+         ylim=range(w.median, 
+                    coef(fit)[1], 
+                    2*w.median-coef(fit)[1]), 
+                    #seps), 
          col=if (length(l_degs)==1) col.pal else dnu.cl[pchs], 
          pch=if (length(l_degs)==1) 1 else pchs)
     abline(fit, lty=2)
@@ -187,7 +192,9 @@ seismology_plot <- function(seps, nus, #fit,
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
     if (length(l_degs)>1)
-        legend("bottomright", pch=l_degs+1, col=dnu.cl, cex=text.cex, bty="n",
-               legend=paste0("\u2113=", l_degs), horiz=1)
+        legend("topleft", pch=l_degs+1, col=dnu.cl, 
+               #cex=text.cex, #bty="n",
+               cex=0.8*text.cex,
+               legend=paste0("\u2113=", l_degs))#, horiz=1)
 }
 

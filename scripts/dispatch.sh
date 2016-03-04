@@ -9,10 +9,12 @@ min_process=10
 num_process=200
 init_mesh_delta_coeff=1
 mesh_delta_coeff=$init_mesh_delta_coeff
-mesh_delta_limit=0.2
-mesh_delta_upper=4
+mesh_delta_limit=0.3
+mesh_delta_upper=3
 max_years_for_timestep=1000000
-max_years_limit=100000
+max_years_limit=1000000
+max_bounces=10
+n_bounces=0
 
 pmslog="pms.log"
 logfile="mesa.log"
@@ -107,6 +109,13 @@ simulate() {
             exit 1
         fi
         
+        n_bounces=$n_bounces+1
+        if [ $n_bounces -gt $max_bounces ]; then
+            echo "Bounced too much"
+            cleanup
+            exit 1
+        fi
+        
         mv LOGS/history.data "history_""$mesh_delta_coeff""_"\
 "$max_years_for_timestep"".data"
         
@@ -136,7 +145,7 @@ simulate() {
         
         # if there are convergence problems, decrease the number of points used
         if grep -q "$convfail" "$logfile"; then
-            new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 1.2" |
+            new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 1.1" |
                 bc -l)
         fi
         
@@ -172,7 +181,7 @@ simulate() {
     ./rn | tee -a "$logfile"
     
     # only process some of the adipls files 
-    num_files="$(find "LOGS" -maxdepth 1 -type f -name "*.FGONG" | wc -l)"
+    num_files="$(find 'LOGS' -maxdepth 1 -type f -name '*.FGONG' | wc -l)"
     if [ $num_files -lt $min_process ]; then
         echo "Small number of logs generated ($num_files < $min_process)" | 
             tee -a "$logfile"

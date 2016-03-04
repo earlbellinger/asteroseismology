@@ -27,11 +27,11 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     
     ## Model properties 
     obs.DF["age"] <- pro_header$star_age/10**9
+    obs.DF["X_c"] <- hstry$center_h1
     obs.DF["mass_cc"] <- hstry$mass_conv_core/pro_header$star_mass
     obs.DF["mass_X"] <- pro_header$star_mass_h1/pro_header$star_mass
     obs.DF["mass_Y"] <- (pro_header$star_mass_he3 + 
             pro_header$star_mass_he4)/pro_header$star_mass
-    obs.DF["X_c"] <- hstry$center_h1
     obs.DF["X_surf"] <- hstry$surface_h1
     obs.DF["Y_surf"] <- hstry$surface_he3 + hstry$surface_he4
     
@@ -48,7 +48,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     #acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, #acoustic_cutoff=acoustic_cutoff, 
-        outf=ifelse(sample(0:1000, 1) == 0, gsub("/", "-", freqs_file), FALSE),
+        outf=ifelse(sample(0:10000, 1) == 0, gsub("/", "-", freqs_file), FALSE),
         filepath=file.path('plots', 'separation'))
     
     if (all(is.na(seis.DF))) return(NULL)
@@ -56,7 +56,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
 }
 
 ### Obtain evolutionary tracks from a MESA directory
-parse_dir <- function(directory, min_num_models=15) {
+parse_dir <- function(directory, min_num_models=10) {
     ## parse dirname string e.g. "M=1.0_Y=0.28"
     params.DF <- NULL
     for (var in unlist(strsplit(basename(directory), '_'))) { 

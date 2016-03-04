@@ -49,7 +49,7 @@ def main(arguments):
     parser.add_argument('-n', '--nice', default=False, action='store_true',
                         help='run as nice job')
     parser.add_argument('-t', '--threshold', 
-                        default=[0, 0, 0, 0, 10**-5, 10**-3], 
+                        default=[0, 0, 0, 0, 10**-3, 10**-5], 
                         type=list,
                         help='consider as 0 if <= this value')
     args = parser.parse_args(arguments)

@@ -21,33 +21,30 @@ X <- 1-combos$Y-combos$Z
 
 # set up corner
 p = ggpairs(data=combos, axisLabels="show", upper="blank",
-        aes(color=X),
+        aes(color=X, size=0.1), 
         columnLabels=sapply(names(combos)[1:6], 
             function (name) as.expression(get_label_nameless(name))))
 
 # log plot alpha_mlt, alpha_ov, and D
-for (col_j in c(1:6)) {
-    for (row_i in log_vars) {
-        if (row_i <= col_j) next
+for (col_j in 1:6) {
+    for (row_i in 1:6) {
+        if (row_i == col_j) {
+            p <- putPlot(p, 
+                ggplot(combos) + geom_line(aes_string(names(combos)[row_i]), 
+                   stat="density"), row_i, row_i)
+            next
+        }
         pp <- getPlot(p, row_i, col_j)
-        pp <- pp + scale_y_log10(limits=signif(range(combos[,row_i]), 1))
-        pp$subtype <- 'logpoints'
-        pp$type <- 'logcontinuous'
+        if (row_i %in% log_vars)
+            pp <- pp + scale_y_log10(limits=signif(range(combos[,row_i]), 1))
+        if (col_j %in% log_vars)
+            pp <- pp + scale_x_log10(limits=signif(range(combos[,col_j]), 1))
+        if (row_i %in% log_vars || col_j %in% log_vars) {
+            pp$subtype <- 'logpoints'
+            pp$type <- 'logcontinuous'
+        }
         p <- putPlot(p, pp, row_i, col_j)
     }
-}
-for (row_i in 1:6) {
-    for (col_j in log_vars) {
-        if (row_i < col_j) next
-        pp <- getPlot(p, row_i, col_j)
-        pp <- pp + scale_x_log10(limits=signif(range(combos[,col_j]), 1))
-        pp$subtype <- 'logpoints'
-        pp$type <- 'logcontinuous'
-        p <- putPlot(p, pp, row_i, col_j)
-    }
-    p <- putPlot(p, 
-        ggplot(combos) + geom_line(aes_string(names(combos)[row_i]), 
-            stat="density"), row_i, row_i)
 }
 
 # change number lines
@@ -66,14 +63,16 @@ minor_ticks <- function(xs) {
 for (ii in 1:6) {
     for (jj in 1:6) {
         pp <- getPlot(p, ii, jj)
-        if (jj %in% log_vars) 
+        if (jj %in% log_vars) {
             pp <- pp + scale_x_log10(breaks=log_number_ticks)
-        else pp <- pp + scale_x_continuous(breaks=number_ticks)
-        if (ii %in% log_vars && ii != jj) 
+        } else {
+            pp <- pp + scale_x_continuous(breaks=number_ticks)
+        }
+        if (ii %in% log_vars && ii != jj) {
             pp <- pp + scale_y_log10(breaks=log_number_ticks)
-        else pp <- pp + scale_y_continuous(breaks=number_ticks)
-        #pp <- pp + scale_x_continuous(breaks=number_ticks) +
-        #           scale_y_continuous(breaks=number_ticks)
+        } else {
+            pp <- pp + scale_y_continuous(breaks=number_ticks)
+        }
         p <- putPlot(p, pp, ii, jj)
     }
 }
@@ -93,5 +92,5 @@ inputs_plot <- function(..., text.cex) {
 
 # save!
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"),
-    short=FALSE, thin=FALSE, make_png=FALSE)
+    short=FALSE, thin=FALSE, make_png=TRUE)
 
