@@ -105,7 +105,7 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     ys = data.loc[:, [i for i in y_show if i not in X_columns]]
     
     print()
-    for n_trees in [4096]:
+    for n_trees in [1024]:
     #list(range(4, 16)) + [18,20] + [2**n for n in range(4, 12)]:
     #[n for n in range(4, 64)]:#[2**n for n in range(1, 12)]:
         forest = Pipeline(steps=[

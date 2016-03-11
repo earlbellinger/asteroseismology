@@ -7,13 +7,13 @@
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 min_process=10
 num_process=200
-init_mesh_delta_coeff=1
+init_mesh_delta_coeff=0.5
 mesh_delta_coeff=$init_mesh_delta_coeff
 mesh_delta_limit=0.3
 mesh_delta_upper=3
-max_years_for_timestep=1000000
-max_years_limit=1000000
-max_bounces=10
+max_years_for_timestep=10000000
+max_years_limit=10000000
+max_bounces=15
 n_bounces=0
 
 pmslog="pms.log"
@@ -36,10 +36,10 @@ simulate() {
     change 'initial_mass' '1.0' "$M"
     change 'initial_y' '-1' "$Y"
     change 'initial_z' '0.02' "$Z"
-    change 'Zbase' '0.02' "$Z"
     change "new_Y" '-1' "$Y"
     change "new_Z" '-1' "$Z"
     change 'mixing_length_alpha' '2.1' "$alpha"
+    #change 'Zbase' '0.02' "$Z"
     
     if (( $(echo "$overshoot > 0" | bc -l) )); then
         change 'step_overshoot_f_above_nonburn_core' '0.005' "$overshoot"
@@ -48,15 +48,23 @@ simulate() {
         change 'step_overshoot_f_above_burn_h_core' '0.005' "$overshoot"
         change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
         change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
+        
+        f0=$(echo "scale=8; $overshoot / 5" | bc -l)
+        change 'overshoot_f0_above_nonburn_core' '0.001' "$f0"
+        change 'overshoot_f0_above_nonburn_shell' '0.001' "$f0"
+        change 'overshoot_f0_below_nonburn_shell' '0.001' "$f0"
+        change 'overshoot_f0_above_burn_h_core' '0.001' "$f0"
+        change 'overshoot_f0_above_burn_h_shell' '0.001' "$f0"
+        change 'overshoot_f0_below_burn_h_shell' '0.001' "$f0"
     fi
     
     ./rn | tee "$pmslog"
     
     while ! grep -q "$pmsuccess" "$pmslog"; do
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
+        new_mesh_delta_coeff=$(echo "scale=3; $mesh_delta_coeff * 0.9" | bc -l)
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
           then
-            echo "Couldn't achieve convergence" | tee -a "$pmslog"
+            echo "Error: Couldn't achieve PMS convergence" | tee -a "$pmslog"
             cleanup
             exit 1
         fi
@@ -67,7 +75,7 @@ simulate() {
         ./rn | tee -a "$pmslog"
     done
     
-    mv LOGS/history.data .
+    mv LOGS/history.data history-pms.data
     
     if (( $(echo "$diffusion > 0" | bc -l) )); then
        change "do_element_diffusion" ".false." ".true."
@@ -75,15 +83,15 @@ simulate() {
        change 'diffusion_class_factor(2)' '1' "$diffusion"
        change 'diffusion_class_factor(3)' '1' "$diffusion"
        change 'diffusion_class_factor(4)' '1' "$diffusion"
-       change 'diffusion_class_factor(5)' '1' "$diffusion"
+       #change 'diffusion_class_factor(5)' '1' "$diffusion"
        if [ $light -eq 1 ]; then
            change 'diffusion_class_representative(4)' "'o16'" "'he4'"
-           change 'diffusion_class_representative(5)' "'fe56'" "'he4'"
+           #change 'diffusion_class_representative(5)' "'fe56'" "'he4'"
        fi
     fi
     
     change "max_years_for_timestep" "-1" "$max_years_for_timestep"
-    change "min_timestep_limit" "1d-12" "1d9"
+    change "min_timestep_limit" "1d-12" "1d10"
     change "create_pre_main_sequence_model" ".true." ".false."
     change "load_saved_model" ".false." ".true."
     change "save_model_when_terminate" ".true." ".false."
@@ -98,20 +106,20 @@ simulate() {
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
         
-        tmp=$(Rscript ../../profile_interval.R)
-        tmp=(${tmp//;/ })
-        num_lines=${tmp[0]}
-        max_age=${tmp[1]}
-        if [ $num_lines -lt $min_process ] && 
-           [ $(cat LOGS/history.data | wc -l) -gt $num_process ]; then
-            echo "Fully radiative track"
-            cleanup
-            exit 1
-        fi
+        #tmp=$(Rscript ../../profile_interval.R)
+        #tmp=(${tmp//;/ })
+        #num_lines=${tmp[0]}
+        #max_age=${tmp[1]}
+        #if [ $num_lines -lt $min_process ] && 
+        #   [ $(cat LOGS/history.data | wc -l) -gt $num_process ]; then
+        #    echo "Error: Fully radiative track ( $num_lines < $min_process )"
+        #    cleanup
+        #    exit 1
+        #fi
         
         n_bounces=$n_bounces+1
         if [ $n_bounces -gt $max_bounces ]; then
-            echo "Bounced too much"
+            echo "Error: Bounced too much"
             cleanup
             exit 1
         fi
@@ -120,14 +128,14 @@ simulate() {
 "$max_years_for_timestep"".data"
         
         # decrease the mesh spacing
-        new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 0.9" | bc -l)
+        new_mesh_delta_coeff=$(echo "scale=3; $mesh_delta_coeff * 0.9" | bc -l)
         
         # check that we're still within bounds
         if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) &&
               $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) )) ||
            (( $(echo "$new_mesh_delta_coeff > $mesh_delta_upper" | bc -l) ));
           then
-            echo "Couldn't achieve convergence" | tee -a "$logfile"
+            echo "Error: Couldn't achieve MS convergence" | tee -a "$logfile"
             cleanup
             exit 1
         fi
@@ -145,7 +153,7 @@ simulate() {
         
         # if there are convergence problems, decrease the number of points used
         if grep -q "$convfail" "$logfile"; then
-            new_mesh_delta_coeff=$(echo "scale=2; $mesh_delta_coeff * 1.1" |
+            new_mesh_delta_coeff=$(echo "scale=3; $mesh_delta_coeff * 1.1" |
                 bc -l)
         fi
         
@@ -158,21 +166,23 @@ simulate() {
         ./rn | tee -a "$logfile"
     done
     
+    cp LOGS/history.data history-ms.data
+    
     # enable profile writing and rerun track with good settings 
     change "write_profiles_flag" ".false." ".true."
     
-    tmp=$(Rscript ../../profile_interval.R)
-    tmp=(${tmp//;/ })
-    num_lines=${tmp[0]}
-    max_age=${tmp[1]}
-    if [ $num_lines -lt 10 ]; then
-        echo "Fully radiative track"
-        cleanup
-        exit 1
-    fi
+    #tmp=$(Rscript ../../profile_interval.R)
+    #tmp=(${tmp//;/ })
+    #num_lines=${tmp[0]}
+    #max_age=${tmp[1]}
+    #if [ $num_lines -lt 10 ]; then
+    #    echo "Error: Fully radiative track ( $num_lines < 10 )"
+    #    cleanup
+    #    exit 1
+    #fi
+    num_lines=$(cat LOGS/history.data | wc -l)
     if [ $num_lines -gt $num_process ]; then
-        new_profile_interval=$(echo "scale=0; 
-            $num_lines / $num_process" | bc -l)
+        new_profile_interval=$(echo "scale=0; $num_lines/$num_process" | bc -l)
         if [ $new_profile_interval -gt 1 ]; then
             change "profile_interval" "1" "$new_profile_interval"
         fi
@@ -183,12 +193,12 @@ simulate() {
     # only process some of the adipls files 
     num_files="$(find 'LOGS' -maxdepth 1 -type f -name '*.FGONG' | wc -l)"
     if [ $num_files -lt $min_process ]; then
-        echo "Small number of logs generated ($num_files < $min_process)" | 
-            tee -a "$logfile"
+        echo "Warning: Small number of logs generated 
+($num_files < $min_process)" | tee -a "$logfile"
         #exit 1 # maybe some day I will change this to rerun with more profiles
     fi
-    Rscript ../../fgong_enumerate.R "$num_process" | 
-        xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
+    #Rscript ../../fgong_enumerate.R "$num_process"
+    ls LOGS/*.FGONG | xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
         "echo start {}; fgong2freqs.sh {}; echo end {}"
     
     cd ../..
@@ -201,7 +211,6 @@ change() { #param initval newval
         sed -i.bak "s/\!$1 = $2/$1 = $2/g" inlist_1.0
     fi
     sed -i.bak "s/$1 = $2/$1 = $3/g" inlist_1.0
-    sleep 1
 }
 
 cleanup() {

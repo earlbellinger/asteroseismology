@@ -18,13 +18,13 @@ if (any(decreasing_L)) {
 }
 DF <- DF[-1:-floor(nrow(DF)*0.1),] # in case more PMS leaks in
 
-cutoff <- 0
-mx1_diff <- abs(DF$conv_mx1_top - DF$conv_mx1_bot)
-mx2_diff <- abs(DF$conv_mx2_top - DF$conv_mx2_bot)
-radiative <- with(DF, 
-    mass_conv_core <= 0 & mx1_diff <= cutoff & mx2_diff <= cutoff |
-    mass_conv_core  > 0 & mx2_diff <= cutoff)
-if (any(radiative)) DF <- DF[1:min(which(radiative)),]
+#cutoff <- 0
+#mx1_diff <- abs(DF$conv_mx1_top - DF$conv_mx1_bot)
+#mx2_diff <- abs(DF$conv_mx2_top - DF$conv_mx2_bot)
+#radiative <- with(DF, 
+#    mass_conv_core <= 0 & mx1_diff <= cutoff & mx2_diff <= cutoff |
+#    mass_conv_core  > 0 & mx2_diff <= cutoff)
+#if (any(radiative)) DF <- DF[1:min(which(radiative)),]
 
 y <- DF$surface_h1
 x <- DF$star_age

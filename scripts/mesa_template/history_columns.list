@@ -473,7 +473,10 @@
       surface he3
       surface he4
       surface c12
+      surface n14
       surface o16
+      surface ne20
+      surface mg24
       ! etc.
       
    ! log mass fractions near surface

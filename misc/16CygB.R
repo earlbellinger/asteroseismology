@@ -2,6 +2,7 @@ library(magicaxis)
 library(lomb)
 library(RColorBrewer)
 source(file.path('..', 'scripts', 'utils.R'))
+source(file.path('..', 'scripts', 'seismology.R'))
 
 plot_dir <- file.path("plots", "16CygB")
 

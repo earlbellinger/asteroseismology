@@ -34,7 +34,8 @@ rand_inst <- function(n) {
         obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
             if (n==1) 0 else uncertainty)))
         colnames(obs.DF) <- name
-        if (obs.DF[['Fe/H']] <= 0.4) break # Fe/H > 0.4 is probably not possible
+        # Fe/H > 0.4 is probably not possible in reality 
+        if (obs.DF[['Fe/H']] <= 0.4) break 
     }
     
     # Correct frequencies for Doppler shift

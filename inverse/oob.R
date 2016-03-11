@@ -98,25 +98,26 @@ oob_plot <- function(max_n=1024, plotboth=0, y='oob_estimate', ...,
     lines(data$n_trees, 
         if (y=='oob_estimate') 1-data[[y]] else data[[y]], type='l')
     minor <- 32
-    axis(1, at=seq(minor, max_n, minor), labels=FALSE, tcl=-0.125)
-    axis(3, at=seq(minor, max_n, minor), labels=FALSE, tcl=-0.125)
+    axis(1, at=seq(minor, max_n, minor), labels=FALSE, tcl=0.125)
+    axis(3, at=seq(minor, max_n, minor), labels=FALSE, tcl=0.125)
     
-    axis(1, at=2^(2:log2(minor)), labels=FALSE, tcl=-0.25)
-    axis(3, at=2^(2:log2(minor)), labels=FALSE, tcl=-0.25)
+    axis(1, at=2^(2:log2(minor)), labels=FALSE, tcl=0.25)
+    axis(3, at=2^(2:log2(minor)), labels=FALSE, tcl=0.25)
     
-    axis(1, at=2^(2:log2(max_n)), labels=2^(2:log2(max_n)), tcl=-0.25,
+    axis(1, at=2^(2:log2(max_n)), labels=2^(2:log2(max_n)), tcl=0.25,
         cex.axis=text.cex)
-    axis(3, at=2^(2:log2(max_n)), labels=FALSE, tcl=-0.25)
+    axis(3, at=2^(2:log2(max_n)), labels=FALSE, tcl=0.25)
     
     if (y == 'oob_estimate')
-        magaxis(side=c(2,4), tcl=-0.25, labels=c(1,0), mgp=mgp+c(0,0.25,0), 
-            family=font, las=2, cex.axis=text.cex)
-    else {
-        axis(2, at=seq(1, 60, 6), labels=FALSE, tcl=-0.125)
-        axis(4, at=seq(1, 60, 6), labels=FALSE, tcl=-0.125)
-        axis(2, at=c(1, 10, 60), labels=c(1, 10, 60), tcl=-0.25, 
+        magaxis(side=c(2,4), tcl=0.25, labels=c(1,0), mgp=mgp,#mgp+c(0,0.25,0), 
+            family=font, #las=2, 
             cex.axis=text.cex)
-        axis(4, at=c(1, 10, 60), labels=FALSE, tcl=-0.25)
+    else {
+        axis(2, at=seq(1, 60, 6), labels=FALSE, tcl=0.125)
+        axis(4, at=seq(1, 60, 6), labels=FALSE, tcl=0.125)
+        axis(2, at=c(1, 10, 60), labels=c(1, 10, 60), tcl=0.25, 
+            cex.axis=text.cex)
+        axis(4, at=c(1, 10, 60), labels=FALSE, tcl=0.25)
     }
     
     #abline(h=0.99, lty=3, col='darkred')
@@ -149,7 +150,7 @@ oob_plot <- function(max_n=1024, plotboth=0, y='oob_estimate', ...,
     }
 }
 
-make_plots(oob_plot, "oob")
+make_plots(oob_plot, "oob", plotlegend=F)
 make_plots(oob_plot, "oob-without", plotboth=1)
 make_plots(oob_plot, "time-without", plotboth=1, y='time', plotlegend=F)
 
