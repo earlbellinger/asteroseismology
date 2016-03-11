@@ -3,6 +3,8 @@
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
+invisible(library(magicaxis))
+
 ## Plotting values
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
@@ -12,6 +14,14 @@ text.cex <- 1
 font <- "Palatino"
 mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
+
+
+## Constants
+solar_Teff = log10(5777)
+solar_age = 4.57e9
+solar_radius = 6.955*10**10
+solar_mass = 1.9891*10**30
+solar_scale = sqrt(solar_mass/solar_radius^3)
 
 #png_res <- 400
 #cex.paper <- 0.8
@@ -63,7 +73,7 @@ make_plots <- function(plot_f, filename,
             args))
     }
     if (paper) {
-        args$mar <- mar.paper
+        if (all(args$mar == utils.mar)) args$mar <- mar.paper
         do.call(widethin, c(list(
                 directory=file.path(filepath, 'paper'),
                 pdf_width=paper_pdf_width, 
@@ -473,5 +483,39 @@ scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh"),
                    mesh=mesh, X=X, Z=Z, xlab=xlab, ylab=ylab, 
                    solar_x=solar_x, solar_y=solar_y)
     }
+}
+
+plot_lamb_brunt <- function(DF, ..., 
+        text.cex=1, mgp=utils.mgp, font=utils.font) {
+    lambs <- NULL
+    for (ell in 1:3) {
+        S <- DF$csound**2 / (DF$radius/max(DF$radius) * solar_radius)**2
+        lamb <- data.frame(10**6/(2*pi) * sqrt(ell*(ell+1) * S))
+        names(lamb) <- ell
+        lambs <- if (is.null(lambs)) lamb else cbind(lambs, lamb)
+    }
+    brunt_N2 <- DF$brunt_N2
+    stable <- which(brunt_N2 >= 0)
+    indices <- if (any(diff(stable)!=1)) {
+        stable[which(diff(stable)!=1)[1]+1] : max(stable)
+    } else {
+        stable
+    }
+    brunt <- 10**6/(2*pi) * sqrt(brunt_N2[indices])
+    plot(DF$radius[indices]/max(DF$radius), brunt, 
+        axes=0, tcl=0, type='l', 
+        log='y', #xaxs='i', #cex=0.5,
+        ylim=range(brunt, lambs),#, 0.01, 10**6), 
+        #ylim=c(1, 10**5),
+        xlim=range(DF$radius/max(DF$radius)),#range(0.01, max(DF$radius)), 
+        #xlim=c(0.088, 0.09),
+        #xlim=c(0.0815, 0.0825),
+        xlab=expression("Radius" ~ r/R["*"]),
+        ylab=expression("Frequency" ~ nu/mu*Hz))
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), las=1,
+        mgp=mgp, cex.axis=text.cex)
+    for (ell in 1:3) lines(DF$radius/max(DF$radius), lambs[[ell]], lty=ell+1)
+    legend("topright", lty=c(1,2), #pch=c(1, NA),
+        legend=c("Brunt", "Lamb"), bty='n')
 }
 

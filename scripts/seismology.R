@@ -20,53 +20,90 @@ dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
 # nu_max is the frequency of maximum oscillation power
 # acoustic_cutoff is the truncation frequency 
 # outf is the filename that plots should have (None for no plot)
-seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
+seismology <- function(freqs, nu_max, 
+        ..., min_points_per_deg=15, acoustic_cutoff=Inf, outf=FALSE) {
     if (nrow(freqs) == 0) {
         print("No frequencies found")
         return(NULL)
     }
+    #freqs <- freqs[,1:3]
     freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
     
-    # all (l,n) combinations should be unique; discard otherwise
-    for (l_mode in unique(freqs$l)) {
-        radials <- freqs[freqs$l==l_mode & freqs$n>0,]
-        duplicates <- duplicated(radials$n)
-        if (any(duplicates)) {
-            print("Duplicated (l,n) combination")
-            print(radials[duplicates,])
-            return(NULL)
-        }
-    }
+    # get l=0
+    seis.DF <- avg(Dnu, freqs, nu_max=nu_max, outf=outf, 
+        acoustic_cutoff=acoustic_cutoff, ...)
+    
+    # make echelle
+    if (outf != FALSE) make_plots(echelle_plot, paste0(outf, '-echelle'), 
+        freqs=freqs, large_sep=seis.DF[[1]], ...)
+    
+    # all (l,n) combinations should be unique with no mixing; discard otherwise
+    #for (l_mode in unique(freqs$l)) {
+    #    radials <- freqs[freqs$l==l_mode & freqs$n>=0,]
+    #    duplicates <- duplicated(radials$n)
+    #    if (any(duplicates)) {
+    #        print("Duplicated (l,n) combination")
+    #        print(radials[duplicates,])
+    #        #while (duplicated(radials$n)) 
+    #        #    radials <- radials[-which(duplicated(radials$n)),]
+    #        #freqs <- rbind(freqs[freqs$l!=l_mode | freqs$n<0,], radials)
+    #        return(NULL)
+    #    }
+        #if ('inertia' %in% names(radials) && any(diff(radials$inertia) > 0)) {
+         #   #||
+         #       #abs(diff(radials$inertia))>100*radials$inertia[-1]) 
+         #       #{
+         #   print("Mixed modes")
+         #   #print(radials)
+         #   #while (any(diff(radials$inertia) > 0)) 
+         #   #    radials <- radials[c(1, 
+         #   #        1+which(diff(radials$inertia) <= 0)),]
+         #   #freqs <- rbind(freqs[freqs$l!=l_mode | freqs$n<0,], radials)
+         #   return(NULL)
+        #}
+        #if (nrow(radials) <= min_points_per_deg) {
+        #    print("Too few points")
+        #    print(radials)
+        #    return(NULL)
+        #}
+    #}
     
     # get averages for Dnu, dnu, r01, r02, r10, r13
-    seis.DF <- avg(Dnu, NULL, freqs, sort(unique(freqs$l)), nu_max, outf, ...)
-    seis.DF <- avg(Dnu, seis.DF, freqs, 0, nu_max, outf, ...)
+    #seis.DF <- avg(Dnu, seis.DF, freqs, sort(unique(freqs$l)), 
+    #    nu_max, outf, ...)
     for (l_deg in 0:1) {
         if (l_deg==0 || 3 %in% freqs$l) { # some stars only have l=0,1,2
-            seis.DF <- avg(dnu, seis.DF, freqs, l_deg, nu_max, outf, ...)
-            seis.DF <- avg(r_sep, seis.DF, freqs, l_deg, nu_max, outf, ...)
+            seis.DF <- avg(dnu, freqs, l_deg, seis.DF, nu_max, outf, ...)
+            seis.DF <- avg(r_sep, freqs, l_deg, seis.DF, nu_max, outf, ...)
         }
-        seis.DF <- avg(r_avg, seis.DF, freqs, l_deg, nu_max, outf, ...)
+        seis.DF <- avg(r_avg, freqs, l_deg, seis.DF, nu_max, outf, ...)
     }
     return(seis.DF)
 }
 
-## Calculate averages of things like f = dnu, Dnu, r_sep, r_avg
+## Calculate averages of things like separator = dnu, Dnu, r_sep, r_avg
 # DF is the where the result will be stored
 # freqs are a data frame with columns l, n, nu
 # l_degs are the l's for which this calculation should be made 
 # nu_max is the center of the gaussian
 # make a plot with filename 'outf' if outf != FALSE
-avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
-    sep_name <- deparse(substitute(f))
+avg <- function(separator, freqs, 
+        l_degs=0, DF=NULL, nu_max=NA, acoustic_cutoff=Inf, outf=FALSE, ...) {
+    sep_name <- deparse(substitute(separator))
+    #print(sep_name)
     seps <- c() # contains the computed quantity (e.g. large freq separations)
     nus <- c() # contains frequencies of the base mode
     pchs <- c() # if there's more than one l, get different symbols for each
     p_modes <- freqs[freqs$n >= 1,] 
     for (l_deg in l_degs) {
         ell <- p_modes[p_modes$l==l_deg,]
-        if (nrow(ell) == 0) next
-        vals <- sapply(unique(ell$n), function(n) f(l_deg, n, freqs))
+        ell <- ell[!duplicated(ell$n) & !duplicated(ell$n, fromLast=T),]
+        if (nrow(ell) == 0) {
+            print(paste0("No ell=", ell))
+            #print(ell)
+            next
+        }
+        vals <- sapply(unique(ell$n), function(n) separator(l_deg, n, freqs))
         not.nan <- complete.cases(vals)
         seps <- c(seps, vals[not.nan])
         nus <- c(nus, ell$nu[not.nan])
@@ -75,6 +112,8 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
     
     # need 3 points to make something reasonable 
     if (length(seps)<=2) {
+        print(paste("Too few points for", sep_name))
+        print(seps)
         #DF[paste0(sep_name, "_median")] <- NA
         #DF[paste0(sep_name, "_slope")] <- NA
         return(DF)
@@ -102,10 +141,15 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
        else if (sep_name == 'r_avg') paste0(sep_name, l_degs, 1-l_degs)
     
     fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
-    gaussian_env <- dnorm(nus, nu_max, fwhm)
-    w.median <- weightedMedian(seps, gaussian_env)
-    DF[paste0(sep_name, "_median")] <- w.median
-    #fit <- lm(seps~nus, weights=gaussian_env)
+    if (!is.na(nu_max)) {
+        gaussian_env <- dnorm(nus, nu_max, fwhm)
+        w.median <- weightedMedian(seps, gaussian_env)
+        DF[paste0(sep_name, "_median")] <- w.median
+        #fit <- lm(seps~nus, weights=gaussian_env)
+    } else {
+        DF[paste0(sep_name, "_median")] <- median(seps)
+        #fit <- lm(seps~nus)
+    }
     #DF[paste0(sep_name, "_slope")] <- coef(fit)[2]
     
     if (outf != FALSE) make_plots(seismology_plot, 
@@ -122,50 +166,88 @@ avg <- function(f, DF, freqs, l_degs, nu_max, outf=FALSE, ...) {
 
 ## Separation: just the difference between two frequencies 
 # nu_{l1,n1} - nu_{l2,n2} 
-# the difference must be positive, otherwise it returns NA 
-separation <- function(first_l, first_n, second_l, second_n, DF) {
-    first <- DF$l == first_l & DF$n == first_n
-    second <- DF$l == second_l & DF$n == second_n
-    if (sum(first) == 1 && sum(second) == 1) { # check that it's unique
-        difference <- DF[first,]$nu - DF[second,]$nu
-        if (difference >= 0) return(difference)
+# the difference must uniquely exist and be positive, otherwise it returns NA 
+separation <- function(first_l, first_n, second_l, second_n, DF, use_n=T) {
+    first <- DF[DF$l == first_l & DF$n == first_n,]
+    if (nrow(first) != 1) return(NA)
+    second <- if (use_n) {
+        DF[DF$l == second_l & DF$n == second_n,]
+    } else {
+        n.diff <- first_n - second_n
+        second.modes <- DF[DF$l == second_l & DF$nu < first$nu,]
+        if (all(is.na(second.modes))) return (NA)
+        second.modes[order(second.modes$nu, decreasing=T),][n.diff,]
     }
-    return(NA)
+    if (nrow(second) != 1) return(NA)
+    difference <- first$nu - second$nu
+    if (difference <= 0) return(NA)
+    return(difference)
 }
 
 ## Five point averages 
 #dd_01= 1/8( nu_[n-1,0] - 4*nu_[n-1,1] + 6*nu_[n,0] - 4*nu[n,  1] + nu_[n+1,0] )
 #dd_10=-1/8( nu_[n-1,1] - 4*nu_[n,  0] + 6*nu_[n,1] - 4*nu[n+1,0] + nu_[n+1,1] )
-dd <- function(l0, l1, n, DF) {
-    p_modes <- DF$n>0
+# with the subscript of nu being (n, l)
+dd <- function(l0, l1, n, DF, use_n=T) {
+    if (l0 == 0 && l1 != 1 || l0 == 1 && l1 != 0) return(NA)
+    
+    p_modes <- DF$n>=0
     ell.0 <- DF[DF$l==0 & p_modes,]
     ell.1 <- DF[DF$l==1 & p_modes,]
-    ns <- DF[DF$n>=(n-1) || DF$n<=(n+1)]
-    n. <- ns[ns$n==n,]#DF[DF$n==n,]
-    n.minus.one <- ns[ns$n==(n-1),]#DF[DF$n==n-1,]
-    n.plus.one <- ns[ns$n==(n+1),]#DF[DF$n==n+1,]
-    val <- if (l0 == 0 && l1 == 1) { ## dd_01
-        ( merge(n.minus.one, ell.0)$nu -
-        4*merge(n.minus.one, ell.1)$nu +
-        6*merge(n., ell.0)$nu -
-        4*merge(n., ell.1)$nu +
-          merge(n.plus.one, ell.0)$nu )/8
-    } else if (l1 == 0 && l0 == 1) { ## dd_10
-        -( merge(n.minus.one, ell.1)$nu -
-         4*merge(n., ell.0)$nu +
-         6*merge(n., ell.1)$nu -
-         4*merge(n.plus.one, ell.0)$nu +
-           merge(n.plus.one, ell.1)$nu )/8
-    } else NA
-    if (length(val) == 0) NA
-    else val
+    if (use_n) {
+        ns <- DF[DF$n>=(n-1) & DF$n<=(n+1),]
+        n. <- ns[ns$n==n,]#DF[DF$n==n,]
+        n.minus.one <- ns[ns$n==(n-1),]#DF[DF$n==n-1,]
+        n.plus.one <- ns[ns$n==(n+1),]#DF[DF$n==n+1,]
+        
+        val <- if (l0 == 0 && l1 == 1) { ## dd_01
+            ( merge(n.minus.one, ell.0)$nu -
+            4*merge(n.minus.one, ell.1)$nu +
+            6*merge(n., ell.0)$nu -
+            4*merge(n., ell.1)$nu +
+              merge(n.plus.one, ell.0)$nu )/8
+        } else if (l1 == 0 && l0 == 1) { ## dd_10
+            -( merge(n.minus.one, ell.1)$nu -
+             4*merge(n., ell.0)$nu +
+             6*merge(n., ell.1)$nu -
+             4*merge(n.plus.one, ell.0)$nu +
+               merge(n.plus.one, ell.1)$nu )/8
+        } else NA
+        
+        if (length(val) != 1) {
+            NA
+        } else {
+           val
+        }
+    
+    } else {
+        ref.l <- if (l0 == 0 && l1 == 1) ell.0 else ell.1
+        ref.nu <- ref.l[ref.l$n == n,]$nu
+        if (length(ref.nu) != 1) return(NA)
+        lesser <- ref.l$nu < ref.nu
+        greater <- ref.l$nu > ref.nu
+        if (!any(lesser) || !any(greater)) return(NA)
+        same.minus1 <- max(ref.l[lesser,]$nu)
+        same.plus1 <- min(ref.l[greater,]$nu)
+        
+        other.l <- if (l0 == 0 && l1 == 1) ell.1 else ell.0
+        lesser <- other.l$nu < ref.nu
+        greater <- other.l$nu > ref.nu
+        if (!any(lesser) || !any(greater)) return(NA)
+        other.minus1 <- max(other.l[lesser,]$nu)
+        other.plus1 <- min(other.l[greater,]$nu)
+        
+        const <- if (l0 == 0 && l1 == 1) 1/8 else -1/8
+        const * ( same.minus1 - 4 * other.minus1 + 6 * ref.nu - 
+                                4 * other.plus1 + same.plus1 )
+    }
 }
 
 ## Separations and ratios
-dnu <- function(l, n, DF) separation(l, n, l+2, n-1, DF)
-Dnu <- function(l, n, DF) separation(l, n, l, n-1, DF)
+dnu <- function(l, n, DF) separation(l, n, l+2, n-1, DF, use_n=F)
+Dnu <- function(l, n, DF) separation(l, n, l, n-1, DF, use_n=F)
 r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
-r_avg <- function(l, n, DF) dd(l, 1-l, n, DF) / Dnu(1-l, n+l, DF)
+r_avg <- function(l, n, DF) dd(l, 1-l, n, DF, use_n=F) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
 seismology_plot <- function(seps, nus, #fit, 
@@ -196,5 +278,26 @@ seismology_plot <- function(seps, nus, #fit,
                #cex=text.cex, #bty="n",
                cex=0.8*text.cex,
                legend=paste0("\u2113=", l_degs))#, horiz=1)
+}
+
+echelle_plot <- function(freqs, large_sep=NA, ..., 
+        text.cex=1, mgp=utils.mgp, font=utils.font) {
+    if (is.na(large_sep)) large_sep <- avg(Dnu, NULL, freqs, 0)[[1]] 
+    plot(freqs$nu %% large_sep, freqs$nu, 
+         tck=0, axes=FALSE, 
+         pch=freqs$l+1, 
+         col=dnu.cl[freqs$l+1], 
+         xlab=expression((nu ~ mod ~ Delta * nu) / mu * Hz), 
+         ylab=expression(nu/mu*Hz))
+    for (l_deg in 0:3) {
+        lines(freqs[freqs$l==l_deg,]$nu %% large_sep, 
+              freqs[freqs$l==l_deg,]$nu,
+              lty=2)
+    }
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
+        las=1, cex.axis=text.cex)
+    l_degs <- sort(unique(freqs$l))
+    legend("top", pch=l_degs+1, col=dnu.cl[l_degs+1], cex=0.8*text.cex, 
+           legend=c(paste0("\u2113=", l_degs)))
 }
 

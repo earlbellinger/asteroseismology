@@ -10,7 +10,7 @@ library(parallelMap)
 Z_div_X_solar = 0.02293
 profile.pattern <- 'profile.+.data$'
 freqs.pattern <- 'profile.+-freqs.dat$'
-freqs.cols <- c('l', 'n', 'nu', 'inertia')
+freqs.cols <- c('l', 'n', 'nu')#, 'inertia')
 
 ### Obtain observable properties from models 
 summarize <- function(pro_file, freqs_file, ev.DF) {
@@ -19,7 +19,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     pro_header <- read.table(pro_file, header=TRUE, nrows=1, skip=1)
     hstry <- ev.DF[ev.DF$model_number==pro_header$model_number,]
     if (nrow(hstry) == 0) {#|| hstry$mass_conv_core > 0) 
-        print(paste("Model", pro_file, "failed"))
+        print(paste("Model", pro_file, "failed: no history information"))
         return(NULL)
     }
     
@@ -48,10 +48,15 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
     #acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, #acoustic_cutoff=acoustic_cutoff, 
-        outf=ifelse(sample(0:10000, 1) == 0, gsub("/", "-", freqs_file), FALSE),
+        outf=ifelse(sample(0:10000, 1) == 0, 
+            gsub("/", "-", freqs_file), 
+            FALSE),
         filepath=file.path('plots', 'separation'))
     
-    if (all(is.na(seis.DF))) return(NULL)
+    if (all(is.na(seis.DF))) {
+        print(paste("Model", pro_file, "failed: no frequency separations"))
+        return(NULL)
+    }
     merge(rbind(obs.DF), rbind(seis.DF))
 }
 
@@ -98,7 +103,6 @@ parse_dir <- function(directory, min_num_models=10) {
                 summarize(pro_file, freqs_file, ev.DF), 
             pro_file=file.path(log_dir, pro_files), 
             freqs_file=file.path(log_dir, freq_files)))
-    
     merge(rbind(params.DF), obs.DF[with(obs.DF, order(age)),])
 }
 
@@ -129,7 +133,8 @@ plot_HR <- function(DF, ev.DF, ...,
         round(quantile(seq(min(DF$X_c), max(DF$X_c), length=length(col.pal)), 
             c(0, 0.25, 0.5, 0.75, 1)), 3), 
         col.pal[1:length(col.pal)], gradient='y', align='rb')
-    mtext(expression("Core-hydrogen" ~ X[c]), 4, line=5.5, cex=text.cex)
+    mtext(expression("Core-hydrogen abundance" ~ X[c]), 4, 
+        line=5.5, cex=text.cex)
     par(family="Luxi Mono")
     legend("bottom", bty='n', xjust=1, cex=text.cex/2, col="gray", 
         legend=c(
@@ -195,19 +200,22 @@ plot_Kippenhahn <- function(DF, ev.DF, ...,
 plot_separations <- function(DF, ..., 
         text.cex=1, font=utils.font, mgp=utils.mgp) {
     attach(DF)
-    plot(NA, axes=0, xaxs='i', yaxs='i',
+    plot(NA, axes=0, xaxs='i', #yaxs='i',
         xlim=range(age),
-        ylim=c(0, log10(200)),
+        ylim=range(log10(Dnu0_median), 
+                   log10(dnu02_median), 
+                   log10(dnu13_median)),
+        #c(0, log10(200)),
         xlab=expression("Age"~tau/"Gyr"),
         ylab=expression("Frequency"~nu/mu*Hz))
     #magaxis(1:3, labels=c(1,1,0), mgp=c(2, 0.5, 0), family=font, las=1, 
     #    tcl=-0.25, unlog='y')
-    magaxis(1:2, labels=c(1,1), mgp=c(2, 0.5, 0), family=font, las=1, 
-        tcl=-0.25, unlog='y')
+    magaxis(1:2, labels=c(1,1), mgp=mgp, family=font, las=1, 
+        tcl=0.25, unlog='y', cex.axis=text.cex)
     lines(log10(Dnu0_median) ~ age, lty=2)
     lines(log10(dnu02_median) ~ age, lty=3)
     lines(log10(dnu13_median) ~ age, lty=4)
-    legend("bottomleft", lty=c(2,3,4), bty='n', 
+    legend("bottomleft", lty=c(2,3,4), bty='n', cex=0.8*text.cex,
        legend=c(expression(Delta*nu), 
                 expression(delta*nu[0*","*2]),
                 expression(delta*nu[1*","*3])))
@@ -229,8 +237,8 @@ plot_separations <- function(DF, ...,
     locations <- Map(function(x) 
         which(abs(X_c-x)==min(abs(X_c-x))), x=tick.locs)
     age_vals <- round(age[unlist(locations)], 3)
-    axis(3, at=c(min(age), age_vals[-1]), tcl=-0.25, 
-        labels=c(tick.locs))
+    axis(3, at=c(min(age), age_vals[-1]), tcl=0.25, 
+        labels=c(tick.locs), cex.axis=text.cex)
     
     xc_minors <- c()
     for (xc_ii in 1:(length(tick.locs)-1)) {
@@ -243,22 +251,69 @@ plot_separations <- function(DF, ...,
     minor.locations <- Map(function(x) 
         which(abs(X_c-x)==min(abs(X_c-x))), x=xc_minors)
     minor.locs <- age[unlist(minor.locations)]
-    axis(3, at=minor.locs, labels=F, tcl=-0.125)
+    axis(3, at=minor.locs, labels=F, tcl=0.125, cex.axis=text.cex)
     
-    mtext(expression("Fractional core-hydrogen abundance"~X[c]), line=1.25)
+    mtext(expression("Fractional core-hydrogen abundance"~X[c]), line=1.25,
+        cex=text.cex)
     
     par(new=T)
-    plot(NA, axes=0, xaxs='i', yaxs='i', xlab='', ylab='',
+    plot(NA, axes=0, xaxs='i', #yaxs='i', 
+        xlab='', ylab='',
         xlim=range(age),
-        ylim=c(0, max(r_sep02_median, r_sep13_median, 
-                      r_avg01_median, r_avg10_median, 0.2)))
+        ylim=c(range(0, r_sep02_median, r_sep13_median, 
+                        r_avg01_median, r_avg10_median)))
     lines(r_sep02_median ~ age, lty=2, col='darkred')
     lines(r_sep13_median ~ age, lty=3, col='darkred')
     lines(r_avg01_median ~ age, lty=4, col='darkred')
-    magaxis(4, labels=1, mgp=c(2, 0.5, 0), family=font, cex.axis=text.cex,
-        las=1, tcl=-0.25)
-    mtext(expression("Frequency ratio"~r), side=4, line=2.5)
+    magaxis(4, labels=1, mgp=mgp, family=font, cex.axis=text.cex,
+        las=1, tcl=0.25)
+    mtext(expression("Frequency ratio"~r), side=4, line=2, cex=text.cex)
     legend("bottomright", lty=c(2,3,4,5), col='darkred', bty='n', 
+           cex=0.8*text.cex,
+       legend=c(expression(r[0*","*2]), 
+                expression(r[1*","*3]), 
+                expression(r[0*","*1])))
+    
+    legend("bottom", bty='n', xjust=1, cex=text.cex/2, col="gray", 
+        legend=c(
+            as.expression(bquote(M == .(M[1]))), 
+            as.expression(bquote(Y == .(Y[1]))), 
+            as.expression(bquote(Z == .(Z[1]))), 
+            as.expression(bquote(alpha == .(alpha[1]))),
+            as.expression(bquote(f == .(overshoot[1]))),
+            as.expression(bquote(D == .(diffusion[1])))
+        )
+    )
+    detach(DF)
+}
+
+## Plot separation slopes 
+plot_slopes <- function(DF, ..., 
+        text.cex=1, font=utils.font, mgp=utils.mgp) {
+    attach(DF)
+    plot(NA, axes=0, xaxs='i', #yaxs='i',
+        xlim=range(age),
+        ylim=range(Dnu0_slope, dnu02_slope, dnu13_slope,
+                   r_avg01_slope, r_sep02_slope, r_sep13_slope),
+        xlab=expression("Age"~tau/"Gyr"),
+        ylab=expression("Slope"~d*S/d*nu/mu*Hz))
+    magaxis(1:4, labels=c(1,1,0,0), mgp=mgp, family=font, las=1, 
+        tcl=0.25, cex.axis=text.cex)
+    
+    lines(Dnu0_slope ~ age, lty=2)
+    lines(dnu02_slope ~ age, lty=3)
+    lines(dnu13_slope ~ age, lty=4)
+    lines(r_avg01_slope ~ age, lty=2, col=red)
+    lines(r_sep02_slope ~ age, lty=3, col=red)
+    lines(r_sep13_slope ~ age, lty=4, col=red)
+    
+    legend("bottomleft", lty=c(2,3,4), bty='n', cex=0.8*text.cex,
+       legend=c(expression(Delta*nu), 
+                expression(delta*nu[0*","*2]),
+                expression(delta*nu[1*","*3])))
+    
+    legend("bottomright", lty=c(2,3,4,5), col='darkred', bty='n', 
+           cex=0.8*text.cex,
        legend=c(expression(r[0*","*2]), 
                 expression(r[1*","*3]), 
                 expression(r[0*","*1])))
@@ -286,6 +341,8 @@ if (length(args)>0) {
     DF <- unique(parse_dir(directory))
     DF <- DF[complete.cases(DF),]
     DF <- DF[order(DF$age),]
+    
+    print(paste("Produced", nrow(DF), "summaries"))
     
     print(sapply(DF, fivenum))
     
@@ -323,5 +380,11 @@ if (length(args)>0) {
         paste0(basename(directory), "-separations", rejection), 
         filepath=file.path('plots', dirname(directory), 'separations'), 
         DF=DF, mar=c(3, 4, 3, 4))
+    #make_plots(plot_slopes, 
+    #    paste0(basename(directory), "-slopes", rejection), 
+    #    filepath=file.path('plots', dirname(directory), 'separations'), 
+    #    DF=DF)
+    
+    warnings()
 }
 

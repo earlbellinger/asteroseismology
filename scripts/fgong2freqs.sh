@@ -52,53 +52,9 @@ if [ ! -e "$fname.amdl" ]
     exit 1
 fi
 
-## Function to create a redistribute file and pass it to ADIPLS' redistrb 
-run_redistrb() {
-        echo "
-2 '$fname.amdl'    @    
-3 '$fname.model'    @
--1 ''        @
-nn  ,icnmsh
-$1,      ,,  @
-icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
-211  ,      ,     ,0.013,      ,5.    ,      , 
-11   ,      ,     ,   64,      ,5.    ,      , @
-cg,  cx,ca  ,sig1,sig2,lmax,alphsf,adda4,accrm
-1.,0.05,0.05,0.  ,0.  ,   2,      , 0.02, 0.01, @ 
-nout,cn,irsu,unew   
-60  ,  ,    ,    ,,,,,,, @
-nmodel,kmodel,itsaml,ioldex
-      ,      ,      ,     2,,,,,,,,  @
-" > "redistrb-$fname.in"
-    (egrep '# *$|@ *$' "redistrb-$fname.in" | sed -e 's/ *[#,@] *$//') | \
-        $aprgdir/adiajobs/redistrb.c.d.x
-}
-
-## Function to run ADIPLS 
-run_adipls() { 
-    (egrep '# *$|@ *$' adipls-"$fname".in | sed -e 's/ *[#,@] *$//') | \
-        $aprgdir/adipls/adipls.c.d.x
-
-    ## Check that the .agsm file was created successfully
-    if [ ! -e "$fname.agsm" ]; then
-        echo "Error: Failed to generate $fname.agsm"
-        exit 1
-    fi
-    ## Convert .agsm to .dat using set-obs
-    (echo 16; echo "$fname.agsm"; echo "$fname.dat"; echo "2") | \
-        $aprgdir/adiajobs/set-obs.d.x
-
-    ## Check that the frequencies were created, and remove the extra text 
-    if [ ! -e "$fname.dat" ]; then
-        echo "Error: Failed to generate frequency information $fname.dat"
-        exit 1
-    fi
-    cp "$fname.dat" "$fname.dat.bak"
-}
-
 ## Create an adipls.in file with some decent (?) settings 
 echo "
- 2  '$fname.model' @
+ 2  '$fname.amdl' @
  9  '$fname.log'  @
  11 '$fname.agsm' @
  4  '$fname.amde' @
@@ -131,7 +87,7 @@ int:
   istsbc,fctsbc,ibotbc,fcttbc,
         ,      ,      ,      , @
   mdintg,iriche,xfit,fcnorm,eps,epssol,itmax,dsigre,
-        ,     1, 0.9,      ,   ,      ,   16,      , @
+       5,      ,0.99,      ,   ,      ,  100,      , @
   fsig,dsigmx,irsevn,xmnevn,nftmax,itsord,
       ,      ,      ,      ,      ,      , @
 out:
@@ -148,35 +104,31 @@ dgn:
         ,      ,      ,      ,     , @
   imstsl,imissl,imjssl,idgnrk,
         ,      ,      ,      , @
-" > "adipls-$fname.in"
+" >| "adipls-$fname.in"
 
-# rerun with fewer points if redistribution or adipls fails 
-for nn in 6000 5000 4000 3000 2000 1000; do
-    rm -f "$fname.model"
-    run_redistrb $nn
-    if [ ! -e "$fname.model" ]; then 
-        if [ $nn -eq 1000 ]; then
-            echo "Error: Redistribution of $fname failed"
-            exit 1
-        fi
-        echo "Warning: Failed with nn = $nn, retrying redistrb"
-        continue 
-    fi
-    run_adipls
-    num_freqs=$(cat "$fname.dat" | wc -l)
-    if (( $(echo "$num_freqs < 60" | bc -l) )); then 
-        if [ $nn -eq 1000 ]; then
-            echo "Error: Obtaining frequencies of $fname failed"
-            exit 1
-        fi
-        echo "Warning: Too few frequencies with nn = $nn, retrying"
-        continue
-    fi
-    break
-done
+## Run ADIPLS
+(egrep '# *$|@ *$' adipls-"$fname".in | sed -e 's/ *[#,@] *$//') | \
+    $aprgdir/adipls/adipls.c.d.x
 
+## Check that the .agsm file was created successfully
+if [ ! -e "$fname.agsm" ]; then
+    echo "Error: Failed to generate $fname.agsm"
+    exit 1
+fi
+## Convert .agsm to .dat using set-obs
+(echo 6; echo "$fname.agsm"; echo "$fname.dat"; echo "2") | \
+    $aprgdir/adiajobs/set-obs.d.x
+
+## Check that the frequencies were created, and remove the extra text 
+if [ ! -e "$fname.dat" ]; then
+    echo "Error: Failed to generate frequency information $fname.dat"
+    exit 1
+fi
+cp "$fname.dat" "$fname.dat.bak"
+
+## Remove the text so that the data can be parsed 
 cat "$fname.dat.bak" | cut -b 1-36 | \
-    awk -v FIELDWIDTHS="5 7 10 13" -v OFS=, '{print $1,$2,$3,$4}' | \
+    awk -v FIELDWIDTHS="5 7 10" -v OFS=, '{print $1,$2,$3}' | \
     sed "s/,/ /g" | tr -s ' ' >| "$fname.dat"
 
 ### Hooray!
