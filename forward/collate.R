@@ -18,7 +18,7 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=50, space_var='X_c') {
+load_data <- function(filename, num_points=190, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
     #DF <- DF[DF['Fe/H'] > -10,]
     
@@ -35,7 +35,7 @@ load_data <- function(filename, num_points=50, space_var='X_c') {
         DF <- DF[-1:-pms,]
     } 
     DF$age <- DF$age - min(DF$age) # set ZAMS age
-    DF <- DF[DF$age <= 13.9,]
+    DF <- DF[DF$age <= 15,]
     x <- DF[[space_var]]
     
     nrow.DF <- length(x)

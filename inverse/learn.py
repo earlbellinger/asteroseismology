@@ -22,6 +22,8 @@ import pylab as P
 from sys import argv
 #import corner
 
+np.random.seed(seed=0) # for reproducibility
+
 if len(argv) > 1:
     simulations_filename = argv[1]
 else:
@@ -45,7 +47,7 @@ if not os.path.exists(table_dir):
 
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|Dnu_|slope|mass_cc"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|Dnu_|slope"#|mass_cc"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 
@@ -98,7 +100,7 @@ y_latex_short = {
 #all_ys = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age', 
 #    'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
-y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf']#, 'mass_cc']
+y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'mass_cc']
 
 def train_regressor(data, X_columns, y_show=y_init+y_curr):
     X = data.loc[:,X_columns]

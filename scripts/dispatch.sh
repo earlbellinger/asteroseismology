@@ -9,10 +9,10 @@ min_process=10
 num_process=200
 init_mesh_delta_coeff=0.5
 mesh_delta_coeff=$init_mesh_delta_coeff
-mesh_delta_limit=0.3
+mesh_delta_limit=0.2
 mesh_delta_upper=3
-max_years_for_timestep=10000000
-max_years_limit=10000000
+max_years_for_timestep=1000000
+max_years_limit=1000000
 max_bounces=15
 n_bounces=0
 
@@ -106,17 +106,6 @@ simulate() {
     while ! grep -q "$msuccess" "$logfile" ||
             [ $(Rscript ../../discontinuity.R) == 1 ]; do
         
-        #tmp=$(Rscript ../../profile_interval.R)
-        #tmp=(${tmp//;/ })
-        #num_lines=${tmp[0]}
-        #max_age=${tmp[1]}
-        #if [ $num_lines -lt $min_process ] && 
-        #   [ $(cat LOGS/history.data | wc -l) -gt $num_process ]; then
-        #    echo "Error: Fully radiative track ( $num_lines < $min_process )"
-        #    cleanup
-        #    exit 1
-        #fi
-        
         n_bounces=$n_bounces+1
         if [ $n_bounces -gt $max_bounces ]; then
             echo "Error: Bounced too much"
@@ -171,15 +160,6 @@ simulate() {
     # enable profile writing and rerun track with good settings 
     change "write_profiles_flag" ".false." ".true."
     
-    #tmp=$(Rscript ../../profile_interval.R)
-    #tmp=(${tmp//;/ })
-    #num_lines=${tmp[0]}
-    #max_age=${tmp[1]}
-    #if [ $num_lines -lt 10 ]; then
-    #    echo "Error: Fully radiative track ( $num_lines < 10 )"
-    #    cleanup
-    #    exit 1
-    #fi
     num_lines=$(cat LOGS/history.data | wc -l)
     if [ $num_lines -gt $num_process ]; then
         new_profile_interval=$(echo "scale=0; $num_lines/$num_process" | bc -l)
@@ -240,8 +220,8 @@ done
 # set defaults if they weren't supplied
 if [ -z ${M+x} ]; then M=1; fi
 if [ -z ${Y+x} ]; then Y=0.27; fi
-if [ -z ${Z+x} ]; then Z=0.018; fi
-if [ -z ${alpha+x} ]; then alpha=1.9; fi
+if [ -z ${Z+x} ]; then Z=0.02; fi
+if [ -z ${alpha+x} ]; then alpha=1.92; fi
 if [ -z ${overshoot+x} ]; then overshoot=0.2; fi
 if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi

@@ -19,7 +19,7 @@ def main(arguments):
                         help='range of masses')
     parser.add_argument('-Y', default=[0.22, 0.34], nargs=2, type=float, 
                         help='range of helium values')
-    parser.add_argument('-Z', default=[0.0004, 0.04], nargs=2, type=float,
+    parser.add_argument('-Z', default=[10**-5, 0.05], nargs=2, type=float,
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')
