@@ -16,27 +16,23 @@ if (any(decreasing_L)) {
                   max(decreasing_L))
     DF <- DF[-1:-pms,]
 }
-DF <- DF[-1:-floor(nrow(DF)*0.15),] # in case more PMS leaks in
+DF <- DF[-1:-floor(nrow(DF)*0.05),] # in case more PMS leaks in
 DF <- DF[-floor(nrow(DF)*0.95):-nrow(DF),] # crop the end too 
-
-#cutoff <- 0
-#mx1_diff <- abs(DF$conv_mx1_top - DF$conv_mx1_bot)
-#mx2_diff <- abs(DF$conv_mx2_top - DF$conv_mx2_bot)
-#radiative <- with(DF, 
-#    mass_conv_core <= 0 & mx1_diff <= cutoff & mx2_diff <= cutoff |
-#    mass_conv_core  > 0 & mx2_diff <= cutoff)
-#if (any(radiative)) DF <- DF[1:min(which(radiative)),]
 
 y <- DF$surface_h1
 L <- 10**DF$log_L
 Teff <- 10**DF$log_Teff
 x <- DF$star_age
 
-outliers <- abs(diff(y)) >= 10**-3 || abs(diff(Teff)) >= 50 || abs(diff(L)) >= 0.5
+outliers <- abs(diff(y)) >= 10**-4 |
+            abs(diff(Teff)) >= 20 |
+            abs(diff(L)) >= 0.2
 
-if (any(outliers)) {
-    locs <- which(outliers)
-    locs <- locs[c(1, which(diff(locs)>1)+1)]
+locs <- c()
+for (ii in 1:(length(outliers)-1)) {
+    if (!outliers[ii] && outliers[ii+1]) {
+        locs <- c(locs, ii)
+    }
 }
 
 plot_ts <- function(text.cex=1, font="Palatino", mgp=utils.mgp, ...) {
@@ -46,7 +42,7 @@ plot_ts <- function(text.cex=1, font="Palatino", mgp=utils.mgp, ...) {
          xlab=expression('Star age' ~ tau/'yr'))
     magaxis(side=1:4, family=font, tcl=0.25, mgp=mgp, las=1, 
             cex.axis=text.cex, labels=c(1,1,0,0))
-    if (any(outliers))
+    if (length(locs) > 0)
         points(x[locs], y[locs], col=adjustcolor("red", alpha=0.75), cex=5)
 }
 
@@ -63,5 +59,5 @@ if (nrow(DF) > 1) {
                 filepath=file.path('..', '..', 'plots', 'discontinuity')))
 }
 
-cat(as.numeric(length(which(outliers)) > 0))
+cat(as.numeric(length(locs) > 0))
 
