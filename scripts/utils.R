@@ -354,7 +354,7 @@ color_levels <- list(
 
 ## Scatter plot function
 scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal, 
-        xlim, ylim, xlab, ylab, ..., 
+        xlim, ylim, xlab, ylab, log='', ..., 
         solar_x=NA, solar_y=NA, text.cex=cex.paper, mgp=utils.mgp) { 
     Z_max <- max(seis.DF[[Z]])
     Z_min <- min(seis.DF[[Z]])
@@ -367,7 +367,7 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
         if (simulation_i == 1) {
             plot(relation, type=ifelse(use_line, 'l', 'p'),
                  pch=20, axes=FALSE, col=color, cex=0.1, tcl=0, 
-                 xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab)
+                 xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, log=log)
             if (!is.na(solar_x) && !is.na(solar_y)) {
                 abline(v=solar_x, lty=3, col='black')
                 abline(h=solar_y, lty=3, col='black')
@@ -419,9 +419,9 @@ get_mesh <- function(X, Y, Z, seis.DF, cygA_stds) {
 }
 
 ## Mesh plot function 
-mesh_plot <- function(mesh, X, Z, xlab, ylab, ..., 
+mesh_plot <- function(mesh, X, Z, xlab, ylab, log='', ..., 
         solar_x=NA, solar_y=NA, text.cex=cex.paper, mgp=utils.mgp) {
-    filled.contour(mesh,
+    filled.contour(mesh, log=log,
         xlim=if (X=='Teff') rev(range(mesh$x)) else range(mesh$x),
         levels=color_levels[[Z]], 
         color=colorRampPalette(brewer.pal(11, "Spectral")),
@@ -448,7 +448,7 @@ mesh_plot <- function(mesh, X, Z, xlab, ylab, ...,
 ## Calls scatter_plot and mesh_plot 
 # uses globals seis.DF, col.pal, and combos 
 scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh"),
-        scatter=1, mesh=1) {
+        scatter=1, mesh=1, log='', ...) {
     if (Y == 'Teff' && X == 'L') {
         Y = 'L'
         X = 'Teff'
@@ -472,7 +472,7 @@ scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh"),
                    mar=c(3, 4, 1, 6), 
                    seis.DF=seis.DF, X=X, Y=Y, Z=Z, combos=combos, 
                    col.pal=col.pal, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, 
-                   solar_x=solar_x, solar_y=solar_y)
+                   solar_x=solar_x, solar_y=solar_y, log=log, ...)
     }
     
     if (mesh) {
@@ -481,7 +481,7 @@ scatter_mesh <- function(X, Y, Z, filepath=file.path("plots", "mesh"),
                    filepath=filepath, thin.hack=1,
                    mar=c(3, 4, 1, 0), 
                    mesh=mesh, X=X, Z=Z, xlab=xlab, ylab=ylab, 
-                   solar_x=solar_x, solar_y=solar_y)
+                   solar_x=solar_x, solar_y=solar_y, log=log, ...)
     }
 }
 

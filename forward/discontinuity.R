@@ -16,7 +16,8 @@ if (any(decreasing_L)) {
                   max(decreasing_L))
     DF <- DF[-1:-pms,]
 }
-DF <- DF[-1:-floor(nrow(DF)*0.1),] # in case more PMS leaks in
+DF <- DF[-1:-floor(nrow(DF)*0.15),] # in case more PMS leaks in
+DF <- DF[-floor(nrow(DF)*0.95):-nrow(DF),] # crop the end too 
 
 #cutoff <- 0
 #mx1_diff <- abs(DF$conv_mx1_top - DF$conv_mx1_bot)
@@ -27,11 +28,16 @@ DF <- DF[-1:-floor(nrow(DF)*0.1),] # in case more PMS leaks in
 #if (any(radiative)) DF <- DF[1:min(which(radiative)),]
 
 y <- DF$surface_h1
+L <- 10**DF$log_L
+Teff <- 10**DF$log_Teff
 x <- DF$star_age
 
-outliers <- abs(diff(y)) >= 10**-3
-locs <- which(outliers)
-locs <- locs[c(1, which(diff(locs)>1)+1)]
+outliers <- abs(diff(y)) >= 10**-3 || abs(diff(Teff)) >= 50 || abs(diff(L)) >= 0.5
+
+if (any(outliers)) {
+    locs <- which(outliers)
+    locs <- locs[c(1, which(diff(locs)>1)+1)]
+}
 
 plot_ts <- function(text.cex=1, font="Palatino", mgp=utils.mgp, ...) {
     plot(x, y, cex=0.01, pch=1,
@@ -40,7 +46,8 @@ plot_ts <- function(text.cex=1, font="Palatino", mgp=utils.mgp, ...) {
          xlab=expression('Star age' ~ tau/'yr'))
     magaxis(side=1:4, family=font, tcl=0.25, mgp=mgp, las=1, 
             cex.axis=text.cex, labels=c(1,1,0,0))
-    points(x[locs], y[locs], col=adjustcolor("red", alpha=0.75), cex=5)
+    if (any(outliers))
+        points(x[locs], y[locs], col=adjustcolor("red", alpha=0.75), cex=5)
 }
 
 inlist <- readLines("inlist_1.0")

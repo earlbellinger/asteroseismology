@@ -159,9 +159,9 @@ make_plots(plot_cygs, "cyg-L",
     name="L", cygA=cygA, cygB=cygB, 
     mgp.paper=utils.mgp, wide=F, tall=F)
 
-cygA <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygA.dat'), 
+cygA <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygA.dat'),
     header=1)
-cygB <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygB.dat'), 
+cygB <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygB.dat'),
     header=1)
 for (name in c("Y_surf", "X_c", "alpha", "overshoot", "diffusion")) {
     make_plots(plot_cygs, paste0("cyg-", name), 

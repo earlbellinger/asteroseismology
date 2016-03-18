@@ -5,6 +5,7 @@ get_data <- function(perturb, cov) {
     print(c(perturb, cov))
     a <- read.table(perturb, header=1)[1:100,]
     b <- read.table(cov, header=1)[1:100,]
+    print(c(nrow(a), nrow(b)))
     if (nrow(a) != nrow(b)) return(NULL)
     cbind(a, b)
 }
@@ -14,14 +15,14 @@ perturbs <- c(file.path('perturb',
     file.path('perturb', 'kages', 
                      list.files(file.path('perturb', 'kages'))))
 perturbs <- perturbs[order(basename(perturbs))]
-covs <- file.path('learn_covs', 'kages', 
-            list.files(file.path('learn_covs', 'kages')))
+covs <- file.path('learn_covs-simulations', 'kages', 
+            list.files(file.path('learn_covs-simulations', 'kages')))
 covs <- covs[order(basename(covs))]
 
-data <- do.call(plyr:::rbind.fill, 
+DF <- do.call(plyr:::rbind.fill, 
     Map(function(perturb, cov) get_data(perturb, cov), 
     perturb=perturbs, cov=covs))
-data <- data[,c(-26:-30)]
+#data <- data[,c(-26:-30)]
 #data <- data[complete.cases(data),]
 
 

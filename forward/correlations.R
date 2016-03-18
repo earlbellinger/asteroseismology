@@ -21,17 +21,13 @@ library(scales)
 col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(21)
 
 ## Load data
-seis.DF <- data.table(read.table('simulations-working.dat', header=1))
-setkey(seis.DF, M, Y, Z, alpha, diffusion, overshoot)
+seis.DF <- data.table(read.table('simulations.dat', header=1))
+setkey(seis.DF, M, Y, Z, alpha, overshoot, diffusion)
 keys <- key(seis.DF)
 
 solar_vals <- read.table(
         file.path('..', 'inverse', 'perturb', 'Sun_perturb.dat'), 
     nrow=1, header=1)
-
-cygA_stds <- sqrt(diag(var(read.table(
-        file.path('..', 'inverse', 'perturb', '16CygA_perturb.dat'), 
-    header=1))))
 
 # Sort data
 combos <- unique(seis.DF[,keys, with=0])
@@ -40,6 +36,12 @@ ages <- unlist(Map(function(i) max(merge(seis.DF, combos[i,])$age),
 combos <- combos[order(ages),]
 
 ## Make scatter and contour plots of X-R and C-D diagrams for all model vars
+scatter_mesh('Teff', 'L', 'M', mesh=F, thin=F, short=F)
+scatter_mesh('Teff', 'L', 'radius', mesh=F, thin=F, short=F)
+scatter_mesh('Dnu0_median', 'dnu02_median', 'M', mesh=F, thin=F, short=F)
+scatter_mesh('Dnu0_median', 'dnu02_median', 'age', mesh=F, thin=F, short=F)
+scatter_mesh('Dnu0_median', 'dnu02_median', 'X_c', mesh=F, thin=F, short=F)
+
 for (Z in names(seis.DF)[1:9]) {
     scatter_mesh('Teff', 'L', Z)
     scatter_mesh('Dnu0_median', 'dnu02_median', Z)
