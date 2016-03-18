@@ -47,7 +47,8 @@ if not os.path.exists(table_dir):
 
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|Dnu_|slope"#|mass_cc"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|slope|Dnu"#|Dnu"#|dnu"
+#|mass_cc"#|H|mass|X|surf"#|H|He"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 #data = data.loc[data['M'] >= 0.8]
 

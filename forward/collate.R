@@ -9,6 +9,7 @@ library(lpSolve)
 library(parallel)
 library(parallelMap)
 library(magicaxis)
+library(mblm)
 
 args <- commandArgs(TRUE)
 sim_dir <- if (length(args)>0) args[1] else 'simulations'
@@ -18,26 +19,45 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=190, space_var='X_c') {
+load_data <- function(filename, num_points=175, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
-    #DF <- DF[DF['Fe/H'] > -10,]
+    #DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
+    if (any(DF['Fe/H'] < -10)) DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
     
-    
-    #pms <- which(DF$age[-1] < 0.25 & diff(DF$L) < 0)
+    # clip PMS
     decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
     if (any(decreasing_L)) {
-        #print(decreasing_L)
         goes_back_up <- diff(decreasing_L) > 1
         pms <- ifelse(any(goes_back_up), 
                    which(goes_back_up)[1] + 1, 
                    max(decreasing_L))
         print(paste(filename, "Clipping", pms, "points"))
         DF <- DF[-1:-pms,]
-    } 
-    DF$age <- DF$age - min(DF$age) # set ZAMS age
-    DF <- DF[DF$age <= 15,]
-    x <- DF[[space_var]]
+    }
     
+    # detect outliers and remove them
+    for (name in names(DF)[grep("median", names(DF))]) {
+        while (T) {
+           #resids <- resid(lm(DF[[name]] ~ DF$age + I(DF$age^2) + I(DF$age^3)))
+            #ages <- DF$age
+            #other <- DF[[name]]
+            dd <- diff(DF[[name]])
+            outliers <- dd > median(dd) + 100*mad(dd)
+            #outliers <- abs(resid(mblm(other~ages))) > 10
+            #outliers <- abs(resids) > 10
+            if (any(outliers)) {
+                print(paste("Rejecting", sum(outliers), "outliers"))
+                DF <- DF[-(1+which(outliers)),]
+            } else break
+        }
+    }
+    
+    # set ZAMS age 
+    DF$age <- DF$age - min(DF$age)
+    DF <- DF[DF$age <= 15,]
+    
+    # solve linear transport problem to get equally-spaced points 
+    x <- DF[[space_var]]
     nrow.DF <- length(x)
     if (nrow.DF < num_points) {
         print(paste(filename, "has too few points"))

@@ -28,7 +28,7 @@
       !new_net_name = 'o18_and_ne22.net'
       
       pre_ms_relax_num_steps = 100
-      pre_ms_T_c = 3e5 ! 3e5
+      pre_ms_T_c = 9e5 ! 3e5
       
       !new_surface_rotation_v = 0 ! changed from 2 solar (km sec^1)
       !change_rotation_flag = .true.
@@ -78,11 +78,13 @@
       skip_rotation_in_convection_zones = .true.
       
       !varcontrol_target = 1d-3
-      mesh_delta_coeff = 0.5
+      mesh_delta_coeff = 1
       max_allowed_nz = 20000
       
-      hydro_mtx_max_allowed_abs_dlogPgas = 1
-      hydro_mtx_max_allowed_abs_dlogRho = 1
+      !hydro_mtx_max_allowed_abs_dlogPgas = 1
+      !hydro_mtx_max_allowed_abs_dlogRho = 1
+      delta_lgT_cntr_limit = 0.1  
+      delta_lgRho_cntr_limit = 0.5 
       
       num_cells_for_smooth_brunt_B = 0 ! changed from 2
       !num_cells_for_smooth_gradL_composition_term = 5 ! changed from 3
@@ -143,26 +145,27 @@
       diffusion_use_isolve = .true.
       diffusion_use_cgs_solver = .true.
       
-      diffusion_num_classes = 4
+      diffusion_num_classes = 5
       diffusion_class_factor(1) = 1
       diffusion_class_factor(2) = 1
       diffusion_class_factor(3) = 1
       diffusion_class_factor(4) = 1
-      diffusion_class_factor(5) = 0
+      diffusion_class_factor(5) = 1
       
       diffusion_class_representative(1) = 'h1'
       diffusion_class_representative(2) = 'he3'
       diffusion_class_representative(3) = 'he4'
       diffusion_class_representative(4) = 'o16'
-      diffusion_class_representative(5) = 'he4' ! 'fe56'
+      diffusion_class_representative(5) = 'fe56'
       
       diffusion_class_A_max(1) = 2
       diffusion_class_A_max(2) = 3
       diffusion_class_A_max(3) = 4
-      diffusion_class_A_max(4) = 10000
+      diffusion_class_A_max(4) = 16
+      diffusion_class_A_max(5) = 10000
       
       !diffusion_class_A_max(4) = 16
-      diffusion_class_A_max(5) = 0
+      !diffusion_class_A_max(5) = 0
       
       calculate_Brunt_N2 = .true.
       write_pulse_info_with_profile = .true.

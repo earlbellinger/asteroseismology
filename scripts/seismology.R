@@ -11,9 +11,7 @@ library(RColorBrewer)
 
 fwhm_conversion <- (2*sqrt(2*log(2)))
 
-#dnu.cl <- brewer.pal(4, "BrBG")
 dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
-#c("#ca0020", "#f4a582", "#92c5de", "#0571b0")
 
 ## build a data frame containing seismological calculations
 # freqs is a data frame with l, n, and nu
@@ -36,38 +34,7 @@ seismology <- function(freqs, nu_max,
     # make echelle
     if (outf != FALSE) make_plots(echelle_plot, paste0(outf, '-echelle'), 
         freqs=freqs, large_sep=seis.DF[[1]], ...)
-    
-    # all (l,n) combinations should be unique with no mixing; discard otherwise
-    #for (l_mode in unique(freqs$l)) {
-    #    radials <- freqs[freqs$l==l_mode & freqs$n>=0,]
-    #    duplicates <- duplicated(radials$n)
-    #    if (any(duplicates)) {
-    #        print("Duplicated (l,n) combination")
-    #        print(radials[duplicates,])
-    #        #while (duplicated(radials$n)) 
-    #        #    radials <- radials[-which(duplicated(radials$n)),]
-    #        #freqs <- rbind(freqs[freqs$l!=l_mode | freqs$n<0,], radials)
-    #        return(NULL)
-    #    }
-        #if ('inertia' %in% names(radials) && any(diff(radials$inertia) > 0)) {
-         #   #||
-         #       #abs(diff(radials$inertia))>100*radials$inertia[-1]) 
-         #       #{
-         #   print("Mixed modes")
-         #   #print(radials)
-         #   #while (any(diff(radials$inertia) > 0)) 
-         #   #    radials <- radials[c(1, 
-         #   #        1+which(diff(radials$inertia) <= 0)),]
-         #   #freqs <- rbind(freqs[freqs$l!=l_mode | freqs$n<0,], radials)
-         #   return(NULL)
-        #}
-        #if (nrow(radials) <= min_points_per_deg) {
-        #    print("Too few points")
-        #    print(radials)
-        #    return(NULL)
-        #}
-    #}
-    
+
     # get averages for Dnu, dnu, r01, r02, r10, r13
     #seis.DF <- avg(Dnu, seis.DF, freqs, sort(unique(freqs$l)), 
     #    nu_max, outf, ...)
