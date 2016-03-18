@@ -17,7 +17,8 @@ mesh_delta_upper=3 # an upper bound on mesh spacing
 max_years_limit=1000000 # a lower bound on time stepping 
 max_bounces=20 # quit if we require more than this many mesh adjustments 
 n_bounces=0 # the amount of adjustments we've already performed 
-max_years_for_timestep=-1
+max_years_for_timestep=-1 # dt_max 
+profile_interval=1 # how often a profile should be output 
 #min_process=100 # minimum number of fgong files 
 
 ### Log files 
@@ -74,23 +75,55 @@ check_mesh_limits() {
     if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )) ||
        (( $(echo "$new_mesh_delta_coeff > $mesh_delta_upper" | bc -l) ));
       then
-        echo "Error: Couldn't achieve MS convergence (mesh limit)" | tee -a "$logfile"
+        echo "Error: Couldn't achieve convergence (mesh limit)" | 
+            tee -a "$logfile"
         cleanup
         exit 1
     fi
 }
 
 ## Actually change the meshing in the inlist and delete all the logs in there
-change_meshing() {
+commit_meshing() {
     mv LOGS/history.data "history_""$mesh_delta_coeff""_"\
 "$max_years_for_timestep"".data"
-    rm -f LOGS/*
+    rm -rf LOGS/*
     change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
     mesh_delta_coeff=$new_mesh_delta_coeff
     echo "Retrying with mesh_delta_coeff = $mesh_delta_coeff" |
         tee "$logfile"
 }
 
+## Check that we're still within time bounds 
+check_timestep() {
+    if (( $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) )); 
+      then
+        echo "Error: Couldn't achieve convergence (timestep limit)" | 
+            tee -a "$logfile"
+        cleanup
+        exit 1
+    fi
+}
+
+## If the meshing failed, decrease timestep and reset meshing 
+change_time_if_mesh_fail() {
+    if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )) ||
+            grep -q "$meshfail" "$logfile"; then
+        new_mesh_delta_coeff=$ms_mesh_delta
+        
+        new_max_years_for_timestep=$(echo "scale=0;
+            $max_years_for_timestep/2" | bc -l)
+        change "max_years_for_timestep" "$max_years_for_timestep" \
+            "$new_max_years_for_timestep" 
+        max_years_for_timestep=$new_max_years_for_timestep
+        
+        new_profile_interval=$(echo "scale=0; $profile_interval * 2" | bc -l)
+        change 'profile_interval' '$profile_interval' '$new_profile_interval'
+        profile_interval=$new_profile_interval
+        
+        echo "Retrying with max_years_for_timestep = $max_years_for_timestep" |
+            tee -a "$logfile"
+    fi
+}
 ################################################################################
 ### PARSE COMMAND LINE ARGUMENTS ###############################################
 ################################################################################
@@ -137,6 +170,7 @@ dirname="$directory/$expname"
 mkdir -p "$dirname"
 cd "$dirname"
 cp -r $scriptdir/mesa_template/* .
+rm -rf LOGS/*
 
 ### Set up initial parameters 
 change 'initial_mass' '1.0' "$M"
@@ -169,17 +203,10 @@ fi
 
 ## Check that the PMS converged. If not, reduce mesh spacing 
 while ! grep -q "$pmsuccess" "$pmslog"; do
-    new_mesh_delta_coeff=$(echo "scale=3; $mesh_delta_coeff * 0.9" | bc -l)
-    if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )); 
-      then
-        echo "Error: Couldn't achieve PMS convergence" | tee -a "$pmslog"
-        cleanup
-        exit 1
-    fi
-    echo "Retrying PMS with mesh_delta_coeff = $new_mesh_delta_coeff" | 
-        tee "$pmslog"
-    change "mesh_delta_coeff" "$mesh_delta_coeff" "$new_mesh_delta_coeff"
-    mesh_delta_coeff=$new_mesh_delta_coeff
+    bounce
+    adjust_mesh
+    check_mesh_limits
+    commit_meshing
     ./rn | tee -a "$pmslog"
 done
 mv LOGS/history.data history-pms.data
@@ -192,7 +219,7 @@ change "create_pre_main_sequence_model" ".true." ".false."
 change "load_saved_model" ".false." ".true."
 change "save_model_when_terminate" ".true." ".false."
 change "stop_near_zams" ".true." ".false."
-change "Lnuc_div_L_zams_limit" "0.999d0" "-1"
+change "Lnuc_div_L_zams_limit" "0.999" "-1"
 change 'relax_initial_Y' '.true.' '.false.'
 change 'relax_initial_Z' '.true.' '.false.'
 
@@ -212,6 +239,7 @@ fi
 if (( $(echo "$mesh_delta_coeff > $ms_mesh_delta" | bc -l) )); then
     new_mesh_delta_coeff=$ms_mesh_delta
     change 'mesh_delta_coeff' "$mesh_delta_coeff" "$ms_mesh_delta"
+    mesh_delta_coeff=$new_mesh_delta_coeff
 fi
 change "min_timestep_limit" "1d-12" "1d10"
 change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
@@ -224,7 +252,7 @@ while ! grep -q "$msuccess" "$logfile"; do
     bounce
     adjust_mesh
     check_mesh_limits
-    change_meshing
+    commit_meshing
     timeout 12h ./rn | tee "$logfile"
 done
 
@@ -233,41 +261,23 @@ max_age=$(R --slave -q -e "options(scipen = 999);cat("\
 "max(read.table('LOGS/history.data',header=1, skip=5)[['star_age']]))")
 timestep=$(echo "scale=0; $max_age / $num_process" | bc -l)
 if (( $(echo "$timestep < $max_years_limit" | bc -l) )); then
-    max_years_limit=$(echo "scale=0; timestep / 2" | bc -l)
+    max_years_limit=$(echo "scale=0; $timestep / 2" | bc -l)
 fi
 change "max_years_for_timestep" "-1" "$timestep"
+max_years_for_timestep=$timestep
 change "write_profiles_flag" ".false." ".true."
 timeout 24h ./rn | tee "$logfile"
+cp LOGS/history.data history-ms.data
 
 ## Check that it worked and that there are no discontinuities 
 while ! grep -q "$msuccess" "$logfile" ||
         [ $(Rscript ../../discontinuity.R) == 1 ]; do
     bounce
     adjust_mesh
-    
-    ## Check that we're still within time bounds 
-    if (( $(echo "$max_years_for_timestep < $max_years_limit" | bc -l) )); 
-      then
-        echo "Error: Couldn't achieve MS convergence (timestep limit)" | tee -a "$logfile"
-        cleanup
-        exit 1
-    fi
-    
-    ## If the meshing failed, decrease timestep and reset meshing 
-    if (( $(echo "$new_mesh_delta_coeff < $mesh_delta_limit" | bc -l) )) ||
-            grep -q "$meshfail" "$logfile"; then
-        new_max_years_for_timestep=$(echo "scale=0;
-            $max_years_for_timestep/2" | bc -l)
-        new_mesh_delta_coeff=$init_mesh_delta_coeff
-        change "max_years_for_timestep" "$max_years_for_timestep" \
-            "$new_max_years_for_timestep" 
-        max_years_for_timestep=$new_max_years_for_timestep
-        echo "Retrying with max_years_for_timestep = $max_years_for_timestep" |
-            tee -a "$logfile"
-    fi
-    
+    check_timestep
+    change_time_if_mesh_fail
     check_mesh_limits
-    change_meshing
+    commit_meshing
     timeout 24h ./rn | tee -a "$logfile"
 done
 
