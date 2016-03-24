@@ -18,7 +18,8 @@ library(ggplot2)
 library(GGally)
 library(scales)
 
-col.pal <- colorRampPalette(brewer.pal(11, "Spectral"))(21)
+col.pal <- adjustcolor(colorRampPalette(brewer.pal(11, "Spectral"))(21), 
+    alpha.f=0.75)
 
 ## Load data
 seis.DF <- data.table(read.table('simulations.dat', header=1))
@@ -41,6 +42,9 @@ scatter_mesh('Teff', 'L', 'radius', mesh=F, thin=F, short=F)
 scatter_mesh('Dnu0_median', 'dnu02_median', 'M', mesh=F, thin=F, short=F)
 scatter_mesh('Dnu0_median', 'dnu02_median', 'age', mesh=F, thin=F, short=F)
 scatter_mesh('Dnu0_median', 'dnu02_median', 'X_c', mesh=F, thin=F, short=F)
+scatter_mesh('r_sep02_median', 'r_sep13_median', 'X_c', mesh=F, thin=F, short=F)
+scatter_mesh('r_sep02_median', 'r_avg01_median', 'age', mesh=F, thin=F, short=F)
+scatter_mesh('r_sep02_median', 'r_avg01_median', 'M', mesh=F, thin=F, short=F)
 
 for (Z in names(seis.DF)[1:9]) {
     scatter_mesh('Teff', 'L', Z)
@@ -69,11 +73,12 @@ cor.mtest <- function(mat, test) {
 }
 p.values <- cor.mtest(seis.DF, method)
 
-cairo_pdf('plots/corr-spearman.pdf', width=8, height=7, family='Palatino')
+cairo_pdf('plots/corr-spearman.pdf', width=7, height=7, 
+    family='Palatino')
 par(mar=c(0, 0, 0, 0), mgp=c(2, 0.25, 0), oma=c(1,0,0,0), cex=1, cex.lab=1)
 a <- corrplot(M, diag=1, type='lower', order="FPC", 
     p.mat=p.values, pch.cex=0.95, cl.cex=1, 
-    tl.cex=0.3, tl.col=rgb(1,1,1,0), tl.srt=90, 
+    tl.cex=0.35, tl.col=rgb(1,1,1,0), tl.srt=90, 
     sig.level=sig_level/length(M))
 pos <- as.numeric(sapply(colnames(a), function(x) which(x==names(seis.DF))))
 cols <- ifelse(grepl('M|Y|Z|alpha|diffusion|overshoot', names(seis.DF)[pos]), 
@@ -96,7 +101,7 @@ a <- corrplot(M, diag=1, type='lower', order="FPC",
     tl.col=rgb(1,1,1,0), tl.cex=0.35, tl.srt=90, 
     sig.level=sig_level/length(M))
 pos <- as.numeric(sapply(colnames(a), function(x) which(x==names(seis.DF))))
-cols <- ifelse(grepl('M|Y|Z|alpha', names(seis.DF)[pos]), 
+cols <- ifelse(grepl('M|^Y$|Z|alpha|overshoot|diffusion', names(seis.DF)[pos]), 
     '#800080', 'black')
 text(1:ncol(seis.DF)-0.3, (ncol(seis.DF)+1):2-0.4, col=cols, pos=4, srt=90,
     as.expression(Map(function(x) bquote(.(x)[""]), seis.labs[colnames(a)])))
@@ -105,19 +110,21 @@ text(0.8, ncol(seis.DF):1-0.1, col=cols, pos=2,
 mtext(expression("Spearman correlation coefficient"~rho~"       "), outer=1,
     side=4, line=-5, cex=1.75)
 age_pos <- length(seis.DF)-which(colnames(a)=="age")+1
-segments(1, age_pos, x1=age_pos+2, lty=2, col='darkgray', lwd=2)
-segments(age_pos+2, age_pos, y1=1, lty=2, col='darkgray', lwd=2)
+#segments(1, age_pos, x1=age_pos+2, lty=2, col='darkgray', lwd=2)
+#segments(age_pos+2, age_pos, y1=1, lty=2, col='darkgray', lwd=2)
 dev.off()
 
 
 
 ## Make PCA plot
-pca <- prcomp(seis.DF[,-1:-9, with=0], center=TRUE, scale.=TRUE)
+pca <- prcomp(seis.DF[,-1:-15, with=0], center=TRUE, scale.=TRUE)
 pcs <- pca$x[,cumsum(pca$sdev)/sum(pca$sdev)<0.99]
-vars <- formatC(pca$sdev / sum(pca$sdev) * 100, digits=4)
+vars <- unlist(Map(function(x) signif(x, 3), (pca$sdev / sum(pca$sdev) * 100)))
 pclabs <- as.expression(lapply(1:ncol(pcs), 
     function(ii) bquote("("*.(vars[ii])*"%)"~PC[.(ii)])))
-M2 <- cor(pcs, seis.DF[,1:9, with=0], method=method)
+
+
+M2 <- cor(pcs, seis.DF[,1:15, with=0], method=method)
 cor.mtest2 <- function(mat1, mat2, test) {
     p.mat <- matrix(NA, ncol(mat1), ncol(mat2))
     for (i in 1:nrow(p.mat)) {
@@ -127,19 +134,74 @@ cor.mtest2 <- function(mat1, mat2, test) {
     }
     return(p.mat)
 }
-p.values2 <- cor.mtest2(pcs, as.data.frame(seis.DF[,1:9, with=0]), method)
+p.values2 <- cor.mtest2(pcs, as.data.frame(seis.DF[,1:15, with=0]), method)
 
-cairo_pdf('plots/corr-pca.pdf', width=8, height=7, family='Palatino')
+cairo_pdf('plots/corr-pca.pdf', width=8, height=4.17309, 
+    family='Palatino')
 par(mar=c(0, 0, 0, 0), mgp=c(2, 0.25, 0), oma=c(1, 0, 0, 0), 
     cex=1, cex.lab=1)
 a <- corrplot(M2, cl.cex=1, cl.pos='b', 
     tl.col=rgb(1,1,1,0), tl.cex = 0.3, tl.srt=90, 
     p.mat=p.values2, sig.level=sig_level/length(M2))
+colors <- ifelse(grepl('M|^Y$|Z|alpha|overshoot|diffusion', 
+    names(seis.DF)[1:15]), '#800080', 'black')
+text(0.6, ncol(pcs):1, pclabs, pos=2)
+text(1:15, ncol(pcs)+.4, 
+    as.expression(Map(function(x) bquote(.(x)[""]), 
+    seis.labs[names(seis.DF)[1:15]])),
+    #as.expression(seis.labs[1:9]), 
+    col=colors, pos=3)
+mtext(expression("    Spearman correlation coefficient"~rho), outer=1,
+    side=1)
+dev.off()
+
+cairo_pdf('plots/corr-pca-slides.pdf', width=6.22665, height=4.1511, 
+    family='Palatino')
+par(mar=c(0, 0, 0, 0), mgp=c(2, 0.25, 0), oma=c(0.5, 0, 0, 0), 
+    cex=1, cex.lab=1)
+a <- corrplot(M2, pch.cex=0.95,
+    cl.cex=1, cl.pos='r', cl.ratio=0.25, cl.offset=0,
+    tl.col=rgb(1,1,1,0), tl.cex=0.3, tl.srt=90, 
+    p.mat=p.values2, sig.level=sig_level/length(M2))
 colors <- ifelse(grepl('M|Y|Z|alpha', names(seis.DF)[1:9]), 
     '#800080', 'black')
 text(0.6, ncol(pcs):1, pclabs, pos=2)
-text(1:9, ncol(pcs)+.4, 
-    as.expression(Map(function(x) bquote(.(x)[""]), seis.labs[1:9])),
+text(1:9, ncol(pcs)+.3, 
+    as.expression(Map(function(x) bquote(.(x)[""]), 
+    seis.labs[names(seis.DF)[1:15]])),
+    #as.expression(seis.labs[1:9]), 
+    col=colors, pos=3)
+mtext(expression("Spearman correlation coefficient"~rho~"    "), line=-5.5,
+    side=4, cex=1.1)
+dev.off()
+
+
+
+M2 <- cor(pcs, seis.DF[,-1:-15, with=0], method=method)
+cor.mtest2 <- function(mat1, mat2, test) {
+    p.mat <- matrix(NA, ncol(mat1), ncol(mat2))
+    for (i in 1:nrow(p.mat)) {
+        for (j in 1:ncol(p.mat)) {
+            p.mat[i, j] <- cor.test(mat1[, i], mat2[, j], method=test)$p.value
+        }
+    }
+    return(p.mat)
+}
+p.values2 <- cor.mtest2(pcs, as.data.frame(seis.DF[,-1:-15, with=0]), method)
+
+cairo_pdf('plots/corr-pca-observable.pdf', width=6, height=4.17309, 
+    family='Palatino')
+par(mar=c(0, 0, 0, 0), mgp=c(2, 0.25, 0), oma=c(1, 0, 0, 0), 
+    cex=1, cex.lab=1)
+a <- corrplot(M2, cl.cex=1, cl.pos='b', 
+    tl.col=rgb(1,1,1,0), tl.cex = 0.3, tl.srt=90, 
+    p.mat=p.values2, sig.level=sig_level/length(M2))
+colors <- ifelse(grepl('M|^Y$|Z|alpha|overshoot|diffusion', 
+    names(seis.DF)[-1:-15]), '#800080', 'black')
+text(0.6, ncol(pcs):1, pclabs, pos=2) 
+text(1:ncol(M2)+0.5, ncol(pcs)+.75, srt=45, 
+    as.expression(Map(function(x) bquote(.(x)[""]), 
+    seis.labs[names(seis.DF)[-1:-15]])),
     #as.expression(seis.labs[1:9]), 
     col=colors, pos=3)
 mtext(expression("    Spearman correlation coefficient"~rho), outer=1,

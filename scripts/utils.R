@@ -88,15 +88,16 @@ make_plots <- function(plot_f, filename,
 }
 
 widethin <- function(plot_f, filename, directory, 
-        pdf_width, pdf_height, png_width, png_height, text.cex, 
-        wide=T, thin=T, ...) {
+        pdf_width, pdf_height, png_width, png_height, text.cex, ...,
+        wide=T, thin=T) {
     
     if (thin) {
         thin_dir <- file.path(directory, 'thin')
         dir.create(thin_dir, showWarnings=FALSE, recursive=TRUE)
         tallshort(plot_f, filename, thin_dir, 
                   pdf_width/2, png_width/2, 
-                  pdf_height, png_height, text.cex, ...)
+                  pdf_height, png_height, text.cex, ..., 
+                  thin=T, wide=F)
     }
     
     if (wide) {
@@ -104,34 +105,37 @@ widethin <- function(plot_f, filename, directory,
         dir.create(wide_dir, showWarnings=FALSE, recursive=TRUE)
         tallshort(plot_f, filename, wide_dir, 
                   pdf_width, png_width, 
-                  pdf_height, png_height, text.cex, ...)
+                  pdf_height, png_height, text.cex, ..., 
+                  thin=F, wide=T)
     }
 }
 
 tallshort <- function(plot_f, filename, directory, 
-        pdf_width, png_width, pdf_height, png_height, text.cex, 
-        tall=T, short=T, thin.hack=F, ...) {
+        pdf_width, png_width, pdf_height, png_height, text.cex, ...,
+        tall=T, short=T, thin.hack=F) {
     
     if (short) {
         short_dir <- file.path(directory, 'short')
         dir.create(short_dir, showWarnings=FALSE, recursive=TRUE)
         pdfpng(plot_f, filename, short_dir, 
                pdf_width, pdf_height/2, 
-               png_width, png_height/2, text.cex, ...)
+               png_width, png_height/2, text.cex, ..., 
+               tall=F, short=T)
     }
     if (tall) {
         tall_dir <- file.path(directory, 'tall')
         dir.create(tall_dir, showWarnings=FALSE, recursive=TRUE)
         pdfpng(plot_f, filename, tall_dir, 
                pdf_width, pdf_height, 
-               png_width, png_height, text.cex, ...)
+               png_width, png_height, text.cex, ..., 
+               tall=T, short=F)
     }
 }
 
 pdfpng <- function(plot_f, filename, directory, 
         pdf_width, pdf_height, png_width, png_height, 
-        text.cex, png_res, font=utils.font, mar=utils.mar, thin.hack=F,
-        make_png=T, make_pdf=T, mgp=utils.mgp, ...) {
+        text.cex, png_res, ..., font=utils.font, mar=utils.mar, thin.hack=F,
+        make_png=T, make_pdf=T, mgp=utils.mgp) {
     
     if (make_png) {
         png(file.path(directory, paste0(filename, '.png')),
@@ -181,6 +185,7 @@ seis.names <- list(
   radius         = "Radius", 
   mass_X         = "Hydrogen mass fraction", 
   mass_Y         = "Helium mass fraction", 
+  mass_cc        = "Convective core mass", 
   X_surf         = "Surface hydrogen", 
   Y_surf         = "Surface helium", 
   X_c            = "Fractional core-hydrogen", 
@@ -217,6 +222,7 @@ seis.labs <- list(
   radius         = bquote(R), 
   mass_X         = bquote(X), 
   mass_Y         = bquote(Y), 
+  mass_cc        = bquote(M["cc"]),
   X_surf         = bquote(X["surf"]),
   Y_surf         = bquote(Y["surf"]),
   X_c            = bquote(X[c]), 
@@ -251,8 +257,9 @@ seis.units <- list(
   overshoot      = bquote(), 
   age            = bquote("/Gyr"), 
   radius         = bquote("/"*R["☉"]), 
-  mass_X         = bquote(), 
-  mass_Y         = bquote(), 
+  mass_X         = bquote("/"*M["*"]), 
+  mass_Y         = bquote("/"*M["*"]), 
+  mass_Y         = bquote("/"*M["*"]), 
   X_surf         = bquote(),
   Y_surf         = bquote(),
   X_c            = bquote("/"*M["*"]), 
@@ -266,15 +273,15 @@ seis.units <- list(
   Dnu0_slope     = bquote(), 
   dnu02_median   = bquote("/"*mu*Hz), 
   dnu02_slope    = bquote(), 
-  r_sep02_median = bquote("/"*mu*Hz), 
+  r_sep02_median = bquote(""), 
   r_sep02_slope  = bquote(), 
-  r_avg01_median = bquote("/"*mu*Hz), 
+  r_avg01_median = bquote(""), 
   r_avg01_slope  = bquote(), 
   dnu13_median   = bquote("/"*mu*Hz), 
   dnu13_slope    = bquote(), 
-  r_sep13_median = bquote("/"*mu*Hz), 
+  r_sep13_median = bquote(""), 
   r_sep13_slope  = bquote(),
-  r_avg10_median = bquote("/"*mu*Hz), 
+  r_avg10_median = bquote(""), 
   r_avg10_slope  = bquote()
 )
 
@@ -354,8 +361,9 @@ color_levels <- list(
 
 ## Scatter plot function
 scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal, 
-        xlim, ylim, xlab, ylab, log='', ..., 
+        xlim, ylim, xlab, ylab, log='', ..., thin=F, short=F,
         solar_x=NA, solar_y=NA, text.cex=cex.paper, mgp=utils.mgp) { 
+    if (thin) par(mar=c(3, 4, 1, 4))
     Z_max <- max(seis.DF[[Z]])
     Z_min <- min(seis.DF[[Z]])
     for (simulation_i in 1:nrow(combos)) {
@@ -367,13 +375,15 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
         if (simulation_i == 1) {
             plot(relation, type=ifelse(use_line, 'l', 'p'),
                  pch=20, axes=FALSE, col=color, cex=0.1, tcl=0, 
-                 xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, log=log)
+                 xlab=if(thin) get_label_nameless(X) else xlab, 
+                 ylab=if(short) get_label_nameless(Y) else ylab, 
+                 log=log, xlim=xlim, ylim=ylim)
             if (!is.na(solar_x) && !is.na(solar_y)) {
                 abline(v=solar_x, lty=3, col='black')
                 abline(h=solar_y, lty=3, col='black')
             }
             magaxis(side=1:4, family=utils.font, tcl=0.25, labels=c(1,1,0,0),
-                    mgp=mgp, cex.axis=text.cex)
+                    mgp=mgp, cex.axis=text.cex, las=1)
         } else {
             if (use_line) lines(relation, col=color[1])
             else points(relation, col=color, pch=20, cex=0.1)
@@ -387,8 +397,10 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
                  par()$usr[2]+0.10*X_range, par()$usr[4], 
                  signif(quantile(seq(Z_min, Z_max, length=1000), 
                                  c(0, 0.25, 0.5, 0.75, 1)), 2), 
+                 cex=text.cex,
                  col.pal[1:length(col.pal)], gradient='y', align='rb')
-    mtext(get_label(Z), 4, line=5, cex=text.cex)
+    mtext(if(short) get_label_nameless(Z) else get_label(Z), 
+        4, line=ifelse(thin, 3, 5), cex=text.cex)
 }
 
 ## A basic normalization function

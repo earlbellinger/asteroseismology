@@ -8,7 +8,7 @@
 ### GLOBAL VARIABLES ###########################################################
 ################################################################################
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=300 # try to get at least this many fgong files 
+num_process=40 # try to get at least this many fgong files 
 init_mesh_delta_coeff=1 # the number in the inlist file 
 mesh_delta_coeff=$init_mesh_delta_coeff
 ms_mesh_delta=0.4 # the mesh spacing we will use on the main sequence
@@ -210,6 +210,10 @@ while ! grep -q "$pmsuccess" "$pmslog"; do
     ./rn | tee -a "$pmslog"
 done
 mv LOGS/history.data history-pms.data
+# MESA r8118 has a bug that makes it print numbers of the form *.***### 
+# (i.e. no letter for the exponent, and all the numbers are asterisks) 
+# This sed command replaces those with zeros. 
+sed -i.bak "s/\*\.\**-[0-9]*/0.0000000000000000D+00/g" zams.mod 
 
 ################################################################################
 ### MAIN SEQUENCE ##############################################################
@@ -241,7 +245,7 @@ if (( $(echo "$mesh_delta_coeff > $ms_mesh_delta" | bc -l) )); then
     change 'mesh_delta_coeff' "$mesh_delta_coeff" "$ms_mesh_delta"
     mesh_delta_coeff=$new_mesh_delta_coeff
 fi
-change "min_timestep_limit" "1d-12" "1d10"
+#change "min_timestep_limit" "1d-12" "1d10"
 change 'which_atm_option' "'simple_photosphere'" "'Eddington_grey'"
 
 ## Run main sequence without any time limit to obtain max age 
@@ -257,8 +261,9 @@ while ! grep -q "$msuccess" "$logfile"; do
 done
 
 ## Obtain max age and rerun with enough points 
-max_age=$(R --slave -q -e "options(scipen = 999);cat("\
-"max(read.table('LOGS/history.data',header=1, skip=5)[['star_age']]))")
+max_age=$(R --slave -q -e "options(scipen = 999);"\
+"DF <- read.table('LOGS/history.data', header=1, skip=5);"\
+"cat(max(DF[['star_age']])-min(DF[['star_age']]))")
 timestep=$(echo "scale=0; $max_age / $num_process" | bc -l)
 if (( $(echo "$timestep < $max_years_limit" | bc -l) )); then
     max_years_limit=$(echo "scale=0; $timestep / 2" | bc -l)

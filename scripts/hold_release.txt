@@ -1,0 +1,1 @@
+0 * * * * /scratch/seismo/bellinger/asteroseismology/scripts/hold_release.sh >/dev/null 
