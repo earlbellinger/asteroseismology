@@ -23,15 +23,15 @@ def main(arguments):
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')
-    parser.add_argument('-o', '--overshoot', default=[10**-4, 0.5], nargs=2,
+    parser.add_argument('-o', '--overshoot', default=[10**-4, 1], nargs=2,
                         type=float, 
                         help='range of overshoot values')
-    parser.add_argument('-D', '--diffusion', default=[10**-5, 5], nargs=2,
+    parser.add_argument('-D', '--diffusion', default=[10**-6, 100], nargs=2,
                         type=float, 
                         help='range of diffusion factors')
     parser.add_argument('-N', default=1000, help='number of tracks to generate',
                         type=int)
-    parser.add_argument('-s', '--skip', default=20000, type=int,
+    parser.add_argument('-s', '--skip', default=30000, type=int,
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
                         help='offset for sobol numbers')
@@ -49,7 +49,7 @@ def main(arguments):
     parser.add_argument('-n', '--nice', default=False, action='store_true',
                         help='run as nice job')
     parser.add_argument('-t', '--threshold', 
-                        default=[0, 0, 0, 0, 10**-3, 10**-4], 
+                        default=[0, 0, 0, 0, 10**-3, 10**-5], 
                         type=list,
                         help='consider as 0 if <= this value')
     args = parser.parse_args(arguments)
@@ -90,7 +90,7 @@ def dispatch(ranges, N, logs, threshold, directory, light=0, remove=0, skip=0,
         print(bash_cmd)
         #exit()
         subprocess.Popen(bash_cmd.split(), shell=False)
-        sleep(0.05)
+        sleep(0.1)
     np.savetxt('initial_conditions.dat', np.array(init_conds))
 
 if __name__ == '__main__':

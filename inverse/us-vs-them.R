@@ -6,6 +6,7 @@
 source(file.path('..', 'scripts', 'utils.R'))
 
 library(magicaxis)
+library(deming)
 
 col.pal <- c('black', 'black', blue, '#900090', red)
 

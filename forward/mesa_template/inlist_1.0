@@ -64,10 +64,10 @@
       varcontrol_target = 1d-3 ! default is 1d-4
       !max_timestep = 3.15d14
       
-      hydro_mtx_max_allowed_abs_dlogPgas = 1
-      hydro_mtx_max_allowed_abs_dlogRho = 1
-      delta_lgT_cntr_limit = 0.1  
-      delta_lgRho_cntr_limit = 0.5 
+      !hydro_mtx_max_allowed_abs_dlogPgas = 1
+      !hydro_mtx_max_allowed_abs_dlogRho = 1
+      !delta_lgT_cntr_limit = 0.1 ! default is 0.01
+      !delta_lgRho_cntr_limit = 0.5 ! default is 0.05
       
       
       !! Output 

@@ -24,9 +24,9 @@ L <- 10**DF$log_L
 Teff <- 10**DF$log_Teff
 x <- DF$star_age
 
-outliers <- abs(diff(y)) >= 10**-4 |
-            abs(diff(Teff)) >= 20 |
-            abs(diff(L)) >= 0.2
+outliers <- abs(diff(y)) >= 0.01 |
+            abs(diff(Teff)) >= 50 |
+            abs(diff(L)) >= 0.25
 
 locs <- c()
 for (ii in 1:(length(outliers)-1)) {

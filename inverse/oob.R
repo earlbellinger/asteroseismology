@@ -4,6 +4,7 @@
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 library(magicaxis)
+library(RColorBrewer)
 source(file.path('..', 'scripts', 'utils.R'))
 
 data <- read.table(header=0, col.names=c("n_trees", "oob_estimate", "time"), 
@@ -154,3 +155,184 @@ make_plots(oob_plot, "oob", plotlegend=F)
 make_plots(oob_plot, "oob-without", plotboth=1)
 make_plots(oob_plot, "time-without", plotboth=1, y='time', plotlegend=F)
 
+
+ppt.DF <- read.table(file.path('subsets', 'points_per_track.dat'), header=1)
+
+
+
+averages <- NULL
+for (n_tracks in unique(DF$n_tracks)) {
+    for (m_points in unique(DF$m_points)) {
+        for (variable in unique(DF$variable)) {
+            ss <- DF[DF$n_tracks == n_tracks & 
+                     DF$m_points == m_points &
+                     DF$variable == variable,]
+            new.row <- ss[1,]
+            new.row$cv <- mean(ss$cv)
+            new.row$oob <- mean(ss$oob)
+            averages <- rbind(averages, new.row)
+        }
+    }
+}
+
+
+
+
+
+
+
+legend2 <- legend
+body(legend2)[[c(38,4,6)]] <- quote({
+    cidx <- col(matrix(1, ncol=ncol, nrow=n.legpercol))[1:n.leg]
+    wc <- tapply(rep_len(w0,n.leg), cidx, max)
+    w <- sum(wc) + 0.5 * xchar
+    w0 <- rep(cumsum(c(0,wc[-length(wc)])), each=n.legpercol)[1:n.leg]
+})
+body(legend2)[[40]] <- quote(xt <- left + xchar + xextra + w0)
+
+plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ..., 
+        text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
+    
+    if ('log_g' %in% DF$variable) {
+        DF <- DF[-which(DF$variable == 'log_g'),]
+    }
+    
+    par(xpd=FALSE)
+    plot(NA, axes=F, 
+         xlim=range(DF[[m.or.n]]), 
+         ylim=c(1, 0.001),#rev(range(1-DF[[score]])),#c(0,1), 
+         log='xy', xaxs='i', yaxs='i', 
+         xlab=ifelse(m.or.n == 'n_tracks', 
+                     "Number of Evolutionary Tracks",
+                     "Models Per Track"),
+         ylab="Accuracy")
+    
+    yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003, 0.001)
+    axis(2, tick=F, at=yticks,
+         labels=c("0%", "68%", "90%", "97%", "99%", "99.7%", "99.9%"))
+    
+    minor <- 2 ^ (floor(log(sqrt(max(DF[[m.or.n]]))) / log(2)))
+    tick.places <- 2^(log2(min(DF[[m.or.n]])):log2(max(DF[[m.or.n]])))
+    axis(1, at=tick.places, labels=tick.places, 
+         tcl=-0.25, cex.axis=text.cex, tick=F)
+    
+    #grid(0, 5, lty=6, col="cornsilk2", equilogs=F) 
+    for (ytick in yticks[1:(length(yticks)-1)]) abline(h=ytick, col='cornsilk2')
+    for (tick in tick.places) abline(v=tick, col='cornsilk2')
+    
+    par(xpd=TRUE)
+    variables <- unique(DF[['variable']])
+    col.pal <- colorRampPalette(brewer.pal(11, 'Spectral'))(length(variables))
+    for (variable_i in 1:length(variables)) {
+        average <- NULL
+        for (n_tracks in unique(DF[[m.or.n]])) {
+            ss <- DF[DF[[m.or.n]] == n_tracks &
+                         DF$variable == variables[variable_i],]
+            new.row <- ss[1,]
+            new.row[[score]] <- median(ss[[score]])
+            average <- rbind(average, new.row)
+        }
+        vals <- ifelse(average[[score]] < 0, 0, average[[score]])
+        vals <- ifelse(vals > 0.999, 0.999, vals)
+        lines(average[[m.or.n]], 1-vals, col='black', lwd=3)
+        lines(average[[m.or.n]], 1-vals, col=col.pal[variable_i], lwd=1.5)
+        points(average[[m.or.n]], 1-vals, col='black', 
+               pch=21+(variable_i%%3), bg=col.pal[variable_i], cex=0.75)
+    }
+    
+    if (plotlegend) {
+        shapes <- 1:length(variables)%%3 + 1
+        labels <- as.expression(seis.labs[variables])
+        text.widths <- rep(0.1, length(labels))
+        #text.widths[4] <- 0.15
+        text.widths[which(grepl('alpha|Y_surf', variables))] <- 0.175
+        legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
+               legend=labels, text.col='white', pch=c(16, 15, 18)[shapes], 
+               col=col.pal, text.width=text.widths)
+        legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
+               legend=labels, pch=c(1, 0, 5)[shapes], col='black', 
+               text.width=text.widths)
+        #legend("topleft", inset=c(0, -0.15), horiz=T, bty='n',
+        #       legend=labels[1:6], text.col='white', pch=15+shapes, 
+        #       col=col.pal, text.width=0.05)
+        #legend("topleft", inset=c(0, -0.15), horiz=T, bty='n',
+        #       legend=labels[1:6], pch=0+shapes, col='black', text.width=0.05)
+        #legend("topleft", inset=c(0, -0.075), horiz=T, bty='n',
+        #       legend=labels[-1:-6], text.col='white', pch=15+shapes, 
+        #       col=col.pal[-1:-6], text.width=0.05)
+        #legend("topleft", inset=c(0, -0.075), horiz=T, bty='n',
+        #       legend=labels[-1:-6], pch=0+shapes, col='black', text.width=0.05)
+    }
+}
+
+make_plots(plot_accuracy, "num_tracks", 
+    DF=read.table(file.path('subsets', 'num_tracks.dat'), 
+                  header=T, stringsAsFactors=F), mar=c(3, 3, 1.5, 1))
+make_plots(plot_accuracy, "num_points", m.or.n='m_points',
+    DF=read.table(file.path('subsets', 'points_per_track.dat'), 
+                  header=T, stringsAsFactors=F), mar=c(3, 3, 1.5, 1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+# plot cv as a function of num tracks
+plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ..., 
+        text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
+    plot(NA, axes=F, xlim=range(DF[[m.or.n]]), ylim=c(0,1), 
+         log='x', xaxs='i', yaxs='i', 
+         xlab="Number of Evolutionary Tracks",
+         ylab="Accuracy")
+    for (variable in unique(DF$variable)) {
+        average <- NULL
+        for (n_tracks in unique(DF[[m.or.n]])) {
+            ss <- DF[DF[[m.or.n]] == n_tracks &
+                     DF$variable == variable,]
+            new.row <- ss[1,]
+            new.row[[score]] <- mean(ss[[score]])
+            average <- rbind(average, new.row)
+        }
+        points(average[[m.or.n]], average[[score]])
+        lines(average[[m.or.n]], average[[score]])
+    }
+    magaxis(side=c(2,4), tcl=-0.25, labels=c(1,0), mgp=mgp,
+            family=font, las=1, cex.axis=text.cex)
+    minor <- 
+    minor <- 2 ^ (floor(log(sqrt(max(DF[[m.or.n]]))) / log(2)))
+    axis(1, at=seq(minor, max(DF[[m.or.n]]), minor), labels=FALSE, tcl=-0.125)
+    axis(3, at=seq(minor, max(DF[[m.or.n]]), minor), labels=FALSE, tcl=-0.125)
+    
+    axis(1, at=2^(2:log2(minor)), labels=FALSE, tcl=-0.25)
+    axis(3, at=2^(2:log2(minor)), labels=FALSE, tcl=-0.25)
+    
+    axis(1, at=2^(2:log2(max(DF[[m.or.n]]))), 
+        labels=2^(2:log2(max(DF[[m.or.n]]))), 
+        tcl=-0.25, cex.axis=text.cex)
+    axis(3, at=2^(2:log2(max(DF[[m.or.n]]))), 
+        labels=FALSE, tcl=-0.25)
+}
+make_plots(plot_accuracy, "num_tracks", DF=DF)
+make_plots(plot_accuracy, "num_points", DF=DF, m.or.n='m_points')
+
+# plot oob as a function of num tracks 
+for (variable in unique(DF$variable)) {
+    
+}
+
+# plot cv as a function of num points 
+for (variable in unique(DF$variable)) {
+    
+}
+
+# plot oob as a function of num points 
+for (variable in unique(DF$variable)) {
+    
+}
