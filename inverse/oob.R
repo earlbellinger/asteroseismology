@@ -180,7 +180,6 @@ for (n_tracks in unique(DF$n_tracks)) {
 
 
 
-
 legend2 <- legend
 body(legend2)[[c(38,4,6)]] <- quote({
     cidx <- col(matrix(1, ncol=ncol, nrow=n.legpercol))[1:n.leg]
@@ -202,26 +201,33 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
          xlim=range(DF[[m.or.n]]), 
          ylim=c(1, 0.001),#rev(range(1-DF[[score]])),#c(0,1), 
          log='xy', xaxs='i', yaxs='i', 
-         xlab=ifelse(m.or.n == 'n_tracks', 
-                     "Number of Evolutionary Tracks",
-                     "Models Per Track"),
-         ylab="Accuracy")
-    
-    yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003, 0.001)
-    axis(2, tick=F, at=yticks,
-         labels=c("0%", "68%", "90%", "97%", "99%", "99.7%", "99.9%"))
+         xlab=if (m.or.n == 'n_tracks') "Number of Evolutionary Tracks"
+              else if (m.or.n == 'm_points') "Number of Models Per Track"
+              else "Number of Trees in Forest",
+         ylab="")
     
     minor <- 2 ^ (floor(log(sqrt(max(DF[[m.or.n]]))) / log(2)))
     tick.places <- 2^(log2(min(DF[[m.or.n]])):log2(max(DF[[m.or.n]])))
     axis(1, at=tick.places, labels=tick.places, 
          tcl=-0.25, cex.axis=text.cex, tick=F)
     
+    par(mgp=mgp+c(1, 0, 0.15))
+    title(ylab="Predictive Accuracy")
+    
+    yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003, 0.001)
+    axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
+         labels=c("0%", "68%", "90%", "97%", "99%", "99.7%", "99.9%"))
+    
     #grid(0, 5, lty=6, col="cornsilk2", equilogs=F) 
-    for (ytick in yticks[1:(length(yticks)-1)]) abline(h=ytick, col='cornsilk2')
-    for (tick in tick.places) abline(v=tick, col='cornsilk2')
+    for (ytick in yticks[2:(length(yticks)-1)]) 
+        abline(h=ytick, col='cornsilk2')
+    for (tick in tick.places[2:(length(tick.places)-1)]) 
+        abline(v=tick, col='cornsilk2')
     
     par(xpd=TRUE)
-    variables <- unique(DF[['variable']])
+    #variables <- unique(DF[['variable']])
+    variables <- c('M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
+                   'age', 'X_c', 'mass_cc', 'Y_surf', 'radius', 'L')
     col.pal <- colorRampPalette(brewer.pal(11, 'Spectral'))(length(variables))
     for (variable_i in 1:length(variables)) {
         average <- NULL
@@ -235,42 +241,61 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
         vals <- ifelse(average[[score]] < 0, 0, average[[score]])
         vals <- ifelse(vals > 0.999, 0.999, vals)
         lines(average[[m.or.n]], 1-vals, col='black', lwd=3)
-        lines(average[[m.or.n]], 1-vals, col=col.pal[variable_i], lwd=1.5)
-        points(average[[m.or.n]], 1-vals, col='black', 
-               pch=21+(variable_i%%3), bg=col.pal[variable_i], cex=0.75)
+        lines(average[[m.or.n]], 1-vals, lwd=1.5,
+             col=adjustcolor(col.pal[variable_i], alpha=0.95))
+        points(average[[m.or.n]], 1-vals, col='black', cex=0.75, 
+               pch=21+(variable_i%%3), 
+               bg=adjustcolor(col.pal[variable_i], 
+                              red.f=1.25, green.f=1.25, blue.f=1.25))
     }
     
     if (plotlegend) {
         shapes <- 1:length(variables)%%3 + 1
         labels <- as.expression(seis.labs[variables])
-        text.widths <- rep(0.1, length(labels))
-        #text.widths[4] <- 0.15
-        text.widths[which(grepl('alpha|Y_surf', variables))] <- 0.175
-        legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
-               legend=labels, text.col='white', pch=c(16, 15, 18)[shapes], 
-               col=col.pal, text.width=text.widths)
-        legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
-               legend=labels, pch=c(1, 0, 5)[shapes], col='black', 
+        #text.widths <- rep(0.095, length(labels))
+        #text.widths[which(grepl('alpha|Y_surf', variables))] <- 0.175
+        #legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
+        #       legend=labels, text.col='white', pch=c(16, 15, 18)[shapes], 
+        #       col=col.pal, text.width=text.widths)
+        #legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
+        #       legend=labels, pch=c(1, 0, 5)[shapes], col='black', 
+        #       text.width=text.widths)
+        text.widths <- rep(0.15, length(labels)/2)
+        text.widths[3] <- 0.25
+        text.widths[4] <- 0.35
+        text.widths[5] <- 0.25
+        legend2("topleft", legend=labels[1:6], horiz=T, bty='n', 
+               inset=c(0, -0.16), cex=text.cex, text.col='white', 
+               pch=c(16, 15, 18)[shapes], col=col.pal, 
                text.width=text.widths)
-        #legend("topleft", inset=c(0, -0.15), horiz=T, bty='n',
-        #       legend=labels[1:6], text.col='white', pch=15+shapes, 
-        #       col=col.pal, text.width=0.05)
-        #legend("topleft", inset=c(0, -0.15), horiz=T, bty='n',
-        #       legend=labels[1:6], pch=0+shapes, col='black', text.width=0.05)
-        #legend("topleft", inset=c(0, -0.075), horiz=T, bty='n',
-        #       legend=labels[-1:-6], text.col='white', pch=15+shapes, 
-        #       col=col.pal[-1:-6], text.width=0.05)
-        #legend("topleft", inset=c(0, -0.075), horiz=T, bty='n',
-        #       legend=labels[-1:-6], pch=0+shapes, col='black', text.width=0.05)
+        
+        legend2("topleft", legend=labels[1:6], horiz=T, bty='n', 
+               inset=c(0, -0.16), cex=text.cex, 
+               pch=c(1, 0, 5)[shapes], col='black', 
+               text.width=text.widths)
+        
+        legend2("topleft", legend=labels[-1:-6], horiz=T, bty='n', 
+               inset=c(0, -0.11), cex=text.cex, text.col='white', 
+               pch=c(16, 15, 18)[shapes], col=col.pal[-1:-6], 
+               text.width=text.widths)
+        
+        legend2("topleft", legend=labels[-1:-6], horiz=T, bty='n', 
+               inset=c(0, -0.11), cex=text.cex, 
+               pch=c(1, 0, 5)[shapes], col='black', 
+               text.width=text.widths)
     }
 }
 
 make_plots(plot_accuracy, "num_tracks", 
     DF=read.table(file.path('subsets', 'num_tracks.dat'), 
-                  header=T, stringsAsFactors=F), mar=c(3, 3, 1.5, 1))
-make_plots(plot_accuracy, "num_points", m.or.n='m_points',
+                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 2.5, 1))
+make_plots(plot_accuracy, "num_points", m.or.n='m_points', plotlegend=F,
     DF=read.table(file.path('subsets', 'points_per_track.dat'), 
-                  header=T, stringsAsFactors=F), mar=c(3, 3, 1.5, 1))
+                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 1, 1))
+make_plots(plot_accuracy, "num_trees", m.or.n='num_trees', plotlegend=F,
+    DF=read.table(file.path('subsets', 'num_trees.dat'), 
+                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 1, 1))
+
 
 
 
