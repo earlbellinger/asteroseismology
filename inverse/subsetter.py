@@ -36,21 +36,20 @@ y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
 y_curr = ['age', 'X_c', 'mass_cc', 'Y_surf', 'L', 'radius']
 
 num_trials = 20
-points_per_track=sum(data['M']==data.loc[0][0])
+points_per_track = sum(data['M']==data.loc[0][0])
+indices = np.arange(0, len(data), points_per_track)
 
-forest = ExtraTreesRegressor(#RandomForestRegressor(#
-    n_estimators=128, n_jobs=62, oob_score=True, bootstrap=True)
+#forest = ExtraTreesRegressor(#RandomForestRegressor(#
+#    n_estimators=128, n_jobs=62, oob_score=True, bootstrap=True)
 
 def get_forest(X_names=Xs, y_names=y_init+y_curr, num_trees=128, data=data):
-    if num_trees != 128:
-        forest = ExtraTreesRegressor(#RandomForestRegressor(#
-            n_estimators=num_trees, n_jobs=62, oob_score=True, bootstrap=True)
+    forest = ExtraTreesRegressor(#RandomForestRegressor(#
+        n_estimators=num_trees, n_jobs=62, bootstrap=True)
     X = data.loc[:, [i for i in X_names]]
     ys = data.loc[:, [i for i in y_names]]
     return(forest.fit(X, np.ravel(ys)))
 
-def train_test_set(n_tracks=4096, m_points=32,
-        indices=np.arange(0, len(data), points_per_track)):
+def train_test_set(n_tracks=4096, m_points=32):
     # pick out n+1 track ranges
     ranges = np.floor(np.linspace(0, len(indices), n_tracks+1))
     
@@ -77,105 +76,42 @@ def train_test_set(n_tracks=4096, m_points=32,
     return (tracks, validation)
 
 
-### try with different amounts of tracks 
-points_per_track = sum(data['M']==data.loc[0][0])
-indices = np.arange(0, len(data), points_per_track)
-print('n_tracks m_points variable cv oob')
-for n_tracks in [2**n for n in range(2, 
-        int(np.log2(len(data)/points_per_track))+1)]:
-        
-        # grab 32 points from each track 
-        m_points = 32
-        for trial_i in range(num_trials):
-            
-            # pick out n+1 track ranges
-            ranges = np.floor(np.linspace(0, len(indices), n_tracks+1))
-            
-            # pick n points from those ranges
-            track_idxs = [np.random.randint(ranges[i], ranges[i+1]) 
-                          for i in range(len(ranges)-1)]
-            
-            # build validation set without these tracks
-            validation = data.copy()
-            drop_idxs = []
-            for i in track_idxs:
-                drop_idxs += list(range(indices[i], 
-                                        indices[i]+points_per_track))
-            validation = validation.drop(validation.index[drop_idxs])
-            
-            tracks = pd.DataFrame()
-            for idx in track_idxs:
-                track = data[indices[idx]:(indices[idx]+points_per_track)]
-                subset = track.iloc[np.floor(
-                    np.linspace(0, points_per_track-1, m_points))]
-                tracks = tracks.append(subset)
-            for yy in y_init+y_curr:
-                rfr = get_forest(data=tracks, y_names=[yy])
-                X_test = validation.loc[:, [i for i in Xs]]
-                y_true = validation.loc[:, yy] #[i for i in y_init+y_curr]]
-                y_pred = rfr.predict(X_test)
-                print(n_tracks, m_points, yy, 
-                    r2_score(y_true, y_pred), 
-                    rfr.oob_score_)
-
-
 ### try with different models per track
-points_per_track = sum(data['M']==data.loc[0][0])
-indices = np.arange(0, len(data), points_per_track)
-print('n_tracks m_points variable cv oob')
-#[2048]:#128, 256, 512, 1024, 2048]:#
-n_tracks = 4096
-for m_points in range(2, points_per_track+1):
+print('m_points variable cv')
+for m_points in [2**n for n in range(1, 1+int(np.log2(points_per_track)))]:
     for trial_i in range(num_trials):
-        # pick out n+1 track ranges
-        ranges = np.floor(np.linspace(0, len(indices), n_tracks+1))
-        
-        # pick n points from those ranges
-        track_idxs = [np.random.randint(ranges[i], ranges[i+1]) 
-                      for i in range(len(ranges)-1)]
-        
-        # build validation set without these tracks
-        validation = data.copy()
-        drop_idxs = []
-        for i in track_idxs:
-            drop_idxs += list(range(indices[i], 
-                                    indices[i]+points_per_track))
-        validation = validation.drop(validation.index[drop_idxs])
-        
-        tracks = pd.DataFrame()
-        for idx in track_idxs:
-            track = data[indices[idx]:(indices[idx]+points_per_track)]
-            subset = track.iloc[np.floor(
-                np.linspace(0, points_per_track-1, m_points))]
-            tracks = tracks.append(subset)
+        (tracks, validation) = train_test_set(m_points=m_points)
         for yy in y_init+y_curr:
             rfr = get_forest(data=tracks, y_names=[yy])
             X_test = validation.loc[:, [i for i in Xs]]
-            y_true = validation.loc[:, yy] #[i for i in y_init+y_curr]]
+            y_true = validation.loc[:, yy]
             y_pred = rfr.predict(X_test)
-            print(n_tracks, m_points, yy, 
-                r2_score(y_true, y_pred), 
-                rfr.oob_score_)
-
+            print(m_points, yy, r2_score(y_true, y_pred))
 
 ### try with different amounts of trees 
-points_per_track = sum(data['M']==data.loc[0][0])
-indices = np.arange(0, len(data), points_per_track)
-print('n_tracks m_points num_trees variable cv oob')
-n_tracks = 4096
-m_points = 32
+print('num_trees variable cv')
 for num_trees in [2**n for n in range(0, 12)]:
     for trial_i in range(num_trials):
-        
-        # train and test 
+        (tracks, validation) = train_test_set()
         for yy in y_init+y_curr:
             rfr = get_forest(data=tracks, y_names=[yy], num_trees=num_trees)
             X_test = validation.loc[:, [i for i in Xs]]
-            y_true = validation.loc[:, yy] #[i for i in y_init+y_curr]]
+            y_true = validation.loc[:, yy] 
             y_pred = rfr.predict(X_test)
-            print(n_tracks, m_points, num_trees yy, 
-                r2_score(y_true, y_pred), 
-                rfr.oob_score_)
+            print(num_trees, yy, r2_score(y_true, y_pred))
+
+### try with different amounts of tracks 
+print('n_tracks variable cv')
+for n_tracks in [2**n for n in range(1, 
+        int(np.log2(len(data)/points_per_track))+1)]:
+    for trial_i in range(num_trials):
+        (tracks, validation) = train_test_set(n_tracks=n_tracks)
+        for yy in y_init+y_curr:
+            rfr = get_forest(data=tracks, y_names=[yy])
+            X_test = validation.loc[:, [i for i in Xs]]
+            y_true = validation.loc[:, yy] 
+            y_pred = rfr.predict(X_test)
+            print(n_tracks, yy, r2_score(y_true, y_pred))#, rfr.oob_score_)
 
 # ### try with different combinations of number of tracks and models per track
 # points_per_track = sum(data['M']==data.loc[0][0])
