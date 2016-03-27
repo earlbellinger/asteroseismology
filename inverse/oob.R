@@ -189,7 +189,7 @@ body(legend2)[[c(38,4,6)]] <- quote({
 })
 body(legend2)[[40]] <- quote(xt <- left + xchar + xextra + w0)
 
-plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ..., 
+plot_accuracy <- function(DF, score='ev', m.or.n='n_tracks', ..., 
         text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
     
     if ('log_g' %in% DF$variable) {
@@ -199,7 +199,7 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
     par(xpd=FALSE)
     plot(NA, axes=F, 
          xlim=range(DF[[m.or.n]]), 
-         ylim=c(1, 0.001),#rev(range(1-DF[[score]])),#c(0,1), 
+         ylim=c(1, 1-0.997),#0.001),#rev(range(1-DF[[score]])),#c(0,1), 
          log='xy', xaxs='i', yaxs='i', 
          xlab=if (m.or.n == 'n_tracks') "Number of Evolutionary Tracks"
               else if (m.or.n == 'm_points') "Number of Models Per Track"
@@ -214,9 +214,9 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
     par(mgp=mgp+c(1, 0, 0.15))
     title(ylab="Predictive Accuracy")
     
-    yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003, 0.001)
+    yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003)#, 0.001)
     axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
-         labels=c("0%", "68%", "90%", "97%", "99%", "99.7%", "99.9%"))
+         labels=c("0%", "68%", "90%", "97%", "99%", "99.7%"))#, "99.9%"))
     
     #grid(0, 5, lty=6, col="cornsilk2", equilogs=F) 
     for (ytick in yticks[2:(length(yticks)-1)]) 
@@ -235,7 +235,7 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
             ss <- DF[DF[[m.or.n]] == n_tracks &
                          DF$variable == variables[variable_i],]
             new.row <- ss[1,]
-            new.row[[score]] <- median(ss[[score]])
+            new.row[[score]] <- mean(ss[[score]])
             average <- rbind(average, new.row)
         }
         vals <- ifelse(average[[score]] < 0, 0, average[[score]])
@@ -252,14 +252,6 @@ plot_accuracy <- function(DF, score='cv', m.or.n='n_tracks', ...,
     if (plotlegend) {
         shapes <- 1:length(variables)%%3 + 1
         labels <- as.expression(seis.labs[variables])
-        #text.widths <- rep(0.095, length(labels))
-        #text.widths[which(grepl('alpha|Y_surf', variables))] <- 0.175
-        #legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
-        #       legend=labels, text.col='white', pch=c(16, 15, 18)[shapes], 
-        #       col=col.pal, text.width=text.widths)
-        #legend2("topleft", inset=c(-0.025, -0.11), horiz=T, bty='n',
-        #       legend=labels, pch=c(1, 0, 5)[shapes], col='black', 
-        #       text.width=text.widths)
         text.widths <- rep(0.15, length(labels)/2)
         text.widths[3] <- 0.25
         text.widths[4] <- 0.35

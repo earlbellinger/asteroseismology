@@ -22,7 +22,7 @@ simulations <- simulations[grep('.dat', simulations)]
 load_data <- function(filename, num_points=32, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
     #DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
-    if (any(DF['Fe/H'] < -10)) DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
+    #if (any(DF['Fe/H'] < -10)) DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
     
     # clip PMS
     decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
