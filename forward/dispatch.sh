@@ -8,13 +8,13 @@
 ### GLOBAL VARIABLES ###########################################################
 ################################################################################
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=40 # try to get at least this many fgong files 
+num_process=70 # try to get at least this many fgong files 
 init_mesh_delta_coeff=1 # the number in the inlist file 
 mesh_delta_coeff=$init_mesh_delta_coeff
 ms_mesh_delta=0.4 # the mesh spacing we will use on the main sequence
-mesh_delta_limit=0.2 # a lower bound on mesh spacing 
-mesh_delta_upper=3 # an upper bound on mesh spacing
-max_years_limit=1000000 # a lower bound on time stepping 
+mesh_delta_limit=0.1 # a lower bound on mesh spacing 
+mesh_delta_upper=2 # an upper bound on mesh spacing
+max_years_limit=500000 # a lower bound on time stepping 
 max_bounces=20 # quit if we require more than this many mesh adjustments 
 n_bounces=0 # the amount of adjustments we've already performed 
 max_years_for_timestep=-1 # dt_max 
@@ -297,4 +297,3 @@ ls LOGS/*.FGONG | xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
 cd ../..
 Rscript summarize.R "$dirname"
 cleanup
-

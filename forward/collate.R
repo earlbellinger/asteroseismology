@@ -19,10 +19,10 @@ simulations <- file.path(sim_dir, list.files(sim_dir))
 simulations <- simulations[grep('.dat', simulations)]
 
 # Load data
-load_data <- function(filename, num_points=32, space_var='X_c') {
+load_data <- function(filename, num_points=64, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
     #DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
-    #if (any(DF['Fe/H'] < -10)) DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
+    #DF <- DF[DF['Fe/H'] > -8,]
     
     # clip PMS
     decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
@@ -31,35 +31,20 @@ load_data <- function(filename, num_points=32, space_var='X_c') {
         pms <- ifelse(any(goes_back_up), 
                    which(goes_back_up)[1] + 1, 
                    max(decreasing_L))
-        print(paste(filename, "Clipping", pms, "points"))
+        #print(paste(filename, "Clipping", pms, "points"))
         DF <- DF[-1:-pms,]
     }
     
     # detect outliers and remove them
-    while (T) {
-       dd1 <- diff(DF$Dnu0_median)
-       dd2 <- diff(DF$dnu02_median)
-       outliers <- dd1 > 30 | dd2 > 10
+    while (nrow(DF) > num_points) {
+       outliers <- abs(diff(DF$dnu02)) > 5  | abs(diff(DF$dnu13)) > 5  | 
+                   abs(diff(DF$r02))   > .1 | abs(diff(DF$r13))   > .1 | 
+                   abs(diff(DF$r01))   > .1 | abs(diff(DF$r10))   > .1
        if (any(outliers)) {
            print(paste(filename, "Rejecting", sum(outliers), "outliers"))
            DF <- DF[-(1+which(outliers)),]
        } else break
     }
-    #for (name in names(DF)[grep("median", names(DF))]) {
-    #    while (T) {
-    #       #resids <- resid(lm(DF[[name]] ~ DF$age + I(DF$age^2) + I(DF$age^3)))
-    #        #ages <- DF$age
-    #        #other <- DF[[name]]
-    #        dd <- diff(DF[[name]])
-    #        outliers <- dd > median(dd) + 100*mad(dd)
-    #        #outliers <- abs(resid(mblm(other~ages))) > 10
-    #        #outliers <- abs(resids) > 10
-    #        if (any(outliers)) {
-    #            print(paste("Rejecting", sum(outliers), "outliers"))
-    #            DF <- DF[-(1+which(outliers)),]
-    #        } else break
-    #    }
-    #}
     
     # set ZAMS age 
     DF$age <- DF$age - min(DF$age)

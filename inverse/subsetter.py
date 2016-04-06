@@ -11,6 +11,9 @@ from itertools import combinations
 from sys import argv
 from time import time
 
+#import sys
+#sys.stdout = open('subsets/outfile.dat', 'w')
+
 np.random.seed(seed=0) # for reproducibility
 
 if len(argv) > 1:
@@ -23,6 +26,7 @@ raw = pd.read_csv(simulations_filename, sep='\t')
 exclude = "nu_max|radial_velocity"#|Dnu|dnu"#|Dnu_|dnu|slope"
 #|mass_cc"#|H|mass|X|surf"#|H|He"
 data = raw.drop([i for i in raw.columns if re.search(exclude, i)], axis=1)
+#data = data[data.M<1.2] ## only low mass
 
 Xs = ["Teff", "Fe/H", "log_g",
       "Dnu0_median", "dnu02_median", 
@@ -39,7 +43,7 @@ indices = np.arange(0, len(data), points_per_track)
 
 def get_forest(X_names=Xs, y_names=ys, num_trees=128, data=data):
     forest = ExtraTreesRegressor(#RandomForestRegressor(#
-        n_estimators=num_trees, n_jobs=62, bootstrap=True)
+        n_estimators=num_trees, n_jobs=32, bootstrap=True)
     X = data.loc[:, [i for i in X_names]]
     y = data.loc[:, [i for i in y_names]]
     start = time()
@@ -73,19 +77,43 @@ def train_test_set(n_tracks=8192, m_points=32):
     
     return (tracks, validation)
 
+def percent_difference_score(y_true, y_pred):
+    #print(abs(y_true - y_pred) / y_true)
+    keep = np.logical_and(y_true != 0, y_pred != 0)
+    if sum(keep) == 0: return 0
+    y_true = y_true[keep]
+    y_pred = y_pred[np.where(keep)]
+    return np.median(abs(y_true - y_pred) / y_pred)
+
+def accuracy_per_precision_score(y_true, y_pred, y_stds):
+    if np.any(y_stds == 0):
+        for y_std in np.where(y_stds == 0)[0]:
+            if y_true.iloc[y_std] == y_pred[y_std]:
+                y_stds[y_std] = 1
+    return np.median(abs(y_true - y_pred) / y_stds)
+
 def make_tests(var_name, rfr, validation):
     Xs_test = validation.loc[:, [x for x in Xs]]
     ys_true = validation.loc[:, [y for y in ys]]
     ys_pred = rfr.predict(Xs_test)
+    
+    estimates = [estimator.predict(Xs_test) for estimator in rfr.estimators_]
+    #ys_pred = np.mean(estimates, 0)
+    ys_stds = np.std(estimates, 0)
+    
     for y_i in range(len(ys)):
         y_pred = ys_pred[:,y_i]
+        y_stds = ys_stds[:,y_i]
         y_true = ys_true[ys[y_i]]
+        
         print(var_name, ys[y_i], 
             r2_score(y_true, y_pred),
-            explained_variance_score(y_true, y_pred))
+            explained_variance_score(y_true, y_pred),
+            #percent_difference_score(y_true, y_pred),
+            accuracy_per_precision_score(y_true, y_pred, y_stds))
 
 ### try with different amounts of tracks 
-print('n_tracks variable cv ev')
+print('n_tracks variable cv ev pd')
 for n_tracks in [2**n for n in range(1, 
         int(np.log2(len(data)/points_per_track))+1)]:
     for trial_i in range(num_trials):
@@ -94,15 +122,15 @@ for n_tracks in [2**n for n in range(1,
         make_tests(n_tracks, rfr, validation)
 
 ### try with different models per track
-print('m_points variable cv ev')
-for m_points in [2**n for n in range(1, 1+int(np.log2(points_per_track)))]:
+print('m_points variable cv ev pd')
+for m_points in [2**n for n in range(2, 1+int(np.log2(points_per_track)))]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set(m_points=m_points)
         (rfr, train_time) = get_forest(data=tracks)
         make_tests(m_points, rfr, validation)
 
 ### try with different amounts of trees 
-print('num_trees variable cv ev')
+print('num_trees variable cv ev pd')
 for num_trees in [2**n for n in range(0, 8)]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set()
@@ -110,9 +138,10 @@ for num_trees in [2**n for n in range(0, 8)]:
         make_tests(num_trees, rfr, validation)
 
 ### try with different amounts of trees for training time
-print('num_trees train_time')
-for num_trees in [2**n for n in range(0, 8)]:
-    for trial_i in range(num_trials):
-        (tracks, validation) = train_test_set()
-        (rfr, train_time) = get_forest(data=tracks, num_trees=num_trees)
-        print(num_trees, train_time)
+#print('num_trees train_time')
+#for num_trees in [2**n for n in range(0, 8)]:
+#    for trial_i in range(num_trials):
+#        (tracks, validation) = train_test_set()
+#        (rfr, train_time) = get_forest(data=tracks, num_trees=num_trees)
+#        print(num_trees, train_time)
+

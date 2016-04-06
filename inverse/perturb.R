@@ -10,10 +10,10 @@ library(parallelMap)
 dir.create('perturb', showWarnings=FALSE)
 
 speed_of_light = 299792 # km/s
+n_perturbations = 10000
 
 ### Obtain properties of real stars varied within their uncertainties 
-perturb <- function(star, obs_data_file, freqs_data_file,
-        n_perturbations=10000) {
+perturb <- function(star, obs_data_file, freqs_data_file, n_perturbations) {
     obs_data <<- read.table(obs_data_file, header=TRUE) 
     freqs <<- read.table(freqs_data_file, header=TRUE)
     seis.DF <- seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, 
@@ -22,21 +22,18 @@ perturb <- function(star, obs_data_file, freqs_data_file,
     start.time <- proc.time()
     res <- do.call(plyr:::rbind.fill, parallelMap(rand_inst, 1:n_perturbations)) 
     total.time <- proc.time() - start.time
+    time_per_perturb <- total.time[[3]]/n_perturbations
     print(paste("Total time:", total.time[[3]], 
-                "; Time per perturbation:", total.time[[3]]/n_perturbations))
-    return(res)
+                "; Time per perturbation:", time_per_perturb))
+    return(list(res=res, time_per_perturb=time_per_perturb))
 }
 
 rand_inst <- function(n) {
     # Perturb observations by their uncertainties
     attach(obs_data)
-    repeat {
-        obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
-            if (n==1) 0 else uncertainty)))
-        colnames(obs.DF) <- name
-        # Fe/H > 0.4 is probably not possible in reality 
-        if (obs.DF[['Fe/H']] <= 0.4) break 
-    }
+    obs.DF <- data.frame(rbind(rnorm(nrow(obs_data), value, 
+        if (n==1) 0 else uncertainty)))
+    colnames(obs.DF) <- name
     
     # Correct frequencies for Doppler shift
     radial_velocity <- 
@@ -64,23 +61,28 @@ process_dir <- function(star_dir) {
     out_dir <- file.path('perturb', basename(star_dir))
     dir.create(out_dir, showWarnings=FALSE)
     fnames <- list.files(star_dir)
+    times <- c()
     for (fname in fnames) {
         if (!grepl('-obs.dat', fname)) next
         star <- sub('-obs.dat', '', fname)
-        process_star(star, star_dir, out_dir=out_dir)
+        times <- c(times, process_star(star, star_dir, out_dir=out_dir))
     }
+    print(paste("Average time:", mean(times), "+/-", sqrt(var(times))))
+    cat('\n\n')
 }
 
 process_star <- function(star, star_dir, out_dir="perturb") {
     print(paste("Processing", star))
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
-    result <- perturb(star, obs_data_file, freqs_data_file)
+    results <- perturb(star, obs_data_file, freqs_data_file, n_perturbations)
+    result <- results$res
     if (!is.null(result)) {
         write.table(result, 
             file.path(out_dir, paste0(star, "_perturb.dat")), 
             quote=FALSE, sep='\t', row.names=FALSE)
     }
+    results$time_per_perturb
 }
 
 ## Perturb every star 10k times and save the results
@@ -89,7 +91,7 @@ process_dir(file.path("data", "kages"))
 process_dir(file.path("data", "basu"))
 process_dir(file.path("data", "hares"))
 
-star_names <- c("16CygA_amp", "16CygB_amp", "16CygA", "16CygB", 
+star_names <- c("16CygAamp", "16CygBamp", "16CygA", "16CygB", 
     "Tagesstern", "Sun")
 star_dir <- file.path("data")
 for (star in star_names) process_star(star, star_dir)

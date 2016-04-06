@@ -196,37 +196,7 @@ plot_Kippenhahn <- function(DF, ev.DF, ...,
     )
 }
 
-## Plot frequency separations
-plot_separations <- function(DF, ..., 
-        text.cex=1, font=utils.font, mgp=utils.mgp) {
-    attach(DF)
-    plot(NA, axes=0, xaxs='i', #yaxs='i',
-        xlim=range(age),
-        ylim=range(log10(Dnu0_median), 
-                   log10(dnu02_median), 
-                   log10(dnu13_median)),
-        #c(0, log10(200)),
-        xlab=expression("Age"~tau/"Gyr"),
-        ylab=expression("Frequency"~nu/mu*Hz))
-    #magaxis(1:3, labels=c(1,1,0), mgp=c(2, 0.5, 0), family=font, las=1, 
-    #    tcl=-0.25, unlog='y')
-    magaxis(1:2, labels=c(1,1), mgp=mgp, family=font, las=1, 
-        tcl=0.25, unlog='y', cex.axis=text.cex)
-    lines(log10(Dnu0_median) ~ age, lty=2)
-    lines(log10(dnu02_median) ~ age, lty=3)
-    lines(log10(dnu13_median) ~ age, lty=4)
-    legend("bottomleft", lty=c(2,3,4), bty='n', cex=0.8*text.cex,
-       legend=c(expression(Delta*nu), 
-                expression(delta*nu[0*","*2]),
-                expression(delta*nu[1*","*3])))
-    
-    ## Build top x-axis
-    #tick.locs <- pretty(age)
-    #locations <- Map(function(x) 
-    #    which(abs(age-x)==min(abs(age-x))), x=tick.locs)
-    #xc_vals <- round(X_c[unlist(locations)], 3)
-    #axis(3, at=tick.locs, tcl=-0.25, labels=xc_vals)
-    
+plot_Xc_axis <- function() {
     tick.locs <- as.numeric(round(quantile(
         seq(min(X_c), max(X_c), length.out=1000), 
         c(1, 0.8, 0.6, 0.4, 0.2, 0)), 2))
@@ -255,24 +225,52 @@ plot_separations <- function(DF, ...,
     
     mtext(expression("Fractional core-hydrogen abundance"~X[c]), line=1.25,
         cex=text.cex)
+}
+
+## Plot frequency separations
+plot_separations <- function(DF, ..., 
+        text.cex=1, font=utils.font, mgp=utils.mgp) {
+    attach(DF)
+    
+    plot(NA, axes=0, xaxs='i', #yaxs='i',
+        xlim=range(age),
+        ylim=range(Dnu0, dnu02, dnu13),
+        #c(0, log10(200)),
+        xlab=expression("Age"~tau/"Gyr"),
+        ylab=expression("Frequency"~nu/mu*Hz))
+    
+    magaxis(1:2, labels=c(1,1), mgp=mgp, family=font, las=1, 
+        tcl=0.25, cex.axis=text.cex)
+    lines(Dnu0 ~ age, lty=2)
+    lines(dnu02 ~ age, lty=3)
+    lines(dnu13 ~ age, lty=4)
+    legend("bottomleft", lty=c(2,3,4), bty='n', cex=0.8*text.cex,
+       legend=c(expression(Delta*nu), 
+                expression(delta*nu[0*","*2]),
+                expression(delta*nu[1*","*3])))
+    
+    plot_Xc_axis()
     
     par(new=T)
     plot(NA, axes=0, xaxs='i', #yaxs='i', 
         xlab='', ylab='',
         xlim=range(age),
-        ylim=c(range(0, r_sep02_median, r_sep13_median, 
-                        r_avg01_median, r_avg10_median)))
-    lines(r_sep02_median ~ age, lty=2, col='darkred')
-    lines(r_sep13_median ~ age, lty=3, col='darkred')
-    lines(r_avg01_median ~ age, lty=4, col='darkred')
+        ylim=c(range(0, r02, r13, r01, r10)))
+    lines(r02 ~ age, lty=2, col='darkred')
+    lines(r13 ~ age, lty=3, col='darkred')
+    lines(r01 ~ age, lty=4, col=blue)
+    lines(r10 ~ age, lty=5, col=blue)
     magaxis(4, labels=1, mgp=mgp, family=font, cex.axis=text.cex,
         las=1, tcl=0.25)
     mtext(expression("Frequency ratio"~r), side=4, line=2, cex=text.cex)
-    legend("bottomright", lty=c(2,3,4,5), col='darkred', bty='n', 
-           cex=0.8*text.cex,
+    
+    legend("bottomright", lty=c(2,3,4,5), 
+           col=c('darkred', 'darkred', blue, blue),
+           bty='n', cex=0.8*text.cex,
        legend=c(expression(r[0*","*2]), 
                 expression(r[1*","*3]), 
-                expression(r[0*","*1])))
+                expression(r[0*","*1]),
+                expression(r[1*","*0])))
     
     legend("bottom", bty='n', xjust=1, cex=text.cex/2, col="gray", 
         legend=c(
@@ -291,32 +289,52 @@ plot_separations <- function(DF, ...,
 plot_slopes <- function(DF, ..., 
         text.cex=1, font=utils.font, mgp=utils.mgp) {
     attach(DF)
+    
     plot(NA, axes=0, xaxs='i', #yaxs='i',
         xlim=range(age),
-        ylim=range(Dnu0_slope, dnu02_slope, dnu13_slope,
-                   r_avg01_slope, r_sep02_slope, r_sep13_slope),
+        ylim=range(Dnu0_slope, dnu02_slope, dnu13_slope),
         xlab=expression("Age"~tau/"Gyr"),
-        ylab=expression("Slope"~d*S/d*nu/mu*Hz))
-    magaxis(1:4, labels=c(1,1,0,0), mgp=mgp, family=font, las=1, 
+        ylab=expression("Separation slope"~d*S/d*nu/mu*Hz))
+    
+    magaxis(1:2, labels=c(1,1), mgp=mgp, family=font, las=1, 
         tcl=0.25, cex.axis=text.cex)
     
     lines(Dnu0_slope ~ age, lty=2)
     lines(dnu02_slope ~ age, lty=3)
     lines(dnu13_slope ~ age, lty=4)
-    lines(r_avg01_slope ~ age, lty=2, col=red)
-    lines(r_sep02_slope ~ age, lty=3, col=red)
-    lines(r_sep13_slope ~ age, lty=4, col=red)
+    
+    plot_Xc_axis()
+    
+    par(new=T)
+    plot(NA, axes=0, xaxs='i', #yaxs='i', 
+        xlab='', ylab='',
+        xlim=range(age),
+        ylim=c(range(r01_slope, r10_slope, r02_slope, r13_slope)))
+    lines(r02 ~ age, lty=2, col='darkred')
+    lines(r13 ~ age, lty=3, col='darkred')
+    lines(r01 ~ age, lty=4, col=blue)
+    lines(r10 ~ age, lty=5, col=blue)
+    magaxis(4, labels=1, mgp=mgp, family=font, cex.axis=text.cex,
+        las=1, tcl=0.25)
+    mtext(expression("Ratio slope"~d*r/d*nu), side=4, line=3, cex=text.cex)
+    
+    lines(r01_slope ~ age, lty=2, col=blue)
+    lines(r10_slope ~ age, lty=2, col=blue)
+    lines(r02_slope ~ age, lty=3, col='darkred')
+    lines(r13_slope ~ age, lty=4, col='darkred')
     
     legend("bottomleft", lty=c(2,3,4), bty='n', cex=0.8*text.cex,
        legend=c(expression(Delta*nu), 
                 expression(delta*nu[0*","*2]),
                 expression(delta*nu[1*","*3])))
     
-    legend("bottomright", lty=c(2,3,4,5), col='darkred', bty='n', 
-           cex=0.8*text.cex,
+    legend("bottomright", lty=c(2,3,4,5), 
+           col=c('darkred', 'darkred', blue, blue), 
+           bty='n', cex=0.8*text.cex,
        legend=c(expression(r[0*","*2]), 
                 expression(r[1*","*3]), 
-                expression(r[0*","*1])))
+                expression(r[0*","*1]), 
+                expression(r[1*","*0])))
     
     legend("bottom", bty='n', xjust=1, cex=text.cex/2, col="gray", 
         legend=c(
@@ -357,10 +375,6 @@ if (length(args)>0) {
         print("Rejecting track: too few columns")
         print(DF)
         rejection <- "-r"
-    #} else if ( 100*(hs-max(DF$H))/hs > 1.5 ) {
-    #    print("Rejecting track: inaccurate starting H")
-    #    print(c(hs, max(DF$X_c)))
-    #    rejection <- "-pms"
     } else { # Make a table of results! 
         write.table(DF, paste0(directory, '.dat'), quote=FALSE, sep='\t', 
             row.names=FALSE)
@@ -383,7 +397,7 @@ if (length(args)>0) {
     #make_plots(plot_slopes, 
     #    paste0(basename(directory), "-slopes", rejection), 
     #    filepath=file.path('plots', dirname(directory), 'separations'), 
-    #    DF=DF)
+    #    DF=DF, mar=c(3, 4, 3, 4))
     
     warnings()
 }

@@ -212,7 +212,7 @@ plot_accuracy <- function(DF, score='ev', m.or.n='n_tracks', ...,
          tcl=-0.25, cex.axis=text.cex, tick=F)
     
     par(mgp=mgp+c(1, 0, 0.15))
-    title(ylab="Predictive Accuracy")
+    title(ylab=if (score=='ev') expression("Explained Variance"~V[e]))
     
     yticks <- c(1, 0.316, 0.1, 0.03, 0.01, 0.003)#, 0.001)
     axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
@@ -253,8 +253,8 @@ plot_accuracy <- function(DF, score='ev', m.or.n='n_tracks', ...,
         shapes <- 1:length(variables)%%3 + 1
         labels <- as.expression(seis.labs[variables])
         text.widths <- rep(0.15, length(labels)/2)
-        text.widths[3] <- 0.25
-        text.widths[4] <- 0.35
+        text.widths[3] <- 0.3
+        text.widths[4] <- 0.4
         text.widths[5] <- 0.25
         legend2("topleft", legend=labels[1:6], horiz=T, bty='n', 
                inset=c(0, -0.16), cex=text.cex, text.col='white', 
@@ -279,14 +279,19 @@ plot_accuracy <- function(DF, score='ev', m.or.n='n_tracks', ...,
 }
 
 make_plots(plot_accuracy, "num_tracks", 
-    DF=read.table(file.path('subsets', 'num_tracks.dat'), 
-                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 2.5, 1))
-make_plots(plot_accuracy, "num_points", m.or.n='m_points', plotlegend=F,
+    plotlegend=T, mar=c(3, 3.75, 2.5, 1), wide=F, 
+    DF=read.table(file.path('subsets', 'num_tracks.dat'),
+                  header=T, stringsAsFactors=F))
+
+make_plots(plot_accuracy, "num_points", m.or.n='m_points',
+    plotlegend=F, mar=c(3, 3.75, 1, 1), wide=F, 
     DF=read.table(file.path('subsets', 'points_per_track.dat'), 
-                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 1, 1))
-make_plots(plot_accuracy, "num_trees", m.or.n='num_trees', plotlegend=F,
+                  header=T, stringsAsFactors=F))
+
+make_plots(plot_accuracy, "num_trees", m.or.n='num_trees', 
+    plotlegend=F, mar=c(3, 3.75, 2.5, 1), wide=F, 
     DF=read.table(file.path('subsets', 'num_trees.dat'), 
-                  header=T, stringsAsFactors=F), mar=c(3, 3.75, 1, 1))
+                  header=T, stringsAsFactors=F))
 
 
 
