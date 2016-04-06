@@ -104,8 +104,8 @@ plot_comparison <- function(qty, ...,
     arrows(ml[[qty]], kages[[qty]]-kages[[low]], 
            ml[[qty]], kages[[qty]]+kages[[high]], 
         length=0, angle=90, code=3, col="darkgray")
-    points(kages[[qty]] ~ ml[[qty]], pch=1, cex=0.5, 
-        col=col.pal[distance])
+    points(kages[[qty]] ~ ml[[qty]], pch=1, cex=0.5)#, 
+        #col=col.pal[distance])
         #[1+floor(99*dnorm(distance)/dnorm(0))])
     title(xlab=bquote("ML"~.(get_label(name))))
     title(ylab=bquote("KAGES"~.(get_label_nameless(name))))

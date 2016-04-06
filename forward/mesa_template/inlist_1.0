@@ -60,7 +60,7 @@
       max_years_for_timestep = -1
       min_timestep_limit = 1d-12
       mesh_delta_coeff = 1
-      max_allowed_nz = 20000
+      max_allowed_nz = 30000
       varcontrol_target = 1d-3 ! default is 1d-4
       !max_timestep = 3.15d14
       

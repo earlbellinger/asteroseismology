@@ -4,6 +4,8 @@ inverse/perturb/**
 **/maybe_sub_logs/**
 **/maybe_sub_logs*/**
 **/*plots*/**
+**/old/**
+**/learn/**
 **/learn_*/**
 **/learn_covs*/**
 **/learn_tables*/**
@@ -11,4 +13,5 @@ inverse/perturb/**
 **.png
 **.pdf
 **simulations**.dat
+forward/initial_conditions.dat
 

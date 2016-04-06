@@ -30,11 +30,14 @@ else:
     simulations_filename = os.path.join('..', 'forward', 'simulations.dat')
 
 bname = os.path.basename(simulations_filename).split('.')[0]
-plot_dir = 'learn_plots-'+bname
-cov_dir = 'learn_covs-'+bname
-table_dir = 'learn_tables-'+bname
+plot_dir = os.path.join('learn', 'plots-'+bname)
+cov_dir = os.path.join('learn', 'covs-'+bname)
+table_dir = os.path.join('learn', 'tables-'+bname)
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
+
+if not os.path.exists('learn'):
+    os.makedirs('learn')
 
 if not os.path.exists(perturb_dir):
     os.makedirs(perturb_dir)
@@ -47,10 +50,8 @@ if not os.path.exists(table_dir):
 
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|slope|Dnu"#|Dnu"#|dnu"
-#|mass_cc"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
-#data = data.loc[data['M'] >= 0.8]
 
 maxs = data.max()
 mins = data.min()
@@ -96,10 +97,6 @@ y_latex_short = {
     "mass_cc": r"M$_{\mathrm{cc}}$"
 }
 
-#y_show = ['M', 'Y', 'Z', 'age', 'radius']
-#y_show = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age']
-#all_ys = ['M', 'Y', 'Z', 'alpha', 'diffusion', 'overshoot', 'age', 
-#    'log_g', 'L', 'radius', 'Y_surf', 'X_c', 'mass_cc']
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
 y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'mass_cc']
 
@@ -108,11 +105,13 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     ys = data.loc[:, [i for i in y_show if i not in X_columns]]
     
     print()
-    for n_trees in [1024]:
+    for n_trees in [128]:
     #list(range(4, 16)) + [18,20] + [2**n for n in range(4, 12)]:
     #[n for n in range(4, 64)]:#[2**n for n in range(1, 12)]:
         forest = Pipeline(steps=[
-            ('forest', ExtraTreesRegressor(n_estimators=n_trees, 
+            ('forest', ExtraTreesRegressor(
+                #RandomForestRegressor(
+                n_estimators=n_trees, 
                 n_jobs=min(n_trees, 62),
                 oob_score=True, bootstrap=True))])
         start = time()
@@ -139,9 +138,15 @@ def get_rc(num_ys):
         rows, cols = int(sqrt), int(sqrt)
     return rows, cols, sqrt
 
+def weighted_avg_and_std(values, weights):
+    average = np.average(values, axis=0, weights=weights)
+    variance = np.average((values-average)**2, axis=0, weights=weights) 
+    return (average, np.sqrt(variance))
+
 def print_star(star, predict, y_names, table_curr, table_init):
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
+    #middles, stds = weighted_avg_and_std(predict, 1/stds)
     outstr = star
     initstr = "\n" + star
     currstr = "\n" + star
@@ -331,6 +336,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         star_X = star_data.loc[:,X_names]
         start = time()
         predict = forest.predict(star_X)
+        #estimates = [estimator.predict(star_X) 
+        #             for estimator in forest.steps[0][1].estimators_]
+        #stds = np.std(estimates, 0)
         end = time()
         run_times += [end-start]
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
@@ -342,8 +350,11 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
     table_curr.close()
     table_init.close()
     print("\ntotal prediction time:", sum(run_times))
-    print("time per star:", sum(run_times)/len(run_times))
-    print("time per perturbation:", sum(run_times)/len(run_times)/10000)
+    print("time per star:", np.mean(run_times), "+/-", np.std(run_times))
+    #sum(run_times)/len(run_times))
+    print("time per perturbation:", np.mean(np.array(run_times) / 10000), "+/-",
+         np.std(np.array(run_times) / 10000))
+    #sum(run_times)/len(run_times)/10000)
     print("\ncouldn't process", wrong_cols)
     print("out of bounds", outside)
 

@@ -159,9 +159,60 @@ pdfpng <- function(plot_f, filename, directory,
     }
 }
 
-##############################################################################
-### Metadata for the grid ####################################################
-##############################################################################
+################################################################################
+### Nearly-equal spacing #######################################################
+################################################################################
+find_closest <- function(x, y) {
+    x.dest <- x
+    y.dest <- y
+    x.ind <- c()
+    y.ind <- c()
+    min.cost <- Inf
+    ii <- 0
+    while (length(x.dest) > 0 && length(y.dest) > 0) {
+        ii <- ii + 1
+        cost.mat <- outer(x.dest, y.dest, function(x, y) abs(x-y))
+        cost <- min(cost.mat)
+        indices <- which(cost.mat==cost, arr.ind=T)
+        if (cost >= 10*min.cost && ii > 5) break
+        if (cost < min.cost || ii < 5) min.cost <- min(cost.mat)
+        x.ind <- c(x.ind, which(x==x.dest[indices[1]]))
+        y.ind <- c(y.ind, which(y==y.dest[indices[2]]))
+        x.dest <- x.dest[-indices[1]]
+        y.dest <- y.dest[-indices[2]]
+    }
+    list(x=x.ind, y=y.ind)
+}
+
+# solve linear transport problem to get equally-spaced points
+find_closest2 <- function(x, y=NULL, num_points=0) {
+    invisible(library(lpSolve))
+    
+    x.len <- length(x)
+    
+    if (x.len < num_points) {
+        print(paste("Too few points"))
+        return(NULL)
+    }
+    
+    if (is.null(y) && num_points > 0) 
+        y <- seq(max(x), min(x), length=num_points)
+    if (!is.null(y) && num_points == 0) 
+        num_points <- length(y)
+    
+    cost.mat  <- outer(y, x, function(x, y) abs(x-y))
+    row.signs <- rep("==", num_points)
+    row.rhs   <- rep(1, num_points)
+    col.signs <- rep("<=", x.len)
+    col.rhs   <- rep(1, x.len)
+    sol <- lp.transport(cost.mat, "min", row.signs, row.rhs,
+        col.signs, col.rhs)$solution
+    apply(sol, 1, which.max)
+}
+
+################################################################################
+### Metadata for the grid ######################################################
+################################################################################
 
 get_label <- function(symbol) bquote(
         .(seis.names[[symbol]])
@@ -194,20 +245,28 @@ seis.names <- list(
   Teff           = "Temperature", 
   Fe.H           = "Metallicity", 
   Dnu_median     = "Large frequency separation", 
+  Dnu             = "Large frequency separation", 
   Dnu_slope      = "", 
   Dnu0_median    = "Large frequency separation", 
+  Dnu0            = "Large frequency separation", 
   Dnu0_slope     = "", 
   dnu02_median   = "Small separation", 
+  dnu02          = "Small separation", 
   dnu02_slope    = "", 
   r_sep02_median = "", 
+  r02            = "", 
   r_sep02_slope  = "", 
   r_avg01_median = "", 
+  r01            = "", 
   r_avg01_slope  = "", 
   dnu13_median   = "Small separation", 
+  dnu13          = "Small separation", 
   dnu13_slope    = "", 
   r_sep13_median = "", 
+  r13            = "", 
   r_sep13_slope  = "",
   r_avg10_median = "", 
+  r10            = "", 
   r_avg10_slope  = ""
 )
 
@@ -231,20 +290,28 @@ seis.labs <- list(
   Teff           = bquote(T["eff"]), 
   Fe.H           = bquote("[Fe"/"H]"), 
   Dnu_median     = bquote("<"*Delta*nu*">"), 
+  Dnu            = bquote("<"*Delta*nu*">"), 
   Dnu_slope      = bquote("<"*d*Delta*nu/d*nu*">"), 
   Dnu0_median    = bquote("<"*Delta*nu[0]*">"), 
+  Dnu0           = bquote("<"*Delta*nu[0]*">"), 
   Dnu0_slope     = bquote("<"*d*Delta*nu[0]/d*nu*">"), 
-  dnu02_median   = bquote("<"*delta*nu[0*","*2]*">"), 
+  dnu02_median   = bquote("<"*delta*nu[0*","*2]*">"),  
+  dnu02          = bquote("<"*delta*nu[0*","*2]*">"), 
   dnu02_slope    = bquote("<"*d*delta*nu[0*","*2]/d*nu*">"), 
   r_sep02_median = bquote("<"*r[0*","*2]*">"), 
+  r02            = bquote("<"*r[0*","*2]*">"), 
   r_sep02_slope  = bquote("<"*d*r[0*","*2]/d*nu*">"), 
   r_avg01_median = bquote("<"*r[0*","*1]*">"), 
+  r01            = bquote("<"*r[0*","*1]*">"), 
   r_avg01_slope  = bquote("<"*d*r[0*","*1]/d*nu*">"), 
   dnu13_median   = bquote("<"*delta*nu[1*","*3]*">"), 
+  dnu13          = bquote("<"*delta*nu[1*","*3]*">"), 
   dnu13_slope    = bquote("<"*d*delta*nu[1*","*3]/d*nu*">"), 
   r_sep13_median = bquote("<"*r[1*","*3]*">"), 
+  r13            = bquote("<"*r[1*","*3]*">"), 
   r_sep13_slope  = bquote("<"*d*r[1*","*3]/d*nu*">"),
   r_avg10_median = bquote("<"*r[1*","*0]*">"), 
+  r10            = bquote("<"*r[1*","*0]*">"), 
   r_avg10_slope  = bquote("<"*d*r[1*","*0]/d*nu*">")
 )
 
@@ -268,20 +335,28 @@ seis.units <- list(
   Teff           = bquote("/"*K), 
   Fe.H           = bquote(), 
   Dnu_median     = bquote("/"*mu*Hz), 
+  Dnu            = bquote("/"*mu*Hz), 
   Dnu_slope      = bquote(), 
   Dnu0_median    = bquote("/"*mu*Hz), 
+  Dnu0           = bquote("/"*mu*Hz), 
   Dnu0_slope     = bquote(), 
   dnu02_median   = bquote("/"*mu*Hz), 
+  dnu02          = bquote("/"*mu*Hz), 
   dnu02_slope    = bquote(), 
   r_sep02_median = bquote(""), 
+  r02            = bquote(""), 
   r_sep02_slope  = bquote(), 
   r_avg01_median = bquote(""), 
+  r01            = bquote(""), 
   r_avg01_slope  = bquote(), 
   dnu13_median   = bquote("/"*mu*Hz), 
+  dnu13          = bquote("/"*mu*Hz), 
   dnu13_slope    = bquote(), 
   r_sep13_median = bquote(""), 
+  r13            = bquote(""), 
   r_sep13_slope  = bquote(),
   r_avg10_median = bquote(""), 
+  r10            = bquote(""), 
   r_avg10_slope  = bquote()
 )
 
@@ -302,20 +377,28 @@ seis.latex <- list(
   Teff           = "$T_{\text{\"eff\"}}$", 
   Fe.H           = "Fe/H", 
   Dnu_median     = "$\\langle\\Delta\\nu\\rangle$", 
+  Dnu            = "$\\langle\\Delta\\nu\\rangle$", 
   Dnu_slope      = "$\\langle\\frac{d\\Delta\\nu}{d\nu}\\rangle$", 
   Dnu0_median    = "$\\langle\\Delta\\nu_0\\rangle$", 
+  Dnu0           = "$\\langle\\Delta\\nu_0\\rangle$", 
   Dnu0_slope     = "$\\langle\\frac{d\\Delta\\nu_0}{d\nu}\\rangle$", 
   dnu02_median   = "$\\langle\\delta\\nu_{02}\\rangle$", 
+  dnu02          = "$\\langle\\delta\\nu_{02}\\rangle$", 
   dnu02_slope    = "$\\langle\\frac{d\\delta\\nu_{02}}{d\nu}\\rangle$",
   r_sep02_median = "$\\langle r_{02}\\rangle$", 
+  r02            = "$\\langle r_{02}\\rangle$", 
   r_sep02_slope  = "$\\langle\\frac{dr_{02}}{d\nu}\\rangle$", 
   r_avg01_median = "$\\langle r_{01}\\rangle$",
+  r01            = "$\\langle r_{01}\\rangle$",
   r_avg01_slope  = "$\\langle\\frac{dr_{01}}{d\nu}\\rangle$", 
   dnu13_median   = "$\\langle\\delta\\nu_{13}\\rangle$", 
+  dnu13          = "$\\langle\\delta\\nu_{13}\\rangle$", 
   dnu13_slope    = "$\\langle\\frac{d\\delta\\nu_{13}}{d\nu}\\rangle$", 
   r_sep13_median = "$\\langle r_{13}\\rangle$", 
+  r13            = "$\\langle r_{13}\\rangle$", 
   r_sep13_slope  = "$\\langle\\frac{dr_{13}}{d\nu}\\rangle$", 
   r_avg10_median = "$\\langle r_{10}\\rangle$", 
+  r10            = "$\\langle r_{10}\\rangle$", 
   r_avg10_slope  = "$\\langle\\frac{dr_{10}}{d\nu}\\rangle$"
 )
 
@@ -326,13 +409,21 @@ unicode.labs <- list(
   Teff           = "Teff", 
   Fe.H           = "Fe/H", 
   Dnu_median     = "<Δν>", 
+  Dnu            = "<Δν>", 
   Dnu0_median    = "<Δν₀>", 
+  Dnu0           = "<Δν₀>", 
   dnu02_median   = "<δν₀₂>", 
-  r_sep02_median = "<r₀₂>", 
+  dnu02          = "<δν₀₂>", 
+  r_sep02_median = "<r₀₂>",  
+  r02            = "<r₀₂>", 
   r_avg01_median = "<r₀₁>", 
+  r01            = "<r₀₁>", 
   dnu13_median   = "<δν₁₃>", 
-  r_sep13_median = "<r₁₃>", 
-  r_avg10_median = "<r₁₀>"
+  dnu13          = "<δν₁₃>", 
+  r_sep13_median = "<r₁₃>",  
+  r13            = "<r₁₃>", 
+  r_avg10_median = "<r₁₀>", 
+  r10            = "<r₁₀>"
 )
 
 Z_levels <- list(
@@ -371,7 +462,11 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
         color <- col.pal[floor((track[[Z]]-Z_min)/(Z_max-Z_min)*
                                    (length(col.pal)-1))+1]
         use_line <- length(unique(color))==1
-        relation <- track[[Y]] ~ track[[X]]
+        ys <- track[[Y]]
+        xs <- track[[X]]
+        if (grepl('x', log) && 0 %in% xs) xs <- xs + min(xs[xs>0])
+        if (grepl('y', log) && 0 %in% ys) ys <- ys + min(ys[ys>0])
+        relation <- ys ~ xs
         if (simulation_i == 1) {
             plot(relation, type=ifelse(use_line, 'l', 'p'),
                  pch=20, axes=FALSE, col=color, cex=0.1, tcl=0, 
@@ -392,13 +487,14 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
     
     points(solar_x, solar_y, pch=1, cex=1)
     points(solar_x, solar_y, pch=20, cex=0.1)
+    
     X_range <- diff(par()$usr)[1]
     color.legend(par()$usr[2]+0.05*X_range, par()$usr[3], 
                  par()$usr[2]+0.10*X_range, par()$usr[4], 
                  signif(quantile(seq(Z_min, Z_max, length=1000), 
                                  c(0, 0.25, 0.5, 0.75, 1)), 2), 
-                 cex=text.cex,
-                 col.pal[1:length(col.pal)], gradient='y', align='rb')
+                 col.pal[1:length(col.pal)], 
+                 cex=text.cex, gradient='y', align='rb')
     mtext(if(short) get_label_nameless(Z) else get_label(Z), 
         4, line=ifelse(thin, 3, 5), cex=text.cex)
 }
