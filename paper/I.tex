@@ -6,33 +6,30 @@
 \newcommand{\vdag}{(v)^\dagger}
 \newcommand{\myemail}{bellinger@mps.mpg.de}
 
-\usepackage{subfig}
 \usepackage{graphicx}	% Including figure files
+\usepackage{subfig}     % For subcaptions 
 \usepackage{amsmath}	% Advanced maths commands
 \usepackage{amssymb}	% Extra maths symbols
-\usepackage{bm}		% Bold maths symbols, including upright Greek
+\usepackage{bm}		    % Bold maths symbols, including upright Greek
 
 \usepackage{mathrsfs}
-%\usepackage{savesym}
-%\savesymbol{tablenum}
-\usepackage{siunitx}
-%\restoresymbol{SIX}{tablenum}
+\usepackage{siunitx}    % SI units 
 
-\usepackage{bookmark}
+\usepackage{bookmark}   % Hyperlinking to sections etc 
 
-%\usepackage{todonotes}
-\usepackage{physics}
-\usepackage{natbib}
+\usepackage{physics}    % Calculus notation 
+\usepackage{natbib}     % Bibliography
 
-%\usepackage[none]{hyphenat}
-\usepackage{tikz}
+%% Drawing the RF figure 
+\usepackage{tikz}       
 \usetikzlibrary{arrows,positioning,shapes,decorations.markings}
+%%
 
-\newcommand{\Dnu}{\Delta\nu}
-\newcommand{\dnu}{\delta\nu}
-\newcommand{\Mo}{\rm{M}_\odot}
-\newcommand{\Lo}{\rm{L}_\odot}
-\newcommand{\Ro}{\rm{R}_\odot}
+%\newcommand{\Dnu}{\Delta\nu}
+%\newcommand{\dnu}{\delta\nu}
+%\newcommand{\Mo}{\rm{M}_\odot}
+%\newcommand{\Lo}{\rm{L}_\odot}
+%\newcommand{\Ro}{\rm{R}_\odot}
 
 %André
 %Biggie
@@ -49,7 +46,7 @@
 
 %% You can insert a short comment on the title page using the command below.
 
-\slugcomment{}
+%\slugcomment{}
 
 \shorttitle{Stellar parameters in an instant with machine learning}
 \shortauthors{Bellinger \& Angelou et al.}
@@ -65,9 +62,10 @@
 \altaffilmark{4} Department of Astronomy, Yale University, New Haven, CT 06520, USA \\
 \altaffilmark{5} Institut f\"ur Astrophysik G\"ottingen, Friedrich-Hund-Platz 1, 37077 G\"ottingen, Germany}
 
-
 \begin{abstract}
-We develop machine learning methods for instantly estimating fundamental stellar parameters such as the age, mass, radius, and chemical composition of main-sequence solar-like stars from classical and asteroseismic observations. We first demonstrate these methods on a Hare-and-Hound exercise and then apply them to the Sun, 16 Cyg A \& B, and thirty-two \emph{Kepler} objects-of-interest. We find that our estimates and their associated uncertainties are comparable to the results of other methods, but with the additional benefit of needing practically zero computation time. We provide an open-source implementation for the community to use in inferring the attributes of observed stars.\footnote{The source code for all analyses and for all figures appearing in this manuscript can be found electronically at \url{https://github.com/earlbellinger/asteroseismology}.}
+Owing to the remarkable precision being provided by modern space observatories, stellar and planetary systems other than our own are now beginning to be characterized in detail for the first time. These characterizations are pivotal for endeavors such as searching for second Earths and second Suns, tracing the dynamics of our Galaxy, and understanding the processes that comprise stellar evolution. This wealth of data that is becoming available, however, brings with it the need to process this information both precisely and rapidly. While existing methods are able to constrain stellar properties from these observations, they require substantial computational costs to do so. 
+
+We develop machine learning methods for instantly estimating fundamental stellar parameters such as the age, mass, radius, and chemical composition of main-sequence solar-like stars from classical and asteroseismic observations. We first demonstrate these methods on a hare-and-hound exercise and then apply them to the Sun, 16 Cyg A \& B, and thirty-three Kepler objects-of-interest. We find that our estimates and their associated uncertainties are comparable to the results of other methods, but with the additional benefit of needing practically zero computation time. Our method is open source and freely available for the community to use.\footnote{The source code for all analyses and for all figures appearing in this manuscript can be found electronically at \url{https://github.com/earlbellinger/asteroseismology}.}
 \end{abstract}
 
 
@@ -77,58 +75,54 @@ We develop machine learning methods for instantly estimating fundamental stellar
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%% BODY OF PAPER %%%%%%%%%%%%%%%%%%
 \section{Introduction}
+In recent years, the accuracy and frequency of observations for Sun-like stars have been improved dramatically by the advent of dedicated photometric spacecraft missions. Such detailed measurements are placing the strongest ever constraints on the ages, masses, and chemical compositions of these stars. %These constraints then propagate to the study of their planets, which are only able to be characterized once their host star has been. 
+This in turn drives a wide range of applications in astrophysics, such as characterizing extrasolar planetary systems \citep[e.g.][]{2015ApJ...799..170C,2015MNRAS.452.2127S}, assessing galactic chemical evolution \citep[e.g.][]{2015ASSP...39..111C}, and performing ensemble studies of the Galaxy \citep[e.g.][]{2011Sci...332..213C, 2013MNRAS.429..423M, 2014ApJS..210....1C}. 
 
-Asteroseismology provides the opportunity to constrain the ages of stars through accurate inferences of their interior structures.  This in turn drives a wide range of applications in astrophysics, such as characterizing extrasolar planetary systems \citep[e.g.][]{2015ApJ...799..170C,2015MNRAS.452.2127S}, assessing galactic chemical evolution \citep[e.g.][]{2015ASSP...39..111C}, and performing ensemble studies of the Galaxy \citep[e.g.][]{2011Sci...332..213C, 2013MNRAS.429..423M, 2014ApJS..210....1C}. However, seismic ages cannot be measured directly. Instead, they depend on indirect determinations via stellar model calculations. 
+The space photometry revolution has largely been driven by the goal of measuring oscillation modes in stars that are like our Sun. This is due to the fact that asteroseismology, the study of these oscillations, provides the opportunity to constrain the ages of stars through accurate inferences of their interior structures. However, seismic ages cannot be measured directly. Instead, they depend on indirect determinations via stellar model calculations. 
 
-To determine the age of an observed star via seismic analysis, models that best match the available observables are sought via mathematical optimization \citep{1994ApJ...427.1013B}. Several search strategies have been employed, including exploration through a pre-computed grid of models (i.e.~grid-based modelling, see \citealt{2011ApJ...730...63G, 2014ApJS..210....1C}); or \emph{in-situ} optimization such as genetic algorithms \citep{2014ApJS..214...27M}, Markov chain Monte Carlo \citep{2012MNRAS.427.1847B}, or downhill simplex \citep{2013ApJS..208....4P} to name but a few (see e.g.~\citealt{2015MNRAS.452.2127S} for an extended discussion). %\footnote{See \citet{2015MNRAS.452.2127S} for a description of the search strategies and techniques in use.} 
-%Both grid-based modelling and \emph{in-situ} optimization are computationally expensive, however, and furthermore depend on the choices in physics used to construct the model as well as the uncertainties therein \citep{2014A&A...569A..21L}. 
-Utilizing the precision and long temporal observations from the \emph{Kepler} spacecraft and CoRoT satellite, these methods have constrained stellar ages of field stars to within 10\% of their main-sequence lifetime \citep{2015MNRAS.452.2127S}. 
+To determine the age of a star via seismic analysis, models that best match the available observations are sought via mathematical optimization \citep{1994ApJ...427.1013B}. Several search strategies have been employed, including exploration through a pre-computed grid of models (i.e.~grid-based modelling, see \citealt{2011ApJ...730...63G, 2014ApJS..210....1C}); or \emph{in-situ} optimization such as genetic algorithms \citep{2014ApJS..214...27M}, Markov-chain Monte Carlo \citep{2012MNRAS.427.1847B}, or downhill simplex \citep{2013ApJS..208....4P} to name but a few (see e.g.~\citealt{2015MNRAS.452.2127S} for an extended discussion). Utilizing the precision and long temporal observations from the Kepler and CoRoT space telescopes, these methods have constrained stellar ages of field stars to within 10\% of their main-sequence lifetime \citep{2015MNRAS.452.2127S}. 
 
-\emph{In-situ} optimization methods are computationally expensive, however, and grid-based modelling methods that rely on interpolation require dense grids \citep{2009ApJ...699..373M}. These methods also depend on the choices in physics used to construct their models as well as the uncertainties therein \citep{2014A&A...569A..21L}. In addition, these methods are based on $\chi^2$-reduction and therefore assume a linear relation between the free parameters of their search and the observations as well as Gaussian distributions for each error function, which can cause uncertainties to be underestimated \citep{2010arXiv1012.3754A}.
+\emph{In-situ} optimization and grid-based modelling are computationally intensive, however, requiring the calculation of a large number of stellar models (see \citealt{2009ApJ...699..373M} for a discussion). Such methods furthermore depend on the choices in physics used to construct their models and the uncertainties therein \citep{2014A&A...569A..21L}. In addition, these methods fit stellar models via $\chi^2$-reduction, which assumes a linear relation between the observations and the free parameters of their search as well as assuming normally-distributed error functions, which can cause uncertainties to be underestimated \citep{2010arXiv1012.3754A}.
 
-The relationships that exist between the observed properties and model parameters are non-linear and difficult to invert. Here we will show that through the use of machine learning, it is possible for these relationships to be characterized %in a semi-analytical manner 
-and used to construct a statistical model that is able to relate observations of stars to their internal properties. These learned relationships can then be utilized to process entire catalogs with a cost of only seconds per star. 
+These concessions have been made because the relationships connecting observable properties of stars to their internal attributes are non-linear and difficult to invert. Here we will show that through the use of machine learning, it is possible to avoid these difficulties by capturing those relations statistically and using them to construct a model that is capable of relating observations of stars to their structural and evolutionary properties. These learned relationships can then be utilized to process entire catalogs with a cost of only seconds per star. 
 
-In this work, we consider the constrained multiple-regression problem of inferring fundamental stellar parameters from observations. We construct a random forest of decision tree regressors to learn the relationships connecting observable quantities to zero-age main-sequence (ZAMS) properties and current-age evolutionary attributes. The method presented here has strong advantages over existing approaches. First, random forests can be trained and used in only seconds and hence provide massive speedups over other methods. This ability to rapidly process entire catalogs will be crucial in the era of TESS \citep{2015JATIS...1a4003R} and PLATO \citep{2014ExA....38..249R} when seismic data for millions of stars will become available. Secondly, random forests perform non-linear and non-parametric regression -- as opposed to linear interpolation -- which frees us from the strong assumptions laden to other methods and therefore allows us to more faithfully appraise the uncertainties of predicted quantities. %Secondly, iterative searches through the high-dimension parameter space are sensitive to the resolution in their parameter ranges. While iterative searches may identify the best match from a set of \emph{computed} models, they inherently assume that a linear relation exists between observations and model attributes and interpolate within that linear approximation. Interpolating in this fashion, as opposed to the statistical regression applied here, carries assumptions remain unquantified and unpropagated into error estimates.
-Thirdly, our method allows us to investigate wide ranges in and combinations of non-canonical stellar physics, whereas other approaches typically have their physics ``locked in,'' using for example the solar mixing length or a fixed amount of core overshooting. This is especially important in the case of atomic diffusion, which is essential when modelling the Sun \citep{1994MNRAS.269.1137B}, but is usually turned off for stars with M/M$_\odot > 1.4$ because it leads to the unobserved consequence of a hydrogen-only surface \citep{2002A&A...390..611M}. Instead of turning it off \emph{ad-hoc} as is commonly done, our method is able to determine empirically the efficiency of atomic diffusion required to reproduce observations. %This is especially important in the case of atomic diffusion, which is essential in modelling the Sun, but is usually turned off in other approaches for stars with M/M$_\odot > 1.4$ because it totally depletes the surface of heavy elements, which is not observed \citep{2002A&A...390..611M}. 
-And finally, the method presented here provides the opportunity to extract insights from the statistical regression that is being performed, which contrasts the blind optimization processes of other methods that provide an answer but do not indicate the elements that were important in doing so. 
+In this work, we consider the constrained multiple-regression problem of inferring fundamental stellar parameters from observations. We construct a random forest of decision tree regressors to learn the relationships connecting observable quantities to zero-age main-sequence (ZAMS) histories and current-age structural attributes. We validate our technique by inferring the parameters of a hare-and-hound exercise, the Sun, and the well-studied stars 16 Cyg A and B. Finally, we conclude by applying our method on a catalog of Kepler objects-of-interest (hereafter KOI, \citealt{2016MNRAS.456.2183D}).
 
-We apply our method to main-sequence solar-like oscillators, where the detection of many modes of oscillation  offer tight constraints on the stellar interior. We explore various model physics by simulating stars varied not only in their initial mass and chemical composition, but also in their efficiency of convection, extent of core overshooting, and strength of gravitational settling. We validate our technique by inferring the parameters of a Hare-and-Hound exercise, the Sun, and the well-studied stars 16 Cyg A and B. %Notably, in the case of 16 Cyg A and B, the predictions for their respective radii and their corresponding uncertainties match the values measured via interferometry. 
-We conclude by processing a catalog of \emph{Kepler} objects-of-interest (hereafter \emph{KAGES}) and compare to the recent results from grid-based modelling, \emph{in-situ} optimization, interferometry, and asteroseismic glitch analyses. 
+The method presented here has strong advantages over existing approaches. First, random forests can be trained and used in only seconds and hence provide substantial speedups over other methods. This ability to rapidly process entire catalogs will be crucial in the era of TESS \citep{2015JATIS...1a4003R} and PLATO \citep{2014ExA....38..249R} when seismic data for millions of stars will become available. Secondly, random forests perform non-linear and non-parametric regression -- as opposed to linear interpolation -- which frees us from the strong assumptions laden to other methods and therefore allows us to more faithfully appraise the uncertainties of predicted quantities. Interpolation in a high-dimensional parameter space is also sensitive to the resolution of each parameter, which then requires very fine grids. Thirdly, our method allows us to investigate wide ranges in and combinations of non-canonical stellar physics, whereas other approaches typically have their physics ``locked in,'' using for example the solar mixing length or a fixed amount of core overshooting, which additionally results in an underestimates of uncertainty. This is especially important in the case of atomic diffusion, which is essential when modelling the Sun \citep[see e.g.][]{1994MNRAS.269.1137B}, but is usually turned off for stars with M/M$_\odot > 1.4$ because it leads to the unobserved consequence of a hydrogen-only surface \citep{2002A&A...390..611M}. Instead of turning it off \emph{ad-hoc} as is commonly done, our method empirically determines the efficiency of atomic diffusion that is required to reproduce observations on a star-by-star basis. And finally, the method presented here provides the opportunity to extract insights from the statistical regression that is being performed, which contrasts the blind optimization processes of other methods that provide an answer but do not indicate the elements that were important in doing so. 
+
+We have currently developed this method for main-sequence solar-like stars, whose modes of oscillation are known to offer tight constraints on the stellar interior. We explore various model physics by considering stellar evolutionary tracks that are varied not only in their initial mass and chemical composition, but also in their efficiency of convection, extent of core overshooting, and strength of gravitational settling. We compare our results to the recent findings from grid-based modelling \citep{2015MNRAS.452.2127S}, \emph{in-situ} optimization \citep{2015ApJ...811L..37M}, interferometry \citep{2013MNRAS.433.1262W}, and asteroseismic glitch analyses \citep{2014ApJ...790..138V} and find that we obtain similar estimates but with orders-of-magnitude speed-ups in calculation times. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Grid %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Method} \label{sec:Method} 
-Training a machine learning algorithm for the purpose of characterizing observed stars requires a matrix of evolutionary models from which the machine can learn the processes that relate observable quantities to model properties. In order to construct such a matrix, models along evolutionary sequences are extracted and homogenized to yield the same types of information as the stars being observed. Once the network has learned the non-linear relationships present in the simulations, one can feed the algorithm a catalogue of observational data. This includes, but is not limited to, combinations of 
-temperatures, metallicities, frequency separations, surface gravities, luminosities, or radii. %temperatures, metallicities, and frequency separations as well as -- if available -- surface gravities, luminosities, and/or radii. 
-A trained machine can then infer current stellar properties such as ages, masses, core-hydrogen and surface-helium abundances. If luminosities, surface gravities, or radii are not supplied, then they can be predicted as well. In addition, the machine also infers ZAMS parameters, including initial mass and initial chemical compositions as well as the mixing length parameter, overshoot coefficient, and diffusion factor needed to reproduce observations, which are explained in more detail below. The determined distributions of these values can later be used as Bayesian priors when constructing more detailed models of the observed stars. 
+Training a machine learning algorithm for the purpose of characterizing observed stars requires a matrix of evolutionary models from which the machine can learn the processes that relate observable quantities to model properties. In order to construct such a matrix, models along evolutionary sequences are extracted and homogenized to yield the same types of information as the stars being observed. Once the network has learned the non-linear relationships present in the simulations, one can feed the algorithm a catalogue of observational data. These observations include, but are not limited to, combinations of temperatures, metallicities, frequency separations, surface gravities, luminosities, or radii. A trained machine can then infer stellar properties such as ages and masses as well as core-hydrogen and surface-helium abundances. If luminosities, surface gravities, or radii are not supplied, then they may be predicted as well. In addition, the machine also infers ZAMS parameters, including initial mass and initial chemical compositions as well as the mixing length parameter, overshoot coefficient, and diffusion factor needed to reproduce observations, which are explained in more detail below. The determined distributions of these values can later be used as strong priors when constructing more detailed models of those stars. 
 
 
 \subsection{Model generation}
 \label{sec:models}
-We use the open-source 1D stellar evolution code \emph{Modules for Experiments in Stellar Astrophysics} \citep[MESA,][]{Paxton2011} to generate 100,000 main-sequence stellar models across 1,000 solar-like evolutionary tracks varied in initial mass M, helium Y$_0$, metallicity Z$_0$, mixing length parameter $\alpha_{\text{MLT}}$, overshoot coefficient $\alpha_{\text{ov}}$, and atomic diffusion factor D. The diffusion factor serves to amplify or diminish the effects of diffusion, where a value of zero would turn it off and a value of two would double all coefficients. The initial conditions are varied in the ranges M $\in [0.7, 1.6]$ M$_\odot$, Y$_0$ $\in [0.22, 0.33]$, Z$_0$ $\in [0.0004, 0.04]$ (varied logarithmically), $\alpha_{\text{MLT}}$ $\in [1.5, 2.5]$, $\alpha_{\text{ov}}$ $\in [10^{-4}, 0.5]$ (varied logarithmically), and D $\in [10^{-6}, 10]$ (varied logarithmically). We furthermore put a cut-off of 10$^{-3}$ and 10$^{-5}$ on $\alpha_{\text{ov}}$ and D, respectively, below which we consider zero and turn off. The initial parameters of each track at the ZAMS are chosen in a quasi-random fashion so as to populate the initial-condition hyperspace as rapidly as possible (see Appendix \ref{sec:grid} for more details). The initial conditions considered are projected onto two dimensions in pair-wise scatterplots and histograms in Figure \ref{fig:inputs} with points color-coded by initial hydrogen abundance X$_0$. Note that each variable is varied independently with respect to the the initial hydrogen with the exception of Y$_0$ and Z$_0$, which are required to fulfill baryonic conservation, i.e., X+Y+Z=1. 
+We use the open-source 1D stellar evolution code \emph{Modules for Experiments in Stellar Astrophysics} \citep[MESA,][]{Paxton2011} to generate main-sequence stellar models from solar-like evolutionary tracks varied in initial mass M, helium Y$_0$, metallicity Z$_0$, mixing length parameter $\alpha_{\text{MLT}}$, overshoot coefficient $\alpha_{\text{ov}}$, and atomic diffusion factor D. The diffusion factor serves to amplify or diminish the effects of diffusion, where a value of zero would turn it off and a value of two would double all coefficients. The initial conditions are varied in the ranges M $\in [0.7, 1.6]$ M$_\odot$, Y$_0$ $\in [0.22, 0.33]$, Z$_0$ $\in [0.0004, 0.04]$ (varied logarithmically), $\alpha_{\text{MLT}}$ $\in [1.5, 2.5]$, $\alpha_{\text{ov}}$ $\in [10^{-4}, 0.5]$ (varied logarithmically), and D $\in [10^{-6}, 10]$ (varied logarithmically). We furthermore put a cut-off of 10$^{-3}$ and 10$^{-5}$ on $\alpha_{\text{ov}}$ and D, respectively, below which we consider them to be zero and turn them off. The initial parameters of each track at the ZAMS are chosen in a quasi-random fashion so as to populate the initial-condition hyperspace as homogenously and rapidly as possible (shown in Figure \ref{fig:inputs}; see Appendix \ref{sec:grid} for more details). Note that each variable is varied independently with respect to the initial hydrogen with the exception of Y$_0$ and Z$_0$, which are required to fulfill baryonic conservation; i.e., X+Y+Z=1. 
 
-We use MESA version r8118 with the Helmholtz-formulated equation of state that allows for radiation pressure and interpolates within the 2005 update of the OPAL EOS tables \citep{2002ApJ...576.1064R}. We assume a \citet{1998SSRv...85..161G} solar composition for our initial abundances and opacity tables. Since we restrict our study to the main sequence, we use an eight-isotope nuclear network consisting of $^1$H, $^3$He, $^4$He, $^{12}$C, $^{14}$N, $^{16}$O, $^{20}$Ne, and $^{24}$Mg. We set a constant $f_0 = 0.001$ to determine the radius $r_0 = H_p \cdot f_0$ inside the convective zone at which convection is switched to overshooting, where $H_p$ is the pressure scale height. All pre-main-sequence (PMS) models are calculated with a simple photospheric approximation, after which an Eddington T-$\tau$ atmosphere is appended on at ZAMS. We end the PMS at the point where the nuclear luminosity represents 99.9\% of the total luminosity, and additionally consider as PMS any models that still decrease in total luminosity past that point. %Explicitly calculating the diffusion rate of each isotope can become computationally expensive. 
-We calculate atomic diffusion during the main sequence using four diffusion class representatives: $^1$H, $^4$He, $^{16}$O, and $^{56}$Fe.\footnote{The atomic number of each representative isotope is used to calculate the diffusion rate of the other isotopes allocated to that group; see \citealt{Paxton2011}.} 
+We use MESA version r8118 with the Helmholtz-formulated equation of state that allows for radiation pressure and interpolates within the 2005 update of the OPAL EOS tables \citep{2002ApJ...576.1064R}. We assume a \citet{1998SSRv...85..161G} solar composition for our initial abundances and opacity tables. Since we restrict our study to the main sequence, we use an eight-isotope nuclear network consisting of $^1$H, $^3$He, $^4$He, $^{12}$C, $^{14}$N, $^{16}$O, $^{20}$Ne, and $^{24}$Mg. We set an $f_0 = \alpha_{\text{ov}}/5$ to determine the radius $r_0 = H_p \cdot f_0$ inside the convective zone at which convection is switched to overshooting, where $H_p$ is the pressure scale height. All pre-main-sequence (PMS) models are calculated with a simple photospheric approximation, after which an Eddington T-$\tau$ atmosphere is appended on the models at ZAMS. We call ZAMS the point at which the nuclear luminosity of the model makes up 99.9\% of the total luminosity. We calculate atomic diffusion during the main sequence using five diffusion class representatives: $^1$H, $^3$He, $^4$He, $^{16}$O, and $^{56}$Fe.\footnote{The atomic number of each representative isotope is used to calculate the diffusion rate of the other isotopes allocated to that group; see \citealt{Paxton2011}.} 
 Following their most recent measurements, we correct the defaults in MESA of the gravitational constant ($G=6.67408\times 10^{-8}$ \si{\per\g\cm\cubed\per\square\s}; \citealt{2015arXiv150707956M}), the gravitational mass of the Sun ($M_\odot = 1.988475\times 10^{33}$ \si{\g} $= \mu G^{-1} = 1.32712440042\times 10^{11}$ \si{\km\per\s} $G^{-1}$; \citealt{pitjeva2015determination}), and the solar radius ($R_\odot = 6.95568\times 10^{10}$ \si{\cm}; \citealt{2008ApJ...675L..53H}). 
 
-Each track is evolved using at most one-million-year time-steps from ZAMS to either an age of $\tau=15$ Gyr, until it loses its convective envelope, or until terminal-age main sequence (TAMS), which we define as having a fractional core-hydrogen abundance (X$_{\text{c}}$) below $10^{-3}$. We implement adaptive remeshing by recomputing with a finer resolution any track having discontinuities in its surface abundances, which occurs as a result of models with efficient diffusion requiring finer spatial and temporal resolution that those without (see Appendix \ref{sec:remeshing} for details). In order to prevent bias towards any particular run, we select the same number of models from each evolutionary track (see Appendix \ref{sec:selection} for details). Running stellar physics codes in a batch mode like this requires care, so we manually inspect Hertzsprung-Russell, Kippenhahn, and Christensen-Dalsgaard diagrams of all evolutionary tracks to ensure that proper convergence has been achieved. %A great number of complications arise in creating a grid of MESA models simultaneously varied in many dimensions; see the discussion in Appendix \ref{sec:mesa} for a discussion of problems and solutions for undertaking such an exercise. 
+Each track is evolved from ZAMS to either an age of $\tau=16$ Gyr or until terminal-age main sequence (TAMS), which we define as having a fractional core-hydrogen abundance (X$_{\text{c}}$) below $10^{-3}$. We implement adaptive remeshing by recomputing with a finer resolution any track having discontinuities in its surface abundances, which occurs as a result of models having efficient diffusion requiring finer spatial and temporal resolution than those models without efficient diffusion (see Appendix \ref{sec:remeshing} for details). In order to prevent bias towards any particular run, we select the same number of models from each evolutionary track (see Appendix \ref{sec:selection} for details). Running stellar physics codes in a batch mode like this requires care, so we manually inspect Hertzsprung-Russell, Kippenhahn, and Christensen-Dalsgaard diagrams of the evolutionary tracks to ensure that proper convergence has been achieved. 
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\linewidth,keepaspectratio]{figs/inputs.png}
-    \caption{Scatterplot matrix (lower panel) and density plots (diagonal) of evolutionary track initial conditions considered. Mass (M), initial helium (Y$_0$), initial metallicity (Z$_0$), mixing length parameter ($\alpha_{\text{MLT}}$), overshoot ($\alpha_{\text{ov}}$), and diffusion factor (D) were varied in a quasi-random fashion to obtain a low-discrepancy grid of model tracks. Points are colored by their initial hydrogen X$_0=1-$Y$_0-$Z$_0$, with blue being low X$_0$ ($\sim 62\%$) and black being high X$_0$ ($\sim 78\%$). The space is densely populated with evolutionary tracks of maximally-different initial conditions. }
+    \includegraphics[width=\linewidth,keepaspectratio]{figs/grids/inputs.png}
+    \caption{Scatterplot matrix (lower panel) and density plots (diagonal) of evolutionary track initial conditions considered. Mass (M), initial helium (Y$_0$), initial metallicity (Z$_0$), mixing length parameter ($\alpha_{\text{MLT}}$), overshoot ($\alpha_{\text{ov}}$), and diffusion factor (D) were varied in a quasi-random fashion to obtain a low-discrepancy grid of model tracks. Points are colored by their initial hydrogen X$_0=1-$Y$_0-$Z$_0$, with blue being low X$_0$ ($\sim 62\%$) and black being high X$_0$ ($\sim 78\%$). The parameter space is densely populated with evolutionary tracks of maximally-different initial conditions. \textbf{todo: remake with new ranges} }
     \label{fig:inputs}
 \end{figure*}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Seismology %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Seismological calculations}
+\subsection{Calculation of Seismic Parameters}
 \label{sec:seis}
-We use the ADIPLS pulsation package \citep{2008Ap&SS.316..113C} to post-process all p-mode oscillations up to spherical degree $\ell=3$ and below the acoustic cut-off frequency. We define a frequency separation $S$ as the difference between a frequency $\nu$ of spherical degree $\ell$ and radial order $n$ and another frequency, that is:
+We use the ADIPLS pulsation package \citep{2008Ap&SS.316..113C} to compute p-mode oscillations up to spherical degree $\ell=3$ below the acoustic cut-off frequency. We define a frequency separation $S$ as the difference between a frequency $\nu$ of spherical degree $\ell$ and radial order $n$ and another frequency, that is:
 \begin{equation} 
   S_{(\ell_1, \ell_2)}(n_1, n_2) \equiv \nu_{\ell_1}(n_1) - \nu_{\ell_2}(n_2).
 \end{equation}
@@ -140,15 +134,13 @@ and the small frequency separation is
 \begin{equation}
   \delta\nu_{(\ell, \ell+2)}(n) \equiv S_{(\ell, \ell+2)}(n, n-1).
 \end{equation}
-The ratios between the large and small frequency separations (Equation \ref{eqn:LSratio}), and also between the large frequency separation and five-point-averaged frequencies (Equation \ref{eqn:rnl}), have been shown to be less sensitive to the surface term than the aforementioned separations and are therefore valuable asteroseismic diagnostics of stellar interiors \citep{2003A&A...411..215R}. They are defined as
+The ratios between the large and small frequency separations (Equation \ref{eqn:LSratio}), and also between the large frequency separation and five-point-averaged frequencies (Equation \ref{eqn:rnl}) have been shown to be less sensitive to the surface term than the aforementioned separations and are therefore valuable asteroseismic diagnostics of stellar interiors \citep{2003A&A...411..215R}. They are defined as
 \begin{equation} 
   \mathrm{r}_{(\ell,\ell+2)}(n) \equiv \frac{\delta\nu_\ell(n)}{\Delta\nu_{(1-\ell)}(n+\ell)} \label{eqn:LSratio}
 \end{equation}
 %and
 \begin{equation} 
   \mathrm{r}_{(\ell, 1-\ell)}(n) \equiv \frac{\mathrm{dd}_{(\ell,1-\ell)}(n)}{\Delta\nu_{(1-\ell)}(n+\ell)} \label{eqn:rnl}
-  %r_{0, 1}(n) \equiv \frac{1}{8\Delta\nu_{1}(n)} [&\nu_0(n-1) - 4\nu_1(n-1) + 6\nu_0(n) \notag\\
-  %& - 4\nu_1(n) + \nu_0(n+1)]
 \end{equation}
 where
 \begin{align} 
@@ -157,176 +149,163 @@ where
   \mathrm{dd}_{1,0} \equiv -\frac{1}{8} \big[&\nu_1(n-1) - 4\nu_0(n) \notag\\
                                  &+6\nu_1(n) - 4\nu_0(n+1) + \nu_1(n+1)\big].
 \end{align}
-%where
-%\begin{align}
-%  dd_{0,1}(n) = \frac{1}{8} [ &\nu_0(n-1) - 4\nu_1(n-1) + 6\nu_0(n) \notag\\
-%  & - 4\nu_1(n) + \nu_0(n+1) ]
-%\end{align}
-Since the set of radial orders that are observable differs from star to star, we collect global statistics on $\delta\nu_{0,2}$, $\delta\nu_{1,3}$, $r_{0,2}$, $r_{1,3}$, $r_{0,1}$, and $r_{1,0}$. %We omit $\Delta\nu$ because it has considerable nonlinear structure to it, and also because it as well has been shown to be highly sensitive to the surface term (ibid). 
-We mimic the range of observable frequencies in our models by weighting all frequencies by their position in a Gaussian envelope centered at the predicted frequency of maximum oscillation power $\nu_{\max}$ and having full-width at half-maximum of $0.66\cdot\nu_{\max}{}^{0.88}$ as per the prescription given by \citet{2012A&A...537A..30M}. We then calculate the weighted median of each variable, which we denote with angled parenthesis (e.g.~$\langle\delta\nu_{0,2}\rangle$).\footnote{We also investigated using weighted linear regression to obtain slopes (e.g.~$\langle\dv{\delta\nu_{0,2}}{\nu}\rangle$), but we found that these values did not enhance our analysis.} We elect to use the median rather than the mean because it has a breakdown point of 50\%, meaning that half of the frequencies can be replaced by noise and our result will not differ (for a discussion of breakdown points, see \citealt{hampel1971general}, who attributed them to Gauss). This approach allows us to predict the fundamental parameters of any solar-like oscillator irrespective of which radial orders are observed for that star. Illustrations of these techniques applied to the frequencies of a model in our grid are shown in Figure \ref{fig:ratios}. 
+Since the set of radial orders that are observable differs from star to star, we collect global statistics on $\Delta\nu_0$, $\delta\nu_{0,2}$, $\delta\nu_{1,3}$, $r_{0,2}$, $r_{1,3}$, $r_{0,1}$, and $r_{1,0}$. We mimic the range of observable frequencies in our models by weighting all frequencies by their position in a Gaussian envelope centered at the predicted frequency of maximum oscillation power $\nu_{\max}$ and having full-width at half-maximum of $0.66\cdot\nu_{\max}{}^{0.88}$ as per the prescription given by \citet{2012A&A...537A..30M}. We then calculate the weighted median of each variable, which we denote with angled parenthesis (e.g.~$\langle r_{0,2}\rangle$). We choose the median rather than the mean because it is a robust statistic with a high breakdown point, meaning that it is much less sensitive to the presence of outliers (for a discussion of breakdown points, see \citealt{hampel1971general}, who attributed them to Gauss). This approach allows us to predict the fundamental parameters of any solar-like oscillator that has had multiple modes observed irrespective of which exact radial orders have been detected. Illustrations of these methods used to derive the frequency separations and ratios of a stellar model are shown in Figure \ref{fig:ratios}. 
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/freqs/solar-test-Dnu0.pdf}\hfill
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/freqs/solar-test-dnu02.pdf}\\
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/freqs/solar-test-r_avg01.pdf}\hfill
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/freqs/solar-test-r_sep02.pdf}%
-    \caption{The large and small frequency separations $\Delta\nu_0$ and $\delta\nu_{0,2}$ and frequency ratios $r_{0,1}$ and $r_{0,2}$ of a stellar model. The vertical dotted line indicates $\nu_{\max}$. A $\nu_{\max}$-weighted linear fit is indicated with a dashed diagonal line to guide the eye. Point sizes and colors are proportional to the applied weighting, with blue points having a large influence and red points having little. }%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/separations/solar-test-Dnu0.pdf}\hfill
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/separations/solar-test-dnu02.pdf}\\
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/separations/solar-test-r_avg01.pdf}\hfill
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/separations/solar-test-r_sep02.pdf}%
+    \caption{The large and small frequency separations $\Delta\nu_0$ and $\delta\nu_{0,2}$ (top) and frequency ratios $r_{0,1}$ and $r_{0,2}$ (bottom) of a stellar model plotted as a function of frequency. The vertical dotted line indicates $\nu_{\max}$. A $\nu_{\max}$-weighted linear fit is indicated with a dashed diagonal line to guide the eye. Point sizes and colors are proportional to the applied weighting, with blue points having a large influence and red points having little. }%
     \label{fig:ratios}
 \end{figure*}
 
 \subsection{Training the Random Forest} \label{sec:forest}
-We train a random forest regressor on our matrix of evolutionary models to discover the relations that facilitate inference of fundamental stellar parameters from observable quantities. The topology of our random forest regressor can be seen in Figure \ref{fig:rf}. There are several good textbooks that discuss random forests; see for example Chapter 15 of Elements of Statistical Learning \citep{hastie2005elements}. We choose random forests over any of the many other nonlinear regression routines (e.g.~Gaussian processes, symbolic regression, neural networks, support vector regression, etc.) for three reasons. First, random forests perform \emph{constrained} regression; that is, they only make predictions within the boundaries of the supplied training data \citep[see e.g.~section 9.2.1 of][]{hastie2005elements}. This is in contrast to other methods like neural networks, which perform unconstrained regression and are therefore not prevented from predicting non-physical quantities such as negative masses or from violating conservation requirements. Secondly, due to the decision rule process explained below, random forests are insensitive to the scale of the data. Unless care is taken, other regression methods will artificially weight some properties like temperature as being more important than, say, luminosity, solely because temperatures are written using larger numbers (e.g.~5777 vs.~1, see for example section 11.5.3 of \citealt{hastie2005elements} for a discussion). And finally, random forests provide the opportunity to extract insight about the actual regression being performed by examining the importances assigned to each observable quantity, which we explore in detail below. 
+We train a random forest regressor on our matrix of evolutionary models to discover the relations that facilitate inference of fundamental stellar parameters from observable quantities. A schematic representation of the topology of our random forest regressor can be seen in Figure \ref{fig:rf}. There are several good textbooks that discuss random forests; see for example Chapter 15 of Elements of Statistical Learning \citep{hastie2005elements}. We choose random forests over any of the many other nonlinear regression routines (e.g.~Gaussian processes, symbolic regression, neural networks, support vector regression, etc.) for three reasons. First, random forests perform \emph{constrained} regression; that is, they only make predictions within the boundaries of the supplied training data \citep[see e.g.~section 9.2.1 of][]{hastie2005elements}. This is in contrast to other methods like neural networks, which ordinarily perform unconstrained regression and are therefore not prevented from predicting non-physical quantities such as negative masses or from violating conservation requirements. Secondly, due to the decision rule process explained below, random forests are insensitive to the scale of the data. Unless care is taken, other regression methods will artificially weight some properties like temperature as being more important than, say, luminosity, solely because temperatures are written using larger numbers (e.g.~5777 vs.~1, see for example section 11.5.3 of \citealt{hastie2005elements} for a discussion). And finally, random forests provide the opportunity to extract insight about the actual regression being performed by examining the importances assigned to each observable quantity, which we explore in detail below. 
 
 \begin{figure}
     \centering
     \input{figs/random_forest.tex}
-    \caption{A schematic representation of a random forest regressor for inferring fundamental stellar parameters. Classical observables like temperature and asteroseismic observables like $\delta\nu_{0,2}$ are input on the left side. These quantities are then fed through to some number of hidden decision trees, which each independently predict attributes like age and mass. The predictions are then averaged and output on the right side. Frequency separations and ratios include separate nodes for $\nu_{\max}$-centered weighted medians of $\delta\nu_{0,2}$, $r_{0,2}$, $r_{1,0}$, $r_{0,1}$, and, if they are measured, $\delta\nu_{1,3}$ and $r_{1,3}$.\\
+    \caption{A schematic representation of a random forest regressor for inferring fundamental stellar parameters. Classical observables such as temperature and asteroseismic observables like $\delta\nu_{0,2}$ are input on the left side. These quantities are then fed through to some number of hidden decision trees, which each independently predict attributes like age and mass. The predictions are then averaged and output on the right side. Frequency separations and ratios include separate nodes for $\nu_{\max}$-centered weighted medians of $\delta\nu_{0,2}$, $r_{0,2}$, $r_{1,0}$, $r_{0,1}$, and, if they are measured, $\delta\nu_{1,3}$ and $r_{1,3}$.\\
     Surface gravities, luminosities, radii, and octupole modes are not always available (e.g.~with the KAGES stars); in their absence, these quantities can be predicted instead of being supplied. In this case, those nodes can be moved over to the ``prediction'' side instead of being on the ``observations'' side. Also, in addition to potentially unobserved inputs like stellar radii, other interesting model properties can be predicted as well, such as core-hydrogen mass fraction and surface helium. }
     \label{fig:rf}
 \end{figure}
 
-A random forest is an ensemble regressor, meaning that it is composed of many individual components that each perform regression, and the forest subsequently averages over the results from each \citep{breiman2001random}. The components of the ensemble are decision trees, each of which learns a set of decision rules for relating the observations to the model parameters. Each decision tree is supplied with a random subset of the evolutionary models and a random subset of the observable quantities, a process known as statistical bagging \citep[see section 8.7 of][]{hastie2005elements}, which prevents the random forest from becoming overfit to the training data. We moreover use a variant on random forests known as \emph{extremely} randomized trees \citep{geurts2006extremely}, which further randomizes the attribute and cut-point choices used when creating decision rules. %Training each decision tree in this fashion, a process known as statistical bagging, has been shown to prevent overfitting to the training data \textbf{cite}. 
-%Each decision tree ultimately learns a high-dimensional step function, and if the grid is much finer than the uncertainties on the observations, then supplying Monte-Carlo perturbed inputs to the random forest some large number of times (we choose 10,000) results in smooth prediction densities as will be seen in \S \ref{sec:results}. 
-%By efficiently sampling our hypercube we can train out network on a fraction of the stellar models required from grid-based modelling or \emp{in situ} optimization. 
+A random forest is an ensemble regressor, meaning that it is composed of many individual components that each perform regression, and the forest subsequently averages over the results from each component \citep{breiman2001random}. The components of the ensemble are decision trees, each of which learns a set of decision rules for relating the observations to the model parameters. Each decision tree is supplied with a random subset of the evolutionary models and a random subset of the observable quantities, a process known as statistical bagging \citep[see section 8.7 of][]{hastie2005elements}, which prevents the random forest from becoming overfit to the training data. We moreover use a variant on random forests known as \emph{extremely} randomized trees \citep{geurts2006extremely}, which further randomizes the attribute and cut-point choices used when creating decision rules. 
 
-The decision trees use information theory to decide which rule is the best choice for inferring quantities like age and mass from the supplied information \citep[see chapter 9 of][]{hastie2005elements}. At every stage, the rule that creates the largest decrease in mean squared error (MSE) is crafted. A rule may be, for example, ``all models with L $<0.4$ L$_\odot$ have M $<$ M$_\odot$.'' %The information theoretic criterion used for creating decision rules is the Gini (im)purity, which quantifies the extent to which a candidate decision rule (e.g.~select all models with L $<0.4$ L$_\odot$) partitions the data into similar classes (e.g.~all models with L $<0.4$ L$_\odot$ have M $<$ M$_\odot$). 
-The rules are refined until every data point that was supplied to that particular tree is fully explained by a sequence of decisions. This process presents an opportunity for not only rapidly inferring stellar parameters from observations, but also for understanding the relationships that exist in the data, as each decision tree explicitly ranks the relative importance and therefore inferential power of each observable quantity. Figure \ref{fig:importances} shows the relative importances of each type of observation in inferring stellar attributes. Figure \ref{fig:importance-covariances} furthermore shows the covariances of these importances. Taken together, these two plots illustrate what combination of variables provide the best connections for determining stellar parameters. 
+The decision trees use information theory to decide which rule is the best choice for inferring quantities like age and mass from the supplied information \citep[see chapter 9 of][]{hastie2005elements}. At every stage, the rule that creates the largest decrease in mean squared error (MSE) is crafted. A rule may be, for example, ``all models with L $<0.4$ L$_\odot$ have M $<$ M$_\odot$.'' The rules are refined until every data point that was supplied to that particular tree is fully explained by a sequence of decisions. This process presents an opportunity for not only rapidly inferring stellar parameters from observations, but also for understanding the relationships that exist in the data, as each decision tree explicitly ranks the relative importance and therefore inferential power of each observable quantity. Figure \ref{fig:importances} shows the relative importances of each type of observation in inferring stellar attributes. Figure \ref{fig:importance-covariances} furthermore shows the covariances of these importances, which serves to demonstrate which combinations of variables are most useful for constraining stellar parameters. 
+%For example, the redness of the top left cell between the asteroseismic frequency ratio $\langle r_{1,3} \rangle$ (abscissa) and the surface gravity log g (ordinate) indicates that while this ratio is the most useful quantity for making inferences, a tree will often supplement it with information about the surface -- which by construction the ratios lack -- to complete an analysis. Likewise, the large covariance between T$_{\text{eff}}$ and [Fe/H] is due to the fact that the effective temperature of a star is not only a function of its mass but also its composition.%Taken together, these two plots illustrate what combination of variables provide the best connections for determining stellar parameters. 
 
-\begin{figure*}
+\begin{figure}
     \centering
-    \includegraphics[width=\linewidth, keepaspectratio]{figs/importances-perturb.pdf}
-    \caption{Box-and-whisker plots of relative importances for each observable feature in inferring fundamental stellar parameters as measured by a random forest regressor grown from a grid of evolutionary models. %This forest contains 1024 trees, with each tree determining its own relative importances for all input variables. 
-    The boxes display the first (16\%) and third (84\%) quartile of feature importances over all trees; the white line indicates the median; the color indicates the mean, with blue being low and red being high; and the whiskers extend to the most extreme values. The boxes are sorted by the median value. %It can be seen that the asteroseismic frequency ratios and surface gravity are the most frequently used diagnostics by the machine learning algorithm for inferring stellar attributes, whereas the large frequency separation is the least used one. 
-    \textbf{note: these results potentially subject to change when new simulations finish running}%the median slopes of the small frequency separation and ratios are the least used ones. 
-    %This can be understood by virtue of the fact that $\Delta\nu$ is essentially encoded in the other variables. %slopes of all the measured separations and ratios are extremely similar (see Figure \ref{fig:ratios}), so knowledge of one makes the others redundant. Likewise, the relative down-weighting of measured radii can be understood by the fact that its value can be inferred by the combination of L and T$_{\text{eff}}$, so it adds no new information if those two are already present.  %This relative down-weighting of the small frequency separations can be understood by virtue of the fact that the information they bear are more or less encapsulated by the better-probing $\langle r_{\ell, \ell+1}\rangle$. Likewise, 
-     }
+    \includegraphics[width=0.5\textwidth, keepaspectratio]{figs/importances/importances-perturb.pdf}
+    \caption{Box-and-whisker plots of relative importances for each observable feature in inferring fundamental stellar parameters as measured by a random forest regressor grown from a grid of evolutionary models. The boxes display the first (16\%) and third (84\%) quartile of feature importances over all trees, the middle line indicates the median, and the whiskers extend to the most extreme values. The boxes are sorted by the median value.}
     \label{fig:importances}
-\end{figure*}
+\end{figure}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\linewidth, keepaspectratio, trim={0cm 0 0cm 0},clip]{figs/cov-perturb.pdf}
-    \caption{Standardized covariances of random forest feature importances, with the standardized variance of each feature importance shown along the diagonal. Blue points on the off-diagonal indicate that when the abscissa variable is selected, the ordinate variable is redundant; and conversely, red points indicate that when the abscissa variable is selected, the ordinate variable becomes more useful for successful forecasting. For example, the redness of the top left cell between the asteroseismic frequency ratio $\langle r_{1,3} \rangle$ (abscissa) and the surface gravity log g (ordinate) indicates that while this ratio is the most useful quantity for making inferences, a tree will often supplement it with information about the surface -- which by construction the ratios lack -- to complete an analysis. Likewise, the large covariance between T$_{\text{eff}}$ and [Fe/H] is due to the fact that the effective temperature of a star is not only a function of its mass but also its composition. 
-    \textbf{note: these results potentially subject to change when new simulations finish running}}
+    \includegraphics[width=\linewidth, keepaspectratio, trim={0cm 0 0cm 0},clip]{figs/importances/cov-perturb.pdf}
+    \caption{Standardized covariances of random forest feature importances, with the variables shown in order of median importance. Blue points on the off-diagonal indicate that when the abscissa variable is selected, the ordinate variable is redundant; and conversely, red points indicate that when the abscissa variable is selected, the ordinate variable becomes more useful for successful forecasting.}
     \label{fig:importance-covariances}
 \end{figure*}
 
-While each tree is trained on only a subset of the data, all trees are tested on all of the data that they did not see. This provides an ``out-of-bag'' accuracy score representing how well the forest will perform when predicting on observations that it has not seen yet \citep[see section 3.1 of][]{breiman2001random}. %The uncertainty on a prediction is a combination of the uncertainty on each individual prediction, call it $\sigma_s$, and the uncertainty inherent to the predictor making the inference, $\sigma_p$. Since these are uncorrelated, these quantities are additive; that is, $\sigma = \sigma_s+\sigma_p$. In our case, the out-of-bag accuracy score is nearly 100\%, so we may safely assume that $\sigma_p=0$, i.e., all the uncertainty in prediction stems from observation. Naturally, there is most likely a systematic bias introduced by assuming a particular set of physics; however, it is impossible to quantify and propagate such uncertainties. 
-We show in Figure \ref{fig:rftraining} the accuracy of the random forest regressor as a function of the number of decision trees in the forest. There it can be seen that with less than 50 trees in the forest and only seconds of training time, the method is able to provide excellent predictive accuracy. 
+It is often the case for many stars that radii, luminosities, surface gravities, and oscillation modes with spherical degree $\ell=3$ are not available. For example, the KOI data set lacks all of this information, and the hare-and-hound exercise data lack all of these except luminosities. We therefore must train random forests that predict those quantities instead of using them as inputs. We show the relative importances determined by these forests in Figure \ref{fig:importances2}. Remarkably, when $\ell=3$ modes and luminosities are omitted, temperatures become the most important quantity to have observed.
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\linewidth,keepaspectratio]{figs/oob-without.pdf}\\
-    \includegraphics[width=\linewidth,keepaspectratio]{figs/time-without.pdf}\\
-    \caption{Training accuracies (top) and times (bottom) of a random forest regressor plotted as a function of the number of trees in the forest. In less than one minute's time and using only a small number of trees, a machine learning algorithm can determine the relations that permit inference of stellar parameters from observations. It can also be seen that the training time is linear in the amount of decision trees used to fit the data. After the forest has about 16 trees, a regressor using a limited set of information (blue and red) does just as well as the regressor using all of the information (black). The performance of the regressor does not improve much after having grown about 32 trees. }
-    \label{fig:rftraining}
-\end{figure*}
-
-It is often the case for many stars that radii, luminosities, surface gravities, and oscillation modes with spherical degree $\ell=3$ are not available. For example, the KAGES data set lacks all of this information, and the hare-and-hound exercise data lack all excepting luminosities. We test the impact of this information being absent by predicting those quantities instead of using them as constraints. We find that measuring these variables is dispensible: the information they hold is contained within the other observable quantities, and therefore they (as well as ages, masses, etc.) can be predicted to the same degree of accuracy that they were measured using these nonlinear inference techniques on temperatures, metallicities, and lower degree modes. This fact is demonstrated in Figure \ref{fig:rftraining} as well. It can be seen that the same accuracy can be achieved when predicting luminosities, surface gravities, and radii as was when they were used as measured inputs. We furthermore show the relative observational importances determined by these forests in Figure \ref{fig:importances2}. Remarkably, when $\ell=3$ modes and especially when luminosities are omitted, temperatures become the most important quantity to have observed. 
-%As the nodes are learning statistical relationships between the inputs and outputs the network inherits the uncertainties in stellar modelling used for the training. 
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/importances-hares.pdf}\hfill
-    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/importances-kages.pdf}
-    \caption{Box-and-whisker plots of relative importances of each observable feature in measuring fundamental stellar parameters for the Hare-and-Hound exercise data (left), where luminosities are available; and the \emph{Kepler} objects-of-interest (right), where they are not. Octupole ($\ell=3$) modes have not been measured in any of these stars, so $\delta\nu_{1,3}$ and $r_{1,3}$ from evolutionary modelling are not supplied to these random forests. }
+    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/importances/importances-hares.pdf}\hfill
+    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/importances/importances-kages.pdf}
+    \caption{Box-and-whisker plots of relative importances of each observable feature in measuring fundamental stellar parameters for the hare-and-hound exercise data (left), where luminosities are available; and the Kepler objects-of-interest (right), where they are not. Octupole ($\ell=3$) modes have not been measured in any of these stars, so $\langle\delta\nu_{1,3}\rangle$ and $\langle r_{1,3}\rangle$ from evolutionary modelling are not supplied to these random forests. }
     \label{fig:importances2}
 \end{figure*}
 
+There are two separate sources of uncertainty in predicting stellar parameters. The first is the uncertainty belonging to the observations of the star. In order to propagate measurement uncertainties $\epsilon$ into the predictions, we perturb all measured quantities $N=10,000$ times with normal noise having zero mean and a standard deviation of $\epsilon$. We account for the covariance between asteroseismic separations and ratios by recalculating them upon each perturbation. 
+
+The second source is model uncertainty. Fundamentally, each parameter can only be constrained to the extent that observations are able to bear information pertaining to that parameter. Even if observations were error-free, there still may exist a limit to which information gleaned from the surface may tell us about the physical attributes and evolutionary history of a star. We quantify those limits via cross-validation: we train the random forest on only a subset of the simulated evolutionary tracks and making predictions on a held-out validation set. We randomly select a different subset of the tracks 25 times to serve as different held-out validation sets and obtain averaged accuracy scores. 
+
+We calculate accuracies using two scores. The first is the explained variance score V$_{\text{e}}$:
+\begin{equation}
+  \text{V}_{\text{e}} = 1 - \frac{\text{Var}\{ y - \hat y \}}{\text{Var}\{ y \}}
+\end{equation}
+where $y$ is the value we want to predict from the validation set (e.g.~stellar mass), $\hat y$ is the predicted value from the random forest, and Var is the variance, i.e.~the square of the standard deviation. This score tells us the extent to which the regressor has reduced the variance in the parameter it is predicting. The value ranges from negative infinity, which would be obtained by a pathologically bad predictor; to one for a perfect predictor, which happens when all of the values are guessed correctly. 
+
+The second score we consider is the distance in units of model uncertainty $\hat \sigma$ between the true value $y$ and the predicted value $\hat y$. The model uncertainty can be obtained by taking the standard deviation of predictions across all of the decision trees in the forest. We show in Figure \ref{fig:evaluation-tracks} these accuracies as a function of the number of evolutionary tracks used in the training of the random forest. We also consider the number of trees in the forest and the number of models per evolutionary track; see Appendix \ref{sec:evaluation} for an extended discussion. 
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{figs/evaluation/num_tracks-ev.pdf}\hfill
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{figs/evaluation/num_tracks-sigma.pdf}
+    \caption{Explained variance (left) and accuracy per precision score (right) of each stellar parameter as a function of the number of evolutionary tracks used in training the random forest. \textbf{todo: remove mass_cc} } 
+    \label{fig:evaluation-tracks}
+\end{figure*}
+
+The explained variance score reveals that most attributes have very little model uncertainty. For example, essentially all of the uncertainty in predicting stellar radii and luminosities will stem from observational error. However, for some evolutionary properties -- most notably the mixing length parameter -- there is still a great deal of model uncertainty. These attributes will therefore be predicted with substantial error bars. On the other hand, the accuracy per precision score shows that the regressor is well-calibrated: on average, all of the values are predicted within one $\hat\sigma$. In other words, the uncertainties for all of the parameters -- even for the ones that cannot be constrained very well -- are still appropriately gauged by the regressor. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
-We perform three tests of our method. We begin with a Hare-and-Hound simulation exercise to show that we can can reliably recover inputs with known truth values. We then move to the Sun and the solar-like stars of 16 Cygni, which have been well-studied; and we conclude by demonstrating our method on thirty-two \emph{Kepler} objects-of-interest. In each case, we train our random forest regressor with 1024 decision trees on the subset of observational data that is available to the catalogue being processed. In order to propagate uncertainties into the predictions, we perturb all measurements 10,000 times. We account for the covariance between asteroseismic separations and ratios by recalculating them upon each perturbation. 
+We perform three tests of our method. We begin with a hare-and-hound simulation exercise to show that we can can reliably recover parameters with known truth values. We then move to the Sun and the solar-like stars of 16 Cygni, which have been the subjects of many investigations; and we conclude by applying our method to thirty-three Kepler objects-of-interest. In each case, we train our random forest regressor on the subset of observational data that is available to the stars being processed. In the case of the Sun and 16 Cygni, we know very accurately their radii, luminosities, and surface gravities. For other stars, however, we predict this information rather than supplying it as an input to the forest. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Hare and Hound %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Hare and Hound} 
-Sarbani Basu prepared twelve models varied in mass, initial chemical composition, and mixing length parameter with only some models having overshooting and only some models having atomic diffusion included. The models were evolved using the Yale rotating stellar evolution code \citep[YREC,][]{2008Ap&SS.316...31D}, which is a different evolution code than the one that was used to inform the random forest. Effective temperatures, luminosities, [Fe/H] and $\nu_{\max}$ values as well as $\ell=0,1,2$ frequencies were obtained from each model. George Angelou perturbed the ``observations'' of these models according to the scheme devised by \citet{spaceinn}. The true values and the perturbed observations can be seen in Appendix \ref{sec:hare-and-hound}. The perturbed observations and their uncertainties were given to Earl Bellinger, who used the machine learning methods described herein to recover them without being given access to the true values. The predicted quantities are plotted against their true values in Figure \ref{fig:hare-comparison}. Here it can be seen that the method is able to recover the true model values within uncertainties even when they have been perturbed by noise. 
+Sarbani Basu prepared twelve models varied in mass, initial chemical composition, and mixing length parameter with only some models having overshooting and only some models having atomic diffusion included. The models were evolved using the Yale rotating stellar evolution code \citep[YREC,][]{2008Ap&SS.316...31D}, which is a different evolution code than the one that was used to train the random forest. Effective temperatures, luminosities, [Fe/H] and $\nu_{\max}$ values as well as $\ell=0,1,2$ frequencies were obtained from each model. George Angelou perturbed the ``observations'' of these models according to the scheme devised by \citet{spaceinn}. The true values and the perturbed observations can be seen in Appendix \ref{sec:hare-and-hound}. The perturbed observations and their uncertainties were given to Earl Bellinger, who used the machine learning methods described herein to recover them without being given access to the true values. The predicted ages, masses, and radii for these models are plotted against their true values in Figure \ref{fig:hare-comparison}. Here it can be seen that the method is able to recover the true model values within uncertainties even when they have been perturbed by noise. 
 
-\begin{figure*}
+\begin{figure}
     \centering
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Mass.pdf}\hfill
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Radius.pdf}\\
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Overshoot.pdf}\hfill
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Diffusion.pdf}\\
-    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Age.pdf}
-    \caption{asdf \textbf{todo: write stuff} \label{fig:hare-comparison}}
-\end{figure*}
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Age.pdf}\\
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Mass.pdf}\\
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/basu-Radius.pdf}
+    \caption{Predicted values of age, mass, and radius plotted against the true values in a hare-and-hound simulation exercise.  \label{fig:hare-comparison}}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% The Sun & 16 Cygni %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{The Sun \& 16 Cygni}
-In order to be confident about our predictions on \emph{Kepler} data, we first degrade the frequencies of the Quiet Sun that were obtained by the Birmingham Solar-Oscillations Network \citep[BiSON,][]{2014MNRAS.439.2025D} to the level of information that is achievable by the spacecraft. We also degrade the Sun's uncertainties of classical observations by applying 16 Cyg B's uncertainties of effective temperature, luminosity, surface gravity, metallicity, $\nu_{\max}$, radius, and radial velocity. Finally, we perturb each central value with random Gaussian noise according to its uncertainty to reflect the fact that the central value of an uncertain observation is not the true value. 
+In order to be confident about our predictions for Kepler data, we first degrade the frequencies of the Quiet Sun that were obtained by the Birmingham Solar-Oscillations Network \citep[BiSON,][]{2014MNRAS.439.2025D} to the level of information that is achievable by the spacecraft. We also degrade the Sun's uncertainties of classical observations by applying 16 Cyg B's uncertainties of effective temperature, luminosity, surface gravity, metallicity, $\nu_{\max}$, radius, and radial velocity. Finally, we perturb each central value with random Gaussian noise according to its uncertainty to reflect the fact that the central value of an uncertain observation is not \emph{per se} the true value. We show in Figure \ref{fig:corner} the densities for the predicted mass, initial composition, mixing length parameter, overshoot coefficient, and diffusion factor needed for fitting an evolutionary model to degraded data of the Sun, and also the predicted age, core-hydrogen abundance, and surface-helium abundance of the Sun. Relative uncertainties $\epsilon = \frac{\sigma}{\mu}\cdot 100$ are also indicated. 
 
-Effective temperatures, surface gravities, and metallicities of 16 Cyg A and B were obtained from \citet{2009A&A...508L..17R}; radii and luminosities from \citet{2013MNRAS.433.1262W}; and frequencies from \citet{2015MNRAS.446.2959D}. We obtained the radial velocity measurements of 16 Cyg A and B from \citet{2002ApJS..141..503N} and corrected frequencies for Doppler shifting as per the prescription in \citet{2014MNRAS.445L..94D}.\footnote{We tried with and without line-of-sight corrections and found that it did not make a difference to the predicted quantities or their uncertainties.} The initial parameters as predicted by machine learning can be seen in Table \ref{tab:results}, and the predicted current-age parameters can be seen in Table \ref{tab:results-ca}. These results support the hypothesis that 16 Cyg A and B were formed at the same time with the same initial composition. We also show in Figure \ref{fig:corner} the densities and correlations for the predicted age, mass, initial composition, mixing length parameter, overshoot coefficient, and diffusion factor for the degraded Sun. Initial condition distributions like these are useful as strong priors when performing more detailed stellar analyses. 
+\begin{figure*}
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{figs/comparison/Tagesstern.pdf}
+    \caption{Predictions from machine learning of initial (top six) and current-age (bottom three) stellar parameters for degraded solar data. Labels are placed at the mean and 3$\sigma$ levels. Dotted lines indicate the median and quartiles. Relative uncertainties $\epsilon$ are shown beside each plot. }
+    \label{fig:corner}
+\end{figure*}
+
+Effective temperatures, surface gravities, and metallicities of 16 Cyg A and B were obtained from \citet{2009A&A...508L..17R}; radii and luminosities from \citet{2013MNRAS.433.1262W}; and frequencies from \citet{2015MNRAS.446.2959D}. We obtained the radial velocity measurements of 16 Cyg A and B from \citet{2002ApJS..141..503N} and corrected frequencies for Doppler shifting as per the prescription in \citet{2014MNRAS.445L..94D}.\footnote{We tried with and without line-of-sight corrections and found that it did not make a difference to the predicted quantities or their uncertainties.} The initial parameters for the Sun and 16 Cygni as predicted by machine learning can be seen in Table \ref{tab:results}, and the predicted current-age parameters can be seen in Table \ref{tab:results-ca}. These results support the hypothesis that 16 Cyg A and B were formed at the same time with the same initial composition. Initial condition distributions like these are useful as strong priors when performing more detailed stellar analyses. 
 
 \begin{deluxetable}{cccccccc}
 \tabletypesize{\scriptsize}
-\tablecaption{Means and standard deviations for fundamental stellar parameters -- masses, initial chemical compositions, mixing lengths, diffusion factors, and overshoot coefficients -- of 16 Cyg A, 16 Cyg B, and the Sun as a Star inferred via machine learning from their respective temperatures, metallicities, luminosities, surface gravities, radii, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle \delta\nu_{1,3} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{1,3} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. %Values of the undegraded solar data predicted from this set of information are also shown for reference. 
+\tablecaption{Means and standard deviations for initial stellar parameters -- masses, chemical compositions, mixing lengths, diffusion factors, and overshoot coefficients -- of the Sun as a Star, 16 Cyg A, and 16 Cyg B inferred via machine learning from their respective temperatures, metallicities, luminosities, surface gravities, radii, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle \delta\nu_{1,3} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{1,3} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. 
 \label{tab:results}}
 \tablewidth{0pt}
-\tablehead{\colhead{Name} & \colhead{M$/$M$_\odot$} & \colhead{Y$_0$} & \colhead{Z$_0$} & \colhead{$\alpha_{\mathrm{MLT}}$} & \colhead{D} & \colhead{$\alpha_{\mathrm{ov}}$}}\startdata
-16CygA & 1.07 $\pm$ 0.024 & 0.27 $\pm$ 0.009 & 0.0221 $\pm$ 0.001 & 1.87 $\pm$ 0.051 & 0.292 $\pm$ 0.14 & 0.205 $\pm$ 0.022 \\
-16CygB & 1 $\pm$ 0.01 & 0.275 $\pm$ 0.0025 & 0.0202 $\pm$ 0.0008 & 1.79 $\pm$ 0.057 & 0.417 $\pm$ 0.099 & 0.157 $\pm$ 0.026 \\
-Degraded Sun & 1.01 $\pm$ 0.0071 & 0.27 $\pm$ 0.0032 & 0.02 $\pm$ 0.00079 & 1.92 $\pm$ 0.063 & 0.727 $\pm$ 0.14 & 0.154 $\pm$ 0.012 \\
-%Sun & 1.01 $\pm$ 0.0062 & 0.273 $\pm$ 0.0019 & 0.0206 $\pm$ 0.0013 & 1.9 $\pm$ 0.012 & 0.725 $\pm$ 0.06 & 0.149 $\pm$ 0.0048 \\
+\tablehead{\colhead{Name} & \colhead{M$/$M$_\odot$} & \colhead{Y$_0$} & \colhead{Z$_0$} & \colhead{$\alpha_{\mathrm{MLT}}$} & \colhead{$\alpha_{\mathrm{ov}}$} & \colhead{D}}\startdata
+16CygA & 1.08 $\pm$ 0.016 & 0.262 $\pm$ 0.0077 & 0.0222 $\pm$ 0.0015 & 1.85 $\pm$ 0.073 & 0.0791 $\pm$ 0.03 & 0.844 $\pm$ 0.8 \\
+16CygB & 1.03 $\pm$ 0.015 & 0.267 $\pm$ 0.0068 & 0.0212 $\pm$ 0.0014 & 1.82 $\pm$ 0.069 & 0.115 $\pm$ 0.032 & 1.88 $\pm$ 1.6 \\
+Degraded Sun & 1 $\pm$ 0.012 & 0.269 $\pm$ 0.006 & 0.0197 $\pm$ 0.0015 & 1.87 $\pm$ 0.08 & 0.0653 $\pm$ 0.016 & 3.6 $\pm$ 3.1 \\
 \enddata
 \end{deluxetable}
 
 \begin{deluxetable}{cccc}
 \tabletypesize{\scriptsize}
 %\rotate
-\tablecaption{Means and standard deviations for current-age stellar attributes -- age, surface-helium and core-hydrogen abundances -- of 16 Cyg A, 16 Cyg B, and the Sun as a Star inferred via machine learning from their respective temperatures, metallicities, luminosities, surface gravities, radii, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle \delta\nu_{1,3} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{1,3} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. %Values of the undegraded solar data predicted from this set of information are also shown for reference. 
+\tablecaption{Means and standard deviations for current-age stellar attributes -- age, surface-helium and core-hydrogen abundances -- of the Sun as a Star, 16 Cyg A, and 16 Cyg B inferred via machine learning from their respective temperatures, metallicities, luminosities, surface gravities, radii, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle \delta\nu_{1,3} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{1,3} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. 
 \label{tab:results-ca}}
 \tablewidth{0pt}
-\tablehead{\colhead{Name} & \colhead{$\tau/$Gyr} & \colhead{X$_{\text{c}}$/M$_*$} & \colhead{Y$_{\text{surf}}}}\startdata
-16CygA & 7.07 $\pm$ 0.4 & 0.0931 $\pm$ 0.019 & 0.264 $\pm$ 0.0095 \\
-16CygB & 7.2 $\pm$ 0.27 & 0.15 $\pm$ 0.019 & 0.264 $\pm$ 0.003 \\
-Degraded Sun & 4.5 $\pm$ 0.15 & 0.366 $\pm$ 0.018 & 0.256 $\pm$ 0.0018 \\
-%Sun & 4.4 $\pm$ 0.081 & 0.374 $\pm$ 0.0038 & 0.259 $\pm$ 0.0023 \\
+\tablehead{\colhead{Name} & \colhead{$\tau/$Gyr} & \colhead{X$_{\mathrm{c}}$/M$_*$} & \colhead{Y$_{\mathrm{surf}}$}}\startdata
+16CygA & 6.96 $\pm$ 0.42 & 0.0628 $\pm$ 0.026 & 0.247 $\pm$ 0.0083 \\
+16CygB & 6.82 $\pm$ 0.29 & 0.155 $\pm$ 0.024 & 0.238 $\pm$ 0.017 \\
+Degraded Sun & 4.62 $\pm$ 0.18 & 0.344 $\pm$ 0.026 & 0.239 $\pm$ 0.016 \\
 \enddata
 \end{deluxetable}
 
-\begin{figure*}
-    \centering
-    \includegraphics[width=\linewidth,keepaspectratio]{figs/Tagesstern_init-corner.pdf}
-    \caption{Predictions from machine learning of initial stellar parameters for degraded solar data. The diagonal shows histograms of mass M, initial helium Y$_0$, initial metallicity $Z_0$, mixing length parameter $\alpha_{\text{MLT}}$, diffusion factor D, and overshoot $\alpha_{\text{ov}}$. The lower panel shows contour plots for each pair of these variables. }
-    \label{fig:corner}
-\end{figure*}
+We additionally predict the radii and luminosities of 16 Cyg A and B instead of using them as constraints. Figure \ref{fig:interferometry} shows our inferred radii, luminosities and surface-helium abundances of 16 Cyg A and B plotted against the values determined by interferometry \citep{2013MNRAS.433.1262W} and an asteroseismic estimate \citep{2014ApJ...790..138V}. Here again we find excellent agreement between our method and the measured values. 
 
-We additionally predict the radii and luminosities of 16 Cyg A and B instead of using them as constraints. Figure \ref{fig:interferometry} shows our inferred radii, luminosities, surface-helium, and core-hydrogen abundances of 16 Cyg A and B plotted against the values determined by interferometry \citep{2013MNRAS.433.1262W} and an asteroseismic estimate \citep{2014ApJ...790..138V}. Here again we find excellent agreement between our method and the measured values. 
-
-\begin{figure*}
+\begin{figure}
     \centering
     %\includegraphics[width=\linewidth,keepaspectratio]{figs/16cyg-all.png}
-    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-radius.pdf}\hfill
+    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-radius.pdf}\\
     \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-L.pdf}\\
-    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-Y_surf.pdf}\hfill
-    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-X_c.pdf}\\
-    \caption{Probability densities showing predictions of 16 Cyg A (red) and B (blue) from machine learning of radii (top left) and luminosities (top right) as well as surface-helium (bottom left) and core-hydrogen (bottom right) abundances. Relative uncertainties ($\epsilon = \frac{\sigma}{\mu}\cdot 100$, with mean $\mu$ and standard deviation $\sigma$) are shown beside of each plot. Predictions and $2\sigma$ uncertainties from interferometric (``int'') measurements and asteroseismic (``ast'') estimates are shown with arrows.}
+    \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-Y_surf.pdf}
+    %\includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-X_c.pdf}\\
+    \caption{Probability densities showing predictions of 16 Cyg A (red) and B (blue) from machine learning of radii (top), luminosities (middle), and surface-helium abundances (bottom). Relative uncertainties $\epsilon$ are shown beside each plot. Predictions and $2\sigma$ uncertainties from interferometric (``int'') measurements and asteroseismic (``ast'') estimates are shown with arrows.}
     \label{fig:interferometry}
-\end{figure*}
+\end{figure}
 
-Detailed modelling of 16 Cyg A and B have been performed  by \citet{2015ApJ...811L..37M} using the Asteroseismic Modeling Portal (AMP). They calculated their results using a fixed diffusion factor, but without heavy element diffusion (i.e.~only helium diffusion) and with no overshooting. In order to account for systematic uncertainties, they multiplied the spectroscopic uncertainties of 16 Cyg A and B by an arbitrary constant $c=3$. Therefore, in order to make a fair comparison between the results of our method and theirs, we generate a new matrix of evolutionary models with those same conditions and also increase the uncertainties on [Fe/H] by a factor of $c$. In Figure \ref{fig:16Cyg-hist}, we show probability densities of the predicted parameters of 16 Cyg A and B that we obtain using machine learning in comparison to the results obtained by AMP. We find good agreement of values and uncertainties. To perform their analysis, AMP required 7,712.99 hours and 7,467.28 hours of computational time to model 16 Cyg A and B respectively using the world's 10th fastest supercomputer, the Texas Advanced Computing Center Stampede \citep{TOP500}. Here we have obtained comparable results in less than one minute. We note however that detailed optimization codes like AMP still remain important for obtaining structural models of stars as well as for performing post-main sequence modelling, where our method has not yet been extended. 
+Detailed modelling of 16 Cyg A and B have been performed  by \citet{2015ApJ...811L..37M} using the Asteroseismic Modeling Portal (AMP), a genetic algorithm for matching individual frequencies of stars to stellar models. They calculated their results using a fixed diffusion factor, but without heavy element diffusion (i.e.~only helium diffusion) and with no overshooting. In order to account for systematic uncertainties, they multiplied the spectroscopic uncertainties of 16 Cyg A and B by an arbitrary constant $c=3$. Therefore, in order to make a fair comparison between the results of our method and theirs, we generate a new matrix of evolutionary models with those same conditions and also increase the uncertainties on [Fe/H] by a factor of $c$. In Figure \ref{fig:16Cyg-hist}, we show probability densities of the predicted parameters of 16 Cyg A and B that we obtain using machine learning in comparison to the results obtained by AMP. We find good agreement of values and uncertainties. To perform their analysis, AMP required 7,712.99 hours and 7,467.28 hours of computational time to model 16 Cyg A and B respectively using the world's 10th fastest supercomputer, the Texas Advanced Computing Center Stampede \citep{TOP500}. Here we have obtained comparable results in less than one minute using only global asteroseismic constraints and no individual frequencies. We note however that detailed optimization codes like AMP still remain important for obtaining structural models of stars as well as for performing post-main sequence modelling, where our method has not yet been extended. 
 
 \begin{figure*}
     \centering
-    %\includegraphics[width=\linewidth,keepaspectratio]{figs/16cyg-all.png}
     \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-age.pdf}\hfill
     \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-M.pdf}\\
     \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-Y.pdf}\hfill
     \includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-Z.pdf}
-    %\includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-alpha.pdf}\\
-    %\includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-overshoot.pdf}\hfill
-    %\includegraphics[width=0.5\linewidth, keepaspectratio]{figs/hists/cyg-diffusion.pdf}\\
-    
     \caption{Probability densities showing predictions from machine learning of fundamental stellar parameters for 16 Cyg A (red) and B (blue) against predictions from AMP modelling. Relative uncertainties are shown beside each plot. Predictions and $2\sigma$ uncertainties from AMP modelling are shown with arrows.}
     \label{fig:16Cyg-hist}
 \end{figure*}
@@ -335,86 +314,90 @@ Detailed modelling of 16 Cyg A and B have been performed  by \citet{2015ApJ...81
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Kepler Objects of Interest %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{\emph{Kepler} Objects of Interest}
-We obtain classical observations and frequencies of the KAGES targets from \citet{2015MNRAS.452.2127S}. We use line-of-sight radial velocity corrections when available, which was only the case with KIC 6278762 \citep{2002AJ....124.1144L}, KIC 10666592 \citep{2013A&A...554A..84M}, and KIC 3632418 \citep{2006AstL...32..759G}. We use the random forest whose feature importances were shown in Figure \ref{fig:importances2} to predict the fundamental properties of these stars, the results of which can be seen in Table \ref{tab:results-kages}. Finally, Figure \ref{fig:us-vs-them} shows the fundamental parameters obtained from our method plotted against those obtained by KAGES. We find good agreement across all stars.
+\subsection{Kepler Objects of Interest}
+We obtain classical observations and frequencies of the KAGES targets from \citet{2015MNRAS.452.2127S}. We use line-of-sight radial velocity corrections when available, which was only the case with KIC 6278762 \citep{2002AJ....124.1144L}, KIC 10666592 \citep{2013A&A...554A..84M}, and KIC 3632418 \citep{2006AstL...32..759G}. We use the random forest whose feature importances were shown in Figure \ref{fig:importances2} to predict the fundamental properties of these stars, the results of which can be seen in Table \ref{tab:results-kages}. Figure \ref{fig:us-vs-them} shows the fundamental parameters obtained from our method plotted against those obtained by KAGES. We find good agreement across all stars. 
 
 \begin{deluxetable}{ccccccc}
 \tabletypesize{\scriptsize}
-\tablecaption{Means and standard deviations for initial conditions -- mass, chemical composition, mixing length, diffusion factor, and overshoot coefficient -- of the KAGES data set inferred via machine learning from their respective temperatures, metallicities, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. \label{tab:results-kages}}
+\tablecaption{Means and standard deviations for initial conditions -- mass, chemical composition, mixing length, overshoot coefficient, and diffusion factor -- of the KAGES data set inferred via machine learning from their respective temperatures, metallicities, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. \label{tab:results-kages}}
 \tablewidth{0pt}
-\tablehead{\colhead{KIC} & \colhead{M$/$M$_\odot$} & \colhead{Y$_0$} & \colhead{Z$_0$} & \colhead{$\alpha_{\mathrm{MLT}}$} & \colhead{D} & \colhead{$\alpha_{\mathrm{ov}}$}}\startdata
-3425851 & 1.15 $\pm$ 0.034 & 0.283 $\pm$ 0.0097 & 0.0148 $\pm$ 0.0026 & 2.03 $\pm$ 0.16 & 0.145 $\pm$ 0.13 & 0.15 $\pm$ 0.045 \\
-3544595 & 0.911 $\pm$ 0.026 & 0.274 $\pm$ 0.0086 & 0.0144 $\pm$ 0.0022 & 1.94 $\pm$ 0.072 & 1.18 $\pm$ 0.54 & 0.255 $\pm$ 0.045 \\
-3632418 & 1.35 $\pm$ 0.046 & 0.278 $\pm$ 0.012 & 0.0173 $\pm$ 0.0029 & 2.04 $\pm$ 0.16 & 0.582 $\pm$ 0.4 & 0.276 $\pm$ 0.075 \\
-4141376 & 1 $\pm$ 0.048 & 0.281 $\pm$ 0.014 & 0.0118 $\pm$ 0.0024 & 1.86 $\pm$ 0.096 & 1.02 $\pm$ 0.85 & 0.172 $\pm$ 0.049 \\
-4143755 & 0.949 $\pm$ 0.022 & 0.27 $\pm$ 0.003 & 0.00979 $\pm$ 0.0018 & 1.64 $\pm$ 0.019 & 2.34 $\pm$ 0.94 & 0.354 $\pm$ 0.023 \\
-4349452 & 1.19 $\pm$ 0.044 & 0.273 $\pm$ 0.011 & 0.0177 $\pm$ 0.0036 & 1.86 $\pm$ 0.13 & 0.589 $\pm$ 0.52 & 0.173 $\pm$ 0.046 \\
-4914423 & 1.12 $\pm$ 0.037 & 0.28 $\pm$ 0.009 & 0.0201 $\pm$ 0.0036 & 1.78 $\pm$ 0.068 & 0.434 $\pm$ 0.31 & 0.22 $\pm$ 0.037 \\
-5094751 & 1.07 $\pm$ 0.043 & 0.275 $\pm$ 0.0084 & 0.0152 $\pm$ 0.0033 & 1.78 $\pm$ 0.11 & 0.318 $\pm$ 0.21 & 0.225 $\pm$ 0.043 \\
-5866724 & 1.24 $\pm$ 0.049 & 0.278 $\pm$ 0.0085 & 0.0226 $\pm$ 0.0037 & 1.88 $\pm$ 0.12 & 0.699 $\pm$ 0.58 & 0.202 $\pm$ 0.045 \\
-6278762 & 0.778 $\pm$ 0.012 & 0.258 $\pm$ 0.0062 & 0.0143 $\pm$ 0.0021 & 2.06 $\pm$ 0.1 & 0.995 $\pm$ 0.33 & 0.235 $\pm$ 0.044 \\
-6521045 & 1.12 $\pm$ 0.033 & 0.275 $\pm$ 0.0077 & 0.0196 $\pm$ 0.0034 & 1.79 $\pm$ 0.049 & 0.641 $\pm$ 0.31 & 0.241 $\pm$ 0.033 \\
-7670943 & 1.29 $\pm$ 0.062 & 0.282 $\pm$ 0.0083 & 0.0208 $\pm$ 0.0041 & 2.04 $\pm$ 0.13 & 0.31 $\pm$ 0.25 & 0.178 $\pm$ 0.047 \\
-8077137 & 1.18 $\pm$ 0.054 & 0.274 $\pm$ 0.0075 & 0.0143 $\pm$ 0.0024 & 1.78 $\pm$ 0.11 & 0.371 $\pm$ 0.37 & 0.272 $\pm$ 0.048 \\
-8292840 & 1.12 $\pm$ 0.062 & 0.264 $\pm$ 0.0064 & 0.0124 $\pm$ 0.0024 & 1.8 $\pm$ 0.088 & 0.874 $\pm$ 0.83 & 0.227 $\pm$ 0.057 \\
-8349582 & 1.13 $\pm$ 0.025 & 0.283 $\pm$ 0.0053 & 0.0289 $\pm$ 0.0029 & 1.82 $\pm$ 0.081 & 0.404 $\pm$ 0.23 & 0.249 $\pm$ 0.022 \\
-8478994 & 0.795 $\pm$ 0.021 & 0.277 $\pm$ 0.0092 & 0.00993 $\pm$ 0.0013 & 1.92 $\pm$ 0.1 & 1.56 $\pm$ 0.98 & 0.277 $\pm$ 0.068 \\
-8494142 & 1.4 $\pm$ 0.044 & 0.286 $\pm$ 0.013 & 0.0251 $\pm$ 0.0035 & 1.72 $\pm$ 0.067 & 0.46 $\pm$ 0.39 & 0.163 $\pm$ 0.045 \\
-8554498 & 1.35 $\pm$ 0.056 & 0.282 $\pm$ 0.0063 & 0.0253 $\pm$ 0.0026 & 1.76 $\pm$ 0.042 & 0.405 $\pm$ 0.23 & 0.198 $\pm$ 0.044 \\
-8866102 & 1.22 $\pm$ 0.055 & 0.278 $\pm$ 0.0093 & 0.019 $\pm$ 0.0037 & 1.86 $\pm$ 0.1 & 0.495 $\pm$ 0.44 & 0.173 $\pm$ 0.041 \\
-9414417 & 1.33 $\pm$ 0.042 & 0.269 $\pm$ 0.0092 & 0.015 $\pm$ 0.0022 & 1.84 $\pm$ 0.13 & 0.509 $\pm$ 0.4 & 0.286 $\pm$ 0.047 \\
-9592705 & 1.41 $\pm$ 0.03 & 0.296 $\pm$ 0.0094 & 0.0238 $\pm$ 0.003 & 1.69 $\pm$ 0.071 & 0.143 $\pm$ 0.11 & 0.193 $\pm$ 0.025 \\
-9955598 & 0.931 $\pm$ 0.017 & 0.269 $\pm$ 0.0099 & 0.0212 $\pm$ 0.003 & 1.91 $\pm$ 0.089 & 0.772 $\pm$ 0.49 & 0.205 $\pm$ 0.054 \\
-10514430 & 1.08 $\pm$ 0.045 & 0.277 $\pm$ 0.0077 & 0.0152 $\pm$ 0.0027 & 1.72 $\pm$ 0.043 & 0.843 $\pm$ 0.4 & 0.312 $\pm$ 0.04 \\
-10586004 & 1.22 $\pm$ 0.067 & 0.279 $\pm$ 0.0054 & 0.0262 $\pm$ 0.0039 & 1.79 $\pm$ 0.089 & 0.394 $\pm$ 0.28 & 0.294 $\pm$ 0.049 \\
-10666592 & 1.44 $\pm$ 0.031 & 0.303 $\pm$ 0.0093 & 0.0254 $\pm$ 0.0025 & 1.75 $\pm$ 0.14 & 0.0705 $\pm$ 0.088 & 0.196 $\pm$ 0.043 \\
-10963065 & 1.04 $\pm$ 0.044 & 0.275 $\pm$ 0.0076 & 0.0127 $\pm$ 0.0027 & 1.8 $\pm$ 0.079 & 0.585 $\pm$ 0.35 & 0.213 $\pm$ 0.032 \\
-11133306 & 1.11 $\pm$ 0.042 & 0.268 $\pm$ 0.011 & 0.0196 $\pm$ 0.0033 & 1.86 $\pm$ 0.073 & 0.989 $\pm$ 0.6 & 0.169 $\pm$ 0.036 \\
-11295426 & 1.1 $\pm$ 0.032 & 0.268 $\pm$ 0.013 & 0.0231 $\pm$ 0.0021 & 1.82 $\pm$ 0.07 & 0.414 $\pm$ 0.37 & 0.184 $\pm$ 0.032 \\
-11401755 & 1.1 $\pm$ 0.019 & 0.274 $\pm$ 0.0047 & 0.0115 $\pm$ 0.0012 & 1.76 $\pm$ 0.028 & 0.936 $\pm$ 0.46 & 0.321 $\pm$ 0.033 \\
-11807274 & 1.28 $\pm$ 0.062 & 0.273 $\pm$ 0.0072 & 0.0195 $\pm$ 0.0033 & 1.81 $\pm$ 0.08 & 0.344 $\pm$ 0.3 & 0.187 $\pm$ 0.036 \\
-11853905 & 1.15 $\pm$ 0.052 & 0.281 $\pm$ 0.0083 & 0.0224 $\pm$ 0.0035 & 1.83 $\pm$ 0.088 & 0.866 $\pm$ 0.54 & 0.278 $\pm$ 0.039 \\
-11904151 & 0.917 $\pm$ 0.031 & 0.271 $\pm$ 0.0079 & 0.0149 $\pm$ 0.0026 & 1.85 $\pm$ 0.064 & 0.958 $\pm$ 0.45 & 0.25 $\pm$ 0.04 \\
+\tablehead{\colhead{KIC} & \colhead{M$/$M$_\odot$} & \colhead{Y$_0$} & \colhead{Z$_0$} & \colhead{$\alpha_{\mathrm{MLT}}$} & \colhead{$\alpha_{\mathrm{ov}}$} & \colhead{D}}\startdata
+3425851 & 1.15 $\pm$ 0.053 & 0.284 $\pm$ 0.02 & 0.0153 $\pm$ 0.0028 & 1.93 $\pm$ 0.23 & 0.0575 $\pm$ 0.055 & 0.503 $\pm$ 1 \\
+3544595 & 0.911 $\pm$ 0.031 & 0.27 $\pm$ 0.0092 & 0.015 $\pm$ 0.0028 & 1.87 $\pm$ 0.1 & 0.157 $\pm$ 0.11 & 4.95 $\pm$ 4.5 \\
+3632418 & 1.39 $\pm$ 0.057 & 0.268 $\pm$ 0.0093 & 0.019 $\pm$ 0.0032 & 1.98 $\pm$ 0.13 & 0.245 $\pm$ 0.14 & 1.1 $\pm$ 1.1 \\
+4141376 & 1.02 $\pm$ 0.036 & 0.268 $\pm$ 0.01 & 0.012 $\pm$ 0.0025 & 1.87 $\pm$ 0.12 & 0.128 $\pm$ 0.12 & 4.03 $\pm$ 4.2 \\
+4143755 & 0.987 $\pm$ 0.04 & 0.279 $\pm$ 0.0047 & 0.0137 $\pm$ 0.0026 & 1.75 $\pm$ 0.039 & 0.357 $\pm$ 0.076 & 14.6 $\pm$ 5.9 \\
+4349452 & 1.22 $\pm$ 0.055 & 0.277 $\pm$ 0.012 & 0.0204 $\pm$ 0.0043 & 1.89 $\pm$ 0.17 & 0.103 $\pm$ 0.091 & 7.26 $\pm$ 8.7 \\
+4914423 & 1.19 $\pm$ 0.051 & 0.273 $\pm$ 0.0099 & 0.0261 $\pm$ 0.0047 & 1.77 $\pm$ 0.11 & 0.0825 $\pm$ 0.044 & 2.63 $\pm$ 1.8 \\
+5094751 & 1.11 $\pm$ 0.037 & 0.275 $\pm$ 0.0085 & 0.0181 $\pm$ 0.0029 & 1.78 $\pm$ 0.11 & 0.0711 $\pm$ 0.039 & 2.61 $\pm$ 1.5 \\
+5866724 & 1.29 $\pm$ 0.065 & 0.276 $\pm$ 0.011 & 0.0269 $\pm$ 0.0057 & 1.8 $\pm$ 0.14 & 0.11 $\pm$ 0.091 & 6.91 $\pm$ 8.1 \\
+6196457 & 1.33 $\pm$ 0.058 & 0.276 $\pm$ 0.0054 & 0.0328 $\pm$ 0.0053 & 1.72 $\pm$ 0.053 & 0.158 $\pm$ 0.062 & 6.39 $\pm$ 2.5 \\
+6278762 & 0.758 $\pm$ 0.012 & 0.255 $\pm$ 0.0057 & 0.013 $\pm$ 0.0016 & 2.09 $\pm$ 0.066 & 0.0653 $\pm$ 0.029 & 5.24 $\pm$ 2.1 \\
+6521045 & 1.2 $\pm$ 0.052 & 0.272 $\pm$ 0.0075 & 0.0272 $\pm$ 0.005 & 1.81 $\pm$ 0.072 & 0.112 $\pm$ 0.036 & 3.01 $\pm$ 1.4 \\
+7670943 & 1.3 $\pm$ 0.06 & 0.279 $\pm$ 0.017 & 0.0215 $\pm$ 0.0045 & 1.98 $\pm$ 0.23 & 0.06 $\pm$ 0.062 & 0.925 $\pm$ 2.5 \\
+8077137 & 1.23 $\pm$ 0.07 & 0.271 $\pm$ 0.0096 & 0.0183 $\pm$ 0.0028 & 1.85 $\pm$ 0.14 & 0.207 $\pm$ 0.11 & 3.16 $\pm$ 2.2 \\
+8292840 & 1.15 $\pm$ 0.078 & 0.277 $\pm$ 0.0099 & 0.0161 $\pm$ 0.0048 & 1.84 $\pm$ 0.15 & 0.147 $\pm$ 0.12 & 11.3 $\pm$ 11 \\
+8349582 & 1.23 $\pm$ 0.041 & 0.269 $\pm$ 0.0077 & 0.0438 $\pm$ 0.0074 & 1.96 $\pm$ 0.12 & 0.113 $\pm$ 0.067 & 2.31 $\pm$ 1 \\
+8478994 & 0.814 $\pm$ 0.022 & 0.274 $\pm$ 0.0087 & 0.0109 $\pm$ 0.0013 & 1.93 $\pm$ 0.065 & 0.216 $\pm$ 0.075 & 18.2 $\pm$ 9.8 \\
+8494142 & 1.42 $\pm$ 0.056 & 0.273 $\pm$ 0.011 & 0.0278 $\pm$ 0.0045 & 1.69 $\pm$ 0.066 & 0.0931 $\pm$ 0.053 & 1.61 $\pm$ 1.8 \\
+8554498 & 1.38 $\pm$ 0.063 & 0.271 $\pm$ 0.0073 & 0.0306 $\pm$ 0.0029 & 1.7 $\pm$ 0.073 & 0.135 $\pm$ 0.083 & 2.08 $\pm$ 1.6 \\
+8684730 & 1.43 $\pm$ 0.032 & 0.276 $\pm$ 0.0075 & 0.0409 $\pm$ 0.0053 & 1.9 $\pm$ 0.14 & 0.274 $\pm$ 0.096 & 14.8 $\pm$ 8.8 \\
+8866102 & 1.26 $\pm$ 0.067 & 0.278 $\pm$ 0.013 & 0.0209 $\pm$ 0.0048 & 1.79 $\pm$ 0.15 & 0.0805 $\pm$ 0.069 & 5.16 $\pm$ 7.4 \\
+9414417 & 1.36 $\pm$ 0.054 & 0.265 $\pm$ 0.008 & 0.0177 $\pm$ 0.0028 & 1.87 $\pm$ 0.13 & 0.181 $\pm$ 0.1 & 2.24 $\pm$ 1.8 \\
+9592705 & 1.44 $\pm$ 0.045 & 0.274 $\pm$ 0.01 & 0.0281 $\pm$ 0.0039 & 1.71 $\pm$ 0.066 & 0.115 $\pm$ 0.057 & 0.736 $\pm$ 0.61 \\
+9955598 & 0.929 $\pm$ 0.029 & 0.27 $\pm$ 0.011 & 0.0231 $\pm$ 0.0039 & 1.95 $\pm$ 0.11 & 0.191 $\pm$ 0.13 & 2.36 $\pm$ 1.9 \\
+10514430 & 1.13 $\pm$ 0.057 & 0.278 $\pm$ 0.0057 & 0.0204 $\pm$ 0.0041 & 1.78 $\pm$ 0.06 & 0.312 $\pm$ 0.096 & 5.01 $\pm$ 2.1 \\
+10586004 & 1.32 $\pm$ 0.074 & 0.274 $\pm$ 0.0059 & 0.0387 $\pm$ 0.0069 & 1.81 $\pm$ 0.13 & 0.214 $\pm$ 0.13 & 4.33 $\pm$ 3.8 \\
+10666592 & 1.5 $\pm$ 0.02 & 0.298 $\pm$ 0.013 & 0.0293 $\pm$ 0.0033 & 1.79 $\pm$ 0.11 & 0.0623 $\pm$ 0.046 & 0.2 $\pm$ 0.18 \\
+10963065 & 1.09 $\pm$ 0.032 & 0.264 $\pm$ 0.0083 & 0.014 $\pm$ 0.0026 & 1.79 $\pm$ 0.12 & 0.0508 $\pm$ 0.028 & 3.2 $\pm$ 2.7 \\
+11133306 & 1.11 $\pm$ 0.046 & 0.272 $\pm$ 0.01 & 0.0207 $\pm$ 0.0041 & 1.85 $\pm$ 0.16 & 0.0422 $\pm$ 0.035 & 5.09 $\pm$ 5.8 \\
+11295426 & 1.11 $\pm$ 0.033 & 0.267 $\pm$ 0.01 & 0.0248 $\pm$ 0.0035 & 1.8 $\pm$ 0.088 & 0.0483 $\pm$ 0.032 & 1.28 $\pm$ 0.9 \\
+11401755 & 1.15 $\pm$ 0.035 & 0.272 $\pm$ 0.0066 & 0.0156 $\pm$ 0.0022 & 1.86 $\pm$ 0.067 & 0.341 $\pm$ 0.071 & 3.89 $\pm$ 1.8 \\
+11807274 & 1.33 $\pm$ 0.075 & 0.274 $\pm$ 0.0087 & 0.0248 $\pm$ 0.0049 & 1.76 $\pm$ 0.083 & 0.104 $\pm$ 0.063 & 5.47 $\pm$ 5.4 \\
+11853905 & 1.22 $\pm$ 0.054 & 0.272 $\pm$ 0.0073 & 0.0295 $\pm$ 0.0052 & 1.85 $\pm$ 0.12 & 0.172 $\pm$ 0.08 & 3.49 $\pm$ 1.9 \\
+11904151 & 0.931 $\pm$ 0.033 & 0.265 $\pm$ 0.0092 & 0.0161 $\pm$ 0.0031 & 1.84 $\pm$ 0.13 & 0.051 $\pm$ 0.029 & 2.86 $\pm$ 2 \\
 \enddata
 \end{deluxetable}
 
 \begin{deluxetable}{ccccccc}
 \tabletypesize{\scriptsize}
-\tablecaption{Means and standard deviations for current-age conditions -- age, core-hydrogen abundance, surface gravity, luminosity, radius, and surface-helium abundance -- of the KAGES data set inferred via machine learning from their respective temperatures, metallicities, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$. \label{tab:results-kages-curr}}
+\tablecaption{Means and standard deviations for current-age conditions -- age, core-hydrogen abundance, surface gravity, luminosity, radius, and surface-helium abundance -- of the KAGES data set inferred via machine learning from their respective temperatures, metallicities, and asteroseismic observables $\langle \Delta\nu_0 \rangle$, $\langle \delta\nu_{0,2} \rangle$, $\langle r_{0,2} \rangle$, $\langle r_{0,1} \rangle$, and $\langle r_{1,0} \rangle$.  \label{tab:results-kages-curr}}
 \tablewidth{0pt}
-\tablehead{\colhead{KIC} & \colhead{$\tau/$Gyr} & \colhead{X$_{\text{c}}$/M$_*$} & \colhead{log g (cgs)} & \colhead{L$/$L$_\odot$} & \colhead{R$/$R$_\odot$} & \colhead{Y$_{\text{surf}}$}}\startdata
-3425851 & 3.96 $\pm$ 0.55 & 0.182 $\pm$ 0.058 & 4.23 $\pm$ 0.0086 & 2.7 $\pm$ 0.14 & 1.36 $\pm$ 0.016 & 0.277 $\pm$ 0.012 \\
-3544595 & 6.47 $\pm$ 1.2 & 0.335 $\pm$ 0.08 & 4.47 $\pm$ 0.017 & 0.848 $\pm$ 0.061 & 0.924 $\pm$ 0.015 & 0.249 $\pm$ 0.013 \\
-3632418 & 3.15 $\pm$ 0.28 & 0.139 $\pm$ 0.042 & 4.02 $\pm$ 0.0071 & 5.05 $\pm$ 0.2 & 1.89 $\pm$ 0.023 & 0.256 $\pm$ 0.019 \\
-4141376 & 3.27 $\pm$ 0.69 & 0.404 $\pm$ 0.076 & 4.42 $\pm$ 0.011 & 1.38 $\pm$ 0.098 & 1.03 $\pm$ 0.022 & 0.262 $\pm$ 0.016 \\
-4143755 & 9.41 $\pm$ 0.52 & 0.0448 $\pm$ 0.012 & 4.11 $\pm$ 0.0077 & 2 $\pm$ 0.1 & 1.42 $\pm$ 0.012 & 0.216 $\pm$ 0.021 \\
-4349452 & 3.04 $\pm$ 0.68 & 0.353 $\pm$ 0.072 & 4.28 $\pm$ 0.011 & 2.44 $\pm$ 0.13 & 1.31 $\pm$ 0.017 & 0.257 $\pm$ 0.014 \\
-4914423 & 6.35 $\pm$ 0.81 & 0.069 $\pm$ 0.026 & 4.16 $\pm$ 0.0062 & 2.3 $\pm$ 0.16 & 1.46 $\pm$ 0.023 & 0.269 $\pm$ 0.013 \\
-5094751 & 6.42 $\pm$ 0.83 & 0.11 $\pm$ 0.024 & 4.21 $\pm$ 0.0071 & 2.11 $\pm$ 0.15 & 1.35 $\pm$ 0.023 & 0.266 $\pm$ 0.01 \\
-5866724 & 3.31 $\pm$ 0.64 & 0.317 $\pm$ 0.084 & 4.24 $\pm$ 0.012 & 2.65 $\pm$ 0.12 & 1.4 $\pm$ 0.021 & 0.261 $\pm$ 0.013 \\
-6278762 & 10.1 $\pm$ 0.97 & 0.391 $\pm$ 0.026 & 4.57 $\pm$ 0.0057 & 0.351 $\pm$ 0.022 & 0.756 $\pm$ 0.0049 & 0.237 $\pm$ 0.011 \\
-6521045 & 6.76 $\pm$ 0.7 & 0.0323 $\pm$ 0.01 & 4.13 $\pm$ 0.0036 & 2.44 $\pm$ 0.16 & 1.52 $\pm$ 0.025 & 0.261 $\pm$ 0.011 \\
-7670943 & 2.52 $\pm$ 0.63 & 0.349 $\pm$ 0.08 & 4.23 $\pm$ 0.0086 & 3.29 $\pm$ 0.28 & 1.44 $\pm$ 0.027 & 0.269 $\pm$ 0.014 \\
-8077137 & 4.87 $\pm$ 0.77 & 0.102 $\pm$ 0.053 & 4.07 $\pm$ 0.01 & 3.54 $\pm$ 0.27 & 1.65 $\pm$ 0.037 & 0.26 $\pm$ 0.014 \\
-8292840 & 4.55 $\pm$ 1.4 & 0.26 $\pm$ 0.11 & 4.25 $\pm$ 0.018 & 2.42 $\pm$ 0.2 & 1.32 $\pm$ 0.023 & 0.236 $\pm$ 0.021 \\
-8349582 & 7.55 $\pm$ 0.58 & 0.0461 $\pm$ 0.016 & 4.17 $\pm$ 0.0058 & 2.04 $\pm$ 0.11 & 1.46 $\pm$ 0.012 & 0.273 $\pm$ 0.0082 \\
-8478994 & 6.2 $\pm$ 2.2 & 0.496 $\pm$ 0.053 & 4.57 $\pm$ 0.0099 & 0.481 $\pm$ 0.034 & 0.767 $\pm$ 0.0076 & 0.258 $\pm$ 0.014 \\
-8494142 & 2.75 $\pm$ 0.44 & 0.204 $\pm$ 0.06 & 4.04 $\pm$ 0.0092 & 4.66 $\pm$ 0.25 & 1.87 $\pm$ 0.028 & 0.26 $\pm$ 0.028 \\
-8554498 & 3.78 $\pm$ 0.59 & 0.109 $\pm$ 0.048 & 4.03 $\pm$ 0.0084 & 4.15 $\pm$ 0.23 & 1.86 $\pm$ 0.034 & 0.268 $\pm$ 0.013 \\
-8866102 & 2.69 $\pm$ 0.65 & 0.369 $\pm$ 0.087 & 4.27 $\pm$ 0.011 & 2.68 $\pm$ 0.15 & 1.35 $\pm$ 0.02 & 0.266 $\pm$ 0.015 \\
-9414417 & 3.32 $\pm$ 0.3 & 0.172 $\pm$ 0.028 & 4.01 $\pm$ 0.0062 & 4.91 $\pm$ 0.29 & 1.88 $\pm$ 0.027 & 0.245 $\pm$ 0.018 \\
-9592705 & 2.76 $\pm$ 0.25 & 0.13 $\pm$ 0.034 & 3.97 $\pm$ 0.0072 & 5.59 $\pm$ 0.3 & 2.04 $\pm$ 0.022 & 0.288 $\pm$ 0.012 \\
-9955598 & 6.33 $\pm$ 0.81 & 0.386 $\pm$ 0.033 & 4.5 $\pm$ 0.006 & 0.657 $\pm$ 0.043 & 0.901 $\pm$ 0.0097 & 0.255 $\pm$ 0.014 \\
-10514430 & 7.2 $\pm$ 0.85 & 0.0399 $\pm$ 0.014 & 4.08 $\pm$ 0.0074 & 2.67 $\pm$ 0.21 & 1.57 $\pm$ 0.031 & 0.255 $\pm$ 0.014 \\
-10586004 & 5.91 $\pm$ 1 & 0.085 $\pm$ 0.049 & 4.08 $\pm$ 0.017 & 2.93 $\pm$ 0.22 & 1.67 $\pm$ 0.046 & 0.268 $\pm$ 0.0083 \\
-10666592 & 2.25 $\pm$ 0.14 & 0.218 $\pm$ 0.034 & 4.01 $\pm$ 0.0062 & 5.53 $\pm$ 0.34 & 1.95 $\pm$ 0.022 & 0.3 $\pm$ 0.012 \\
-10963065 & 5.29 $\pm$ 0.7 & 0.217 $\pm$ 0.039 & 4.29 $\pm$ 0.0066 & 1.91 $\pm$ 0.12 & 1.21 $\pm$ 0.024 & 0.256 $\pm$ 0.013 \\
-11133306 & 4.73 $\pm$ 0.65 & 0.259 $\pm$ 0.05 & 4.32 $\pm$ 0.0096 & 1.72 $\pm$ 0.081 & 1.21 $\pm$ 0.019 & 0.247 $\pm$ 0.02 \\
-11295426 & 6.83 $\pm$ 0.68 & 0.0936 $\pm$ 0.032 & 4.28 $\pm$ 0.0079 & 1.64 $\pm$ 0.1 & 1.26 $\pm$ 0.016 & 0.258 $\pm$ 0.018 \\
-11401755 & 5.97 $\pm$ 0.44 & 0.0467 $\pm$ 0.014 & 4.04 $\pm$ 0.0056 & 3.23 $\pm$ 0.16 & 1.66 $\pm$ 0.018 & 0.245 $\pm$ 0.016 \\
-11807274 & 3.44 $\pm$ 0.69 & 0.236 $\pm$ 0.078 & 4.15 $\pm$ 0.012 & 3.5 $\pm$ 0.26 & 1.58 $\pm$ 0.032 & 0.257 $\pm$ 0.015 \\
-11853905 & 6.65 $\pm$ 0.8 & 0.0472 $\pm$ 0.021 & 4.11 $\pm$ 0.0064 & 2.53 $\pm$ 0.19 & 1.57 $\pm$ 0.037 & 0.262 $\pm$ 0.011 \\
-11904151 & 10.1 $\pm$ 1.3 & 0.1 $\pm$ 0.038 & 4.35 $\pm$ 0.0098 & 1.09 $\pm$ 0.059 & 1.06 $\pm$ 0.015 & 0.245 $\pm$ 0.013 \\
+\tablehead{\colhead{KIC} & \colhead{$\tau/$Gyr} & \colhead{X$_{\mathrm{c}}$/M$_*$} & \colhead{log g} & \colhead{L$/$L$_\odot$} & \colhead{R$/$R$_\odot$} & \colhead{Y$_{\mathrm{surf}}$}}\startdata
+3425851 & 3.65 $\pm$ 0.76 & 0.138 $\pm$ 0.083 & 4.23 $\pm$ 0.01 & 2.73 $\pm$ 0.16 & 1.36 $\pm$ 0.022 & 0.272 $\pm$ 0.026 \\
+3544595 & 6.65 $\pm$ 1.5 & 0.315 $\pm$ 0.078 & 4.46 $\pm$ 0.017 & 0.838 $\pm$ 0.067 & 0.937 $\pm$ 0.021 & 0.229 $\pm$ 0.022 \\
+3632418 & 3.02 $\pm$ 0.36 & 0.0958 $\pm$ 0.039 & 4.02 $\pm$ 0.0084 & 5.18 $\pm$ 0.27 & 1.91 $\pm$ 0.032 & 0.244 $\pm$ 0.022 \\
+4141376 & 3.39 $\pm$ 0.68 & 0.382 $\pm$ 0.07 & 4.41 $\pm$ 0.01 & 1.41 $\pm$ 0.095 & 1.05 $\pm$ 0.017 & 0.238 $\pm$ 0.022 \\
+4143755 & 7.79 $\pm$ 0.89 & 0.0798 $\pm$ 0.022 & 4.1 $\pm$ 0.016 & 2.31 $\pm$ 0.13 & 1.49 $\pm$ 0.036 & 0.177 $\pm$ 0.021 \\
+4349452 & 2.37 $\pm$ 0.78 & 0.365 $\pm$ 0.1 & 4.28 $\pm$ 0.012 & 2.48 $\pm$ 0.14 & 1.32 $\pm$ 0.022 & 0.221 $\pm$ 0.043 \\
+4914423 & 5.19 $\pm$ 0.58 & 0.063 $\pm$ 0.037 & 4.16 $\pm$ 0.01 & 2.47 $\pm$ 0.16 & 1.5 $\pm$ 0.026 & 0.235 $\pm$ 0.023 \\
+5094751 & 5.31 $\pm$ 0.66 & 0.0751 $\pm$ 0.041 & 4.21 $\pm$ 0.0088 & 2.22 $\pm$ 0.12 & 1.37 $\pm$ 0.017 & 0.229 $\pm$ 0.024 \\
+5866724 & 2.4 $\pm$ 0.97 & 0.364 $\pm$ 0.12 & 4.24 $\pm$ 0.018 & 2.72 $\pm$ 0.15 & 1.42 $\pm$ 0.024 & 0.229 $\pm$ 0.038 \\
+6196457 & 3.61 $\pm$ 0.75 & 0.195 $\pm$ 0.06 & 4.11 $\pm$ 0.021 & 3.46 $\pm$ 0.21 & 1.7 $\pm$ 0.036 & 0.24 $\pm$ 0.017 \\
+6278762 & 10.3 $\pm$ 0.97 & 0.348 $\pm$ 0.026 & 4.56 $\pm$ 0.008 & 0.342 $\pm$ 0.023 & 0.758 $\pm$ 0.0062 & 0.192 $\pm$ 0.022 \\
+6521045 & 5.59 $\pm$ 0.39 & 0.0309 $\pm$ 0.011 & 4.13 $\pm$ 0.0063 & 2.68 $\pm$ 0.17 & 1.57 $\pm$ 0.031 & 0.222 $\pm$ 0.02 \\
+7670943 & 2.24 $\pm$ 0.6 & 0.325 $\pm$ 0.088 & 4.23 $\pm$ 0.01 & 3.28 $\pm$ 0.23 & 1.44 $\pm$ 0.025 & 0.262 $\pm$ 0.03 \\
+8077137 & 4.42 $\pm$ 0.95 & 0.0868 $\pm$ 0.052 & 4.08 $\pm$ 0.017 & 3.68 $\pm$ 0.26 & 1.68 $\pm$ 0.044 & 0.218 $\pm$ 0.032 \\
+8292840 & 3.47 $\pm$ 1.5 & 0.284 $\pm$ 0.14 & 4.25 $\pm$ 0.023 & 2.54 $\pm$ 0.2 & 1.34 $\pm$ 0.026 & 0.192 $\pm$ 0.049 \\
+8349582 & 6.73 $\pm$ 0.66 & 0.0188 $\pm$ 0.013 & 4.17 $\pm$ 0.012 & 2.22 $\pm$ 0.12 & 1.52 $\pm$ 0.018 & 0.231 $\pm$ 0.015 \\
+8478994 & 4.5 $\pm$ 1.7 & 0.496 $\pm$ 0.054 & 4.55 $\pm$ 0.013 & 0.522 $\pm$ 0.037 & 0.796 $\pm$ 0.015 & 0.208 $\pm$ 0.022 \\
+8494142 & 2.81 $\pm$ 0.53 & 0.172 $\pm$ 0.067 & 4.06 $\pm$ 0.017 & 4.5 $\pm$ 0.32 & 1.84 $\pm$ 0.039 & 0.24 $\pm$ 0.031 \\
+8554498 & 3.66 $\pm$ 0.77 & 0.0995 $\pm$ 0.059 & 4.05 $\pm$ 0.017 & 4.05 $\pm$ 0.2 & 1.85 $\pm$ 0.04 & 0.247 $\pm$ 0.018 \\
+8684730 & 3 $\pm$ 0.37 & 0.24 $\pm$ 0.064 & 4.06 $\pm$ 0.045 & 4.04 $\pm$ 0.53 & 1.87 $\pm$ 0.11 & 0.176 $\pm$ 0.04 \\
+8866102 & 1.91 $\pm$ 0.72 & 0.405 $\pm$ 0.11 & 4.27 $\pm$ 0.016 & 2.78 $\pm$ 0.16 & 1.36 $\pm$ 0.024 & 0.239 $\pm$ 0.04 \\
+9414417 & 3.11 $\pm$ 0.32 & 0.0869 $\pm$ 0.031 & 4.02 $\pm$ 0.0069 & 4.97 $\pm$ 0.35 & 1.89 $\pm$ 0.037 & 0.213 $\pm$ 0.028 \\
+9592705 & 3.02 $\pm$ 0.43 & 0.057 $\pm$ 0.027 & 3.98 $\pm$ 0.01 & 5.57 $\pm$ 0.41 & 2.04 $\pm$ 0.042 & 0.26 $\pm$ 0.016 \\
+9955598 & 7 $\pm$ 1 & 0.367 $\pm$ 0.035 & 4.49 $\pm$ 0.0063 & 0.66 $\pm$ 0.043 & 0.903 $\pm$ 0.013 & 0.25 $\pm$ 0.02 \\
+10514430 & 6.41 $\pm$ 0.85 & 0.0645 $\pm$ 0.023 & 4.08 $\pm$ 0.015 & 2.94 $\pm$ 0.17 & 1.62 $\pm$ 0.033 & 0.222 $\pm$ 0.021 \\
+10586004 & 4.75 $\pm$ 1.4 & 0.123 $\pm$ 0.09 & 4.1 $\pm$ 0.04 & 3.12 $\pm$ 0.27 & 1.71 $\pm$ 0.068 & 0.241 $\pm$ 0.021 \\
+10666592 & 2.02 $\pm$ 0.24 & 0.146 $\pm$ 0.032 & 4.02 $\pm$ 0.0065 & 5.79 $\pm$ 0.33 & 1.98 $\pm$ 0.019 & 0.29 $\pm$ 0.014 \\
+10963065 & 4.39 $\pm$ 0.61 & 0.165 $\pm$ 0.053 & 4.29 $\pm$ 0.0075 & 1.96 $\pm$ 0.1 & 1.24 $\pm$ 0.015 & 0.218 $\pm$ 0.03 \\
+11133306 & 4.12 $\pm$ 0.85 & 0.22 $\pm$ 0.079 & 4.32 $\pm$ 0.0095 & 1.72 $\pm$ 0.11 & 1.21 $\pm$ 0.021 & 0.222 $\pm$ 0.036 \\
+11295426 & 6.24 $\pm$ 0.77 & 0.085 $\pm$ 0.037 & 4.28 $\pm$ 0.0073 & 1.65 $\pm$ 0.096 & 1.26 $\pm$ 0.019 & 0.243 $\pm$ 0.012 \\
+11401755 & 5.58 $\pm$ 0.5 & 0.0436 $\pm$ 0.0087 & 4.04 $\pm$ 0.0081 & 3.46 $\pm$ 0.18 & 1.7 $\pm$ 0.026 & 0.21 $\pm$ 0.028 \\
+11807274 & 2.73 $\pm$ 1 & 0.297 $\pm$ 0.11 & 4.17 $\pm$ 0.025 & 3.55 $\pm$ 0.22 & 1.58 $\pm$ 0.038 & 0.215 $\pm$ 0.034 \\
+11853905 & 5.67 $\pm$ 0.7 & 0.0399 $\pm$ 0.022 & 4.11 $\pm$ 0.011 & 2.75 $\pm$ 0.17 & 1.62 $\pm$ 0.033 & 0.224 $\pm$ 0.022 \\
+11904151 & 9.68 $\pm$ 1.5 & 0.0787 $\pm$ 0.036 & 4.35 $\pm$ 0.0098 & 1.08 $\pm$ 0.062 & 1.07 $\pm$ 0.019 & 0.213 $\pm$ 0.025 \\
 \enddata
 \end{deluxetable}
 
@@ -425,51 +408,66 @@ We obtain classical observations and frequencies of the KAGES targets from \cite
     \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/kages-Luminosity.pdf}\hfill
     \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/kages-logg.pdf}\\
     \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/comparison/kages-Age.pdf}
-    \caption{Suggested KAGES masses, radii, luminosities, surface gravities, and ages of \emph{Kepler} objects-of-interest plotted against the predictions made here by machine learning (ML). Medians, 16\% quantiles, and 84\% quantiles are shown for each point. A dashed line of agreement is shown in both plots to guide the eye. The color of each point indicates roughly the sigma of disagreement between both methods, with black points indicating agreement and redder points indicating disagreement. }
+    \caption{Predicted masses, radii, luminosities, surface gravities, and ages of 33 Kepler objects-of-interest plotted against the suggested KAGES values. Medians, 16\% quantiles, and 84\% quantiles are shown for each point. A dashed line of agreement is shown in both plots to guide the eye. }
     \label{fig:us-vs-them}
 \end{figure*}
 
+We find a significant linear trend in the Kepler objects-of-interest between the diffusion factor and stellar mass needed to reproduce observations ($P = 0.00039$ from a two-sided t-test with $N-2=31$ degrees of freedom). Since the values of mass and diffusion factor are uncertain, an ordinary linear fit between them would be affected by regression dilution and hence result in biased estimates. We therefore use Deming regression to estimate the coefficients of this relation, which avoids the problem of attenuation bias \citep{deming1943statistical}. We show the fitted diffusion factors as a function of predicted stellar mass for all of these stars in Figure \ref{fig:diffusion}. A diffusion factor that linearly decreases with mass, i.e.~
+\begin{equation}
+    \text{D} = ( 8.88 \pm 2.12 ) - ( 5.79 \pm 1.56 ) \cdot \text{M}/\text{M}_\odot
+\end{equation}
+explains observations better than a diffusion factor that is constant for all stars (e.g.~D=1 or D=0). 
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{figs/diffusion/diffusion.pdf}
+    \caption{Diffusion factor as a function of stellar mass for 33 Kepler objects-of-interest, with D being shown in log space. A significant linear trend can be seen to exist between D and M. \label{fig:diffusion} } 
+\end{figure*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Discussion %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
-The amount of time it takes to predict the fundamental characteristics of a star can be decomposed into two parts: the amount of time it takes to calculate Monte Carlo perturbations to the observations, and the amount of time it takes to make a prediction on each perturbed set of observations. Hence we have
+The amount of time it takes to predict the fundamental characteristics of a star using a trained random forest can be decomposed into two parts: the amount of time it takes to calculate Monte Carlo perturbations to the observations, and the amount of time it takes to make a prediction on each perturbed set of observations. Hence we have
 \begin{equation}
     t = n(t_p + t_r)
 \end{equation}
-where $t$ is the total time, $n$ is the number of perturbations, $t_p$ is the time it takes to perform a single perturbation, and $t_r$ is the random forest regression time. We typically see times of $t_p \simeq 0.009 \si{\s}$ and $t_r \simeq 0.00007 \si{\s}$. Since we use $n=$10,000 in this work, we find in general a time of around a minute per star. Since each star can be processed independently in parallel, a computing cluster could process a catalog containing millions of objects in less than a day's time. Since $t_p >> t_r$, the calculation depends almost entirely on the time it takes to perturb the observations.\footnote{We note that our perturbation code uses an interpreted language (R), so it has room even still for many orders-of-magnitude of speed-up.} There is also a one-time cost of generating the matrix of training data, which took us roughly a day to run. Unless one wants to consider a different range of parameters or different input physics, however, the matrix does not need to be calculated again; this same matrix can be used for all future observations. 
+where $t$ is the total time, $n$ is the number of perturbations, $t_p$ is the time it takes to perform a single perturbation, and $t_r$ is the random forest regression time. We typically see times of $t_p = (7.9 \pm 0.7) \cdot 10^{-3}$ $(\si{\s})$ and $t_r = (1.8 \pm 0.4) \cdot 10^{-5}$ $(\si{\s})$. We chose a conservative $n=$10,000 for the results presented here, which results in a time of around a minute per star. Since each star can be processed independently in parallel, a computing cluster could feasibly process a catalog containing millions of objects in less than a day's time. Since $t_p >> t_r$, the calculation depends almost entirely on the time it takes to perturb the observations.\footnote{Our perturbation code uses an interpreted language (R), so it has room even still for more speed-up.} There is also a one-time cost of generating the matrix of training data, which took us roughly a day to run. Unless one wants to consider a different range of parameters or different input physics, however, the matrix does not need to be calculated again; this same matrix can be used for all future observations. Finally, there is also the one-time cost of training the random forest, which takes less than a minute and can be reused without retraining on every star. 
 
-Previously, \citet{pulone1997age} developed a neural network for predicting stellar age based on the star's position in the Hertzsprung-Russell diagram. More recently, \citet{2016arXiv160200902V} have worked on incorporating seismic information into that analysis as we have done here. Our method provides several advantages over both of these. Firstly, the random forests that we use perform constrained regression, meaning that the values we predict for quantities like age and mass will always be non-negative and within the bounds of the training data, which is not true of the neural networks-based approach that they take. Indeed, this can be readily seen by the fact that half of the values \citet{2016arXiv160200902V} predict are outside the bounds of their input grid. Secondly, we use averaged frequency separations which allows us to make predictions on any main-sequence solar-like star irrespective of which radial orders have been observed. In contrast, they consider only radial orders $n=16\ldots 19$, and therefore their network would need to be re-trained for any new star that is observed with a different (or even a sub-) set of radial orders than those. This leads to the next point: we have shown that our random forests are very fast to train, and can be retrained in only seconds for stars that are missing, for example, luminosity information. In contrast, deep neural networks are computationally intensive to train, taking days or even weeks to converge depending on the breadth of network topologies considered in the cross-validation. Their approach therefore provides no additional time benefit over the standard method of \emph{in-situ} optimization over an evolution path, and produces less precise values (see Section 3 of \citealt{2016arXiv160200902V}). Finally, our grid is varied in six parameters -- M, Y$_0$, Z$_0$, $\alpha_{\text{MLT}}$, $\alpha_{\text{ov}}$, and D -- whereas their grid considers a much more limited range of stellar physics. In particular, their grid does not include diffusion or overshooting calculations, and they consider only masses up to 1.1 M$_\odot$. As mentioned, including these higher mass ranges and more intricate physical calculations involves many challenges that we discussed at length in Section 2 and in the Appendices.
+Previously, \citet{pulone1997age} developed a neural network for predicting stellar age based on the star's position in the Hertzsprung-Russell diagram. More recently, \citet{2016arXiv160200902V} have worked on incorporating seismic information into that analysis as we have done here. Our method provides several advantages over these. Firstly, the random forests that we use perform constrained regression, meaning that the values we predict for quantities like age and mass will always be non-negative and within the bounds of the training data, which is not true of the neural networks-based approach that they take. Secondly, using \emph{averaged} frequency separations allows us to make predictions without need for concern over which radial orders were observed. Thirdly, we have shown that our random forests are very fast to train, and can be retrained in only seconds for stars that are missing observational constraints such as luminosities. In contrast, deep neural networks are computationally intensive to train, taking days or even weeks to converge depending on the breadth of network topologies considered in the cross-validation. Finally, our grid is varied in six parameters -- M, Y$_0$, Z$_0$, $\alpha_{\text{MLT}}$, $\alpha_{\text{ov}}$, and D, which allows our method to explore a wide range of stellar physics.
 
-%approached this problem by constructing a feed-forward neural network with three hidden layers to calculate stellar age, mass, initial composition and mixing length from frequencies with radial orders $n=16\ldots 19$. Since the radial orders are fixed, their method only works on stars with those particular radial orders observed (i.e.~currently only the Sun, 16 Cyg A, and 16 Cyg B). Their network would need to be re-trained for any new star that is observed with a different (or even a sub-) set of radial orders than those. Deep neural networks are computationally intensive to train, taking days or even weeks to converge depending on the breadth of network topologies considered in the cross-validation. This approach therefore provides no additional benefit in terms of time over the classical approach of \emph{in-situ} optimization over an evolution path, and has been seen to produce less precise values than the traditional method.% since it considers only a subset of the available information. 
-%Moreover, as mentioned earlier, neural networks solve an unconstrained rather than a constrained regression problem and can therefore yield non-physical solutions. 
 
-%Random forests of decision tree regressors that are trained to learn the relationships between fundamental parameters and averaged frequency separations and ratios avoid such complications. Since we consider $\nu_{\max}$-weighted median values of observables like the small frequency separation, we are not limited to any particular set of observed radial orders. As such, we are able to process all KAGES stars and regress the fundamental parameters for all of these objects. Furthermore, decision tree regressors learn the boundaries of the parameter space, and therefore will not predict non-physical values like a negative age. In addition, random forests do not need to cross-validate their internal architectures because each tree is constructed independently of each other tree, and additionally provide the opportunity to glean insight about the regression being performed, as we have shown. Finally, the training times of a random forest provides orders-of-magnitude improvement over a deep neural network, discovering the patterns in the inputs in only seconds. %In an unconstrained setting, neural networks could be preferential because of their ability to learn posterior distributions. However, being that inference of stellar parameters is a highly constrained regression problem, random forests are better suited for the task. 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Conclusions %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
-Here we have considered the constrained multiple-regression problem of inferring fundamental stellar parameters from observations. We created a grid of evolutionary tracks varied in mass, chemical composition, mixing length parameter, diffusion factor, and overshooting coefficient. We evolved them in time along the main sequence and collected classical properties as well as global statistics on the modes of oscillations from models along each evolutionary path. We trained a machine learning algorithm to discern the patterns that relate observations to stellar properties throughout all of the evolutionary tracks. We then applied this method to hare-and-hound exercise data, the Sun, 16 Cyg A and B, and thirty-two stars observed by \emph{Kepler}. We obtained in an instant precise initial stellar conditions as well as current-age values, which are vital for ensemble studies of the Galaxy. The retrodicted initial conditions like the mixing length parameter and overshoot coefficient can furthermore be used as strong priors when performing more detailed stellar modelling, e.g.~when obtaining a reference model for an inversion. Remarkably, we were able to empirically determine the value of the diffusion factor and hence the efficiency of diffusion required to reproduce the observations instead of inhibiting it \emph{ad hoc} for higher-mass stars as is often done. 
+Here we have considered the constrained multiple-regression problem of inferring fundamental stellar parameters from observations. We created a grid of evolutionary tracks varied in mass, chemical composition, mixing length parameter, diffusion factor, and overshooting coefficient. We evolved them in time along the main sequence and collected classical properties as well as global statistics on the modes of oscillations from models along each evolutionary path. We trained a machine learning algorithm to discern the patterns that relate observations to stellar properties throughout all of the evolutionary tracks. We then applied this method to hare-and-hound exercise data, the Sun, 16 Cyg A and B, and thirty-three stars observed by Kepler. We obtained in an instant precise initial stellar conditions as well as current-age values, which are vital for ensemble studies of the Galaxy. The retrodicted initial conditions like the mixing length parameter and overshoot coefficient can furthermore be used as strong priors when performing more detailed stellar modelling, e.g.~when obtaining a reference model for an inversion. Remarkably, we were able to empirically determine the value of the diffusion factor and hence the efficiency of diffusion required to reproduce the observations instead of inhibiting it \emph{ad hoc} for higher-mass stars as is often done. 
 
 We note that these estimates represent a set of choices in stellar physics, for which such a bias is impossible to rightfully propagate. Nevertheless, varying quantities that are usually kept fixed, such as the mixing length parameter, the diffusion factor, and the overshoot coefficient, takes us a step in the right direction. And finally, the fact that quantities such as stellar radii and luminosities -- quantities that have been measured accurately, not just precisely -- can be so faithfully reproduced by this method, gives a degree of confidence in its efficacy. 
 
-The method we have presented here is applicable to solar-like stars on the main sequence. We intend to extend this study to later stages of evolution. Such a task presents novel challenges, however, because the global statistics we have considered here, such as the small frequency separation, are less applicable in those later stages due to their mixed modes of oscillation. Therefore, new approaches and advances be needed for those stars. 
+The method we have presented here is only applicable to main-sequence stars. We intend to extend this study to later stages of evolution. 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Acknowledgements %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \acknowledgments The research leading to the presented results has received funding from the European Research Council under the European Community's Seventh Framework Programme (FP7/2007-2013) / ERC grant agreement no 338251 (StellarAges). This research was undertaken in the context of the International Max Planck Research School. 
 
-Analysis in this manuscript was performed with python3 libraries scikit-learn \citep{scikit-learn}, NumPy \citep{van2011numpy}, and pandas \citep{mckinney2010data}; the R software package \citep{R}; and the R libraries magicaxis \citep{magicaxis}, RColorBrewer \citep{RColorBrewer}, parallelMap \citep{parallelMap}, data.table \citep{data.table}, lpSolve \citep{lpSolve}, ggplot2 \citep{ggplot2}, GGally \citep{GGally}, scales \citep{scales}, and matrixStats \citep{matrixStats}. 
+Analysis in this manuscript was performed with python3 libraries scikit-learn \citep{scikit-learn}, NumPy \citep{van2011numpy}, and pandas \citep{mckinney2010data}; the R software package \citep{R}; and the R libraries magicaxis \citep{magicaxis}, RColorBrewer \citep{RColorBrewer}, parallelMap \citep{parallelMap}, data.table \citep{data.table}, lpSolve \citep{lpSolve}, ggplot2 \citep{ggplot2}, GGally \citep{GGally}, scales \citep{scales}, deming \citep{deming}, and matrixStats \citep{matrixStats}. 
 
 \appendix
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Grid strategy %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Initial grid strategy}
 \label{sec:grid}
-The initial conditions of a stellar model can be viewed as a 6-orthotope with dimensions M, Y$_0$, Z$_0$, $\alpha_{\text{MLT}}$, $\alpha_{\text{ov}}$, and D. In most experiments, only a subset of these dimensions are varied with the others either kept fixed at the solar value or turned off completely. Here we construct a grid of stellar models with all quantities varied simultaneously. Instead of varying the quantities in a linear fashion, however, we opt to construct a quasi-random grid of evolutionary tracks. 
+The initial conditions of a stellar model can be viewed as a 6-orthotope with dimensions M, Y$_0$, Z$_0$, $\alpha_{\text{MLT}}$, $\alpha_{\text{ov}}$, and D. In order to vary all of these parameters simultaneously, we construct a quasi-random grid of initial conditions. 
 
 A linear grid subdivides all dimensions in which initial quantities can vary into equal parts and creates a track of models for every combination of these subdivisions. Although in the limit such a strategy will eventually fill the hypercube of initial conditions, it does so very slowly. It is furthermore suboptimal in the sense that linear grids maximize redundant information, as each varied quantity is tried with the exact same values of all other parameters that have been considered already. In a high-dimensional setting, if any of the parameters are irrelevant to the task of the computation, then the majority of the tracks in a linear grid will not contribute any new information.
 
-A refinement on this approach is to create a grid of models with \emph{randomly} varied initial conditions. Such a strategy fills the space more rapidly, and furthermore solves the problem of redundant information. However, this approach suffers from a different problem: since the points are generated at random, they tend to ``clump up'' at random as well. This results in random gaps in the parameter space, which are obviously undesirable. 
+A refinement on this approach is to create a grid of models with randomly varied initial conditions. Such a strategy fills the space more rapidly, and furthermore solves the problem of redundant information. However, this approach suffers from a different problem: since the points are generated at random, they tend to ``clump up'' at random as well. This results in random gaps in the parameter space, which are obviously undesirable. 
 
 Therefore, in order to select points that do not stack, do not clump, and also fill the space as rapidly as possible, we generate Sobol numbers \citep{sobol1967distribution} in the unit 6-cube and map them to the parameter ranges of each quantity that we want to vary. Sobol numbers are a sequence of $m$-dimensional vectors $x_1 \ldots x_n$ in the unit hypercube $I^m$ constructed such that the integral of a real function $f$ in that space is equivalent in the limit to that function evaluated on those numbers, that is,
 \begin{equation}
@@ -479,15 +477,15 @@ with the sequence being chosen such that the convergence is achieved as quickly 
 
 \begin{figure*}
     \centering
-    \subfloat[Linear]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grid-linear.png}}}%
+    \subfloat[Linear]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grids/linear.png}}}%
     %\hfill
-    \subfloat[Random]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grid-random.png}}}%
+    \subfloat[Random]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grids/random.png}}}%
     %\hfill
-    \subfloat[Quasi-random]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grid-quasirandom.png}}}%
-    \caption{Results of different methods for generating multidimensional grids portrayed via a unit cube projected onto a unit square. Linear (left), random (middle), and quasi-random (right) grids are generated in three dimensions, with color depicting the third dimension, i.e., the distance between the reader and the screen. %Linear grids exhaust each dimension uniformly, but with all points stacked on top of each other, so the unit cube is filled very slowly and each point bears redundant information, which is why all of the (stacked) points appear black. Random grids fill the unit cube more rapidly, but points tend to clump up and leave large gaps in the parameter space. Quasi-random grids achieve the best of both worlds and fill the unit cube most rapidly by generating points that are maximally distant along all dimensions. 
-    From top to bottom, all three methods are shown with 100, 400, and 2000 points generated, respectively. }%
+    \subfloat[Quasi-random]{{\includegraphics[width=0.33\textwidth,keepaspectratio]{figs/grids/quasirandom.png}}}%
+    \caption{Results of different methods for generating multidimensional grids portrayed via a unit cube projected onto a unit square. Linear (left), random (middle), and quasi-random (right) grids are generated in three dimensions, with color depicting the third dimension, i.e., the distance between the reader and the screen. From top to bottom, all three methods are shown with 100, 400, and 2000 points generated, respectively. }%
     \label{fig:grids}
 \end{figure*}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Remeshing %%%%%%%%%%%%%%%%%
@@ -499,45 +497,38 @@ When performing element diffusion calculations in MESA, the surface abundance of
 
 \begin{figure}
     \centering
-    \subfloat[First iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/discontinuity-1.pdf}}}\\
-    \subfloat[Second iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/discontinuity-2.pdf}}}\\
-    \subfloat[Third iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/discontinuity-3.pdf}}}%
-    \caption{Surface abundance discontinuity detection and iterative remeshing for an evolutionary track in our grid. The detected discontinuities are encircled in red. The third iteration has no discontinuities and so this track is considered to have converged. }
+    \subfloat[First iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/diffusion/discontinuity-1.pdf}}}\\
+    \subfloat[Second iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/diffusion/discontinuity-2.pdf}}}\\
+    \subfloat[Third iteration]{{\includegraphics[width=0.5\linewidth,keepaspectratio]{figs/diffusion/discontinuity-3.pdf}}}%
+    \caption{Surface abundance discontinuity detection and iterative remeshing for an evolutionary track. The detected discontinuities are encircled in red. The third iteration has no discontinuities and so this track is considered to have converged. }
     \label{fig:discontinuity}
 \end{figure}
 
 Instead of being a physical reality, these effects arise only when there is insufficient mesh resolution in the outermost layers of the model. We therefore seek to detect these cases and re-run any such evolutionary track with finer mesh resolution. We consider a track an outlier if its surface hydrogen abundance changes by more than 0.01 in a single time-step. We iteratively re-run any track with outliers detected using a finer mesh resolution, and, if necessary, smaller time-steps, until convergence is reached. The process and a resolved track can also be seen in Figure \ref{fig:discontinuity}. 
 
-%To address this problem, we must devise a discontinuity detection scheme. %A function is smooth if its first derivative is continuous. %A jump discontinuity in a function causes an extreme value to occur in that function's first derivative. 
-%Hence, we first fit cubic splines to the surface hydrogen abundance $\text{X}_{\text{surf}}$ as a function of the star's age $\tau$. We then twice differentiate the spline along a million equally-spaced points in stellar age and consider whether any second derivatives are outliers. We define an outlier using robust statistics as any point whose absolute difference with the median is more than a million times the median absolute deviation (MAD) of the local derivatives, that is, if
+Some tracks still do not converge without surface abundance discontinuities despite the fineness of the mesh or the brevity of the time-steps. These troublesome evolutionary tracks seem to be located only located in a thin ridge of models having sufficient stellar mass (M > 1), a deficit of initial metals (Z < 0.001) and a specific inefficiency of diffusion (D ~ 0.01). A visualization of this can be seen in Figure \ref{fig:diffusion-gap}.
 
-%\begin{equation}
-%    \abs{
-%        \dv[2]{\text{X}_{\text{surf}}}{\tau} - 
-%        \text{median}\qty( \dv[2]{\text{X}_{\text{surf}}}{\tau} ) 
-%    } > 10^6 \cdot \text{MAD}\qty( \dv[2]{\text{X}_{\text{surf}}}{\tau} ) 
-%\end{equation}
-%where
-%\begin{equation}
-%    \text{MAD} \equiv \text{median}_{i}\left(\ \left| \text{X}_{i} - \text{median}_{j} (\text{X}_{j}) \right|\ \right).
-%\end{equation}
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/diffusion/FeH0_M_D.pdf}\hfill
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{figs/diffusion/Fe_H_M_D.pdf}
+    \caption{Stellar mass as a function of diffusion factor colored by initial surface metallicity (left) and final surface metallicity (right). A ridge of unconverged evolutionary tracks can be seen around a diffusion factor of 0.01. Beyond this ridge, tracks that were initially metal-poor end their main-sequence lives with all of their metals drained from their surfaces. } 
+    \label{fig:diffusion-gap}
+\end{figure*}
 
-
-%For the purposes of calculating gravitational settling on the near-surface layer, the surface is considered as not only the outermost cell, but also by accumulating the outermost cells of 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Model selection %%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Model selection}
 \label{sec:selection}
-In order to prevent statistical bias towards the evolutionary tracks that generate the most models, i.e.~the ones that require the most careful calculations and therefore use smaller time-steps, or those that live on the main sequence for a longer amount of time; we select $N=100$ models from each evolutionary track such that the models are as evenly-spaced in core-hydrogen abundance as possible. 
+In order to prevent statistical bias towards the evolutionary tracks that generate the most models, i.e.~the ones that require the most careful calculations and therefore use smaller time-steps, or those that live on the main sequence for a longer amount of time; we select $N=64$ models from each evolutionary track such that the models are as evenly-spaced in core-hydrogen abundance as possible. 
 
 Starting from the original vector of length $m$ of core-hydrogen abundances $\vec X$, we find the subset of length $m$ that is closest to the optimal spacing $\vec B$, where
 \begin{equation}
   \vec B \equiv \qty[
     X_T, 
     \ldots,
-    %\min\qty(\vec H)+\frac{\max\qty(\vec H)-\min\qty(\vec H)}{99},
     \frac{(m-i)\cdot X_T + X_Z}{m-1}, 
     \ldots, 
     X_Z
@@ -571,38 +562,60 @@ The indices of $\vec X$ that are most near to being equidistantly-spaced are the
     \label{fig:nearly-even}
 \end{figure*}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Model evaluation %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Evaluating the regressor}
+\label{sec:evaluation}
+In training the random forest regressor, we must determine how many evolutionary tracks $N$ to include, how many models $M$ to extract from each evolutionary track, and how many trees $T$ to use when growing the forest. As such it is useful to define measures of gauging the accuracy of the random forest so that we may evaluate it with different combinations of these parameters. 
+
+By far the most common way of measuring the quality of a random forest regressor is its so-called ``out-of-bag'' (OOB) score \citep[see section 3.1 of][]{breiman2001random}. While each tree is trained on only a subset (or ``bag'') of the stellar models, all trees are tested on all of the models that they did not see. This provides an accuracy score representing how well the forest will perform when predicting on observations that it has not seen yet. We can then use the metrics defined in Section \ref{sec:methods} to calculate oob scores. 
+
+However, such an approach to scoring is too optimistic in this scenario. Since a tree can get models from every simulation, predicting the attributes of a model when the tree has been trained on one of that model's neighbors leads to an artificially inflated oob score. This is especially the case for things like stellar mass, which do not change along the main sequence. A tree that has witnessed neighbors on either side of the model being predicted will have no error when predicting that model's mass, and hence the score will appear better than when predicting on real data.   
+
+Therefore, we opt instead to build validation sets containing entire tracks that are left out from the training of the random forest. We omit models and tracks in powers of two so that we may roughly maintain the regular spacing that we have established in our grid of models (refer back to Appendices \ref{sec:grid} and \ref{sec:selection} for details). We have already shown in Figure \ref{fig:evaluation-tracks} these cross-validated metrics as a function of the number of evolutionary tracks. In Figure \ref{fig:app-evaluation} we now show the explained variance score as a function of the number of trees in the forest and the number models obtained from each evolutionary track. Although more seems to be better for all quantities, we find that there is not much improvement after about $M=T=16$. 
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{figs/evaluation/num_points.pdf}\hfill
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{figs/evaluation/num_trees.pdf}
+    \caption{Explained variance of each stellar parameter as a function of the number of models per evolutionary track (left) and the number of trees used in training the random forest (right). \textbf{todo: remove mass_cc} } 
+    \label{fig:app-evaluation}
+\end{figure*}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Hare-and-Hound %%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Hare-and-Hound}
 \label{sec:hare-and-hound}
-Table \ref{tab:hnh-true} lists the true values of the Hare-and-Hound exercise performed here, and Table \ref{tab:hnh-perturb} lists the perturbed inputs that were supplied to the machine learning algorithm. 
+Table \ref{tab:hnh-true} lists the true values of the hare-and-hound exercise performed here, and Table \ref{tab:hnh-perturb} lists the perturbed inputs that were supplied to the machine learning algorithm. 
 
 \begin{deluxetable}{ccccccccccc}
 \tabletypesize{\scriptsize}
 %\rotate
-\tablecaption{True values for the Hare-and-Hound exercise. \label{tab:hnh-true}}
+\tablecaption{True values for the hare-and-hound exercise. \label{tab:hnh-true}}
 \tablewidth{0pt}
 \tablehead{\colhead{Model} & \colhead{R/R$_\odot$} & \colhead{M/M$_\odot$} & \colhead{$\tau$} & \colhead{T$_{\text{eff}}$} & \colhead{L/L$_\odot$} & \colhead{[Fe/H]} & \colhead{Y$_0$} & \colhead{$\nu_{\max}$} & \colhead{$\alpha_{\text{ov}}$} & \colhead{D}}\startdata
-0 & 1.705 & 1.303 & 3.725 & 6297.96 & 4.11 & 0.03 & 0.2520 & 1313.67 & 0 & 0 \\
-1 & 1.388 & 1.279 & 2.608 & 5861.38 & 2.04 & 0.26 & 0.2577 & 2020.34 & 0 & 0 \\
-2 & 1.068 & 0.951 & 6.587 & 5876.25 & 1.22 & 0.04 & 0.3057 & 2534.29 & 0 & 0 \\
-3 & 1.126 & 1.066 & 2.242 & 6453.57 & 1.98 & -0.36 & 0.2678 & 2429.83 & 0 & 0 \\
-4 & 1.497 & 1.406 & 1.202 & 6506.26 & 3.61 & 0.14 & 0.2629 & 1808.52 & 0 & 0 \\
-5 & 1.331 & 1.163 & 4.979 & 6081.35 & 2.18 & 0.03 & 0.2499 & 1955.72 & 0 & 0 \\
-6 & 0.953 & 0.983 & 2.757 & 5721.37 & 0.87 & -0.06 & 0.2683 & 3345.56 & 0 & 0 \\
-7 & 1.137 & 1.101 & 2.205 & 6378.23 & 1.92 & -0.31 & 0.2504 & 2483.83 & 0 & 0 \\
-8 & 1.696 & 1.333 & 2.792 & 6382.22 & 4.29 & -0.07 & 0.2555 & 1348.83 & 0 & 0 \\
-9 & 0.810 & 0.769 & 9.705 & 5919.70 & 0.72 & -0.83 & 0.2493 & 3563.09 & 0 & 0 \\
-10 & 1.399 & 1.164 & 6.263 & 5916.71 & 2.15 & 0.00 & 0.2480 & 1799.10 & 0.2 & 1 \\
-11 & 1.233 & 1.158 & 2.176 & 6228.02 & 2.05 & 0.11 & 0.2796 & 2247.53 & 0.2 & 1 \\
+0 & 1.705 & 1.303 & 3.725 & 6297.96 & 4.11 & 0.03 & 0.2520 & 1313.67 & No & No \\
+1 & 1.388 & 1.279 & 2.608 & 5861.38 & 2.04 & 0.26 & 0.2577 & 2020.34 & No & No \\
+2 & 1.068 & 0.951 & 6.587 & 5876.25 & 1.22 & 0.04 & 0.3057 & 2534.29 & No & No \\
+3 & 1.126 & 1.066 & 2.242 & 6453.57 & 1.98 & -0.36 & 0.2678 & 2429.83 & No & No \\
+4 & 1.497 & 1.406 & 1.202 & 6506.26 & 3.61 & 0.14 & 0.2629 & 1808.52 & No & No \\
+5 & 1.331 & 1.163 & 4.979 & 6081.35 & 2.18 & 0.03 & 0.2499 & 1955.72 & No & No \\
+6 & 0.953 & 0.983 & 2.757 & 5721.37 & 0.87 & -0.06 & 0.2683 & 3345.56 & No & No \\
+7 & 1.137 & 1.101 & 2.205 & 6378.23 & 1.92 & -0.31 & 0.2504 & 2483.83 & No & No \\
+8 & 1.696 & 1.333 & 2.792 & 6382.22 & 4.29 & -0.07 & 0.2555 & 1348.83 & No & No \\
+9 & 0.810 & 0.769 & 9.705 & 5919.70 & 0.72 & -0.83 & 0.2493 & 3563.09 & No & No \\
+10 & 1.399 & 1.164 & 6.263 & 5916.71 & 2.15 & 0.00 & 0.2480 & 1799.10 & Yes & Yes \\
+11 & 1.233 & 1.158 & 2.176 & 6228.02 & 2.05 & 0.11 & 0.2796 & 2247.53 & Yes & Yes \\
 \enddata
 \end{deluxetable}
 
 \begin{deluxetable}{ccccc}
 \tabletypesize{\scriptsize}
-%\rotate
-\tablecaption{Supplied (perturbed) inputs for the Hare-and-Hound exercise. \label{tab:hnh-perturb}}
+\tablecaption{Supplied (perturbed) inputs for the hare-and-hound exercise. \label{tab:hnh-perturb}}
 \tablewidth{0pt}
 \tablehead{\colhead{Model} & \colhead{T$_{\text{eff}}$} & \colhead{L/L$_\odot$} & \colhead{[Fe/H]} & \colhead{$\nu_{\max}$}}\startdata
 0 & 6236.96 $\pm$ 85 & 4.23 $\pm$ 0.12 & -0.03 $\pm$ 0.09 & 1397.87 $\pm$ 66 \\
@@ -626,4 +639,3 @@ Table \ref{tab:hnh-true} lists the true values of the Hare-and-Hound exercise pe
 
 
 \end{document}
-

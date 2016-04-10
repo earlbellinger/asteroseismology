@@ -11,7 +11,7 @@ library(GGally)
 library(scales)
 
 ## Load data
-combos <- read.table('initial_conditions.dat', 
+combos <- read.table(file.path('..', 'forward', 'initial_conditions.dat'), 
     col.names=c("M", "Y", "Z", "alpha", "overshoot", "diffusion"))
 
 log_vars <- c(3, 5, 6)
@@ -21,7 +21,7 @@ X <- 1-combos$Y-combos$Z
 
 # set up corner
 p = ggpairs(data=combos, axisLabels="show", upper="blank",
-        aes(color=X, size=0.1), 
+        aes(color=X, size=0.01), 
         columnLabels=sapply(names(combos)[1:6], 
             function (name) as.expression(get_label_nameless(name))))
 
@@ -73,6 +73,7 @@ for (ii in 1:6) {
         } else {
             pp <- pp + scale_y_continuous(breaks=number_ticks)
         }
+        pp <- pp + scale_size_area(range=c(1, 1))
         p <- putPlot(p, pp, ii, jj)
     }
 }

@@ -21,6 +21,10 @@ if len(argv) > 1:
 else:
     simulations_filename = os.path.join('..', 'forward', 'simulations.dat')
 
+out_dir = os.path.join('subsetter')
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+
 ### Load grid of models 
 raw = pd.read_csv(simulations_filename, sep='\t')
 exclude = "nu_max|radial_velocity"#|Dnu|dnu"#|Dnu_|dnu|slope"
@@ -28,15 +32,14 @@ exclude = "nu_max|radial_velocity"#|Dnu|dnu"#|Dnu_|dnu|slope"
 data = raw.drop([i for i in raw.columns if re.search(exclude, i)], axis=1)
 #data = data[data.M<1.2] ## only low mass
 
-Xs = ["Teff", "Fe/H", "log_g",
-      "Dnu0_median", "dnu02_median", 
-      "r_sep02_median", "r_avg10_median", "r_avg01_median"]
+Xs = ["Teff", "Fe/H", "log_g", "Dnu0", "dnu02", "r02", "r10", "r01"]
 ys = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
       'age', 'X_c', 'mass_cc', 'Y_surf', 'L', 'radius']
 
-num_trials = 20
+num_trials = 25
 points_per_track = sum(data['M']==data.loc[0][0])
 indices = np.arange(0, len(data), points_per_track)
+num_tracks = 2**(int(np.log2(len(data)/points_per_track)))
 
 #forest = ExtraTreesRegressor(#RandomForestRegressor(#
 #    n_estimators=128, n_jobs=62, oob_score=True, bootstrap=True)
@@ -51,7 +54,7 @@ def get_forest(X_names=Xs, y_names=ys, num_trees=128, data=data):
     end = time()
     return(rfr, end-start)
 
-def train_test_set(n_tracks=8192, m_points=32):
+def train_test_set(n_tracks=num_tracks, m_points=points_per_track):
     # pick out n+1 track ranges
     ranges = np.floor(np.linspace(0, len(indices), n_tracks+1))
     
@@ -92,6 +95,9 @@ def accuracy_per_precision_score(y_true, y_pred, y_stds):
                 y_stds[y_std] = 1
     return np.median(abs(y_true - y_pred) / y_stds)
 
+def absolute_difference_score(y_true, y_pred):
+    return np.median(abs(y_true - y_pred))
+
 def make_tests(var_name, rfr, validation):
     Xs_test = validation.loc[:, [x for x in Xs]]
     ys_true = validation.loc[:, [y for y in ys]]
@@ -101,41 +107,68 @@ def make_tests(var_name, rfr, validation):
     #ys_pred = np.mean(estimates, 0)
     ys_stds = np.std(estimates, 0)
     
+    result = ""
     for y_i in range(len(ys)):
         y_pred = ys_pred[:,y_i]
         y_stds = ys_stds[:,y_i]
         y_true = ys_true[ys[y_i]]
         
-        print(var_name, ys[y_i], 
-            r2_score(y_true, y_pred),
-            explained_variance_score(y_true, y_pred),
-            #percent_difference_score(y_true, y_pred),
-            accuracy_per_precision_score(y_true, y_pred, y_stds))
+        result += str(var_name) + " " + ys[y_i] + " " + \
+            str(r2_score(y_true, y_pred)) + " " + \
+            str(explained_variance_score(y_true, y_pred)) + " " + \
+            str(accuracy_per_precision_score(y_true, y_pred, y_stds)) + " " + \
+            str(absolute_difference_score(y_true, y_pred)) + "\n"
+        
+    return(result)
 
-### try with different amounts of tracks 
-print('n_tracks variable cv ev pd')
+def write(result, f):
+    print(result)
+    f.write(result)
+    f.flush()
+    os.fsync(f.fileno())
+
+### try with different amounts of tracks
+fname = os.path.join(out_dir, "num_tracks.dat")
+f = open(fname, 'w') 
+header = 'num_tracks variable r2 ev sigma diff'
+print(header)
+f.write(header + "\n")
 for n_tracks in [2**n for n in range(1, 
         int(np.log2(len(data)/points_per_track))+1)]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set(n_tracks=n_tracks)
         (rfr, train_time) = get_forest(data=tracks)
-        make_tests(n_tracks, rfr, validation)
+        result = make_tests(n_tracks, rfr, validation)
+        write(result, f)
+f.close()
 
 ### try with different models per track
-print('m_points variable cv ev pd')
+fname = os.path.join(out_dir, "num_points.dat")
+f = open(fname, 'w') 
+header = 'num_points variable r2 ev sigma diff'
+print(header)
+f.write(header + "\n")
 for m_points in [2**n for n in range(2, 1+int(np.log2(points_per_track)))]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set(m_points=m_points)
         (rfr, train_time) = get_forest(data=tracks)
-        make_tests(m_points, rfr, validation)
+        result = make_tests(m_points, rfr, validation)
+        write(result, f)
+f.close()
 
 ### try with different amounts of trees 
-print('num_trees variable cv ev pd')
+fname = os.path.join(out_dir, "num_trees.dat")
+f = open(fname, 'w') 
+header = 'num_trees variable r2 ev sigma diff'
+print(header)
+f.write(header + "\n")
 for num_trees in [2**n for n in range(0, 8)]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set()
         (rfr, train_time) = get_forest(data=tracks, num_trees=num_trees)
-        make_tests(num_trees, rfr, validation)
+        result = make_tests(num_trees, rfr, validation)
+        write(result, f)
+f.close()
 
 ### try with different amounts of trees for training time
 #print('num_trees train_time')

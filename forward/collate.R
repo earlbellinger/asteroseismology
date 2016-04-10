@@ -25,21 +25,21 @@ load_data <- function(filename, num_points=64, space_var='X_c') {
     #DF <- DF[DF['Fe/H'] > -8,]
     
     # clip PMS
-    decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
-    if (any(decreasing_L)) {
-        goes_back_up <- diff(decreasing_L) > 1
-        pms <- ifelse(any(goes_back_up), 
-                   which(goes_back_up)[1] + 1, 
-                   max(decreasing_L))
-        #print(paste(filename, "Clipping", pms, "points"))
-        DF <- DF[-1:-pms,]
-    }
+    #decreasing_L <- which(diff(DF$L) < 0 & DF$age[-1] < 0.25)
+    #if (any(decreasing_L)) {
+    #    goes_back_up <- diff(decreasing_L) > 1
+    #    pms <- ifelse(any(goes_back_up), 
+    #               which(goes_back_up)[1] + 1, 
+    #               max(decreasing_L))
+    #    #print(paste(filename, "Clipping", pms, "points"))
+    #    DF <- DF[-1:-pms,]
+    #}
     
     # detect outliers and remove them
     while (nrow(DF) > num_points) {
-       outliers <- abs(diff(DF$dnu02)) > 5  | abs(diff(DF$dnu13)) > 5  | 
-                   abs(diff(DF$r02))   > .1 | abs(diff(DF$r13))   > .1 | 
-                   abs(diff(DF$r01))   > .1 | abs(diff(DF$r10))   > .1
+       outliers <- abs(diff(DF$dnu02)) > 10 | abs(diff(DF$dnu13)) > 10 | 
+                   abs(diff(DF$r02))   > .2 | abs(diff(DF$r13))   > .2 | 
+                   abs(diff(DF$r01))   > .2 | abs(diff(DF$r10))   > .2
        if (any(outliers)) {
            print(paste(filename, "Rejecting", sum(outliers), "outliers"))
            DF <- DF[-(1+which(outliers)),]
@@ -48,7 +48,7 @@ load_data <- function(filename, num_points=64, space_var='X_c') {
     
     # set ZAMS age 
     DF$age <- DF$age - min(DF$age)
-    DF <- DF[DF$age <= 15,]
+    #DF <- DF[DF$age <= 15,]
     
     # solve linear transport problem to get equally-spaced points 
     x <- DF[[space_var]]
