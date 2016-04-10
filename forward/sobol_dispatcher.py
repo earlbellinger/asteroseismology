@@ -29,8 +29,8 @@ def main(arguments):
     parser.add_argument('-D', '--diffusion', default=[10**-6, 100], nargs=2,
                         type=float, 
                         help='range of diffusion factors')
-    parser.add_argument('-N', default=1000, help='number of tracks to generate',
-                        type=int)
+    parser.add_argument('-N', default=1000, type=int, 
+                        help='number of tracks to generate')
     parser.add_argument('-s', '--skip', default=20000, type=int,
                         help='offset for sobol numbers')
     parser.add_argument('-d', '--directory', default="simulations", type=str,
@@ -87,10 +87,10 @@ def dispatch(ranges, N, logs, threshold, directory, light=0, remove=0, skip=0,
                   [val for val in vals] + 
                   ["-L " if light else ""] +
                   ["-r " if remove else ""])
-        print(bash_cmd)
+        #print(bash_cmd)
         #exit()
-        subprocess.Popen(bash_cmd.split(), shell=False)
-        sleep(0.1)
+        #subprocess.Popen(bash_cmd.split(), shell=False)
+        #sleep(0.01)
     np.savetxt('initial_conditions.dat', np.array(init_conds))
 
 if __name__ == '__main__':

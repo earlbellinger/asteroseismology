@@ -11,11 +11,11 @@ export CONDOR_CONFIG=/opt/condor/default/etc/condor_config
 sleep 30
 
 ## hold and release jobs if other people are in the queue 
-if /opt/condor/default/bin/condor_q | # list all jobs 
-        grep -v "bellinger" | # find the ones that aren't mine 
-        grep -q " I "; then # find if any are inactive 
-    /opt/condor/default/bin/condor_hold -all
-    sleep 30
-    /opt/condor/default/bin/condor_release -all
-fi
+#if /opt/condor/default/bin/condor_q | # list all jobs 
+#        grep -v "bellinger" | # find the ones that aren't mine 
+#        grep -q " I "; then # find if any are inactive 
+#    /opt/condor/default/bin/condor_hold -all
+#    sleep 30
+#    /opt/condor/default/bin/condor_release -all
+#fi
 

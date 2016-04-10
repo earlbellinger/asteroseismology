@@ -7,9 +7,9 @@ source(file.path('..', 'scripts', 'utils.R'))
 
 library(magicaxis)
 
-cygA <- read.table(file.path('learn_covs-simulations-amp', 
+cygA <- read.table(file.path('learn', 'covs-simulations-amp', 
     'perturb', '16CygAamp.dat'), header=1)
-cygB <- read.table(file.path('learn_covs-simulations-amp', 
+cygB <- read.table(file.path('learn', 'covs-simulations-amp', 
     'perturb', '16CygBamp.dat'), header=1)
 
 metcalfe <- read.table(file.path('data', 'cyg.dat'), header=1)
@@ -70,7 +70,7 @@ plot_cygs <- function(name, cygA, cygB, ...,
     }
     
     if (name == "L") {
-        xlim[1] <- xlim[1] - xmean*0.2
+        xlim[1] <- xlim[1] - xmean*0.25
         xlim[2] <- xlim[2] + xmean*0.1
     }
     
@@ -102,20 +102,18 @@ plot_cygs <- function(name, cygA, cygB, ...,
     eps_B <- if (mean(cygB[[name]]) > 0)
         signif(sqrt(var(cygB[[name]])) / mean(cygB[[name]]) * 100, 3)
         else 0
-    uncertainties <- c(as.expression(bquote(epsilon == .( eps_A ) * "%")),
-                       as.expression(bquote(epsilon == .( eps_B ) * "%")))
+    uncertainties <- c(bquote(epsilon == .( eps_A ) * "%"),
+                       bquote(epsilon == .( eps_B ) * "%"))
     legend("right", bty='n', cex=text.cex, inset=c(-0.05, 0), 
-        text.col=c(red, blue), legend=uncertainties)
+        text.col=c(red, blue), legend=as.expression(uncertainties))
     if (has_other) {
         eps_Am <- signif(stds[1]/means[1]*100, 3)
         eps_Bm <- signif(stds[2]/means[2]*100, 3)
-        uncertainties <- c(
-            as.expression(bquote(epsilon[.(other_name)]==.( eps_Am )*"%")),
-            as.expression(bquote(epsilon[.(other_name)]==.( eps_Bm )*"%"))
-        )
+        uncertainties <- c(bquote(epsilon[.(other_name)]==.( eps_Am )*"%"),
+                           bquote(epsilon[.(other_name)]==.( eps_Bm )*"%"))
         legend("topright", bty='n', cex=text.cex, 
             inset=c(-.05, -0.15),#inset=c(-0.075, 0),
-            text.col=c(red, blue), legend=uncertainties)
+            text.col=c(red, blue), legend=as.expression(uncertainties))
     }
     
     if (show_legend) {
@@ -141,27 +139,33 @@ for (name in names(cygA)) {
         mgp.paper=utils.mgp, wide=F, tall=F)
 }
 
-cygA <- read.table(file.path('learn_covs-simulations', 'hares', '16CygA.dat'), 
+cygA <- read.table(
+        file.path('learn', 'covs-simulations', 'hares', '16CygA.dat'),
     header=1)
-cygB <- read.table(file.path('learn_covs-simulations', 'hares', '16CygB.dat'), 
+cygB <- read.table(
+        file.path('learn', 'covs-simulations', 'hares', '16CygB.dat'), 
     header=1)
 make_plots(plot_cygs, "cyg-radius", 
     filepath=file.path('plots', 'comparison'),
     name="radius", cygA=cygA, cygB=cygB, 
     mgp.paper=utils.mgp, wide=F, tall=F)
 
-cygA <- read.table(file.path('learn_covs-simulations', 'kages', '16CygA.dat'), 
+cygA <- read.table(
+        file.path('learn', 'covs-simulations', 'kages', '16CygA.dat'),
     header=1)
-cygB <- read.table(file.path('learn_covs-simulations', 'kages', '16CygB.dat'), 
+cygB <- read.table(
+        file.path('learn', 'covs-simulations', 'kages', '16CygB.dat'), 
     header=1)
 make_plots(plot_cygs, "cyg-L", 
-    filepath=file.path('plots', 'comparison'),
+    filepath=file.path('plots', 'comparison'), 
     name="L", cygA=cygA, cygB=cygB, 
     mgp.paper=utils.mgp, wide=F, tall=F)
 
-cygA <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygA.dat'),
+cygA <- read.table(
+        file.path('learn', 'covs-simulations', 'perturb', '16CygA.dat'), 
     header=1)
-cygB <- read.table(file.path('learn_covs-simulations', 'perturb', '16CygB.dat'),
+cygB <- read.table(
+        file.path('learn', 'covs-simulations', 'perturb', '16CygB.dat'), 
     header=1)
 for (name in c("Y_surf", "X_c", "alpha", "overshoot", "diffusion")) {
     make_plots(plot_cygs, paste0("cyg-", name), 

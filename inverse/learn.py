@@ -20,7 +20,7 @@ mpl.rc('text', dvipnghack='true')
 mpl.rcParams.update({'font.size': 16}) 
 import pylab as P
 from sys import argv
-#import corner
+import corner
 
 np.random.seed(seed=0) # for reproducibility
 
@@ -50,7 +50,7 @@ if not os.path.exists(table_dir):
 
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
+exclude = "nu_max|radial_velocity|mass_cc"#|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 
 maxs = data.max()
@@ -68,14 +68,14 @@ y_latex = {
     "overshoot": r"Overshoot $\alpha_{\mathrm{ov}}$", 
     "age": r"Age $\tau/$Gyr", 
     "radius": r"Radius R$/$R$_\odot$", 
-    "mass_X": r"Hydrogen mass-fraction X", 
-    "mass_Y": r"Helium mass-fraction Y",
+    "mass_X": r"Hydrogen mass X", 
+    "mass_Y": r"Helium mass Y",
     "X_surf": r"Surface hydrogen X$_{\mathrm{surf}}$", 
     "Y_surf": r"Surface helium Y$_{\mathrm{surf}}$",
-    "X_c": r"Core-hydrogen fraction X$_c$",
+    "X_c": r"Core-hydrogen X$_{\mathrm{c}}$",
     "log_g": r"Surface gravity log g (cgs)", 
     "L": r"Luminosity L$/$L$_\odot$",
-    "mass_cc": r"Convective core mass-fraction M$_{\mathrm{cc}}$"
+    "mass_cc": r"Convective-core mass M$_{\mathrm{cc}}$"
 }
 
 y_latex_short = {
@@ -98,7 +98,7 @@ y_latex_short = {
 }
 
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
-y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'mass_cc']
+y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf']
 
 def train_regressor(data, X_columns, y_show=y_init+y_curr):
     X = data.loc[:,X_columns]
@@ -161,30 +161,28 @@ def print_star(star, predict, y_names, table_curr, table_init):
     table_curr.write(currstr + r' \\')
     table_init.write(initstr + r' \\')
 
-def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
-    ## Corner plot
-    predict_cols = [i for i,y in enumerate(y_names) if y in y_show]
-    #truths = [np.NaN for i in range(len(predict_cols))]
-    #if star[:3] == 'Sun' or star[:10] == 'Tagesstern':
-    #    if y_show==y_init:
-    #        truths[0] = 1
-    #    else:
-    #        truths[0] = 4.57
-    figure = corner.corner(
-        predict[:,predict_cols], 
-        labels=[y_latex_short[y_name] for y_name in y_names
-                if y_name in y_show],
-        title_fmt='.2g',
-        #truths=truths,
-        quantiles=[0.16, 0.5, 0.84],
-        show_titles=True, 
-        fill_contours=True, ret=True, 
-        bins=50, smooth=1.0,
-        title_args={"fontsize": 12})
-    figure.set_size_inches(2*6.97522, 4*4.17309)
-    plt.savefig(os.path.join(out_dir, star + '-corner.pdf'))
-    plt.close()
-    
+def write_table_headers(y_names, table_curr, table_init):
+    print("Name\t"+"\t".join(y_names))
+    table_curr.write(
+        r"\tablehead{\colhead{Name} & "+\
+        ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
+                    for yy in y_names if yy in y_curr]) +\
+        r"}\startdata" )
+    table_init.write(
+        r"\tablehead{\colhead{Name} & "+\
+        ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
+                    for yy in y_names if yy in y_init]) +\
+        r"}\startdata" )
+
+def plot_line(value, n, bins, plt, style):
+    cands = bins > value
+    if any(cands):
+        height = n[np.where(bins > value)[0][0]-1]
+    else:
+        height = n[0]
+    plt.plot((value, value), (0, height), style)
+
+def plot_star(star, predict, y_names, out_dir=plot_dir):
     ## Regular histograms
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
@@ -207,26 +205,86 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, y_show=y_init):
             ax = plt.subplot2grid((rows, cols), (pred_j//2, (pred_j%2)*2),
                 colspan=2)
         
-        n, bins, patches = P.hist(predict[:,pred_j], 50, normed=1, 
+        n, bins, patches = ax.hist(predict[:,pred_j], 50, normed=1, 
             histtype='stepfilled', color='white')
-        y = P.normpdf(bins, m, s)
-        P.plot(bins, y, 'b--', linewidth=1.5)
+        
+        #if y_central is not None:
+        #    mean = np.mean(y_central[:,pred_j])
+        #    std = np.std(y_central[:,pred_j])
+        #    
+        #    plot_line(mean, n, bins, plt, 'r--')
+        #    plot_line(mean+std, n, bins, plt, 'r-.')
+        #    plot_line(mean-std, n, bins, plt, 'r-.')
+        
+        q_16, q_50, q_84 = corner.quantile(predict[:,pred_j], [0.16, 0.5, 0.84])
+        q_m, q_p = q_50-q_16, q_84-q_50
+        plot_line(q_50, n, bins, plt, 'k--')
+        plot_line(q_16, n, bins, plt, 'k-.')
+        plot_line(q_84, n, bins, plt, 'k-.')
+        
+        # Format the quantile display.
+        fmt = "{{0:{0}}}".format(".3g").format
+        title = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+        title = title.format(fmt(q_50), fmt(q_m), fmt(q_p))
         
         ax.annotate(r"$\epsilon = %.3g\%%$" % (s/m*100),
-            xy=(0.5, 0.125), xycoords='axes fraction',
-            horizontalalignment='center', verticalalignment='center')
+            xy=(0.99, 0.12), xycoords='axes fraction',
+            horizontalalignment='right', verticalalignment='right')
         
-        P.xlabel(y_latex[y_names[pred_j]])
+        P.xlabel(y_latex[y_names[pred_j]] + " = " + title)
         P.locator_params(axis='x', nbins=3)
+        
+        xs = [max(0, m-4*s), m+4*s]
+        
         xticks = [max(0, m-3*s), m, m+3*s]
         ax.set_xticks(xticks)
-        ax.set_xlim([max(0, m-4*s), m+4*s])
+        ax.set_xlim(xs)
         ax.set_xticklabels(['%.3g'%xtick for xtick in xticks])
         ax.set_yticklabels('',visible=False)
-        ax.minorticks_on()
+        
+        ax.set_frame_on(False)
+        ax.get_xaxis().tick_bottom()
+        ax.axes.get_yaxis().set_visible(False)
+        
+        #xmin, xmax = ax1.get_xaxis().get_view_interval()
+        ymin, ymax = ax.get_yaxis().get_view_interval()
+        ax.add_artist(mpl.lines.Line2D(xs, (ymin, ymin), 
+            color='black', linewidth=2))
+        
+        #ax.minorticks_on()
         plt.tight_layout()
     
-    plt.savefig(os.path.join(out_dir, star + '.png'), dpi=400)
+    plt.savefig(os.path.join(out_dir, star + '.pdf'), dpi=400)
+    plt.close()
+
+def plot_importances(forest, cov_dir, basename, X_names):
+    est = forest.steps[0][1]
+    importances = est.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    import_dist = np.array([tree.feature_importances_ 
+        for tree in est.estimators_])
+    
+    np.savetxt(os.path.join(cov_dir, 'feature-importance-' + \
+            basename + '.dat'),
+        import_dist, header=" ".join(X_names), comments='')
+    
+    import_dist = import_dist.T[indices][::-1].T
+    
+    print("Feature ranking:")
+    for f in range(len(X_names)):
+        print("%d. %s (%.3g)" % (f+1, X_names[indices[f]], 
+            importances[indices[f]]))
+    print()
+    
+    mpl.rc('text', usetex='false') 
+    plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
+    plt.boxplot(import_dist, vert=0)
+    plt.yticks(range(1,1+len(X_names)),
+               np.array(X_names)[indices][::-1])
+    plt.xlabel("Feature importance")
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_dir, 'feature_importance-' + \
+        basename + '.pdf'))
     plt.close()
 
 def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
@@ -271,47 +329,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             out = train_regressor(data, X_columns)
             forest, y_names, X_names = out
             
-            ## Plot importances
-            est = forest.steps[0][1]
-            importances = est.feature_importances_
-            indices = np.argsort(importances)[::-1]
-            import_dist = np.array([tree.feature_importances_ 
-                for tree in est.estimators_])
-            
-            np.savetxt(os.path.join(cov_dir, 'feature-importance-' + \
-                    basename + '.dat'),
-                import_dist, header=" ".join(X_names), comments='')
-            
-            import_dist = import_dist.T[indices][::-1].T
-            
-            print("Feature ranking:")
-            for f in range(len(X_names)):
-                print("%d. %s (%.3g)" % (f+1, X_names[indices[f]], 
-                    importances[indices[f]]))
-            
-            mpl.rc('text', usetex='false') 
-            plt.figure(figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-            plt.boxplot(import_dist, vert=0)
-            plt.yticks(range(1,1+len(X_names)),
-                       np.array(X_names)[indices][::-1])
-            plt.xlabel("Feature importance")
-            plt.tight_layout()
-            plt.savefig(os.path.join(plot_dir, 'feature_importance-' + \
-                basename + '.pdf'))
-            plt.close()
-            
-            print()
-            print("Name\t"+"\t".join(y_names))
-            table_curr.write(
-                r"\tablehead{\colhead{Name} & "+\
-                ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
-                            for yy in y_names if yy in y_curr]) +\
-                r"}\startdata" )
-            table_init.write(
-                r"\tablehead{\colhead{Name} & "+\
-                ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
-                            for yy in y_names if yy in y_init]) +\
-                r"}\startdata" )
+            plot_importances(forest, cov_dir, basename, X_names)
+            write_table_headers(y_names, table_curr, table_init)
         
         ## check that it has all of the right columns
         if not set(X_names).issubset(set(star_data.columns)):
@@ -333,6 +352,7 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             outside += [(star, X_name)]
             continue
         
+        ## predict values
         star_X = star_data.loc[:,X_names]
         start = time()
         predict = forest.predict(star_X)
@@ -345,6 +365,11 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             header=" ".join(y_names), comments='')
         print_star(star, predict, y_names, table_curr, table_init)
         #plot_star(star+"_init", predict, y_names, out_dir)
+        
+        #X_central = star_X.iloc[0,:]
+        #y_central = np.array([estimator.predict(X_central.reshape(1, -1))[0] 
+        #                      for estimator in forest.steps[0][1].estimators_])
+        plot_star(star, predict, y_names, out_dir)#, y_central)
         #plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
     
     table_curr.close()

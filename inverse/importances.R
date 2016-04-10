@@ -9,12 +9,13 @@ library(magicaxis)
 library(lattice)
 library(grid)
 
-dat.cyg <- read.table(file.path('learn_covs', 'feature-importance-perturb.dat'),
+covs_dir <- file.path('learn', 'covs-simulations')
+dat.cyg <- read.table(file.path(covs_dir, 'feature-importance-perturb.dat'), 
     header=1)
-dat.kages <- read.table(file.path('learn_covs', 
-    'feature-importance-kages.dat'), header=1)
-dat.hares <- read.table(file.path('learn_covs', 
-    'feature-importance-basu.dat'), header=1)
+dat.kages <- read.table(file.path(covs_dir, 'feature-importance-kages.dat'), 
+    header=1)
+dat.hares <- read.table(file.path(covs_dir, 'feature-importance-basu.dat'), 
+    header=1)
 
 make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
         label=FALSE) {
@@ -25,11 +26,13 @@ make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
     col.pal <- adjustcolor(colorRampPalette(c(blue, red, "black"))(1001)[1+1000*
             sapply(DF, mean)], alpha=0.75)
     
-    boxplot(DF, horizontal=1, las=1, pch=20, cex=0.1, col=col.pal, range=1000,
+    boxplot(DF, horizontal=1, las=1, pch=20, cex=0.1, #col=col.pal, 
+        range=1000,
         ylim=if (label != FALSE) 
                  range(0, round(dat.kages*1.01, 2), round(dat.hares*1.01, 2))
              else range(0, round(DF*1.01, 2)), 
-        border="black", outcol="black", medcol="white", medlwd=1, yaxs='i',
+        #border="black", outcol="black", medcol="white", 
+        medlwd=1, yaxs='i',
         xlab="Feature importance", xaxt='n', tcl=0, cex.axis=text.cex,
         names=as.expression(unlist(Map(function(x) seis.labs[x], 
             names(DF))))
@@ -46,7 +49,7 @@ make_plots(make_boxplot, 'importances-perturb',
     mar=c(3, 5, 1, 1), dat=dat.cyg)
 make_plots(make_boxplot, 'importances-kages', 
     filepath=file.path('plots', 'importances'),
-    mar=c(3, 5, 1, 1), dat=dat.kages, label="KAGES")
+    mar=c(3, 5, 1, 1), dat=dat.kages, label="KOI")
 make_plots(make_boxplot, 'importances-hares', 
     filepath=file.path('plots', 'importances'),
     mar=c(3, 5, 1, 1), dat=dat.hares, label="Hare and Hound")

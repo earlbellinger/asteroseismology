@@ -15,12 +15,12 @@ col.pal <- c('black', 'black', blue, '#900090', red)
 #############################################################
 kages <- read.table(file.path('data', 'kages.dat'), header=1)
 
-data_dir <- file.path('learn_covs-simulations', 'kages')
-ml <- do.call(plyr:::rbind.fill, Map(function(cov) {
-        name <- sub('.dat', '', basename(cov))
+data_dir <- file.path('learn', 'covs-simulations', 'kages')
+ml <- do.call(plyr:::rbind.fill, Map(function(covs) {
+        name <- sub('.dat', '', basename(covs))
         if (!name %in% kages$KIC) 
             return(NULL)
-        DF <- read.table(cov, header=1)
+        DF <- read.table(covs, header=1)
         data.frame(Name = as.integer(name),
                    Age = median(DF$age),
                    dAgeL = median(DF$age) - quantile(DF$age, .16),
@@ -58,7 +58,6 @@ ml <- do.call(plyr:::rbind.fill, Map(function(cov) {
                    dovL = median(DF$overshoot) - quantile(DF$overshoot, .16),
                    dovH = quantile(DF$overshoot, .84) - median(DF$overshoot),
                    ov_s = sqrt(var(DF$overshoot))
-                   #dAge = sqrt(var(DF$age))
                   )
     }, file.path(data_dir, list.files(data_dir)) ))
 
@@ -75,18 +74,6 @@ plot_comparison <- function(qty, ...,
                      ml[[qty]]-ml[[low]], 
                      ml[[qty]]+ml[[high]])
     
-    #ml.sigma <- (ml[[qty]] * (ml[[high]]-ml[[low]])) / 2
-    #kg.sigma <- (kages[[qty]] * (kages[[high]]-kages[[low]])) / 2
-    sigma <- ml[[paste0(qty, '_s')]] + 
-        ((kages[[qty]]+kages[[high]]) - (kages[[qty]]-kages[[low]])) / 2
-    distance <- abs(ml[[qty]] - kages[[qty]]) / sigma
-    #distance <- if (distance<2*ml.sigma) 0 else distance
-    #dist2 <- abs(ml[[qty]] - kages[[qty]]) / kg.sigma
-    #distance <- (dist1+dist2)/2
-    #col.pal <- colorRampPalette(c(red, 'black'))(100)
-    distance <- ifelse(distance > 5, 5, 1+floor(distance))
-    #col.pal <- c('black', 'black', blue, 'darkred', red)
-    
     name <- if (qty == 'Age') { 'age'
     } else if (qty == 'Mass') { 'M'
     } else if (qty == 'Luminosity') { 'L'
@@ -98,17 +85,21 @@ plot_comparison <- function(qty, ...,
     abline(coef=c(0,1), lty=2)
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
-    arrows(ml[[qty]]-ml[[low]], kages[[qty]], 
-           ml[[qty]]+ml[[high]], kages[[qty]], 
-        length=0, angle=90, code=3, col="darkgray")
-    arrows(ml[[qty]], kages[[qty]]-kages[[low]], 
-           ml[[qty]], kages[[qty]]+kages[[high]], 
-        length=0, angle=90, code=3, col="darkgray")
-    points(kages[[qty]] ~ ml[[qty]], pch=1, cex=0.5)#, 
-        #col=col.pal[distance])
-        #[1+floor(99*dnorm(distance)/dnorm(0))])
-    title(xlab=bquote("ML"~.(get_label(name))))
-    title(ylab=bquote("KAGES"~.(get_label_nameless(name))))
+    arrows(kages[[qty]]-kages[[low]],  ml[[qty]], 
+           kages[[qty]]+kages[[high]], ml[[qty]], 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    arrows(kages[[qty]], ml[[qty]]-ml[[low]], 
+           kages[[qty]], ml[[qty]]+ml[[high]], 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    #arrows(ml[[qty]]-ml[[low]], kages[[qty]], 
+    #       ml[[qty]]+ml[[high]], kages[[qty]], 
+    #    length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    #arrows(ml[[qty]], kages[[qty]]-kages[[low]], 
+    #       ml[[qty]], kages[[qty]]+kages[[high]], 
+    #    length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(ml[[qty]] ~ kages[[qty]], pch=1, cex=0.5)
+    title(xlab=bquote("KAGES"~.(get_label(name))))
+    title(ylab=bquote("ML"~.(get_label_nameless(name))))
 }
 
 for (qty in c("Age", "Mass", "Luminosity", "Radius", "logg")) {
@@ -128,51 +119,47 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
     abline(h=1, lty=2)
     arrows(ml$Mass, ml$D-ml$dDL, 
            ml$Mass, ml$D+ml$dDH, 
-        length=0, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     arrows(ml$Mass-ml$dMassL, ml$D,
            ml$Mass+ml$dMassH, ml$D,
-        length=0, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     points(ml$D ~ ml$Mass)
-    #    col=colorRampPalette(c(blue, 'black', red))(1000)[
-    #        floor(999*normalize(ml$Y)+1)])
-    #brewer.pal(10, "Spectral")[floor(9*normalize(ml$ov)+1)])
-    #col=col.pal[distance])
     
     title(xlab=get_label("M"))
     title(ylab=get_label("diffusion"))
     
-    mdl <- deming(D~Mass, data=ml, xstd=Mass_s, ystd=D_s, conf=.68) 
-    #lm(D ~ Mass, data=ml)
-    #coefs <- summary(mdl)$coefficients
-    abline(mdl, untf=T)
+    mdl <- deming(D~Mass, data=ml, xstd=Mass_s, ystd=D_s) 
     
-    #newMs <- seq(0.7, 1.6, 0.01)
-    #lower <- mdl$ci[[1]] + mdl$ci[[2]] * newMs
-    #upper <- mdl$ci[[3]] + mdl$ci[[4]] * newMs
-    #lines(newMs, lower, lty=3)
-    #lines(newMs, upper, lty=3)
-    #prd <- predict(mdl, newdata=data.frame(Mass=newMs), 
-    #    interval=c('confidence'), level=0.99, type='response')
-    #prd[prd<0] <- 10**-10
-    #lines(newMs, prd[,2], col='black', lty=3)
-    #lines(newMs, prd[,3], col='black', lty=3)
+    #abline(mdl, untf=T)
     
-    #legend("bottomleft", col=c(col.pal[2:5], 1, 1), pch=c(1,1,1,1,NA,NA), 
-    #       cex=text.cex,
-    #       lty=c(NA,NA,NA,NA,2,1), bty='n',
-    #       legend=expression(""<2*sigma ~ "(consistent with D=1)",
-    #           ""<3*sigma, ""<4*sigma, "">=4*sigma,
-    #           D==1, D==(4.15%+-%0.55)-(2.7%+-%0.46)%*%M))
-    legend("bottomleft", cex=text.cex, pch=c(3, NA, NA), #bty='n', 
-           lty=c(NA,2,1), col=c("darkgray", "black", "black"),
+    slope <- mdl[[1]][[2]]
+    slope.se <- sqrt(mdl$variance[[4]])#/sqrt(nrow(ml))
+    print(paste("P-value:", pt(slope / slope.se, mdl$n-2)))
+    
+    intercept <- mdl[[1]][[1]]
+    M.new <- seq(0.7, 1.6, 0.001)
+    D.new <- slope * M.new + intercept
+    D.new[D.new < 0] <- 10^-10
+    lines(D.new ~ M.new)
+    
+    intercept.se <- sqrt(mdl$variance[[1]])
+    
+    cat(paste("\\text{D} = (", 
+        signif(intercept, 3),      "\\pm", signif(intercept.se, 3), 
+        ")", ifelse(slope>=0, "+", "-"), "(", 
+        abs(signif(slope,     3)), "\\pm", signif(slope.se,     3), 
+        ") \\cdot \\text{M}/\\text{M}_\\odot\n"))
+    
+    legend("bottomleft", cex=text.cex, pch=c(3, NA, NA), bty='n', 
+           inset=c(0.02, 0.01), 
+           lty=c(NA,2,1), col=c("darkgray", "black", "black"), 
            legend=c("KOIs", expression(D==1), 
         bquote(D==
             .(signif(mdl$coefficients[1],3)) -
             .(abs(signif(mdl$coefficients[2],3)))%*%M)))
-            #(.(signif(coefs[[1]],3)) %+-% .(signif(coefs[[3]],3))) -
-            #(.(abs(signif(coefs[[2]],3))) %+-% .(signif(coefs[[4]],3)))%*%M)))
-    legend("bottomleft", cex=text.cex, pch=c(1,NA,NA), legend=c("","",""), 
-        bty='n', lty=c(NA,NA,1))
+    legend("bottomleft", inset=c(0.02, 0.01), 
+        cex=text.cex, pch=c(1,NA,NA), legend=c("","",""), 
+        lty=c(NA,NA,1), bty='n')
     
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
@@ -181,82 +168,103 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
 make_plots(plot_diffusion, paste0('diffusion'),
      filepath=file.path('plots', 'comparison'))
 
-#############################################################
-### Comparison with Hare-and-Hound ##########################
-#############################################################
+#######################################################################
+### Comparison with Sarbani's Hare-and-Hound ##########################
+#######################################################################
+age_mass_radius <- function(covs) {
+    name <- sub('.dat', '', basename(covs))
+    if (!name %in% basu$Model) 
+        return(NULL)
+    DF <- read.table(covs, header=1)
+    data.frame(
+        Name         = as.integer(name),
+        Age          = median(DF$age),
+        dAgeL        = median(DF$age) - quantile(DF$age, .16),
+        dAgeH        = quantile(DF$age, .84) - median(DF$age),
+        Age_s        = sqrt(var(DF$age)),
+        Mass         = median(DF$M),
+        dMassL       = median(DF$M) - quantile(DF$M, .16),
+        dMassH       = quantile(DF$M, .84) - median(DF$M),
+        Mass_s       = sqrt(var(DF$M)),
+        Radius       = median(DF$radius),
+        dRadiusL     = median(DF$radius) - quantile(DF$radius, .16),
+        dRadiusH     = quantile(DF$radius, .84) - median(DF$radius),
+        Radius_s     = sqrt(var(DF$radius))
+    )
+}
+
 basu <- read.table(file.path('data', 'basu.dat'), header=1)
-data_dir <- file.path('learn_covs-simulations', 'basu')
-ml <- do.call(plyr:::rbind.fill, Map(function(cov) {
-        name <- sub('.dat', '', basename(cov))
-        if (!name %in% basu$Model) 
-            return(NULL)
-        DF <- read.table(cov, header=1)
-        data.frame(
-            Name         = as.integer(name),
-            Age          = median(DF$age),
-            dAgeL        = median(DF$age) - quantile(DF$age, .16),
-            dAgeH        = quantile(DF$age, .84) - median(DF$age),
-            Age_s        = sqrt(var(DF$age)),
-            Mass         = median(DF$M),
-            dMassL       = median(DF$M) - quantile(DF$M, .16),
-            dMassH       = quantile(DF$M, .84) - median(DF$M),
-            Mass_s       = sqrt(var(DF$M)),
-            Radius       = median(DF$radius),
-            dRadiusL     = median(DF$radius) - quantile(DF$radius, .16),
-            dRadiusH     = quantile(DF$radius, .84) - median(DF$radius),
-            Radius_s     = sqrt(var(DF$radius)),
-            Overshoot    = median(DF$overshoot),
-            dOvershootL  = median(DF$overshoot) - quantile(DF$overshoot, .16),
-            dOvershootH  = quantile(DF$overshoot, .84) - median(DF$overshoot),
-            Overshoot_s  = sqrt(var(DF$overshoot)),
-            Diffusion    = median(DF$diffusion),
-            dDiffusionL  = median(DF$diffusion) - quantile(DF$diffusion, .16),
-            dDiffusionH  = quantile(DF$diffusion, .84) - median(DF$diffusion),
-            Diffusion_s  = sqrt(var(DF$diffusion))
-        )
-    }, file.path(data_dir, list.files(data_dir)) )
-)
+data_dir <- file.path('learn', 'covs-simulations', 'basu')
+ml <- do.call(plyr:::rbind.fill, Map(age_mass_radius, 
+    file.path(data_dir, list.files(data_dir))))
 
 basu <- basu[basu$Model %in% ml$Name,]
 basu <- basu[order(basu$Model),]
 ml <- ml[order(ml$Name),]
 
-plot_comparison <- function(qty, ..., 
+plot_comparison <- function(qty, other=basu, ..., 
         text.cex=1, mgp=utils.mgp, font='Palatino') {
     low <- paste0('d', qty, 'L')
     high <- paste0('d', qty, 'H')
-    lims <- range(basu[[qty]], ml[[qty]]-ml[[low]], ml[[qty]]+ml[[high]])
-    
-    #ml.sigma <- (ml[[qty]] * (ml[[high]] - -ml[[low]])) / 2
-    ml.sigma <- ml[[paste0(qty, '_s')]]
-    distance <- abs(ml[[qty]] - basu[[qty]]) / ml.sigma
-    distance <- ifelse(distance > 5, 5, 1+floor(distance))
-    #distance <- if (distance<2*ml.sigma) 0 else distance
-    #col.pal <- colorRampPalette(c('black', 'black', blue, 'darkred', red))(100)
-    #col.pal <- c('black', 'black', blue, 'darkred', red)
+    lims <- range(other[[qty]], 
+                  ml[[qty]]-ml[[low]], 
+                  ml[[qty]]+ml[[high]])
     
     name <- if (qty == 'Age') { 'age'
      } else if (qty == 'Mass') { 'M'
      } else if (qty == 'Overshoot') { 'overshoot'
      } else if (qty == 'Radius') { 'radius'
      } else if (qty == 'Diffusion') { 'diffusion' }
+     else { qty }
     
     plot(NA, axes=F, ylab="", xlab="", xlim=lims, ylim=lims)
     abline(coef=c(0,1), lty=2)
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
-    arrows(basu[[qty]], ml[[qty]]-ml[[low]], 
-           basu[[qty]], ml[[qty]]+ml[[high]], 
-        length=0, angle=90, code=3, col="darkgray")
-    points(ml[[qty]] ~ basu[[qty]], pch=1, cex=0.75, 
-        col=col.pal[distance])#[1+floor(99*dnorm(distance)/dnorm(0))])
-    title(ylab=bquote("ML"~.(get_label_nameless(name))))
-    title(xlab=bquote("Hare-and-Hound"~.(get_label(name))))
+    arrows(other[[qty]], ml[[qty]]-ml[[low]], 
+           other[[qty]], ml[[qty]]+ml[[high]], 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(ml[[qty]] ~ other[[qty]], pch=1, cex=0.5)
+    title(ylab=bquote("Predicted"~.(get_label_nameless(name))))
+    title(xlab=bquote("True"~.(get_label(name))))
 }
 
-for (qty in c("Age", "Mass", "Overshoot", "Radius", "Diffusion")) {
+for (qty in c("Age", "Mass", "Radius")) {
     make_plots(plot_comparison, paste0('basu-', qty),
          filepath=file.path('plots', 'comparison'),
          qty=qty)
+}
+
+######################################################################
+### Comparison with SpaceInn Hare-and-Hound ##########################
+######################################################################
+hares <- read.table(file.path('data', 'hares.dat'), header=1)
+data_dir <- file.path('learn', 'covs-simulations', 'hares')
+ml <- do.call(plyr:::rbind.fill, Map(function(covs) {
+        name <- sub('.dat', '', basename(covs))
+        if (!name %in% hares$Model) 
+            return(NULL)
+        DF <- read.table(covs, header=1)
+        results <- data.frame(Name=name)
+        for (column in names(hares)[-1]) {
+            vals <- DF[,column]
+            result <- data.frame(median(vals), 
+                                 median(vals) - quantile(vals, .16), 
+                                 quantile(vals, .84) - median(vals))
+            colnames(result) <- c(column, 
+                                  paste0('d', column, 'L'),
+                                  paste0('d', column, 'H'))
+            results <- cbind(results, result)
+        }
+        results
+    }, 
+    file.path(data_dir, list.files(data_dir))))
+hares <- hares[hares$Model %in% ml$Name,]
+hares <- hares[order(hares$Model),]
+ml <- ml[order(ml$Name),]
+for (qty in names(hares)[-1]) {
+    make_plots(plot_comparison, paste0('hares-', qty),
+         filepath=file.path('plots', 'comparison'),
+         qty=qty, other=hares)
 }
 
