@@ -27,14 +27,14 @@ if not os.path.exists(out_dir):
 
 ### Load grid of models 
 raw = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity"#|Dnu|dnu"#|Dnu_|dnu|slope"
+exclude = "nu_max|radial_velocity|mass_cc"#|Dnu|dnu"#|Dnu_|dnu|slope"
 #|mass_cc"#|H|mass|X|surf"#|H|He"
 data = raw.drop([i for i in raw.columns if re.search(exclude, i)], axis=1)
 #data = data[data.M<1.2] ## only low mass
 
 Xs = ["Teff", "Fe/H", "log_g", "Dnu0", "dnu02", "r02", "r10", "r01"]
 ys = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
-      'age', 'X_c', 'mass_cc', 'Y_surf', 'L', 'radius']
+      'age', 'X_c', 'Y_surf', 'L', 'radius']
 
 num_trials = 25
 points_per_track = sum(data['M']==data.loc[0][0])
@@ -44,7 +44,7 @@ num_tracks = 2**(int(np.log2(len(data)/points_per_track)))
 #forest = ExtraTreesRegressor(#RandomForestRegressor(#
 #    n_estimators=128, n_jobs=62, oob_score=True, bootstrap=True)
 
-def get_forest(X_names=Xs, y_names=ys, num_trees=128, data=data):
+def get_forest(X_names=Xs, y_names=ys, num_trees=512, data=data):
     forest = ExtraTreesRegressor(#RandomForestRegressor(#
         n_estimators=num_trees, n_jobs=32, bootstrap=True)
     X = data.loc[:, [i for i in X_names]]
@@ -162,7 +162,7 @@ f = open(fname, 'w')
 header = 'num_trees variable r2 ev sigma diff'
 print(header)
 f.write(header + "\n")
-for num_trees in [2**n for n in range(0, 8)]:
+for num_trees in [2**n for n in range(0, 10)]:
     for trial_i in range(num_trials):
         (tracks, validation) = train_test_set()
         (rfr, train_time) = get_forest(data=tracks, num_trees=num_trees)

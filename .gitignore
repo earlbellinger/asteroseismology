@@ -12,6 +12,3 @@ inverse/perturb/**
 **/__pycache__/**
 **.png
 **.pdf
-**simulations**.dat
-forward/initial_conditions.dat
-
