@@ -10,8 +10,9 @@ utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
 utils.font <<- "Palatino"
-text.cex <- 1
+
 font <- "Palatino"
+text.cex <- 1
 mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
 
@@ -41,7 +42,7 @@ make_plots <- function(plot_f, filename,
         mgp.slides=utils.mgp, 
         mgp.paper=c(1.5, 0.15, 0),
         hack.mgp=c(2, 0.5, 0), thin.hack=FALSE, 
-        cex.paper=0.8, cex.slides=1.3, cex.hack=1.4,
+        cex.paper=0.75, cex.slides=1.3, cex.hack=1.4,
         wide=TRUE, thin=TRUE, 
         tall=TRUE, short=TRUE,
         make_png=TRUE, make_pdf=TRUE, 

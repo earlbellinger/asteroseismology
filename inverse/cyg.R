@@ -79,12 +79,12 @@ plot_cygs <- function(name, cygA, cygB, ...,
         xlim[2] <- xlim[2] + xmean * 0.1
     }
     
-    par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(0.75,0,0))
+    par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(.85, 0, 0))
     plot(A, axes=F, col=red, lwd=1.5, yaxs='i', xaxs='i', lty=2,
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
         xlab="", ylab="", main="")
     magaxis(side=1, family=font, tcl=0.25, labels=1, 
-            las=1, mgp=mgp, cex.axis=text.cex)
+            las=1, mgp=mgp-c(0, 0.2, 0), cex.axis=text.cex)
     lines(B, col=blue, lwd=1.5, lty=2)
     
     if (has_other) {
@@ -102,8 +102,8 @@ plot_cygs <- function(name, cygA, cygB, ...,
     eps_B <- if (mean(cygB[[name]]) > 0)
         signif(sqrt(var(cygB[[name]])) / mean(cygB[[name]]) * 100, 3)
         else 0
-    uncertainties <- c(bquote(epsilon == .( eps_A ) * "%"),
-                       bquote(epsilon == .( eps_B ) * "%"))
+    uncertainties <- c(as.expression(bquote(epsilon == .( eps_A ) * "%")),
+                       as.expression(bquote(epsilon == .( eps_B ) * "%")))
     legend("right", bty='n', cex=text.cex, inset=c(-0.05, 0), 
         text.col=c(red, blue), legend=as.expression(uncertainties))
     if (has_other) {
@@ -134,7 +134,7 @@ plot_cygs <- function(name, cygA, cygB, ...,
 
 for (name in names(cygA)) {
     make_plots(plot_cygs, paste0("cyg-", name), 
-        filepath=file.path('plots', 'comparison'),
+        filepath=file.path('plots', 'comparison', 'cyg'),
         name=name, cygA=cygA, cygB=cygB,
         mgp.paper=utils.mgp, wide=F, tall=F)
 }
@@ -146,7 +146,7 @@ cygB <- read.table(
         file.path('learn', 'covs-simulations', 'hares', '16CygB.dat'), 
     header=1)
 make_plots(plot_cygs, "cyg-radius", 
-    filepath=file.path('plots', 'comparison'),
+    filepath=file.path('plots', 'comparison', 'cyg'),
     name="radius", cygA=cygA, cygB=cygB, 
     mgp.paper=utils.mgp, wide=F, tall=F)
 
@@ -157,7 +157,7 @@ cygB <- read.table(
         file.path('learn', 'covs-simulations', 'kages', '16CygB.dat'), 
     header=1)
 make_plots(plot_cygs, "cyg-L", 
-    filepath=file.path('plots', 'comparison'), 
+    filepath=file.path('plots', 'comparison', 'cyg'), 
     name="L", cygA=cygA, cygB=cygB, 
     mgp.paper=utils.mgp, wide=F, tall=F)
 
@@ -169,16 +169,16 @@ cygB <- read.table(
     header=1)
 for (name in c("Y_surf", "X_c", "alpha", "overshoot", "diffusion")) {
     make_plots(plot_cygs, paste0("cyg-", name), 
-        filepath=file.path('plots', 'comparison'),
+        filepath=file.path('plots', 'comparison', 'cyg'),
         name=name, cygA=cygA, cygB=cygB,
         mgp.paper=utils.mgp, wide=F, tall=F)
 }
 #make_plots(plot_cygs, "cyg-Y_surf", 
-#    filepath=file.path('plots', 'comparison'),
+#    filepath=file.path('plots', 'comparison', 'cyg'),
 #    name="Y_surf", cygA=cygA, cygB=cygB, 
 #    mgp.paper=utils.mgp, wide=F, tall=F)
 #make_plots(plot_cygs, "cyg-X_c", 
-#    filepath=file.path('plots', 'comparison'),
+#    filepath=file.path('plots', 'comparison', 'cyg'),
 #    name="X_c", cygA=cygA, cygB=cygB, 
 #    mgp.paper=utils.mgp, wide=F, tall=F)
 
