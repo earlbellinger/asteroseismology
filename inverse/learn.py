@@ -143,6 +143,14 @@ def weighted_avg_and_std(values, weights):
     variance = np.average((values-average)**2, axis=0, weights=weights) 
     return (average, np.sqrt(variance))
 
+def gumr(xn, xu):
+    z2 = np.trunc(np.log10(xu))+1
+    z1 = np.around(xu/(10**z2), 2)
+    y1 = np.around(xn*10**(-z2), 2)
+    value = y1*10**z2
+    uncert = z1*10**z2
+    return('%g'%value, '%g'%uncert)
+
 def print_star(star, predict, y_names, table_curr, table_init):
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
@@ -152,11 +160,12 @@ def print_star(star, predict, y_names, table_curr, table_init):
     currstr = "\n" + star
     for (pred_j, name) in enumerate(y_names):
         (m, s) = (middles[pred_j], stds[pred_j])
-        outstr += "\t%.3g±%.2g" % (m, s)
+        m, s = gumr(m, s)
+        outstr += "\t%s±%s" % (m, s)
         if name in y_init:
-            initstr += r" & %.3g $\pm$ %.2g" % (m, s)
+            initstr += r" & %s $\pm$ %s" % (m, s)
         if name in y_curr:
-            currstr += r" & %.3g $\pm$ %.2g" % (m, s)
+            currstr += r" & %s $\pm$ %s" % (m, s)
     print(outstr)
     table_curr.write(currstr + r' \\')
     table_init.write(initstr + r' \\')

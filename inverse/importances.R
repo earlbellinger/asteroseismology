@@ -19,7 +19,7 @@ dat.hares <- read.table(file.path(covs_dir, 'feature-importance-basu.dat'),
 
 make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
         label=FALSE) {
-    par(mgp=c(2, 1, 0))
+    par(mgp=c(1.25, 1, 0))
     
     sort <- order(sapply(dat, median))
     DF <- dat[,sort]
@@ -46,7 +46,7 @@ make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
 }
 make_plots(make_boxplot, 'importances-perturb', 
     filepath=file.path('plots', 'importances'),
-    mar=c(3, 5, 1, 1), dat=dat.cyg)
+    mar=c(3, 4, 1, 2), dat=dat.cyg)
 make_plots(make_boxplot, 'importances-kages', 
     filepath=file.path('plots', 'importances'),
     mar=c(3, 5, 1, 1), dat=dat.kages, label="KOI")

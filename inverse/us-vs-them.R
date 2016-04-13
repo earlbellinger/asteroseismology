@@ -83,29 +83,119 @@ plot_comparison <- function(qty, ...,
     plot(NA, axes=F, ylab="", xlab="",
         xlim=lims, ylim=lims)
     abline(coef=c(0,1), lty=2)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+    magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
+    magaxis(side=1, family=font, tcl=0.25, labels=1,
+        cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
     arrows(kages[[qty]]-kages[[low]],  ml[[qty]], 
            kages[[qty]]+kages[[high]], ml[[qty]], 
         length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     arrows(kages[[qty]], ml[[qty]]-ml[[low]], 
            kages[[qty]], ml[[qty]]+ml[[high]], 
         length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
-    #arrows(ml[[qty]]-ml[[low]], kages[[qty]], 
-    #       ml[[qty]]+ml[[high]], kages[[qty]], 
-    #    length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
-    #arrows(ml[[qty]], kages[[qty]]-kages[[low]], 
-    #       ml[[qty]], kages[[qty]]+kages[[high]], 
-    #    length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     points(ml[[qty]] ~ kages[[qty]], pch=1, cex=0.5)
-    title(xlab=bquote("KAGES"~.(get_label(name))))
     title(ylab=bquote("ML"~.(get_label_nameless(name))))
+    par(mgp=mgp-c(0.2, 0, 0))
+    label <- if (qty == 'logg') "Surface gravity log g" else get_label(name)
+    title(xlab=bquote("KAGES"~.(label)))
 }
 
+plot_rel_diff <- function(qty, ..., 
+        text.cex=1, mgp=utils.mgp, font='Palatino') {
+    low <- paste0('d', qty, 'L')
+    high <- paste0('d', qty, 'H')
+    std <- paste0(qty, '_s')
+    xlims <- range(kages[[qty]]-kages[[low]], 
+                   kages[[qty]]+kages[[high]])
+    
+    kages.std <- (kages[[high]]+kages[[qty]]-(kages[[qty]]-kages[[low]]))/2
+    
+    dif <- kages[[qty]] - ml[[qty]]
+    dif.unc <- sqrt( kages.std^2 + ml[[std]]^2 )
+    
+    rel.dif <- dif / kages[[qty]]
+    rel.unc <- sqrt( (dif.unc/dif)^2 + kages.std^2 ) * abs(kages[[qty]])
+    
+    ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
+    #ylims[1] <- max(ylims[1], -1)
+    #ylims[2] <- min(ylims[2], 1)
+    
+    name <- if (qty == 'Age') { 'age'
+    } else if (qty == 'Mass') { 'M'
+    } else if (qty == 'Luminosity') { 'L'
+    } else if (qty == 'Radius') { 'radius'
+    } else if (qty == 'logg') { 'log_g' }
+    
+    plot(NA, axes=F, ylab="", xlab="", xlim=xlims, ylim=ylims)
+    #abline(coef=c(0,1), lty=2)
+    abline(h=0, lty=2)
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+        cex.axis=text.cex, las=1, mgp=mgp)
+    arrows(kages[[qty]]-kages[[low]],  rel.dif, 
+           kages[[qty]]+kages[[high]], rel.dif, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    arrows(kages[[qty]], rel.dif - rel.unc, 
+           kages[[qty]], rel.dif + rel.unc, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(rel.dif ~ kages[[qty]], pch=1, cex=0.5)
+    title(xlab=bquote("KAGES"~.(get_label(name))))
+    title(ylab=bquote(
+        (.(seis.labs[[name]])["KAGES"] - .(seis.labs[[name]])["ML"]) / 
+         .(seis.labs[[name]])["KAGES"]
+    ))
+}
+
+plot_abs_diff <- function(qty, ..., 
+        text.cex=1, mgp=utils.mgp, font='Palatino') {
+    low <- paste0('d', qty, 'L')
+    high <- paste0('d', qty, 'H')
+    std <- paste0(qty, '_s')
+    xlims <- range(kages[[qty]]-kages[[low]], 
+                   kages[[qty]]+kages[[high]])
+    
+    kages.std <- (kages[[high]]+kages[[qty]]-(kages[[qty]]-kages[[low]]))/2
+    dif <- kages[[qty]] - ml[[qty]]
+    dif.unc <- sqrt( kages.std^2 + ml[[std]]^2 )
+    ylims <- range(dif + dif.unc, dif - dif.unc)
+    
+    name <- if (qty == 'Age') { 'age'
+    } else if (qty == 'Mass') { 'M'
+    } else if (qty == 'Luminosity') { 'L'
+    } else if (qty == 'Radius') { 'radius'
+    } else if (qty == 'logg') { 'log_g' }
+    
+    plot(NA, axes=F, ylab="", xlab="", xlim=xlims, ylim=ylims)
+    #abline(coef=c(0,1), lty=2)
+    abline(h=0, lty=2)
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+        cex.axis=text.cex, las=1, mgp=mgp)
+    arrows(kages[[qty]]-kages[[low]],  dif, 
+           kages[[qty]]+kages[[high]], dif, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    arrows(kages[[qty]], dif - dif.unc, 
+           kages[[qty]], dif + dif.unc, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(dif ~ kages[[qty]], pch=1, cex=0.5)
+    title(xlab=bquote("KAGES"~.(get_label(name))))
+    title(ylab=bquote(
+        .(seis.labs[[name]])["KAGES"] - .(seis.labs[[name]])["ML"]
+    ))
+}
+
+aspect <- 4.65014666667
 for (qty in c("Age", "Mass", "Luminosity", "Radius", "logg")) {
     make_plots(plot_comparison, paste0('kages-', qty),
-         filepath=file.path('plots', 'comparison'),
-         qty=qty)
+         filepath=file.path('plots', 'comparison', 'kages'), qty=qty, 
+         paper_pdf_width=aspect,  slides_pdf_width=aspect,
+         paper_pdf_height=aspect, slides_pdf_height=aspect)
+    make_plots(plot_rel_diff, paste0('kages-', qty, '-rel'),
+         filepath=file.path('plots', 'comparison', 'kages'), qty=qty, 
+         paper_pdf_width=aspect,  slides_pdf_width=aspect,
+         paper_pdf_height=aspect, slides_pdf_height=aspect)
+    make_plots(plot_abs_diff, paste0('kages-', qty, '-diff'),
+         filepath=file.path('plots', 'comparison', 'kages'), qty=qty, 
+         paper_pdf_width=aspect,  slides_pdf_width=aspect,
+         paper_pdf_height=aspect, slides_pdf_height=aspect)
 }
 
 plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
@@ -165,7 +255,7 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
         cex.axis=text.cex, las=1, mgp=mgp)
 }
 
-make_plots(plot_diffusion, paste0('diffusion'),
+make_plots(plot_diffusion, paste0('diffusion'), mar.paper=c(2.5, 3, 1, 2),
      filepath=file.path('plots', 'comparison'))
 
 #######################################################################
@@ -219,19 +309,61 @@ plot_comparison <- function(qty, other=basu, ...,
     
     plot(NA, axes=F, ylab="", xlab="", xlim=lims, ylim=lims)
     abline(coef=c(0,1), lty=2)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+    magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
+    magaxis(side=1, family=font, tcl=0.25, labels=1,
+        cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
     arrows(other[[qty]], ml[[qty]]-ml[[low]], 
            other[[qty]], ml[[qty]]+ml[[high]], 
         length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     points(ml[[qty]] ~ other[[qty]], pch=1, cex=0.5)
     title(ylab=bquote("Predicted"~.(get_label_nameless(name))))
+    par(mgp=mgp-c(0.2, 0, 0))
     title(xlab=bquote("True"~.(get_label(name))))
+}
+
+plot_rel_diff <- function(qty, other=basu, ..., 
+        text.cex=1, mgp=utils.mgp, font='Palatino') {
+    low <- paste0('d', qty, 'L')
+    high <- paste0('d', qty, 'H')
+    xlims <- range(other[[qty]])
+    
+    name <- if (qty == 'Age') { 'age'
+    } else if (qty == 'Mass') { 'M'
+    } else if (qty == 'Luminosity') { 'L'
+    } else if (qty == 'Radius') { 'radius'
+    } else if (qty == 'logg') { 'log_g' }
+    
+    std <- paste0(qty, '_s')
+    dif <- other[[qty]] - ml[[qty]]
+    rel.dif <- dif / other[[qty]]
+    rel.unc <- ((ml[[qty]]+ml[[high]])-(ml[[qty]]-ml[[low]]))/2
+    ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
+    
+    plot(NA, axes=F, ylab="", xlab="", xlim=xlims, ylim=ylims)
+    #abline(coef=c(0,1), lty=2)
+    abline(h=0, lty=2)
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+        cex.axis=text.cex, las=1, mgp=mgp)
+    arrows(other[[qty]], rel.dif - rel.unc, 
+           other[[qty]], rel.dif + rel.unc, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(rel.dif ~ other[[qty]], pch=1, cex=0.5)
+    title(xlab=bquote("True"~.(get_label(name))))
+    title(ylab=bquote(
+        (.(seis.labs[[name]])["True"] - .(seis.labs[[name]])["ML"]) / 
+         .(seis.labs[[name]])["True"]
+    ))
 }
 
 for (qty in c("Age", "Mass", "Radius")) {
     make_plots(plot_comparison, paste0('basu-', qty),
-         filepath=file.path('plots', 'comparison'),
+         filepath=file.path('plots', 'comparison', 'basu'), 
+         mar.paper=c(2.5, 3, 1, 2),
+         qty=qty)
+    make_plots(plot_rel_diff, paste0('basu-', qty, '-rel'),
+         filepath=file.path('plots', 'comparison', 'basu'), 
+         mar.paper=c(2.5, 3, 1, 2),
          qty=qty)
 }
 
@@ -264,7 +396,8 @@ hares <- hares[order(hares$Model),]
 ml <- ml[order(ml$Name),]
 for (qty in names(hares)[-1]) {
     make_plots(plot_comparison, paste0('hares-', qty),
-         filepath=file.path('plots', 'comparison'),
+         filepath=file.path('plots', 'comparison', 'hares'), 
+         mar.paper=c(2.5, 3, 1, 2),
          qty=qty, other=hares)
 }
 
