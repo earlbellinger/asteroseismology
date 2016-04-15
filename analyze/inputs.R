@@ -22,6 +22,7 @@ X <- 1-combos$Y-combos$Z
 # set up corner
 p = ggpairs(data=combos, axisLabels="show", upper="blank",
         aes(color=X, size=0.01), 
+        lower = list(continuous = wrap("points", alpha = 0.75, size=3.5)),
         columnLabels=sapply(names(combos)[1:6], 
             function (name) as.expression(get_label_nameless(name))))
 
@@ -73,7 +74,7 @@ for (ii in 1:6) {
         } else {
             pp <- pp + scale_y_continuous(breaks=number_ticks)
         }
-        pp <- pp + scale_size_area(range=c(1, 1))
+        #pp <- pp + scale_size_area(range=c(1, 1))
         p <- putPlot(p, pp, ii, jj)
     }
 }
@@ -88,10 +89,15 @@ p <- putPlot(p, pp, 1, 1)
 
 # turn into a function so that make_plots can call it
 inputs_plot <- function(..., text.cex) {
-    print(p, leftWidthProportion=0.6, bottomHeightProportion=0.5)
+    print(p,
+    #leftWidthProportion=0.6, bottomHeightProportion=0.5
+    leftWidthProportion=0.4, bottomHeightProportion=0.3
+    )
 }
 
 # save!
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"),
-    short=FALSE, thin=FALSE, make_png=TRUE)
+    short=FALSE, thin=FALSE, make_png=FALSE,
+        paper_pdf_width=1.3*6.97522, 
+        paper_pdf_height=1.3*4.17309)
 

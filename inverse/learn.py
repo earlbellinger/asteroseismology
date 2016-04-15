@@ -91,7 +91,7 @@ y_latex_short = {
     "mass_Y": r"Y",
     "X_surf": r"X$_{\mathrm{surf}}$", 
     "Y_surf": r"Y$_{\mathrm{surf}}$",
-    "X_c": r"X$_{\mathrm{c}}$/M$_*$",
+    "X_c": r"X$_{\mathrm{c}}$",
     "log_g": r"log g", 
     "L": r"L$/$L$_\odot$",
     "mass_cc": r"M$_{\mathrm{cc}}$"
@@ -105,7 +105,7 @@ def train_regressor(data, X_columns, y_show=y_init+y_curr):
     ys = data.loc[:, [i for i in y_show if i not in X_columns]]
     
     print()
-    for n_trees in [128]:
+    for n_trees in [256]:
     #list(range(4, 16)) + [18,20] + [2**n for n in range(4, 12)]:
     #[n for n in range(4, 64)]:#[2**n for n in range(1, 12)]:
         forest = Pipeline(steps=[
@@ -145,7 +145,7 @@ def weighted_avg_and_std(values, weights):
 
 def gumr(xn, xu):
     z2 = np.trunc(np.log10(xu))+1
-    z1 = np.around(xu/(10**z2), 2)
+    z1 = np.around(xu/(10**z2), 3)
     y1 = np.around(xn*10**(-z2), 2)
     value = y1*10**z2
     uncert = z1*10**z2

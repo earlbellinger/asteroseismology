@@ -27,10 +27,8 @@ if not os.path.exists(out_dir):
 
 ### Load grid of models 
 raw = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|mass_cc"#|Dnu|dnu"#|Dnu_|dnu|slope"
-#|mass_cc"#|H|mass|X|surf"#|H|He"
+exclude = "nu_max|radial_velocity|mass_cc"
 data = raw.drop([i for i in raw.columns if re.search(exclude, i)], axis=1)
-#data = data[data.M<1.2] ## only low mass
 
 Xs = ["Teff", "Fe/H", "log_g", "Dnu0", "dnu02", "r02", "r10", "r01"]
 ys = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
@@ -41,16 +39,13 @@ points_per_track = sum(data['M']==data.loc[0][0])
 indices = np.arange(0, len(data), points_per_track)
 num_tracks = 2**(int(np.log2(len(data)/points_per_track)))
 
-#forest = ExtraTreesRegressor(#RandomForestRegressor(#
-#    n_estimators=128, n_jobs=62, oob_score=True, bootstrap=True)
-
-def get_forest(X_names=Xs, y_names=ys, num_trees=512, data=data):
-    forest = ExtraTreesRegressor(#RandomForestRegressor(#
-        n_estimators=num_trees, n_jobs=32, bootstrap=True)
+def get_forest(X_names=Xs, y_names=ys, num_trees=256, data=data):
+    forest = ExtraTreesRegressor(
+        n_estimators=num_trees, n_jobs=62, bootstrap=True)
     X = data.loc[:, [i for i in X_names]]
     y = data.loc[:, [i for i in y_names]]
     start = time()
-    rfr = forest.fit(X, y)#np.ravel(y)))
+    rfr = forest.fit(X, y)
     end = time()
     return(rfr, end-start)
 
@@ -95,6 +90,9 @@ def accuracy_per_precision_score(y_true, y_pred, y_stds):
                 y_stds[y_std] = 1
     return np.median(abs(y_true - y_pred) / y_stds)
 
+def model_uncertainty_score(y_stds):
+    return np.median(y_stds)
+
 def absolute_difference_score(y_true, y_pred):
     return np.median(abs(y_true - y_pred))
 
@@ -113,11 +111,12 @@ def make_tests(var_name, rfr, validation):
         y_stds = ys_stds[:,y_i]
         y_true = ys_true[ys[y_i]]
         
-        result += str(var_name) + " " + ys[y_i] + " " + \
-            str(r2_score(y_true, y_pred)) + " " + \
-            str(explained_variance_score(y_true, y_pred)) + " " + \
-            str(accuracy_per_precision_score(y_true, y_pred, y_stds)) + " " + \
-            str(absolute_difference_score(y_true, y_pred)) + "\n"
+        result += str(var_name) + "\t" + ys[y_i] + "\t" + \
+            str(r2_score(y_true, y_pred)) + "\t" + \
+            str(explained_variance_score(y_true, y_pred)) + "\t" + \
+            str(accuracy_per_precision_score(y_true, y_pred, y_stds)) + "\t" + \
+            str(absolute_difference_score(y_true, y_pred)) + "\t" + \
+            str(model_uncertainty_score(y_stds)) + "\n"
         
     return(result)
 
@@ -130,7 +129,7 @@ def write(result, f):
 ### try with different amounts of tracks
 fname = os.path.join(out_dir, "num_tracks.dat")
 f = open(fname, 'w') 
-header = 'num_tracks variable r2 ev sigma diff'
+header = 'num_tracks\tparameter\tr2\tev\tdist\tdiff\tsigma'
 print(header)
 f.write(header + "\n")
 for n_tracks in [2**n for n in range(1, 
@@ -145,7 +144,7 @@ f.close()
 ### try with different models per track
 fname = os.path.join(out_dir, "num_points.dat")
 f = open(fname, 'w') 
-header = 'num_points variable r2 ev sigma diff'
+header = 'num_points\tparameter\tr2\tev\tdist\tdiff\tsigma'
 print(header)
 f.write(header + "\n")
 for m_points in [2**n for n in range(2, 1+int(np.log2(points_per_track)))]:
@@ -159,7 +158,7 @@ f.close()
 ### try with different amounts of trees 
 fname = os.path.join(out_dir, "num_trees.dat")
 f = open(fname, 'w') 
-header = 'num_trees variable r2 ev sigma diff'
+header = 'num_trees\tparameter\tr2\tev\tdist\tdiff\tsigma'
 print(header)
 f.write(header + "\n")
 for num_trees in [2**n for n in range(0, 10)]:
