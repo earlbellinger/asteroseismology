@@ -79,7 +79,9 @@ plot_cygs <- function(name, cygA, cygB, ...,
         xlim[2] <- xlim[2] + xmean * 0.1
     }
     
-    par(mar=c(2.5, 1, 1, 1), mgp=mgp-c(.85, 0, 0))
+    par(mar=c(2.5, 1, 1, 1), 
+        #ifelse(name=="Y_surf" || name=="L" || name=="radius", 1.5, 1)), 
+        mgp=mgp-c(.85, 0, 0))
     plot(A, axes=F, col=red, lwd=1.5, yaxs='i', xaxs='i', lty=2,
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
         xlab="", ylab="", main="")

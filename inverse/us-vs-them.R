@@ -1,4 +1,5 @@
-#### Plot KAGES masses and ages against what we get with machine learning 
+#### Plot masses and ages against what we get with machine learning 
+#### Also plots the diffusion factor as a function of mass for KAGES stars
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
@@ -114,7 +115,9 @@ plot_rel_diff <- function(qty, ...,
     dif.unc <- sqrt( kages.std^2 + ml[[std]]^2 )
     
     rel.dif <- dif / kages[[qty]]
-    rel.unc <- sqrt( (dif.unc/dif)^2 + kages.std^2 ) * abs(kages[[qty]])
+    #rel.unc <- sqrt( (dif.unc/dif)^2 + kages.std^2 ) * abs(kages[[qty]])
+    rel.unc <- sqrt( (dif.unc/dif)^2 + (kages.std/kages[[qty]])^2 ) * 
+        rel.dif #abs(kages[[qty]])
     
     ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
     #ylims[1] <- max(ylims[1], -1)
@@ -218,7 +221,7 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
     title(xlab=get_label("M"))
     title(ylab=get_label("diffusion"))
     
-    mdl <- deming(D~Mass, data=ml, xstd=Mass_s, ystd=D_s) 
+    mdl <- deming(D~Mass, data=ml, xstd=Mass_s, ystd=D_s, conf=.50) 
     
     #abline(mdl, untf=T)
     
@@ -232,30 +235,49 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
     D.new[D.new < 0] <- 10^-10
     lines(D.new ~ M.new)
     
+    newMs <- seq(0.7, 1.6, 0.01)
+    lower <- mdl$ci[[1]] + mdl$ci[[2]] * newMs
+    upper <- mdl$ci[[3]] + mdl$ci[[4]] * newMs
+    lower[lower<0] <- 10^-10
+    lines(newMs, lower, lty=3)
+    lines(newMs, upper, lty=3)
+    
+    sig.figs <- gumr(slope, slope.se)
+    slope <- sig.figs$value
+    slope.se <- sig.figs$uncert
+    
     intercept.se <- sqrt(mdl$variance[[1]])
+    sig.figs <- gumr(intercept, intercept.se)
+    intercept <- sig.figs$value
+    intercept.se <- sig.figs$uncert
     
     cat(paste("\\text{D} = (", 
-        signif(intercept, 3),      "\\pm", signif(intercept.se, 3), 
+        signif(intercept, 3), "\\pm", signif(intercept.se, 3), 
         ")", ifelse(slope>=0, "+", "-"), "(", 
-        abs(signif(slope,     3)), "\\pm", signif(slope.se,     3), 
+        abs(signif(slope, 3)), "\\pm", signif(slope.se, 3), 
         ") \\cdot \\text{M}/\\text{M}_\\odot\n"))
     
-    legend("bottomleft", cex=text.cex, pch=c(3, NA, NA), bty='n', 
+    legend.slope <- gumr(slope, slope.se)$value
+    legend.inter <- gumr(intercept, intercept.se)$value
+    legend("bottomleft", cex=text.cex, pch=c(3, NA, NA, NA), bty='n', 
            inset=c(0.02, 0.01), 
-           lty=c(NA,2,1), col=c("darkgray", "black", "black"), 
-           legend=c("KOIs", expression(D==1), 
+           lty=c(NA,2,1,3), col=c("darkgray", "black", "black", 'black'), 
+           legend=c(
+        "KOIs",
+        expression(D==1), 
         bquote(D==
-            .(signif(mdl$coefficients[1],3)) -
-            .(abs(signif(mdl$coefficients[2],3)))%*%M)))
+            .(signif(intercept,3)) -
+            .(abs(signif(slope,3)))%*%M),
+        "50% Confidence interval"))
     legend("bottomleft", inset=c(0.02, 0.01), 
-        cex=text.cex, pch=c(1,NA,NA), legend=c("","",""), 
-        lty=c(NA,NA,1), bty='n')
+        cex=text.cex, pch=c(1,NA,NA,NA), legend=c("","","",""), 
+        lty=c(NA,NA,1,NA), bty='n')
     
     magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
 }
 
-make_plots(plot_diffusion, paste0('diffusion'), mar.paper=c(2.5, 3, 1, 2),
+make_plots(plot_diffusion, paste0('diffusion'), mar.paper=c(2.5, 3, 1, 1),
      filepath=file.path('plots', 'comparison'))
 
 #######################################################################
@@ -341,29 +363,36 @@ plot_rel_diff <- function(qty, other=basu, ...,
     ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
     
     plot(NA, axes=F, ylab="", xlab="", xlim=xlims, ylim=ylims)
-    #abline(coef=c(0,1), lty=2)
     abline(h=0, lty=2)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+    
+    magaxis(side=3:4, family=font, tcl=0.25, labels=c(0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
+    magaxis(side=2, family=font, tcl=0.25, labels=1,
+        cex.axis=text.cex, las=1, mgp=mgp)
+    magaxis(side=1, family=font, tcl=0.25, labels=1,
+        cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
+    
     arrows(other[[qty]], rel.dif - rel.unc, 
            other[[qty]], rel.dif + rel.unc, 
         length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
     points(rel.dif ~ other[[qty]], pch=1, cex=0.5)
-    title(xlab=bquote("True"~.(get_label(name))))
+    par(mgp=mgp+c(0.2, 0, 0))
     title(ylab=bquote(
         (.(seis.labs[[name]])["True"] - .(seis.labs[[name]])["ML"]) / 
          .(seis.labs[[name]])["True"]
     ))
+    par(mgp=mgp-c(0.2, 0, 0))
+    title(xlab=bquote("True"~.(get_label(name))))
 }
 
 for (qty in c("Age", "Mass", "Radius")) {
     make_plots(plot_comparison, paste0('basu-', qty),
          filepath=file.path('plots', 'comparison', 'basu'), 
-         mar.paper=c(2.5, 3, 1, 2),
+         mar.paper=c(2.5, 3, 1, 1),
          qty=qty)
     make_plots(plot_rel_diff, paste0('basu-', qty, '-rel'),
          filepath=file.path('plots', 'comparison', 'basu'), 
-         mar.paper=c(2.5, 3, 1, 2),
+         mar.paper=c(2.5, 3, 1, 1),
          qty=qty)
 }
 
@@ -397,7 +426,7 @@ ml <- ml[order(ml$Name),]
 for (qty in names(hares)[-1]) {
     make_plots(plot_comparison, paste0('hares-', qty),
          filepath=file.path('plots', 'comparison', 'hares'), 
-         mar.paper=c(2.5, 3, 1, 2),
+         mar.paper=c(2.5, 3, 1, 1),
          qty=qty, other=hares)
 }
 

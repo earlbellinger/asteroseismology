@@ -7,6 +7,8 @@ library(magicaxis)
 library(RColorBrewer)
 source(file.path('..', 'scripts', 'utils.R'))
 
+options(warn=2) 
+
 out.dir <- file.path('plots', 'evaluate')
 
 legend2 <- legend
@@ -18,23 +20,25 @@ body(legend2)[[c(38,4,6)]] <- quote({
 })
 body(legend2)[[40]] <- quote(xt <- left + xchar + xextra + w0)
 
+trans.black <- adjustcolor('black', alpha=0.5)
+
 plot_accuracy <- function(DF, score='ev', variable='num_tracks', ..., 
         text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
     
-    if (variable=='num_trees' && score=='sigma') {
+    if (variable=='num_trees' && (score=='dist' || score=='sigma')) {
         DF <- DF[DF[[variable]] > 1,]
         #xlim[1] <- 2
     }
     
-    if ('log_g' %in% DF$variable) {
-        DF <- DF[-which(DF$variable == 'log_g'),]
+    if ('log_g' %in% DF$parameter) {
+        DF <- DF[-which(DF$parameter == 'log_g'),]
     }
-    if ('mass_cc' %in% DF$variable) {
-        DF <- DF[-which(DF$variable == 'mass_cc'),]
+    if ('mass_cc' %in% DF$parameter) {
+        DF <- DF[-which(DF$parameter == 'mass_cc'),]
     }
     
     par(xpd=FALSE)
-    ylim <- if (score=='sigma') {
+    ylim <- if (score=='dist') {
         if (variable=='num_tracks') {
             c(0.25, 2) 
         } else if (variable=='num_points') {
@@ -47,9 +51,7 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
          xlim=range(DF[[variable]]), 
          ylim=ylim, log='x',#'xy', 
          xaxs='i', yaxs='i', 
-         xlab=if (variable == 'num_tracks') "Number of Evolutionary Tracks"
-              else if (variable == 'num_points') "Number of Models Per Track"
-              else "Number of Trees in Forest",
+         xlab="",
          ylab="")
     
     minor <- 2 ^ (floor(log(sqrt(max(DF[[variable]]))) / log(2)))
@@ -57,24 +59,34 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
     axis(1, at=tick.places, labels=tick.places, 
          tcl=-0.25, cex.axis=text.cex, tick=F)
     
+    title(xlab=if (variable == 'num_tracks') {
+        "Number of Evolutionary Tracks"
+    } else if (variable == 'num_points') {
+        "Number of Models Per Track"
+    } else { 
+        "Number of Trees in Forest"
+    })
     par(mgp=mgp+c(1, 0, 0.15))
-    
     title(ylab=if (score == 'ev') {
         expression("Explained Variance"~V[e])
     } else if (score == 'r2') {
         expression("Coefficient of Determination"~R[2])
+    } else if (score == 'dist') {
+        expression("Distance"~abs(widehat(y)-y)/widehat(sigma))
     } else if (score == 'sigma') {
-        expression("Accuracy Per Precision"~abs(widehat(y)-y)/widehat(sigma))
+        expression("Normalized Uncertainty"~widehat(sigma))
+    } else if (score == 'diff') {
+        expression("Normalized Error"~abs(widehat(y)-y))
     })
     
-    if (score == "sigma") {
-        yticks <- seq(min(ylim), max(ylim), 0.25)
-        axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
-            labels=yticks)
-    } else {
+    if (score == "ev" || score == "r2") {
         yticks <- c(0, 0.25, 0.5, 0.75, 1)
         axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
             labels=c("0%", "25%", "50%", "75%", "100%"))
+    } else {
+        yticks <- seq(min(ylim), max(ylim), ifelse(score=='dist', 0.5, 0.25))
+        axis(2, tick=F, at=yticks, cex.axis=text.cex, las=1,
+            labels=yticks)
     }
     
     for (ytick in yticks[2:(length(yticks)-1)]) 
@@ -83,58 +95,65 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
         abline(v=tick, col='cornsilk2')
     
     par(xpd=TRUE)
-    variables <- c('M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
+    parameters <- c('M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion',
                    'age', 'X_c', 'Y_surf', 'radius', 'L')
-    col.pal <- colorRampPalette(brewer.pal(11, 'Spectral'))(length(variables))
-    for (variable_i in 1:length(variables)) {
+    col.pal <- colorRampPalette(brewer.pal(11, 'Spectral'))(length(parameters))
+    for (parameter_i in 1:length(parameters)) {
         average <- NULL
-        for (num_tracks in unique(DF[[variable]])) {
-            ss <- DF[DF[[variable]] == num_tracks &
-                         DF$variable == variables[variable_i],]
+        for (value in unique(DF[[variable]])) {
+            ss <- DF[DF[[variable]] == value &
+                     DF$parameter == parameters[parameter_i],]
             new.row <- ss[1,]
             new.row[[score]] <- median(ss[[score]])
             average <- rbind(average, new.row)
         }
         vals <- average[[score]]
-        vals.outside <- if (score=="sigma") vals>max(ylim) else vals<min(ylim)
+        if (score == 'diff' || score == 'sigma') {
+            #param <- DF[DF$parameter==parameters[parameter_i],]
+            #max.val <- max(param[[score]])
+            #max.val <- max(average[[score]])
+            #print(max.val)
+            #vals <- normalize(vals)#vals / max.val
+            vals <- normalize(vals)
+        }
+        vals.outside <- if (score == "ev" || score == "r2")
+            vals<min(ylim) else vals>max(ylim) 
         xs <- average[[variable]]
         if (any(vals.outside)) {
             last <- max(which(vals.outside))
             if (!is.finite(vals[last])) vals[last] <- 2*max(ylim)
             x.trial <- seq(xs[last], xs[last+1], length.out=10000)
             y.trial <- seq(vals[last], vals[last+1], length.out=10000)
-            if (score=="sigma") {
-                new.val <- max(ylim)
-                new.x <- x.trial[min(which(y.trial <= new.val))]
-            } else {
+            if (score == "ev" || score == "r2") {
                 new.val <- min(ylim)
                 new.x <- x.trial[min(which(y.trial >= new.val))]
+            } else {
+                new.val <- max(ylim)
+                new.x <- x.trial[min(which(y.trial <= new.val))]
             }
-            lines(c(new.x, xs[last+1]), 
-                  c(new.val, vals[last+1]), 
-                col='black', lwd=3)
-            lines(c(new.x, xs[last+1]), 
-                  c(new.val, vals[last+1]), 
-                lwd=1.5, col=adjustcolor(col.pal[variable_i], alpha=0.95))
+            if (parameter_i %in% 4:9) lines(c(new.x, xs[last+1]), 
+                c(new.val, vals[last+1]), col=trans.black, lwd=3)
+            lines(c(new.x, xs[last+1]), c(new.val, vals[last+1]), 
+                lwd=1.5, col=adjustcolor(col.pal[parameter_i]))#, alpha=0.95))
             points(new.x, new.val, 
-                col='black', cex=0.75, pch=21+(variable_i%%3), 
-                bg=adjustcolor(col.pal[variable_i], 
-                               red.f=1.25, green.f=1.25, blue.f=1.25))
+                col='black', cex=0.75, pch=21+(parameter_i%%3), 
+                bg=adjustcolor(col.pal[parameter_i]))#, 
+                               #red.f=1.25, green.f=1.25, blue.f=1.25))
             vals <- vals[-c(1:last)]
             xs <- xs[-c(1:last)]
         }
-        lines(xs, vals, col='black', lwd=3)
+        if (parameter_i %in% 4:9) lines(xs, vals, col=trans.black, lwd=3)
         lines(xs, vals, lwd=1.5,
-            col=adjustcolor(col.pal[variable_i], alpha=0.95))
+            col=adjustcolor(col.pal[parameter_i]))#, alpha=0.95))
         points(xs, vals, col='black', cex=0.75, 
-            pch=21+(variable_i%%3), 
-            bg=adjustcolor(col.pal[variable_i], 
-                           red.f=1.25, green.f=1.25, blue.f=1.25))
+            pch=21+(parameter_i%%3), 
+            bg=adjustcolor(col.pal[parameter_i]))#, 
+                           #red.f=1.25, green.f=1.25, blue.f=1.25))
     }
     
     if (length(plotlegend)>0 && plotlegend != F) {
-        shapes <- 1:length(variables)%%3 + 1
-        labels <- as.expression(seis.labs[variables])
+        shapes <- 1:length(parameters)%%3 + 1
+        labels <- as.expression(seis.labs[parameters])
         if (plotlegend == 'left') {
             text.widths <- rep(0.175, 5)
             text.widths[2] <- 0.2
@@ -176,39 +195,16 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
     }
 }
 
-make_plots(plot_accuracy, "num_tracks-ev", filepath=out.dir, 
-    plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_tracks.dat'),
+for (score in c("r2", "ev", "dist", "diff", "sigma")) {
+    for (variable in c("num_tracks", "num_trees", "num_points")) {
+        print(paste(score, variable))
+        make_plots(plot_accuracy, paste0(variable, '-', score), 
+            filepath=out.dir, 
+            variable=variable, score=score, 
+            plotlegend=F, 
+            wide=F, mar=c(3, 3.75, 1, 1), 
+            DF=read.table(file.path('subsetter', paste0(variable, '.dat')),
                   header=T, stringsAsFactors=F))
-
-make_plots(plot_accuracy, "num_tracks-sigma", filepath=out.dir, 
-    score="sigma", plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_tracks.dat'),
-                  header=T, stringsAsFactors=F))
-
-make_plots(plot_accuracy, "num_points-ev", filepath=out.dir, 
-    variable='num_points', plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_points.dat'), 
-                  header=T, stringsAsFactors=F))
-
-make_plots(plot_accuracy, "num_points-sigma", filepath=out.dir, 
-    score='sigma', variable='num_points', plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_points.dat'), 
-                  header=T, stringsAsFactors=F))
-
-make_plots(plot_accuracy, "num_trees-ev", filepath=out.dir, 
-    variable='num_trees', plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_trees.dat'), 
-                  header=T, stringsAsFactors=F))
-
-make_plots(plot_accuracy, "num_trees-sigma", filepath=out.dir, 
-    score='sigma', variable='num_trees', plotlegend=F, 
-    wide=F, mar=c(3, 3.75, 1, 1), 
-    DF=read.table(file.path('subsetter', 'num_trees.dat'), 
-                  header=T, stringsAsFactors=F))
+    }
+}
 

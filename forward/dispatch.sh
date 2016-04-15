@@ -150,10 +150,10 @@ done
 
 ## Set defaults if they weren't supplied
 if [ -z ${M+x} ]; then M=1; fi
-if [ -z ${Y+x} ]; then Y=0.272; fi
-if [ -z ${Z+x} ]; then Z=0.0187; fi
-if [ -z ${alpha+x} ]; then alpha=1.936; fi
-if [ -z ${overshoot+x} ]; then overshoot=0.05; fi
+if [ -z ${Y+x} ]; then Y=0.269; fi
+if [ -z ${Z+x} ]; then Z=0.0197; fi
+if [ -z ${alpha+x} ]; then alpha=1.85; fi
+if [ -z ${overshoot+x} ]; then overshoot=0.0635; fi
 if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${light+x} ]; then light=0; fi

@@ -369,7 +369,7 @@ r_sep <- function(l, n, DF) dnu(l, n, DF) / Dnu(1-l, n+l, DF)
 r_avg <- function(l, n, DF) dd(l, 1-l, n, DF, use_n=F) / Dnu(1-l, n+l, DF)
 
 ## Plot Dnu, dnu, r02, ... 
-seismology_plot <- function(seps, nus, #fit, 
+seismology_plot <- function(seps, nus, 
         gaussian_env, w.median, 
         nu_max, ylab, dnu.cl, pchs, freqs, ..., 
         text.cex=1, mgp=utils.mgp, font=utils.font) {
@@ -379,8 +379,8 @@ seismology_plot <- function(seps, nus, #fit,
     plot(seps~nus, axes=FALSE, tck=0, #xaxs='i',
          cex=1.5 * gaussian_env/max(gaussian_env), 
          ylab=ylab, 
-         xlab=expression("Frequency" ~ nu / mu*Hz), 
-         #xlim=c(1000, max(freqs$nu)), 
+         xlab="", 
+         xlim=range(freqs$nu), 
          ylim=range(w.median, 
                     coef(fit)[1], 
                     2*w.median-coef(fit)[1]), 
@@ -389,8 +389,12 @@ seismology_plot <- function(seps, nus, #fit,
          pch=1)
     abline(fit, lty=2)
     abline(v=nu_max, lty=3)
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), mgp=mgp, 
+    magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
+    par(mgp=mgp-c(0.2, 0.2, 0))
+    magaxis(side=1, family=font, tcl=0.25, labels=1, mgp=mgp-c(0.2, 0.2, 0), 
+        las=1, cex.axis=text.cex)
+    title(xlab=expression("Frequency" ~ nu / mu*Hz))
 }
 
 echelle_plot <- function(freqs, large_sep=NA, ..., 
@@ -401,20 +405,144 @@ echelle_plot <- function(freqs, large_sep=NA, ...,
     plot(nus, c(freqs$nu, freqs$nu), 
          tck=0, axes=FALSE, 
          pch=freqs$l+1, 
+         cex=0.5, 
          col=dnu.cl[freqs$l+1], 
-         xlab=expression((nu ~ mod ~ Delta * nu) / mu * Hz), 
+         xlab="", 
          ylab=expression(nu/mu*Hz),
          xlim=c(0, large_sep*2))
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(0,1,0,0), mgp=mgp, 
+    magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
+    magaxis(side=1, family=font, tcl=0.25, labels=F, mgp=mgp-c(0, 0.2, 0), 
+        las=1, cex.axis=text.cex)
+    par(mgp=mgp-c(0.2, 0, 0))
+    title(xlab=expression((nu ~ mod ~ Delta * nu[0]) / mu * Hz))
     ticks <- axTicks(1)
     ticks <- ticks[ticks < large_sep]
     ticks <- c(ticks, ticks+large_sep)
-    axis(1, tcl=0.25, mgp=mgp, cex.axis=text.cex, tick=F, 
+    axis(1, tcl=0.25, mgp=mgp-c(0, 0.2, 0), cex.axis=text.cex, tick=F, 
         at=ticks, labels=ticks%%large_sep)
     l_degs <- sort(unique(freqs$l))
     abline(v=large_sep, lty=3)
-    legend("bottomleft", pch=l_degs+1, col=dnu.cl[l_degs+1], cex=0.8*text.cex, 
-           legend=c(paste0("\u2113=", l_degs)))
+    legend("left", pch=l_degs+1, col=dnu.cl[l_degs+1], cex=0.8*text.cex, 
+           bty='n', inset=c(0.02, 0), legend=c(paste0("\u2113=", l_degs)))
+}
+
+plot_power_spectrum <- function(freqs, nu_max, colors=0, ..., 
+        text.cex=1, mgp=utils.mgp, font=utils.font) {
+    nus <- freqs$nu
+    fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
+    power <- dnorm(nus, nu_max, fwhm)
+    plot(nus, power/max(power),
+         #ylim=c(0, 1.05),
+         ylab="",#"Power", 
+         xlim=range(nus[power/max(power)>0.001]),
+         xlab=expression("Frequency"~nu/mu*Hz),
+         type='h', lwd=1.5, 
+         xaxs='i', yaxs='i', axes=FALSE, 
+         col=adjustcolor('black', alpha=0.5))
+    #points(nus, power/max(power), type='h', lwd=2,
+    #    col=adjustcolor(col.pal[freqs$l+1], alpha=0.25))
+    magaxis(1, labels=1, tcl=-0.25, cex.axis=text.cex, mgp=mgp-c(0.2, 0, 0), 
+        family=font)
+    legend("topleft", bty="n", col=col.pal, lty=1, cex=text.cex, legend=c(
+        expression("ℓ"==0),
+        expression("ℓ"==1),
+        expression("ℓ"==2),
+        expression("ℓ"==3)
+    ))
+    
+    ## annotate Dnu0
+    ell.0 <- freqs$l==0
+    ell.pwrs <- power[ell.0]
+    max.pwr <- max(ell.pwrs)
+    max.pwr.idx <- which(power[ell.0] == max.pwr)
+    right <- freqs[ell.0,]$nu[max.pwr.idx-3]
+    left <- freqs[ell.0,]$nu[max.pwr.idx-4]
+    right.pwr <- ell.pwrs[max.pwr.idx-3]/max(power)
+    points(right, right.pwr, 
+        type='h', col=col.pal[1], lwd=2)
+    left.pwr <- ell.pwrs[max.pwr.idx-4]/max(power)
+    points(left, left.pwr, 
+        type='h', col=col.pal[1], lwd=2)
+    arrows(left+1, left.pwr-0.15, right-1, length=0.1)
+    arrows(right-1, left.pwr-0.15, left+1, length=0.1)
+    text((left+right)/2 - 35, left.pwr+0.19, cex=text.cex, 
+        expression(Delta*nu[0]))
+    
+    ## annotate dd01
+    ell.1 <- freqs$l==1
+    ell.0.nus <- freqs[ell.0,]$nu
+    ell.1.nus <- freqs[ell.1,]$nu
+    center <- freqs[ell.0,]$nu[max.pwr.idx]
+    
+    without.center <- ell.0.nus[-which(ell.0.nus==center)]
+    first.zero <- find_closest(center, without.center)$y
+    first.zero.nu <- without.center[first.zero]
+    
+    second.zero <- find_closest(center, without.center[-first.zero])$y
+    second.zero.nu <- without.center[-first.zero][second.zero]
+    
+    first.one <- find_closest(center, ell.1.nus)$y
+    first.one.nu <- ell.1.nus[first.one]
+    
+    second.one <- find_closest(center, ell.1.nus[-first.one])$y
+    second.one.nu <- ell.1.nus[-first.one][second.one]
+    
+    center.pwr <- power[which(freqs$nu==center)]/max(power)
+    points(center, center.pwr, 
+        type='h', col=col.pal[1], lwd=2)
+    first.zero.nu.pwr <- power[which(freqs$nu==first.zero.nu)]/max(power)
+    points(first.zero.nu, first.zero.nu.pwr, 
+        type='h', col=col.pal[1], lwd=2)
+    second.zero.nu.pwr <- power[which(freqs$nu==second.zero.nu)]/max(power)
+    points(second.zero.nu, second.zero.nu.pwr, 
+        type='h', col=col.pal[1], lwd=2)
+    first.one.nu.pwr <- power[which(freqs$nu==first.one.nu)]/max(power)
+    points(first.one.nu, first.one.nu.pwr, 
+        type='h', col=col.pal[2], lwd=2)
+    second.one.nu.pwr <- power[which(freqs$nu==second.one.nu)]/max(power)
+    points(second.one.nu, second.one.nu.pwr, 
+        type='h', col=col.pal[2], lwd=2)
+    others <- c(first.zero.nu, second.zero.nu, first.one.nu, second.one.nu)
+    for (other in 1:4) {
+        arrows(center, left.pwr-0.15, others[other], 
+        ifelse(other == 1 || other == 2, -0.15, -0.05) + left.pwr, length=0.1)
+    }
+    text(0.97*second.one.nu, 0.95, expression(dd[0*","*1]), cex=text.cex, 
+        adj=c(1, NA))
+    
+    ## annotate dnu02
+    ell.2.nus <- freqs[freqs$l==2,]$nu
+    ell.pwrs <- power[ell.0]
+    max.pwr <- max(ell.pwrs)
+    max.pwr.idx <- which(power[ell.0] == max.pwr)
+    right <- freqs[ell.0,]$nu[max.pwr.idx+3]
+    left <- ell.2.nus[find_closest(right, ell.2.nus)$y]
+    points(right, power[which(freqs$nu == right)]/max(power), 
+        type='h', col=col.pal[1], lwd=2)
+    points(left, power[which(freqs$nu == left)]/max(power), 
+        type='h', col=col.pal[3], lwd=2)
+    arrows(left-1, left.pwr-0.15, left, length=0.1)
+    arrows(right+1, left.pwr-0.15, right, length=0.1)
+    arrows(left, left.pwr-0.15, right, length=0)
+    text(left*0.99, left.pwr+0.26, cex=text.cex, 
+        expression(delta*nu[0*","*2]), adj=c(0, NA))
+    
+    ## annotate dnu13
+    ell.3.nus <- freqs[freqs$l==3,]$nu
+    ell.pwrs <- power[ell.1]
+    max.pwr <- max(ell.pwrs)
+    max.pwr.idx <- which(power[ell.1] == max.pwr)
+    right <- freqs[ell.1,]$nu[max.pwr.idx+5]
+    left <- ell.3.nus[find_closest(right, ell.3.nus)$y]
+    points(right, power[which(freqs$nu == right)]/max(power), 
+        type='h', col=col.pal[2], lwd=2)
+    points(left, power[which(freqs$nu == left)]/max(power), 
+        type='h', col=col.pal[4], lwd=2)
+    arrows(left-1, left.pwr-0.15, left, length=0.1)
+    arrows(right+1, left.pwr-0.15, right, length=0.1)
+    arrows(left, left.pwr-0.15, right, length=0)
+    text(left*0.99, left.pwr, cex=text.cex, 
+        expression(delta*nu[1*","*3]), adj=c(0, NA))
 }
 

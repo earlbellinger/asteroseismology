@@ -7,13 +7,15 @@ source(file.path('..', 'scripts', 'seismology.R'))
 library(parallel)
 library(parallelMap)
 
+#options(warn=2) 
+
 Z_div_X_solar = 0.02293
 profile.pattern <- 'profile.+.data$'
 freqs.pattern <- 'profile.+-freqs.dat$'
 freqs.cols <- c('l', 'n', 'nu')#, 'inertia')
 
 ### Obtain observable properties from models 
-summarize <- function(pro_file, freqs_file, ev.DF) {
+summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     print(pro_file)
     
     pro_header <- read.table(pro_file, header=TRUE, nrows=1, skip=1)
@@ -51,7 +53,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
         outf=ifelse(sample(0:10000, 1) == 0, 
             gsub("/", "-", freqs_file), 
             FALSE),
-        filepath=file.path('plots', 'separation'))
+        filepath=file.path('plots', dname, 'separation'))
     
     if (all(is.na(seis.DF))) {
         print(paste("Model", pro_file, "failed: no frequency separations"))
@@ -61,7 +63,7 @@ summarize <- function(pro_file, freqs_file, ev.DF) {
 }
 
 ### Obtain evolutionary tracks from a MESA directory
-parse_dir <- function(directory, min_num_models=10) {
+parse_dir <- function(directory, min_num_models=10, dname='simulations') {
     ## parse dirname string e.g. "M=1.0_Y=0.28"
     params.DF <- NULL
     for (var in unlist(strsplit(basename(directory), '_'))) { 
@@ -100,7 +102,7 @@ parse_dir <- function(directory, min_num_models=10) {
     parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
     obs.DF <- do.call(plyr:::rbind.fill, 
         parallelMap(function(pro_file, freqs_file)
-                summarize(pro_file, freqs_file, ev.DF), 
+                summarize(pro_file, freqs_file, ev.DF, dname=dname), 
             pro_file=file.path(log_dir, pro_files), 
             freqs_file=file.path(log_dir, freq_files)))
     merge(rbind(params.DF), obs.DF[with(obs.DF, order(age)),])
@@ -356,7 +358,8 @@ args <- commandArgs(TRUE)
 if (length(args)>0) {
     directory <- args[1]
     print(directory)
-    DF <- unique(parse_dir(directory))
+    dname <- dirname(directory)
+    DF <- unique(parse_dir(directory, dname=dname))
     DF <- DF[complete.cases(DF),]
     DF <- DF[order(DF$age),]
     
