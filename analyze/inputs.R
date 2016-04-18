@@ -12,7 +12,7 @@ library(scales)
 
 ## Load data
 combos <- read.table(file.path('..', 'forward', 'initial_conditions.dat'), 
-    col.names=c("M", "Y", "Z", "alpha", "overshoot", "diffusion"))
+    col.names=c("M", "Y", "Z", "alpha", "overshoot", "diffusion"))[1:500,]
 
 log_vars <- c(3, 5, 6)
 

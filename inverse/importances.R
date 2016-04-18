@@ -32,7 +32,9 @@ make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
         ylim=if (label != FALSE) 
                  range(0, round(dat.kages*1.01, 2), round(dat.hares*1.01, 2))
              else range(0, round(DF*1.01, 2)), 
-        #border="black", outcol="black", medcol="white", 
+        border=rgb(0, 55/256, 96/256),#blue, 
+        outcol="black", 
+        medcol=red, 
         medlwd=1, #yaxs='i',
         xlab="Feature importance", xaxt='n', tcl=0, cex.axis=text.cex,
         names=as.expression(unlist(Map(function(x) seis.labs[x], 

@@ -1,4 +1,5 @@
-forward/simulations**/**
+forward/simulations/**
+forward/simulations-**/**
 inverse/perturb/**
 **/*data*/**
 **/maybe_sub_logs/**

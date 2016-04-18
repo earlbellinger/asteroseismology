@@ -25,6 +25,10 @@ trans.black <- adjustcolor('black', alpha=0.5)
 plot_accuracy <- function(DF, score='ev', variable='num_tracks', ..., 
         text.cex=1, mgp=utils.mgp, font="Palatino", plotlegend=T) {
     
+    if (variable=='num_tracks') {
+        DF <- DF[DF[[variable]] > 4,]
+    }
+    
     if (variable=='num_trees' && (score=='dist' || score=='sigma')) {
         DF <- DF[DF[[variable]] > 1,]
         #xlim[1] <- 2
@@ -40,11 +44,11 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
     par(xpd=FALSE)
     ylim <- if (score=='dist') {
         if (variable=='num_tracks') {
-            c(0.25, 2) 
+            c(0, 2) 
         } else if (variable=='num_points') {
-            c(0.25, 1)
+            c(0, 1)
         } else if (variable=='num_trees') {
-            c(0.25, 2)
+            c(0, 2)
         }
     } else c(0, 1)
     plot(NA, axes=F, 
@@ -67,17 +71,6 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
         "Number of Trees in Forest"
     })
     par(mgp=mgp+c(1, 0, 0.15))
-    title(ylab=if (score == 'ev') {
-        expression("Explained Variance"~V[e])
-    } else if (score == 'r2') {
-        expression("Coefficient of Determination"~R[2])
-    } else if (score == 'dist') {
-        expression("Distance"~abs(widehat(y)-y)/widehat(sigma))
-    } else if (score == 'sigma') {
-        expression("Normalized Uncertainty"~widehat(sigma))
-    } else if (score == 'diff') {
-        expression("Normalized Error"~abs(widehat(y)-y))
-    })
     
     if (score == "ev" || score == "r2") {
         yticks <- c(0, 0.25, 0.5, 0.75, 1)
@@ -114,7 +107,7 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
             #max.val <- max(average[[score]])
             #print(max.val)
             #vals <- normalize(vals)#vals / max.val
-            vals <- normalize(vals)
+            vals <- vals/max(vals)#normalize(vals)
         }
         vals.outside <- if (score == "ev" || score == "r2")
             vals<min(ylim) else vals>max(ylim) 
@@ -193,6 +186,18 @@ plot_accuracy <- function(DF, score='ev', variable='num_tracks', ...,
                 text.width=text.widths)
         }
     }
+    
+    title(ylab=if (score == 'ev') {
+        expression("Explained Variance"~V[e])
+    } else if (score == 'r2') {
+        expression("Coefficient of Determination"~R[2])
+    } else if (score == 'dist') {
+        expression("Distance"~abs(widehat(y)-y)/widehat(sigma))
+    } else if (score == 'sigma') {
+        expression("Uncertainty"~widehat(sigma)/max(widehat(sigma)))
+    } else if (score == 'diff') {
+        expression("Error"~abs(widehat(y)-y)/max(abs(widehat(y)-y)))
+    })
 }
 
 for (score in c("r2", "ev", "dist", "diff", "sigma")) {

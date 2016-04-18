@@ -70,7 +70,7 @@ load_data <- function(filename, num_points=64, space_var='X_c') {
     y <- new.DF[[space_var]]
     
     make_plots(plot_spacing, paste0(basename(filename), "-spacing"), 
-        filepath=file.path('plots', sim_dir, "spacing"), 
+        filepath=file.path('plots', sim_dir, "spacing-test"), 
         x=x, y=y, ideal=ideal, num_points=num_points,
         paper_pdf_height=3.25, slides_pdf_height=3.25,
         mar=c(3, 1, 1, 1), thin=F, tall=F, slides=F)
@@ -85,7 +85,7 @@ plot_spacing <- function(x, y, ideal, num_points, ...,
         xaxs='i', yaxs='i')
     #axis(1, tck=-0.05, text.cex)
     magaxis(1, tck=-0.05, ratio=0.1, family=font, cex.axis=text.cex, usepar=1)
-    title(xlab=expression("Core-hydrogen abundance"~X[c]))
+    title(xlab=expression("Core hydrogen abundance"~X[c]))
     points(x, rep(0.35, length(x)), pch=4, cex=0.25, col='darkblue', xpd=NA)
     points(y, rep(0.225, length(y)), pch=3, cex=0.25, col='darkred', xpd=NA)
     points(ideal, rep(0.1, num_points), pch=20, cex=0.25, xpd=NA)
