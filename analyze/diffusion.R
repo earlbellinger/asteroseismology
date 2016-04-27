@@ -163,7 +163,7 @@ plot_diffusion3 <- function(..., text.cex=1, mgp=utils.mgp) {
                  Zlabs, 
                  col.pal[1:length(col.pal)], 
                  cex=text.cex, gradient='y', align='rb')
-    mtext("Diffusion factor D", 4, line=4.5, cex=text.cex)
+    mtext("Diffusion multiplication factor D", 4, line=4.5, cex=text.cex)
 }
 make_plots(plot_diffusion3, "D_FeH0_FeHf", filepath=filepath,
     thin.hack=1, mar=c(3, 3, 1, 6))

@@ -30,6 +30,13 @@ request_cpus = $OMP_NUM_THREADS
 "
     fi
     
+    ## Set machine
+    machine=""
+    if [ ! -z ${MACHINE+x} ]; then
+        machine="Requirements = Machine==\"$MACHINE\"
+"
+    fi
+    
     name=${cmd// /_}
     if command -v condor_submit >/dev/null 2>&1
       then
@@ -52,7 +59,7 @@ Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
-$threads$image_size$nice
+$threads$image_size$nice$machine
 queue
 " > "condor.job"
         condor_submit "condor.job"
@@ -70,6 +77,7 @@ while [ "$#" -gt 0 ]; do
     -n) NICE=1; shift 1;;
     -p) OMP_NUM_THREADS="$2"; shift 2;;
     -m) MEMORY="$2"; shift 2;;
+    -c) MACHINE="$2"; shift 2;;
 
      *) break;;
   esac
@@ -99,6 +107,7 @@ if [ $HELP -gt 0 ]; then
     echo "  -n   : run as nice job"
     echo "  -p # : set the number of threads to run in parallel"
     echo "  -m # : set the memory consumption of the job"
+    echo "  -c s : set the machine that this job will run on"
     echo
     exit
 fi

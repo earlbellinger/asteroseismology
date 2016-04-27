@@ -242,7 +242,7 @@ seis.names <- list(
   Y               = "Initial helium", 
   Z               = "Initial metallicity",
   alpha           = "Mixing length parameter", 
-  diffusion       = "Multiplicative diffusion factor",
+  diffusion       = "Diffusion multiplication factor",
   overshoot       = "Overshoot",
   age             = "Age", 
   radius          = "Radius", 

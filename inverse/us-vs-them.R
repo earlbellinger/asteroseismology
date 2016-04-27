@@ -359,11 +359,19 @@ plot_rel_diff <- function(qty, other=basu, ...,
     std <- paste0(qty, '_s')
     dif <- other[[qty]] - ml[[qty]]
     rel.dif <- dif / other[[qty]]
-    rel.unc <- ((ml[[qty]]+ml[[high]])-(ml[[qty]]-ml[[low]]))/2
-    ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
+    rel.high <- (other[[qty]] - (ml[[qty]]+ml[[high]])) / other[[qty]]
+    rel.low <- (other[[qty]] - (ml[[qty]]-ml[[low]])) / other[[qty]]
+    #rel.unc <- ((ml[[qty]]+ml[[high]])-(ml[[qty]]-ml[[low]]))/2
+    #ylims <- range(rel.dif + rel.unc, rel.dif - rel.unc)
+    ylims <- range(rel.high, rel.low)
     
     plot(NA, axes=F, ylab="", xlab="", xlim=xlims, ylim=ylims)
     abline(h=0, lty=2)
+    
+    arrows(other[[qty]], rel.low,#rel.dif - rel.unc, 
+           other[[qty]], rel.high,#rel.dif + rel.unc, 
+        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+    points(rel.dif ~ other[[qty]], pch=1, cex=0.5)
     
     magaxis(side=3:4, family=font, tcl=0.25, labels=c(0,0),
         cex.axis=text.cex, las=1, mgp=mgp)
@@ -372,10 +380,6 @@ plot_rel_diff <- function(qty, other=basu, ...,
     magaxis(side=1, family=font, tcl=0.25, labels=1,
         cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
     
-    arrows(other[[qty]], rel.dif - rel.unc, 
-           other[[qty]], rel.dif + rel.unc, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
-    points(rel.dif ~ other[[qty]], pch=1, cex=0.5)
     par(mgp=mgp+c(0.2, 0, 0))
     title(ylab=bquote(
         (.(seis.labs[[name]])["True"] - .(seis.labs[[name]])["ML"]) / 

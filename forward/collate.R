@@ -70,7 +70,7 @@ load_data <- function(filename, num_points=64, space_var='X_c') {
     y <- new.DF[[space_var]]
     
     make_plots(plot_spacing, paste0(basename(filename), "-spacing"), 
-        filepath=file.path('plots', sim_dir, "spacing-test"), 
+        filepath=file.path('plots', sim_dir, "spacing"), 
         x=x, y=y, ideal=ideal, num_points=num_points,
         paper_pdf_height=3.25, slides_pdf_height=3.25,
         mar=c(3, 1, 1, 1), thin=F, tall=F, slides=F)
