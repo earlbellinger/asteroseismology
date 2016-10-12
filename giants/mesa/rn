@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rm -f restart_photo
+date "+DATE: %Y-%m-%d%nTIME: %H:%M:%S"
+if [[ -e star.exe ]];then
+	./star.exe
+else
+	./star
+fi
+date "+DATE: %Y-%m-%d%nTIME: %H:%M:%S"

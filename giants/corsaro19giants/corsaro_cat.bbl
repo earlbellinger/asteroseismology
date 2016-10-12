@@ -1,0 +1,448 @@
+\begin{thebibliography}{75}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Anderson} {et~al.}(1990){Anderson}, {Duvall}, \&
+  {Jefferies}}]{Anderson90}
+{Anderson}, E.~R., {Duvall}, Jr., T.~L., \& {Jefferies}, S.~M. 1990, \apj, 364,
+  699
+
+\bibitem[{{Appourchaux}(2003)}]{App03PB}
+{Appourchaux}, T. 2003, \apss, 284, 109
+
+\bibitem[{{Appourchaux} {et~al.}(2014){Appourchaux}, {Antia}, {Benomar},
+  {Campante}, {Davies}, {Handberg}, {Howe}, {R{\'e}gulo}, {Belkacem}, {Houdek},
+  {Garc{\'{\i}}a}, \& {Chaplin}}]{App14}
+{Appourchaux}, T., {Antia}, H.~M., {Benomar}, O., {et~al.} 2014,
+  arXiv:1403.7046 [astro-ph.SR] (A14)
+
+\bibitem[{{Appourchaux} {et~al.}(2012){Appourchaux}, {Benomar}, {Gruberbauer},
+  {Chaplin}, {Garc{\'{\i}}a}, {Handberg}, {Verner}, {Antia}, {Campante},
+  {Davies}, {Deheuvels}, {Hekker}, {Howe}, {Salabert}, {Bedding}, {White},
+  {Houdek}, {Silva Aguirre}, {Elsworth}, {van Cleve}, {Clarke}, {Hall}, \&
+  {Kjeldsen}}]{App12fwhm}
+{Appourchaux}, T., {Benomar}, O., {Gruberbauer}, M., {et~al.} 2012, \aap, 537,
+  A134
+
+\bibitem[{{Ballot} {et~al.}(2011{\natexlab{a}}){Ballot}, {Barban}, \& {van't
+  Veer-Menneret}}]{Ballot11visibility}
+{Ballot}, J., {Barban}, C., \& {van't Veer-Menneret}, C. 2011{\natexlab{a}},
+  \aap, 531, A124
+
+\bibitem[{{Ballot} {et~al.}(2011{\natexlab{b}}){Ballot}, {Gizon}, {Samadi},
+  {Vauclair}, {Benomar}, {Bruntt}, {Mosser}, {Stahn}, {Verner}, {Campante},
+  {Garc{\'{\i}}a}, {Mathur}, {Salabert}, {Gaulme}, {R{\'e}gulo}, {Roxburgh},
+  {Appourchaux}, {Baudin}, {Catala}, {Chaplin}, {Deheuvels}, {Michel}, {Bazot},
+  {Creevey}, {Dolez}, {Elsworth}, {Sato}, {Vauclair}, {Auvergne}, \&
+  {Baglin}}]{Ballot11}
+{Ballot}, J., {Gizon}, L., {Samadi}, R., {et~al.} 2011{\natexlab{b}}, \aap,
+  530, A97
+
+\bibitem[{{Barban} {et~al.}(2009){Barban}, {Deheuvels}, {Baudin},
+  {Appourchaux}, {Auvergne}, {Ballot}, {Boumier}, {Chaplin}, {Garc{\'{\i}}a},
+  {Gaulme}, {Michel}, {Mosser}, {R{\'e}gulo}, {Roxburgh}, {Verner}, {Baglin},
+  {Catala}, {Samadi}, {Bruntt}, {Elsworth}, \& {Mathur}}]{Barban09}
+{Barban}, C., {Deheuvels}, S., {Baudin}, F., {et~al.} 2009, \aap, 506, 51
+
+\bibitem[{{Baudin} {et~al.}(2011){Baudin}, {Barban}, {Belkacem}, {Hekker},
+  {Morel}, {Samadi}, {Benomar}, {Goupil}, {Carrier}, {Ballot}, {Deheuvels}, {De
+  Ridder}, {Hatzes}, {Kallinger}, \& {Weiss}}]{Baudin11temp}
+{Baudin}, F., {Barban}, C., {Belkacem}, K., {et~al.} 2011, \aap, 529, A84
+
+\bibitem[{{Baudin} {et~al.}(2005){Baudin}, {Samadi}, {Goupil}, {Appourchaux},
+  {Barban}, {Boumier}, {Chaplin}, \& {Gouttebroze}}]{Baudin05}
+{Baudin}, F., {Samadi}, R., {Goupil}, M.-J., {et~al.} 2005, \aap, 433, 349
+
+\bibitem[{{Beck} {et~al.}(2011){Beck}, {Bedding}, {Mosser}, {Stello}, {Garcia},
+  {Kallinger}, {Hekker}, {Elsworth}, {Frandsen}, {Carrier}, {De Ridder},
+  {Aerts}, {White}, {Huber}, {Dupret}, {Montalb{\'a}n}, {Miglio}, {Noels},
+  {Chaplin}, {Kjeldsen}, {Christensen-Dalsgaard}, {Gilliland}, {Brown},
+  {Kawaler}, {Mathur}, \& {Jenkins}}]{Beck11Science}
+{Beck}, P.~G., {Bedding}, T.~R., {Mosser}, B., {et~al.} 2011, Science, 332, 205
+
+\bibitem[{{Beck} {et~al.}(2014){Beck}, {Hambleton}, {Vos}, {Kallinger},
+  {Bloemen}, {Tkachenko}, {Garc{\'{\i}}a}, {{\O}stensen}, {Aerts}, {Kurtz}, {De
+  Ridder}, {Hekker}, {Pavlovski}, {Mathur}, {De Smedt}, {Derekas}, {Corsaro},
+  {Mosser}, {Van Winckel}, {Huber}, {Degroote}, {Davies}, {Pr{\v s}a},
+  {Debosscher}, {Elsworth}, {Nemeth}, {Siess}, {Schmid}, {P{\'a}pics}, {de
+  Vries}, {van Marle}, {Marcos-Arenal}, \& {Lobel}}]{Beck14eccentric}
+{Beck}, P.~G., {Hambleton}, K., {Vos}, J., {et~al.} 2014, \aap, 564, A36
+
+\bibitem[{{Beck} {et~al.}(2012){Beck}, {Montalban}, {Kallinger}, {De Ridder},
+  {Aerts}, {Garc{\'{\i}}a}, {Hekker}, {Dupret}, {Mosser}, {Eggenberger},
+  {Stello}, {Elsworth}, {Frandsen}, {Carrier}, {Hillen}, {Gruberbauer},
+  {Christensen-Dalsgaard}, {Miglio}, {Valentini}, {Bedding}, {Kjeldsen},
+  {Girouard}, {Hall}, \& {Ibrahim}}]{Beck12Nature}
+{Beck}, P.~G., {Montalban}, J., {Kallinger}, T., {et~al.} 2012, \nat, 481, 55
+
+\bibitem[{{Bedding} {et~al.}(2010){Bedding}, {Huber}, {Stello}, {Elsworth},
+  {Hekker}, {Kallinger}, {Mathur}, {Mosser}, {Preston}, {Ballot}, {Barban},
+  {Broomhall}, {Buzasi}, {Chaplin}, {Garc{\'{\i}}a}, {Gruberbauer}, {Hale}, {De
+  Ridder}, {Frandsen}, {Borucki}, {Brown}, {Christensen-Dalsgaard},
+  {Gilliland}, {Jenkins}, {Kjeldsen}, {Koch}, {Belkacem}, {Bildsten}, {Bruntt},
+  {Campante}, {Deheuvels}, {Derekas}, {Dupret}, {Goupil}, {Hatzes}, {Houdek},
+  {Ireland}, {Jiang}, {Karoff}, {Kiss}, {Lebreton}, {Miglio}, {Montalb{\'a}n},
+  {Noels}, {Roxburgh}, {Sangaralingam}, {Stevens}, {Suran}, {Tarrant}, \&
+  {Weiss}}]{Bedding10}
+{Bedding}, T.~R., {Huber}, D., {Stello}, D., {et~al.} 2010, \apjl, 713, L176
+
+\bibitem[{{Bedding} {et~al.}(2011){Bedding}, {Mosser}, {Huber},
+  {Montalb{\'a}n}, {Beck}, {Christensen-Dalsgaard}, {Elsworth},
+  {Garc{\'{\i}}a}, {Miglio}, {Stello}, {White}, {De Ridder}, {Hekker}, {Aerts},
+  {Barban}, {Belkacem}, {Broomhall}, {Brown}, {Buzasi}, {Carrier}, {Chaplin},
+  {di Mauro}, {Dupret}, {Frandsen}, {Gilliland}, {Goupil}, {Jenkins},
+  {Kallinger}, {Kawaler}, {Kjeldsen}, {Mathur}, {Noels}, {Aguirre}, \&
+  {Ventura}}]{Bedding11Nature}
+{Bedding}, T.~R., {Mosser}, B., {Huber}, D., {et~al.} 2011, \nat, 471, 608
+
+\bibitem[{{Belkacem} {et~al.}(2012){Belkacem}, {Dupret}, {Baudin},
+  {Appourchaux}, {Marques}, \& {Samadi}}]{Belkacem12}
+{Belkacem}, K., {Dupret}, M.~A., {Baudin}, F., {et~al.} 2012, \aap, 540, L7
+
+\bibitem[{{Belkacem} {et~al.}(2011){Belkacem}, {Goupil}, {Dupret}, {Samadi},
+  {Baudin}, {Noels}, \& {Mosser}}]{Belkacem11}
+{Belkacem}, K., {Goupil}, M.~J., {Dupret}, M.~A., {et~al.} 2011, \aap, 530,
+  A142
+
+\bibitem[{{Benomar} {et~al.}(2009{\natexlab{a}}){Benomar}, {Appourchaux}, \&
+  {Baudin}}]{Benomar09}
+{Benomar}, O., {Appourchaux}, T., \& {Baudin}, F. 2009{\natexlab{a}}, \aap,
+  506, 15
+
+\bibitem[{{Benomar} {et~al.}(2009{\natexlab{b}}){Benomar}, {Baudin},
+  {Campante}, {Chaplin}, {Garc{\'{\i}}a}, {Gaulme}, {Toutain}, {Verner},
+  {Appourchaux}, {Ballot}, {Barban}, {Elsworth}, {Mathur}, {Mosser},
+  {R{\'e}gulo}, {Roxburgh}, {Auvergne}, {Baglin}, {Catala}, {Michel}, \&
+  {Samadi}}]{Benomar09gamma}
+{Benomar}, O., {Baudin}, F., {Campante}, T.~L., {et~al.} 2009{\natexlab{b}},
+  \aap, 507, L13
+
+\bibitem[{{Benomar} {et~al.}(2013){Benomar}, {Bedding}, {Mosser}, {Stello},
+  {Belkacem}, {Garcia}, {White}, {Kuehn}, {Deheuvels}, \&
+  {Christensen-Dalsgaard}}]{Benomar13}
+{Benomar}, O., {Bedding}, T.~R., {Mosser}, B., {et~al.} 2013, \apj, 767, 158
+
+\bibitem[{{Benomar} {et~al.}(2014){Benomar}, {Belkacem}, {Bedding}, {Stello},
+  {Di Mauro}, {Ventura}, {Mosser}, {Goupil}, {Samadi}, \& {Garcia}}]{Benomar14}
+{Benomar}, O., {Belkacem}, K., {Bedding}, T.~R., {et~al.} 2014, \apjl, 781, L29
+
+\bibitem[{{Borucki} {et~al.}(2010){Borucki}, {Koch}, {Basri}, {Batalha},
+  {Brown}, {Caldwell}, {Caldwell}, {Christensen-Dalsgaard}, {Cochran},
+  {DeVore}, {Dunham}, {Dupree}, {Gautier}, {Geary}, {Gilliland}, {Gould},
+  {Howell}, {Jenkins}, {Kondo}, {Latham}, {Marcy}, {Meibom}, {Kjeldsen},
+  {Lissauer}, {Monet}, {Morrison}, {Sasselov}, {Tarter}, {Boss}, {Brownlee},
+  {Owen}, {Buzasi}, {Charbonneau}, {Doyle}, {Fortney}, {Ford}, {Holman},
+  {Seager}, {Steffen}, {Welsh}, {Rowe}, {Anderson}, {Buchhave}, {Ciardi},
+  {Walkowicz}, {Sherry}, {Horch}, {Isaacson}, {Everett}, {Fischer}, {Torres},
+  {Johnson}, {Endl}, {MacQueen}, {Bryson}, {Dotson}, {Haas}, {Kolodziejczak},
+  {Van Cleve}, {Chandrasekaran}, {Twicken}, {Quintana}, {Clarke}, {Allen},
+  {Li}, {Wu}, {Tenenbaum}, {Verner}, {Bruhweiler}, {Barnes}, \&
+  {Prsa}}]{Borucki10}
+{Borucki}, W.~J., {Koch}, D., {Basri}, G., {et~al.} 2010, Science, 327, 977
+
+\bibitem[{{Broomhall} {et~al.}(2014){Broomhall}, {Miglio}, {Montalb{\'a}n},
+  {Eggenberger}, {Chaplin}, {Elsworth}, {Scuflaire}, {Ventura}, \&
+  {Verner}}]{Broomhall14}
+{Broomhall}, A.-M., {Miglio}, A., {Montalb{\'a}n}, J., {et~al.} 2014, \mnras,
+  440, 1828
+
+\bibitem[{{Chaplin} {et~al.}(2009){Chaplin}, {Houdek}, {Karoff}, {Elsworth}, \&
+  {New}}]{Chaplin09}
+{Chaplin}, W.~J., {Houdek}, G., {Karoff}, C., {Elsworth}, Y., \& {New}, R.
+  2009, \aap, 500, L21
+
+\bibitem[{{Christensen-Dalsgaard}(2004)}]{CD04}
+{Christensen-Dalsgaard}, J. 2004, \solphys, 220, 137
+
+\bibitem[{{Corsaro} \& {De Ridder}(2014)}]{Corsaro14}
+{Corsaro}, E. \& {De Ridder}, J. 2014, \aap, 571, A71 (CD14)
+
+\bibitem[{{Corsaro} {et~al.}(2015){Corsaro}, {De Ridder}, \&
+  {Garc{\'{\i}}a}}]{Corsaro15letter}
+{Corsaro}, E., {De Ridder}, J., \& {Garc{\'{\i}}a}, R.~A. 2015, (submitted)
+
+\bibitem[{{Corsaro} {et~al.}(2013){Corsaro}, {Fr{\"o}hlich}, {Bonanno},
+  {Huber}, {Bedding}, {Benomar}, {De Ridder}, \& {Stello}}]{Corsaro13}
+{Corsaro}, E., {Fr{\"o}hlich}, H.-E., {Bonanno}, A., {et~al.} 2013, \mnras,
+  430, 2313
+
+\bibitem[{{Corsaro} {et~al.}(2012){Corsaro}, {Stello}, {Huber}, {Bedding},
+  {Bonanno}, {Brogaard}, {Kallinger}, {Benomar}, {White}, {Mosser}, {Basu},
+  {Chaplin}, {Christensen-Dalsgaard}, {Elsworth}, {Garc{\'{\i}}a}, {Hekker},
+  {Kjeldsen}, {Mathur}, {Meibom}, {Hall}, {Ibrahim}, \& {Klaus}}]{Corsaro12}
+{Corsaro}, E., {Stello}, D., {Huber}, D., {et~al.} 2012, \apj, 757, 190
+
+\bibitem[{{De Ridder} {et~al.}(2006){De Ridder}, {Arentoft}, \&
+  {Kjeldsen}}]{DeRidder06}
+{De Ridder}, J., {Arentoft}, T., \& {Kjeldsen}, H. 2006, \mnras, 365, 595
+
+\bibitem[{{De Ridder} {et~al.}(2009){De Ridder}, {Barban}, {Baudin}, {Carrier},
+  {Hatzes}, {Hekker}, {Kallinger}, {Weiss}, {Baglin}, {Auvergne}, {Samadi},
+  {Barge}, \& {Deleuil}}]{DeRidder09}
+{De Ridder}, J., {Barban}, C., {Baudin}, F., {et~al.} 2009, \nat, 459, 398
+
+\bibitem[{{Deheuvels} {et~al.}(2010){Deheuvels}, {Bruntt}, {Michel}, {Barban},
+  {Verner}, {R{\'e}gulo}, {Mosser}, {Mathur}, {Gaulme}, {Garcia}, {Boumier},
+  {Appourchaux}, {Samadi}, {Catala}, {Baudin}, {Baglin}, {Auvergne},
+  {Roxburgh}, \& {P{\'e}rez Hern{\'a}ndez}}]{Deheuvels10}
+{Deheuvels}, S., {Bruntt}, H., {Michel}, E., {et~al.} 2010, \aap, 515, A87
+
+\bibitem[{{Deheuvels} {et~al.}(2014){Deheuvels}, {Do{\u g}an}, {Goupil},
+  {Appourchaux}, {Benomar}, {Bruntt}, {Campante}, {Casagrande}, {Ceillier},
+  {Davies}, {De Cat}, {Fu}, {Garc{\'{\i}}a}, {Lobel}, {Mosser}, {Reese},
+  {Regulo}, {Schou}, {Stahn}, {Thygesen}, {Yang}, {Chaplin},
+  {Christensen-Dalsgaard}, {Eggenberger}, {Gizon}, {Mathis},
+  {Molenda-{\.Z}akowicz}, \& {Pinsonneault}}]{Deheuvels14}
+{Deheuvels}, S., {Do{\u g}an}, G., {Goupil}, M.~J., {et~al.} 2014, \aap, 564,
+  A27
+
+\bibitem[{{Deheuvels} {et~al.}(2012){Deheuvels}, {Garc{\'{\i}}a}, {Chaplin},
+  {Basu}, {Antia}, {Appourchaux}, {Benomar}, {Davies}, {Elsworth}, {Gizon},
+  {Goupil}, {Reese}, {Regulo}, {Schou}, {Stahn}, {Casagrande},
+  {Christensen-Dalsgaard}, {Fischer}, {Hekker}, {Kjeldsen}, {Mathur}, {Mosser},
+  {Pinsonneault}, {Valenti}, {Christiansen}, {Kinemuchi}, \&
+  {Mullally}}]{Deheuvels12}
+{Deheuvels}, S., {Garc{\'{\i}}a}, R.~A., {Chaplin}, W.~J., {et~al.} 2012, \apj,
+  756, 19
+
+\bibitem[{{Fr{\"o}hlich} {et~al.}(2012){Fr{\"o}hlich}, {Frasca}, {Catanzaro},
+  {Bonanno}, {Corsaro}, {Molenda-{\.Z}akowicz}, {Klutsch}, \&
+  {Montes}}]{Froehlich12}
+{Fr{\"o}hlich}, H.-E., {Frasca}, A., {Catanzaro}, G., {et~al.} 2012, \aap, 543,
+  A146
+
+\bibitem[{{Garc{\'{\i}}a} {et~al.}(2011){Garc{\'{\i}}a}, {Hekker}, {Stello},
+  {Guti{\'e}rrez-Soto}, {Handberg}, {Huber}, {Karoff}, {Uytterhoeven},
+  {Appourchaux}, {Chaplin}, {Elsworth}, {Mathur}, {Ballot},
+  {Christensen-Dalsgaard}, {Gilliland}, {Houdek}, {Jenkins}, {Kjeldsen},
+  {McCauliff}, {Metcalfe}, {Middour}, {Molenda-Zakowicz}, {Monteiro}, {Smith},
+  \& {Thompson}}]{Garcia11}
+{Garc{\'{\i}}a}, R.~A., {Hekker}, S., {Stello}, D., {et~al.} 2011, \mnras, 414,
+  L6
+
+\bibitem[{{Garc{\'{\i}}a} {et~al.}(2014){Garc{\'{\i}}a}, {Mathur}, {Pires},
+  {R{\'e}gulo}, {Bellamy}, {Pall{\'e}}, {Ballot}, {Barcel{\'o} Forteza},
+  {Beck}, {Bedding}, {Ceillier}, {Roca Cort{\'e}s}, {Salabert}, \&
+  {Stello}}]{Garcia14}
+{Garc{\'{\i}}a}, R.~A., {Mathur}, S., {Pires}, S., {et~al.} 2014, \aap, 568,
+  A10
+
+\bibitem[{{Grosjean} {et~al.}(2014){Grosjean}, {Dupret}, {Belkacem},
+  {Montalban}, {Samadi}, \& {Mosser}}]{Grosjean14}
+{Grosjean}, M., {Dupret}, M.-A., {Belkacem}, K., {et~al.} 2014, \aap, 572, A11
+
+\bibitem[{{Gruberbauer} {et~al.}(2009){Gruberbauer}, {Kallinger}, {Weiss}, \&
+  {Guenther}}]{Gruberbauer09}
+{Gruberbauer}, M., {Kallinger}, T., {Weiss}, W.~W., \& {Guenther}, D.~B. 2009,
+  \aap, 506, 1043
+
+\bibitem[{{Handberg} \& {Campante}(2011)}]{Handberg11}
+{Handberg}, R. \& {Campante}, T.~L. 2011, \aap, 527, A56
+
+\bibitem[{{Hekker} {et~al.}(2010){Hekker}, {Barban}, {Baudin}, {De Ridder},
+  {Kallinger}, {Morel}, {Chaplin}, \& {Elsworth}}]{Hekker10}
+{Hekker}, S., {Barban}, C., {Baudin}, F., {et~al.} 2010, \aap, 520, A60
+
+\bibitem[{{Huber} {et~al.}(2011){Huber}, {Bedding}, {Stello}, {Hekker},
+  {Mathur}, {Mosser}, {Verner}, {Bonanno}, {Buzasi}, {Campante}, {Elsworth},
+  {Hale}, {Kallinger}, {Silva Aguirre}, {Chaplin}, {De Ridder},
+  {Garc{\'{\i}}a}, {Appourchaux}, {Frandsen}, {Houdek}, {Molenda-{\.Z}akowicz},
+  {Monteiro}, {Christensen-Dalsgaard}, {Gilliland}, {Kawaler}, {Kjeldsen},
+  {Broomhall}, {Corsaro}, {Salabert}, {Sanderfer}, {Seader}, \&
+  {Smith}}]{Huber11}
+{Huber}, D., {Bedding}, T.~R., {Stello}, D., {et~al.} 2011, \apj, 743, 143
+
+\bibitem[{{Huber} {et~al.}(2010){Huber}, {Bedding}, {Stello}, {Mosser},
+  {Mathur}, {Kallinger}, {Hekker}, {Elsworth}, {Buzasi}, {De Ridder},
+  {Gilliland}, {Kjeldsen}, {Chaplin}, {Garc{\'{\i}}a}, {Hale}, {Preston},
+  {White}, {Borucki}, {Christensen-Dalsgaard}, {Clarke}, {Jenkins}, \&
+  {Koch}}]{Huber10}
+{Huber}, D., {Bedding}, T.~R., {Stello}, D., {et~al.} 2010, \apj, 723, 1607
+
+\bibitem[{Jeffreys(1961)}]{Jeffreys61}
+Jeffreys, H. 1961, Theory of Probability (3rd Ed. OUP Oxford)
+
+\bibitem[{{Jenkins} {et~al.}(2010){Jenkins}, {Caldwell}, {Chandrasekaran},
+  {Twicken}, {Bryson}, {Quintana}, {Clarke}, {Li}, {Allen}, {Tenenbaum}, {Wu},
+  {Klaus}, {Van Cleve}, {Dotson}, {Haas}, {Gilliland}, {Koch}, \&
+  {Borucki}}]{Jenkins10}
+{Jenkins}, J.~M., {Caldwell}, D.~A., {Chandrasekaran}, H., {et~al.} 2010,
+  \apjl, 713, L120
+
+\bibitem[{{Jiang} \& {Christensen-Dalsgaard}(2014)}]{Jiang14}
+{Jiang}, C. \& {Christensen-Dalsgaard}, J. 2014, \mnras, 444, 3622
+
+\bibitem[{{Kallinger} {et~al.}(2014){Kallinger}, {De Ridder}, {Hekker},
+  {Mathur}, {Mosser}, {Gruberbauer}, {Garc{\'{\i}}a}, {Karoff}, \&
+  {Ballot}}]{Kallinger14}
+{Kallinger}, T., {De Ridder}, J., {Hekker}, S., {et~al.} 2014, \aap, 570, A41
+
+\bibitem[{{Kallinger} {et~al.}(2012){Kallinger}, {Hekker}, {Mosser}, {De
+  Ridder}, {Bedding}, {Elsworth}, {Gruberbauer}, {Guenther}, {Stello}, {Basu},
+  {Garc{\'{\i}}a}, {Chaplin}, {Mullally}, {Still}, \& {Thompson}}]{Kallinger12}
+{Kallinger}, T., {Hekker}, S., {Mosser}, B., {et~al.} 2012, \aap, 541, A51
+
+\bibitem[{{Kallinger} {et~al.}(2010{\natexlab{a}}){Kallinger}, {Mosser},
+  {Hekker}, {Huber}, {Stello}, {Mathur}, {Basu}, {Bedding}, {Chaplin}, {De
+  Ridder}, {Elsworth}, {Frandsen}, {Garc{\'{\i}}a}, {Gruberbauer}, {Matthews},
+  {Borucki}, {Bruntt}, {Christensen-Dalsgaard}, {Gilliland}, {Kjeldsen}, \&
+  {Koch}}]{Kallinger10Kepler}
+{Kallinger}, T., {Mosser}, B., {Hekker}, S., {et~al.} 2010{\natexlab{a}}, \aap,
+  522, A1
+
+\bibitem[{{Kallinger} {et~al.}(2010{\natexlab{b}}){Kallinger}, {Weiss},
+  {Barban}, {Baudin}, {Cameron}, {Carrier}, {De Ridder}, {Goupil},
+  {Gruberbauer}, {Hatzes}, {Hekker}, {Samadi}, \& {Deleuil}}]{Kallinger10CoRoT}
+{Kallinger}, T., {Weiss}, W.~W., {Barban}, C., {et~al.} 2010{\natexlab{b}},
+  \aap, 509, A77
+
+\bibitem[{{Karoff} {et~al.}(2013){Karoff}, {Campante}, {Ballot}, {Kallinger},
+  {Gruberbauer}, {Garc{\'{\i}}a}, {Caldwell}, {Christiansen}, \&
+  {Kinemuchi}}]{Karoff13}
+{Karoff}, C., {Campante}, T.~L., {Ballot}, J., {et~al.} 2013, \apj, 767, 34
+
+\bibitem[{{Kjeldsen} {et~al.}(2008){Kjeldsen}, {Bedding}, {Arentoft}, {Butler},
+  {Dall}, {Karoff}, {Kiss}, {Tinney}, \& {Chaplin}}]{K08}
+{Kjeldsen}, H., {Bedding}, T.~R., {Arentoft}, T., {et~al.} 2008, \apj, 682,
+  1370
+
+\bibitem[{{Kjeldsen} {et~al.}(2005){Kjeldsen}, {Bedding}, {Butler},
+  {Christensen-Dalsgaard}, {Kiss}, {McCarthy}, {Marcy}, {Tinney}, \&
+  {Wright}}]{K05}
+{Kjeldsen}, H., {Bedding}, T.~R., {Butler}, R.~P., {et~al.} 2005, \apj, 635,
+  1281
+
+\bibitem[{{Koch} {et~al.}(2010){Koch}, {Borucki}, {Basri}, {Batalha}, {Brown},
+  {Caldwell}, {Christensen-Dalsgaard}, {Cochran}, {DeVore}, {Dunham},
+  {Gautier}, {Geary}, {Gilliland}, {Gould}, {Jenkins}, {Kondo}, {Latham},
+  {Lissauer}, {Marcy}, {Monet}, {Sasselov}, {Boss}, {Brownlee}, {Caldwell},
+  {Dupree}, {Howell}, {Kjeldsen}, {Meibom}, {Morrison}, {Owen}, {Reitsema},
+  {Tarter}, {Bryson}, {Dotson}, {Gazis}, {Haas}, {Kolodziejczak}, {Rowe}, {Van
+  Cleve}, {Allen}, {Chandrasekaran}, {Clarke}, {Li}, {Quintana}, {Tenenbaum},
+  {Twicken}, \& {Wu}}]{Koch10}
+{Koch}, D.~G., {Borucki}, W.~J., {Basri}, G., {et~al.} 2010, \apjl, 713, L79
+
+\bibitem[{{Kumar} {et~al.}(1988){Kumar}, {Franklin}, \& {Goldreich}}]{Kumar88}
+{Kumar}, P., {Franklin}, J., \& {Goldreich}, P. 1988, \apj, 328, 879
+
+\bibitem[{{Mathur} {et~al.}(2010){Mathur}, {Garc{\'{\i}}a}, {Catala}, {Bruntt},
+  {Mosser}, {Appourchaux}, {Ballot}, {Creevey}, {Gaulme}, {Hekker}, {Huber},
+  {Karoff}, {Piau}, {R{\'e}gulo}, {Roxburgh}, {Salabert}, {Verner}, {Auvergne},
+  {Baglin}, {Chaplin}, {Elsworth}, {Michel}, {Samadi}, {Sato}, \&
+  {Stello}}]{Mathur10}
+{Mathur}, S., {Garc{\'{\i}}a}, R.~A., {Catala}, C., {et~al.} 2010, \aap, 518,
+  A53
+
+\bibitem[{{Miglio} {et~al.}(2012){Miglio}, {Brogaard}, {Stello}, {Chaplin},
+  {D'Antona}, {Montalb{\'a}n}, {Basu}, {Bressan}, {Grundahl}, {Pinsonneault},
+  {Serenelli}, {Elsworth}, {Hekker}, {Kallinger}, {Mosser}, {Ventura},
+  {Bonanno}, {Noels}, {Silva Aguirre}, {Szabo}, {Li}, {McCauliff}, {Middour},
+  \& {Kjeldsen}}]{Miglio12}
+{Miglio}, A., {Brogaard}, K., {Stello}, D., {et~al.} 2012, \mnras, 419, 2077
+
+\bibitem[{{Miglio} {et~al.}(2013){Miglio}, {Chiappini}, {Morel}, {Barbieri},
+  {Chaplin}, {Girardi}, {Montalb{\'a}n}, {Valentini}, {Mosser}, {Baudin},
+  {Casagrande}, {Fossati}, {Aguirre}, \& {Baglin}}]{Miglio13}
+{Miglio}, A., {Chiappini}, C., {Morel}, T., {et~al.} 2013, \mnras, 429, 423
+
+\bibitem[{{Miglio} {et~al.}(2015){Miglio}, {Girardi}, {Rodrigues}, {Stello}, \&
+  {Chaplin}}]{Miglio15}
+{Miglio}, A., {Girardi}, L., {Rodrigues}, T.~S., {Stello}, D., \& {Chaplin},
+  W.~J. 2015, Astrophysics and Space Science Proceedings, 39, 11
+
+\bibitem[{{Miglio} {et~al.}(2009){Miglio}, {Montalb{\'a}n}, {Baudin},
+  {Eggenberger}, {Noels}, {Hekker}, {De Ridder}, {Weiss}, \&
+  {Baglin}}]{Miglio09}
+{Miglio}, A., {Montalb{\'a}n}, J., {Baudin}, F., {et~al.} 2009, \aap, 503, L21
+
+\bibitem[{{Miglio} {et~al.}(2010){Miglio}, {Montalb{\'a}n}, {Carrier}, {De
+  Ridder}, {Mosser}, {Eggenberger}, {Scuflaire}, {Ventura}, {D'Antona},
+  {Noels}, \& {Baglin}}]{Miglio10}
+{Miglio}, A., {Montalb{\'a}n}, J., {Carrier}, F., {et~al.} 2010, \aap, 520, L6
+
+\bibitem[{{Mosser} {et~al.}(2011{\natexlab{a}}){Mosser}, {Barban},
+  {Montalb{\'a}n}, {Beck}, {Miglio}, {Belkacem}, {Goupil}, {Hekker}, {De
+  Ridder}, {Dupret}, {Elsworth}, {Noels}, {Baudin}, {Michel}, {Samadi},
+  {Auvergne}, {Baglin}, \& {Catala}}]{Mosser11mixed}
+{Mosser}, B., {Barban}, C., {Montalb{\'a}n}, J., {et~al.} 2011{\natexlab{a}},
+  \aap, 532, A86
+
+\bibitem[{{Mosser} {et~al.}(2011{\natexlab{b}}){Mosser}, {Belkacem}, {Goupil},
+  {Michel}, {Elsworth}, {Barban}, {Kallinger}, {Hekker}, {De Ridder}, {Samadi},
+  {Baudin}, {Pinheiro}, {Auvergne}, {Baglin}, \& {Catala}}]{Mosser11universal}
+{Mosser}, B., {Belkacem}, K., {Goupil}, M.~J., {et~al.} 2011{\natexlab{b}},
+  \aap, 525, L9
+
+\bibitem[{{Mosser} {et~al.}(2014){Mosser}, {Benomar}, {Belkacem}, {Goupil},
+  {Lagarde}, {Michel}, {Lebreton}, {Stello}, {Vrard}, {Barban}, {Bedding},
+  {Deheuvels}, {Chaplin}, {De Ridder}, {Elsworth}, {Montalban}, {Noels},
+  {Ouazzani}, {Samadi}, {White}, \& {Kjeldsen}}]{Mosser14}
+{Mosser}, B., {Benomar}, O., {Belkacem}, K., {et~al.} 2014, \aap, 572, L5
+
+\bibitem[{{Mosser} {et~al.}(2012{\natexlab{a}}){Mosser}, {Goupil}, {Belkacem},
+  {Marques}, {Beck}, {Bloemen}, {De Ridder}, {Barban}, {Deheuvels}, {Elsworth},
+  {Hekker}, {Kallinger}, {Ouazzani}, {Pinsonneault}, {Samadi}, {Stello},
+  {Garc{\'{\i}}a}, {Klaus}, {Li}, {Mathur}, \& {Morris}}]{Mosser12spin}
+{Mosser}, B., {Goupil}, M.~J., {Belkacem}, K., {et~al.} 2012{\natexlab{a}},
+  \aap, 548, A10
+
+\bibitem[{{Mosser} {et~al.}(2012{\natexlab{b}}){Mosser}, {Goupil}, {Belkacem},
+  {Michel}, {Stello}, {Marques}, {Elsworth}, {Barban}, {Beck}, {Bedding}, {De
+  Ridder}, {Garc{\'{\i}}a}, {Hekker}, {Kallinger}, {Samadi}, {Stumpe},
+  {Barclay}, \& {Burke}}]{Mosser12}
+{Mosser}, B., {Goupil}, M.~J., {Belkacem}, K., {et~al.} 2012{\natexlab{b}},
+  \aap, 540, A143
+
+\bibitem[{{Mosser} {et~al.}(2012{\natexlab{c}}){Mosser}, {Goupil}, {Belkacem},
+  {Michel}, {Stello}, {Marques}, {Elsworth}, {Barban}, {Beck}, {Bedding}, {De
+  Ridder}, {Garcia}, {Hekker}, {Kallinger}, {Samadi}, {Stumpe}, {Barclay}, \&
+  {Burke}}]{Mosser12Cat}
+{Mosser}, B., {Goupil}, M.~J., {Belkacem}, K., {et~al.} 2012{\natexlab{c}},
+  VizieR Online Data Catalog, 354, 9143
+
+\bibitem[{{Pinsonneault} {et~al.}(2012){Pinsonneault}, {An},
+  {Molenda-{\.Z}akowicz}, {Chaplin}, {Metcalfe}, \& {Bruntt}}]{Pin12}
+{Pinsonneault}, M.~H., {An}, D., {Molenda-{\.Z}akowicz}, J., {et~al.} 2012,
+  \apjs, 199, 30
+
+\bibitem[{{Pires} {et~al.}(2014){Pires}, {Mathur}, {Garcia}, {Ballot},
+  {Stello}, \& {Sato}}]{Pires14}
+{Pires}, S., {Mathur}, S., {Garcia}, R.~A., {et~al.} 2014, arXiv:1410.6088
+  [astro-ph.SR]
+
+\bibitem[{{Stello} {et~al.}(2013){Stello}, {Huber}, {Bedding}, {Benomar},
+  {Bildsten}, {Elsworth}, {Gilliland}, {Mosser}, {Paxton}, \&
+  {White}}]{Stello13}
+{Stello}, D., {Huber}, D., {Bedding}, T.~R., {et~al.} 2013, \apjl, 765, L41
+
+\bibitem[{{Stello} {et~al.}(2011){Stello}, {Meibom}, {Gilliland}, {Grundahl},
+  {Hekker}, {Mosser}, {Kallinger}, {Mathur}, {Garc{\'{\i}}a}, {Huber}, {Basu},
+  {Bedding}, {Brogaard}, {Chaplin}, {Elsworth}, {Molenda-{\.Z}akowicz},
+  {Szab{\'o}}, {Still}, {Jenkins}, {Christensen-Dalsgaard}, {Kjeldsen},
+  {Serenelli}, \& {Wohler}}]{Stello11membership}
+{Stello}, D., {Meibom}, S., {Gilliland}, R.~L., {et~al.} 2011, \apj, 739, 13
+
+\bibitem[{{Tassoul}(1980)}]{Tassoul80}
+{Tassoul}, M. 1980, \apjs, 43, 469
+
+\bibitem[{{Tayar} \& {Pinsonneault}(2013)}]{Tayar13}
+{Tayar}, J. \& {Pinsonneault}, M.~H. 2013, \apjl, 775, L1
+
+\bibitem[{{Thompson} {et~al.}(2013){Thompson}, {Christiansen}, {Jenkins},
+  {Caldwell}, {Barclay}, {Bryson}, {Burke}, {Campbell}, {Catanzarite},
+  {Clarke}, {Coughlin}, {Girouard}, {Haas}, {Ibrahim}, {Klaus},
+  {Kolodziejczak}, {Li}, {McCauliff}, {Morris}, {Mullally}, {Quintana}, {Rowe},
+  {Sabale}, {Seader}, {Smith}, {Still}, {Tenenbaum}, {Twicken}, \&
+  {Uddin}}]{Thompson13}
+{Thompson}, S.~E., {Christiansen}, J.~L., {Jenkins}, J.~M., {et~al.} 2013,
+  Kepler Data Release 21 Notes (KSCI-19061-001), Kepler mission
+
+\bibitem[{{Vandakurov}(1968)}]{Vandakurov68}
+{Vandakurov}, Y.~V. 1968, \sovast, 11, 630
+
+\bibitem[{{Vrard} {et~al.}(2014){Vrard}, {Mosser}, \& {Barban}}]{Vrard14}
+{Vrard}, M., {Mosser}, B., \& {Barban}, C. 2014, in SF2A-2014: Proceedings of
+  the Annual meeting of the French Society of Astronomy and Astrophysics, ed.
+  J.~{Ballet}, F.~{Martins}, F.~{Bournaud}, R.~{Monier}, \& C.~{Reyl{\'e}},
+  531--534
+
+\end{thebibliography}

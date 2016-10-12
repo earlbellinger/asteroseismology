@@ -1,0 +1,1 @@
+ffmpeg -start_number 260 -framerate 30 -i plots/%06d.png -c:v libx264 -r 30 out.mp4

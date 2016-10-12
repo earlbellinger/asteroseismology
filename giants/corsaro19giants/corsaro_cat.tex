@@ -1,0 +1,542 @@
+%                                                                
+% AA vers. 6.1, LaTeX class for Astronomy & Astrophysics
+%                                                 (c) Springer-Verlag HD
+%                                                revised by EDP Sciences
+%-----------------------------------------------------------------------
+%
+%\documentclass{aa}
+%\documentclass[referee]{aa} % for a referee version
+%\documentclass[onecolumn]{aa} % for a paper on 1 column  
+%\documentclass[longauth]{aa} % for the long lists of affiliations 
+%\documentclass[rnote]{aa} % for the research notes
+%\documentclass[letter]{aa} % for the letters 
+%
+\documentclass[structabstract]{aa}  
+%\documentclass[traditabstract]{aa}
+%
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage[applemac]{inputenc}
+\usepackage[modulo, switch]{lineno}
+\usepackage{xcolor}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{txfonts}
+\usepackage{natbib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{}{,} % to follow the A&A style
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\Kepler}{\textit{Kepler}}
+\newcommand{\kepler}{\textit{Kepler} }
+\newcommand{\p}{\textit{p} }
+\newcommand{\Dnu}{\Delta \nu}
+\newcommand{\Dnunu}{\Delta\nu_{\ell} \left(\nu\right)}
+\newcommand{\Dnunua}{\Delta_2\nu_{\ell} \left(\nu\right)}
+\newcommand{\numax}{\nu_\mathrm{max}}
+\newcommand{\evid}{\mathcal{E}}
+\newcommand{\model}{\mathcal{M}}
+\newcommand{\muhz}{$\mu$Hz}
+\newcommand{\teff}{T_\mathrm{eff}}
+\newcommand{\DP}{\Delta\Pi_1}
+\newcommand{\diamonds}{\textsc{D\large{iamonds}}}
+\newcommand{\pa}{p_\mathrm{A}}
+\newcommand{\pb}{p_\mathrm{B}}
+\newcommand{\kic}{KIC~12008916}
+\newcommand{\he}{He\textsc{\,\large ii}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}    
+\def\ba{\begin{eqnarray}}
+\def\ea{\end{eqnarray}}    
+\def\divergence{\nabla\cdot}
+\def\bm{\mathbf}
+
+%\modulolinenumbers[5]
+%\linenumbers
+
+\begin{document}
+
+\title{Bayesian peak bagging analysis of 19 low-mass low-luminosity red giants observed with \kepler}
+\author{E. Corsaro\inst{1,2,3},
+J. De Ridder\inst{1},
+R. A. Garc\'{i}a\inst{2}
+          }
+\offprints{Enrico Corsaro\\ \email{enrico.corsaro@cea.fr}}
+
+\institute{Instituut voor Sterrenkunde, KU Leuven, Celestijnenlaan 200D, B-3001 Leuven, Belgium
+\and Laboratoire AIM, CEA/DSM -- CNRS -- Univ. Paris Diderot -- IRFU/SAp, Centre de Saclay, 91191 Gif-sur-Yvette Cedex, France
+\and Instituto de Astrof\'{i}sica de Canarias, E-38205 -- Universidad de La Laguna\\Departamento de Astrof\'{i}sica, E-38206, La Laguna, Tenerife, Spain
+}
+
+   \date{Received ; accepted }
+
+%
+\abstract
+{Non-radial oscillations, observed in thousands of red giants by the space missions CoRoT and \Kepler, allow to greatly deepen our understanding about stellar structure and evolution in cool low-mass stars. The currently available \kepler light curves contain an outstanding amount of information but a detailed analysis of the individual oscillation modes in the observed power spectra, also known as peak bagging, is computationally demanding and challenging to perform on a large number of targets.} 
+{Our intent is to perform for the first time a peak bagging analysis on a sample of 19 low-mass low-luminosity red giants observed by \kepler for more than four years. This allows us to provide high-quality asteroseismic measurements that can be exploited for an intensive testing of the physics used in stellar structure models, stellar evolution and pulsation codes, as well as for refining existing asteroseismic scaling relations in the red giant branch regime.}
+{For this purpose, powerful and sophisticated analysis tools are needed. We exploit the Bayesian code \diamonds, using an efficient nested sampling Monte Carlo algorithm, to perform both a fast fitting of the individual oscillation modes and a peak detection test based on the Bayesian evidence.}
+{We find good agreement for the parameters estimated in the background fitting phase with those given in the literature. We extract and characterize a total of 1618 oscillation modes, providing the largest set of detailed asteroseismic mode measurements ever published. We report on the evidence of a change in regime observed in the relation between linewidths and effective temperatures of the stars occurring at the bottom of the RGB. We show the presence of a linewidth depression or plateau around $\numax$ for all the red giants of the sample. Lastly, we show a good agreement between our measurements of maximum mode amplitudes and existing maximum amplitudes from global analyses provided in the literature, useful as empirical tools to improve and simplify the future peak bagging analysis on a larger sample of evolved stars.}
+{}
+
+% 5 {} token are mandatory
+%
+%\abstract
+%{ }
+\keywords{stars: oscillations --
+	 stars: evolution --
+	 stars: late-type --
+	  methods: statistical --
+	  methods: numerical --
+	  methods: data analysis}
+\titlerunning{Bayesian peak bagging analysis of 19 low-mass low-luminosity red giants}
+      \authorrunning{E. Corsaro et al.}
+\maketitle
+%
+%==========================================================================
+\section{Introduction}
+\label{sec:intro}
+Since the first detection of non-radial oscillations in cool giant stars, the asteroseismology of field red giants (RGs) has encountered a substantial increase in output, especially thanks to the advent of the space-based photometric missions \textit{CoRoT} \citep[e.g.][]{DeRidder09,Kallinger10CoRoT,Mosser11universal,Mosser11mixed} and \kepler \citep[e.g.][]{Borucki10,Koch10,Bedding10,Huber10,Kallinger10Kepler,Kallinger12}, where the latter allowed also for the study of RGs in open clusters \citep[e.g.][]{Stello11membership,Miglio12,Corsaro12}, and in eccentric binary systems \citep{Beck14eccentric}. 
+
+The discovery of so-called mixed modes \citep{Beck11Science,Mosser11mixed}, i.e. modes with p-mode as well as g-mode characteristics, only observed in stars that have passed the main sequence phase, has led to a significant improvement of our understanding of the internal structure and evolution of RGs. The characteristic period spacing of mixed modes frequencies provides a direct way to disentangle H-shell and He-core burning RGs \citep{Bedding11Nature,Mosser12} and has already been used to classify about 13,000 targets observed in the \kepler field of view \citep{Stello13}. Additional studies of the effect of rotation as seen from the splitting of mixed modes show us that the RG cores rotate faster than their convective envelope \citep{Beck12Nature,Deheuvels12,Mosser12spin}, thus opening the possibility to probe their internal rotation rates with direct observations of the oscillations at their surface. RGs are also being used as distance and age indicators to study stellar populations and trace the formation and evolution of the Galaxy \citep[e.g. see][]{Miglio09,Miglio13,Miglio15}.
+
+Nonetheless, several problems and challenges arise in the analysis and physical interpretation of the asteroseismic properties of the RGs. Among the most important topics currently under investigation, we mention: the forward modeling and inversion of the mode frequencies aimed at probing the stellar structure, constrain the evolution, examine the physical mechanisms responsible for the transport of angular momentum inside the star \citep[e.g.][and references therein]{Tayar13,Benomar14,Deheuvels14}; the excitation and damping mechanism of the mixed modes \citep[e.g.][]{Grosjean14}, and the asymptotic behavior of their oscillation frequencies \citep{Jiang14}; the underlying physics responsible for the damping rates of the $p$ modes in a temperature range cooler than that of G-F type main-sequence and subgiant stars \citep[e.g.][]{Chaplin09,Baudin11temp,Belkacem12,Corsaro12}; the analysis of regions of sharp-structure variation inside the convective zone aimed at refining existing stellar models and at retrieving reliable helium abundances \citep[e.g.][]{Miglio10,Broomhall14,Vrard14,Corsaro15letter}. Therefore, RGs are among the most interesting and useful types of stars to test thoroughly the physics implemented in both stellar structure models and in evolution and pulsation codes, but high-precision asteroseismic measurements of individual oscillation modes are highly needed to accomplish each one of the issues listed before.
+
+With the present four-years long datasets available from \kepler for many RGs, we have the possibility to obtain detailed asteroseismic properties such as frequency, amplitude, and lifetime of each individual oscillation mode observed, with an unprecedented level of accuracy and precision. The required analysis, usually known as peak bagging \citep[e.g.][]{App03PB}, represents a key-step to exploit the full potential of the high-quality power spectra of the stars. However, due to the large number of modes populating the power spectrum of a red giant (on the order of $\sim$100), the peak bagging usually turns into a computationally demanding analysis \citep[e.g. see][]{Benomar09,Gruberbauer09,Kallinger10CoRoT,Handberg11,Corsaro14}. For this purpose, we exploit \diamonds\,\,\citep[][hereafter CD14]{Corsaro14}, a new code well suited for model comparison and inference of high-dimensional problems in a Bayesian perspective.
+
+In this paper we show how to adequately extend to the case of RGs the method used by CD14 for main-sequence stars, hence we perform the peak bagging analysis on a sample of low-mass low-luminosity red giant branch (RGB) stars observed by \kepler for more than four years. We thus provide and discuss our results for the background signal, the asteroseismic parameters, the mode damping and amplitude of all the stars in our sample, stressing their relevance in the light of the open questions related to the physics of the red giant stars.
+
+\section{Observations and data} 
+\label{sec:data}
+To select the sample of stars investigated in this work we started from the original sample of RGs observed in long cadence (LC) by \kepler \citep{Jenkins10} and studied by \cite{Huber11} and by \cite{Corsaro13}, consisting in a total of 1111 stars. In this work we focus on low-mass low-luminosity RGB stars (hereafter LRGs, for the sake of brevity), a particular type of RGs that represents a small population of stars (about 5\,\% of the entire population of RGs observed by \Kepler). 
+
+Our choice of analyzing LRGs, amongst the variety of RGs observed, is motivated by the following reasons:
+\begin{itemize}
+\item The clean oscillation pattern caused by the high values of the characteristic frequency separations, providing a more reliable fitting and identification of most of the observed modes.
+\item The large number of modes (both $p$ modes and mixed modes) and radial orders observed thanks to the high frequency of maximum oscillation power $\numax$ (hence broader power excess compared to more evolved RGs), which allow for more stringent frequency inversions and studies of the seismic signatures of Helium inside the star.
+\item The clear presence of rotation in the oscillations with different mixture level between pressure and gravity modes, essential to investigate the physics of angular momentum transport and its evolution in different layers inside the star.
+\item The location in a short-lived phase at the bottom of the RGB, making these stars rare to observe and important to refine stellar evolution theory.
+\item The covered range in stellar effective temperatures, laying just below that of the most evolved low-mass subgiant stars, filling the existing observational gaps that are crucial for our comprehension of the damping mechanism in the transition between the subgiant and the RGB phase of the stellar evolution.
+\end{itemize} 
+
+Therefore, from the original sample we only considered those stars with power spectra having an oscillation envelope with $\numax \gtrsim 110$\,\muhz, according to the stellar population study done by \cite{Miglio09} (see also \citealt{Bedding10}), with $\numax$ values provided by \cite{Huber11}. This selection reduced the number of targets to 56, which we further skimmed by visually choosing the best stars in terms of number of oscillations and SNR ($\gtrsim 1.3$ as measured from the PSD around $\numax$). We then checked for available measurements of their g-mode period spacing $\Delta\Pi_1$, as measured by \cite{Mosser12}, to have confirmation that the RGs considered are indeed settled in the RGB phase of stellar evolution, and as an auxiliary input for the mode identification process (see Sect.~\ref{sec:mode_id}). This cross-match led to 21 stars, two of which were removed due to a bad module sequence in three \kepler observing quarters (Q). The final sample obtained thus consists of 19 LRGs observed by \kepler from Q0 till Q17.1, namely a total of $\sim$1470 days, resulting in a frequency resolution of $\delta \nu_\mathrm{bin}\simeq 0.008\,$\muhz\,\,and $\sim$36,000 data bins for each power spectral density (PSD). The original PDC-SAP \kepler light curves \citep{Thompson13} were corrected following the methods described in \cite{Garcia11} and the final data were high-pass filtered ensuring a 100\,\% transmission for frequencies above 0.2\,$\mu$Hz for all stars. To minimize the effect of the \kepler regular window function due to the spacecraft angular momentum dump and the Earth downlink pointing \citep{Garcia14}, we have interpolated all the gaps of sizes smaller than 2 days using an {\it inpainting} algorithm \citep{Mathur10,Pires14}.
+
+Fig.~\ref{fig:hrd} illustrates the asteroseismic Hertzsprung-Russel diagram (HRD), $\numax$-$\teff$, for the sample of the 19 LRGs. The stars span a temperature range of about $4800$-$5500$\,K, and a range in $\numax$ of $\sim$75\,\muhz\,\,starting from $\sim110$\,\muhz\,\,upwards, with amplitudes at maximum power from 30 to $\sim$70\,ppm.
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{HRD_LMLLRG.png}
+      \caption{Asteroseismic HRD $\numax$-$\teff$ for the sample of 19 LRGs investigated. Amplitudes of maximum oscillation power, $A_\mathrm{max}$, as measured by \cite{Huber11} are indicated in a colored scale. All $\numax$ values are provided by \cite{Huber11}, while temperatures are taken from \cite{Pin12}. 1-$\sigma$ error bars are indicated for both coordinates.}
+    \label{fig:hrd}
+\end{figure}
+
+\section{Peak bagging analysis}
+\label{sec:pb}
+
+\subsection{Background fitting}
+\label{sec:bkg}
+The first step for the peak bagging analysis of the stars is to estimate the background signal in their PSD. We follow the statistical analysis done on a large sample of stars by \cite{Kallinger14}, who found that two separate granulation components with a characteristic frequency close to the region containing the oscillations, together with a third component related to long-term variations, represent best the background signal of the RGs analyzed in this work. In particular, the super-Lorentzian (or Harvey-like) profiles associated to each background component have an exponent set to four, again according to the findings by \cite{Kallinger14}. Thus, the background model that we adopt can be expressed as
+\begin{equation}
+P_\mathrm{bkg} \left(\nu \right) = W + R \left( \nu \right) \left[ B\left( \nu \right) + G \left( \nu \right) \right] \, ,
+\label{eq:overall_bkg}
+\end{equation}
+where we assume $W$ to be a flat noise level since we only study RGs with high $\numax$, and with $R\left(\nu\right)$ the response function that considers the sampling rate of the observations for LC \kepler data,
+\begin{equation}
+R\left( \nu \right) = \mbox{sinc}^2 \left( \frac{\pi \nu}{2 \nu_\mathrm{Nyq}} \right) \, ,
+\label{eq:resp}
+\end{equation}
+with $\nu_\mathrm{Nyq} = 283.212\,\mu$Hz the Nyquist frequency. The super-Lorentzian components are given by
+\begin{equation}
+B\left(\nu\right) = \sum^3_{i=1} \frac{\zeta a^2_i / b_i}{1 + \left( 2 \pi \nu / b_i \right)^4} \, ,
+\label{eq:bkg}
+\end{equation}
+with $a_i$ the amplitude in ppm, $b_i$ the characteristic frequency in \muhz, and $\zeta = 2\sqrt{2}/\pi$ the normalization constant for a super-Lorentzian profile with exponent set to four \citep[e.g. see][]{Karoff13,Kallinger14}.
+The power excess containing the oscillations is as usual described as
+\begin{equation}
+G\left(\nu\right) = H_\mathrm{osc} \exp \left[ - \frac{ \left( \nu - \nu_\mathrm{max} \right)^2}{2 \sigma_\mathrm{env}^2} \right] \, ,
+\label{eq:env}
+\end{equation}
+and is only considered when fitting the background model to the overall PSD of the star.
+
+The results from the fit done by means of \diamonds\,\,for all the stars of our sample are presented in Appendix~\ref{sec:bkg_results}, in which both the parameter values (Tables~\ref{tab:bkg1} and \ref{tab:bkg2}) and the plots with the background fit are given (Fig.~\ref{fig:bkg_tot}). To illustrate the results obtained with the method presented in this paper, we shall from now on refer to the star \kic, randomly chosen from our sample. The resulting background fit for \kic\,\,is shown in Fig.~\ref{fig:bkg_case}. 
+
+We adopted uniform priors for all the free parameters of the background model by starting from the results obtained by \cite{Kallinger14}. Uniform priors ensure us the fastest computation and are easy to set up (see CD14). The configuring parameters of \diamonds\,\,used for the computations of the background fits are given in Appendix~\ref{sec:bkg_results}. Our estimated parameters describing the granulation signal of the stars in this sample agree on average within 4.6\,\% for the amplitudes ($a_\mathrm{gran,1}$, $a_\mathrm{gran,2}$) and within 5.1\,\% for the characteristic frequencies ($b_\mathrm{gran,1}$, $b_\mathrm{gran,2}$) with those measured by \cite{Kallinger14}, who used \kepler light curves about 360 days shorter than ours (up to Q13).
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{KIC012008916_background}
+      \caption{Background fit of the star \kic, as derived by \diamonds. The original PSD is shown in gray, whilst a smoothed version with boxcar width set to $\Delta\nu/5$, with $\Delta\nu$ taken from \cite{Mosser12Cat} (see also Table~\ref{tab:asymp_parameters}), is shown as a black line to guide the eye. The red thick line represents the background model without the Gaussian envelope and computed with the values listed in Table~\ref{tab:bkg1}. The green dotted line accounts for the additional Gaussian component using the values listed in Table~\ref{tab:bkg2}. The individual components of the background model as given by Eq.~(\ref{eq:overall_bkg}) are shown by blue dot-dashed lines.}
+    \label{fig:bkg_case}
+\end{figure}
+
+\subsection{Extraction of the oscillation mode parameters}
+\label{sec:extraction}
+The subsequent step in analyzing the stellar PSDs is to adopt an adequate fitting model for the oscillation pattern contained in the region of the power excess. In this work we adopt a method similar to that used by CD14 (see Sect.~6.3), who applied it to the case of an F-type main sequence star. We restrict our frequency range of analysis to the region containing the oscillations, which we identify as $\numax \pm 3.5 \sigma_\mathrm{env}$, with $\numax$ and $\sigma_\mathrm{env}$ listed in Table~\ref{tab:bkg2}, empirically chosen to ensure all observable modes to be included. We thus take into account some important features characterizing the oscillation pattern in RGs, as explained in the following. 
+
+In the oscillation pattern of all the RGs, one can observe forests of modes between consecutive quadrupole and radial modes (also referred to as $\ell = 2$ and $\ell = 0$, respectively, $\ell$ being the angular degree), which are known as dipole ($\ell = 1$) mixed modes \citep{Beck11Science,Bedding11Nature,Mosser11mixed}. Since $g$ modes have the highest mode inertia because they propagate in high-density regions, their lifetime $\tau$ is significantly longer than that of pure pressure modes \citep[e.g. see][]{CD04}. As a consequence, even with an observing time $T_\mathrm{obs} > 4$ years now made available from \Kepler, mixed modes with a g-dominated character may still appear unresolved, whilst others having a more $p$ mode-like character can be partially or sometimes even fully resolved. 
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{KIC012008916_unresolved_mode}
+      \caption{Example of an unresolved dipole mixed mode for \kic. The FWHM of the oscillation peak spans less than three data bins, as indicated by the red segment having a 3-bins width. The red dotted line represents the half maximum level of the peak.}
+    \label{fig:unresolved_peak}
+\end{figure}
+
+In this work we distinguish between resolved or partially resolved peaks, for which $T_\mathrm{obs} \gtrsim \tau$, and those that are unresolved, for which $T_\mathrm{obs} \ll \tau$ \citep[e.g. see also][who used a similar approach]{Baudin11temp}. In the former case, the oscillation peak profile that we adopt is that of a Lorentzian \citep[e.g. see][]{Kumar88,Anderson90} and it is given by
+\begin{equation}
+\mathcal{P}_{\mathrm{res},0} \left( \nu \right) = \frac{A_0^2 / \left( \pi \Gamma_0 \right)}{1 + 4 \left( \frac{\nu - \nu_{0}}{\Gamma_0} \right)^2} \, ,
+\label{eq:resolved_profile}
+\end{equation}
+where $A_0$, $\Gamma_0$, $\nu_0$ are the amplitude in ppm, the linewidth in \muhz\,\,and the frequency in \muhz, respectively, and represent the three free parameters to be estimated during the fitting process \citep[see][for more details about the relation between amplitude and linewidth of the peak]{Baudin05}.
+According to the Fourier analysis, an oscillation peak that is not resolved has a profile represented as \citep{CD04}:
+\begin{equation}
+\mathcal{P}_{\mathrm{unres},0} \left(\nu \right) = H_0 \, \mbox{sinc}^2 \left[ \frac{\pi \left(\nu - \nu_0 \right)}{\delta \nu_\mathrm{bin}} \right] \, ,
+\label{eq:unresolved_profile}
+\end{equation}
+where $H_0$ and $\nu_0$ are the height in PSD units and the central frequency in \muhz\,\,of the oscillation peak, respectively, and must be estimated during the fitting process, while $\delta \nu_\mathrm{bin}$ is fixed as the frequency resolution introduced in Sect.~\ref{sec:data}. Fitting the height of an unresolved mode is preferred since it is an observable and the linewidth of the peak is not a fitting parameter in this case. However, one can easily derive the corresponding amplitude for the unresolved peak as $A_0 = \sqrt{H_0\delta\nu_\mathrm{bin}/2}$. An example of this type of oscillation peak is shown in Fig.~\ref{fig:unresolved_peak} for the star \kic, where the peak width spans only a few data bins in frequency. In this case, a Lorentzian profile would represent an inadequate model because fitting the linewidth is neither meaningful nor needed for an unresolved mode. Moreover, using a Lorentzian profile to fit unresolved modes destabilizes considerably the fitting process because the linewidth tends to assume values smaller than the frequency resolution itself. Whereas this problem could be partially solved by setting a lower limit to the linewidth free parameter by means of an adequate prior, using a Lorentzian profile for the unresolved modes slows down the computation in any case since each Lorentzian profile requires one more free parameter to be fit with respect to the case of a $\mbox{sinc}^2$ profile. 
+
+According to the description given in this section and still following CD14, we now fix the background parameters corresponding to the white noise, $W = \overline{W}$, and the super-Lorentzian profiles, $B \left( \nu \right) = \overline{B} \left( \nu \right)$, to the values listed in Table~\ref{tab:bkg1}. Then, the final peak bagging model can be represented as
+\begin{equation}
+P \left( \nu \right) = \overline{W} + R \left(\nu \right) \left[ \overline{B} \left( \nu \right) + P_\mathrm{osc} \left( \nu \right)\right] \, , 
+\label{eq:general_pb_model}
+\end{equation}
+where the model representing the oscillation peaks is now given by a mixture of Lorentzian and sinc$^2$ functions
+\begin{equation}
+P_\mathrm{osc} \left( \nu \right) = \sum^{N_\mathrm{res}}_{i=1} \mathcal{P}_{\mathrm{res},i} \left( \nu \right) + \sum^{N_\mathrm{unres}}_{j=1} \mathcal{P}_{\mathrm{unres},j} \left( \nu \right) \, ,
+\label{eq:pb_model}
+\end{equation}
+with $N_\mathrm{res}$ and $N_\mathrm{unres}$ the number of resolved and unresolved peaks to be fit, respectively. In an empirical Bayesian approach as that used by CD14, the prior distributions on each free parameter can easily be set by visual inspection of the PSD of the stars. Likewise done for the case of the background fitting, we adopt uniform prior distributions for all the free parameters of the peak bagging model (see CD14). An example of the resulting fit by using the peak bagging model given by Eq.~(\ref{eq:general_pb_model}) is depicted in Fig.~\ref{fig:chunk} for a chunk of PSD of \kic, where all the oscillation modes for which a Lorentzian profile was used are marked by a shaded colored band (see the figure caption for more description).
+
+\subsection{Peak significance test}
+\label{sec:test}
+Testing the significance of an oscillation peak in the PSD of a star is a crucial aspect that has to be considered for providing a reliable set of modes that can be used for the modeling of the oscillations, hence to investigate the stellar structure and the evolution of the star. For this purpose, following CD14 (Sect.~6.5) we consider a detection probability for a single peak, $\pb$, defined as
+\begin{equation}
+\pb \equiv \frac{\evid_\mathrm{B}}{\evid_\mathrm{A} + \evid_\mathrm{B}} = 1 - \pa
+\label{eq:detection_probability}
+\end{equation}
+where $\evid_\mathrm{A}$ and $\evid_\mathrm{B}$ are the Bayesian evidences for the models excluding and including, respectively, the oscillation peak to be tested. The probability $\pa$ is the complementary probability stating the non-detection of the oscillation peak. For clarity, we shall refer only to $\pb$ for the remainder of the paper as it represents a direct measure of the reliability of the oscillation peak.
+
+In the Bayesian mindset, one has to provide all the peaks tested with their corresponding $\pb$ value, no matter if their detection probability is low (e.g. below 50\,\%, see also CD14, Sect.~6.5). However, we have performed a test using simulations to calibrate the method and gain a more reliable understanding about which threshold in $\pb$ is the most suitable to follow for properly selecting the oscillation modes. In particular, we have simulated 1000 chunks of PSD of a possible RG in the range $20$-$40$\,\muhz\,\,by means of the simulator provided by \cite{DeRidder06}, with either flat noise only or flat noise and a single oscillation peak. This was done by including a randomly generated flat noise component in each of the 1000 simulations and by adding an oscillation peak corresponding to a resolved $p$ mode (having the typical Lorentzian shape) in 100 randomly chosen simulations out of the initial 1000. This gives us a probability of 10\,\% to select one simulation containing a peak. 
+
+In each simulation containing a peak, both the amplitude, the linewidth and the central frequency of the peak were varied across the different simulations. We then performed a blind exercise by fitting the entire set of 1000 simulations without knowing which of them was containing a peak and in what order. To do the test we used two models: (i) a model, $\model_\mathrm{A}$, including only a flat noise component, represented by a single free parameter; (ii) a model, $\model_\mathrm{B}$, including both the flat noise component and the Lorentzian profile, given by Eq~(\ref{eq:resolved_profile}), for a total of four free parameters. The two models considered are therefore fit to all the individual chunks, no matter if they contain or not the oscillation peak. An example of the two fitting models is shown in Fig.~\ref{fig:sim} for two different simulations, with and without the oscillation peak.
+
+We computed 2000 Bayesian evidences, $\evid_\mathrm{A,i}$ and $\evid_\mathrm{B,i}$ with $i$ ranging from 1 to 1000, namely one for each of the two models in each simulation. By computing the detection probabilities $p_\mathrm{B,i}$ for each simulation according to Eq.~(\ref{eq:detection_probability}), all the simulations containing the oscillation peak could be identified when adopting the threshold $\pb \gtrsim 0.99$ (meaning that the model containing the oscillation peak is significantly more likely than the one containing only the flat noise component). This probability threshold corresponds to the limit of a strong evidence condition in the Jeffreys' scale of strength \citep{Jeffreys61}. This shows that, despite $\model_\mathrm{B}$ is disfavored because it contains 3 more free parameters than $\model_\mathrm{A}$ --- according to the Bayesian perspective of Occam's razor --- it provides a much better fit than that of a single noise component when the oscillation peak is present, thus resulting in a considerably larger Bayesian evidence (see also CD14, Sect. 2.1 for more discussion). We therefore now have a method to detect peaks based on the Bayesian model comparison that works well and it is straightforward to conduct.
+
+We can easily extend this analysis to the case of an unresolved peak by changing the function that describes the peak profile in the model $\model_\mathrm{B}$ with that given by Eq.~(\ref{eq:unresolved_profile}). Thus, following Approach 1 described in CD14, for each star in our sample we fit chunks of PSD with a frequency range containing one radial order per time, and apply the peak significance test as described before to all the ambiguous detections occurring in the selected chunk. 
+
+We note that while performing the peak significance test for the 19 LRGs, we found that a 8$\sigma$ level, with $\sigma$ representing the background level fit given in Sect.~\ref{sec:bkg} and used in the peak bagging model, Eq.~(\ref{eq:general_pb_model}), is a raw indication of the 99\,\% threshold in $p_\mathrm{B}$ for all the targets, and can thus be used as a guideline to select peaks to be tested with our method based on the Bayesian model comparison. Fig.~\ref{fig:chunk} illustrates an example of peak significance test performed for \kic, where $p_\mathrm{B} < 0.99$ (the peak marked by the vertical dotted red line), with a $8\sigma$ background level overlaid (dashed blue line) to show that the peak height of the tested peak is well comparable. 
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{Simulations.png}
+      \caption{Example of simulations of a chunk of PSD for the peak significance test in a red giant. The top panel shows the case of a simulation containing only a flat noise component, whilst the bottom panel represents a simulation including an oscillation peak with its characteristic Lorentzian shape. The black thick line represents the resulting fit as computed by \diamonds\,\,(using $\model_\mathrm{A}$ in the top panel and $\model_\mathrm{B}$ in the bottom panel), with median values for each parameter. }
+    \label{fig:sim}
+\end{figure}
+
+\subsection{Mode identification}
+\label{sec:mode_id}
+The last step of the peak bagging analysis involves the mode identification. In the case of pure acoustic $\ell = 1,2,3$ modes this is accomplished by computing their position relative to that of the closest radial mode, which in turn can usually be easily identified in all the stars due to its high amplitude and linewidth. We therefore adopt the asymptotic relation for $p$ modes \citep{Vandakurov68,Tassoul80}, obtaining for each radial order $n$:
+\begin{equation}
+\nu_{n,\ell = 1} = \nu_{n,\ell = 0} + \Dnu/2 - \delta\nu_{01} \, ,
+\end{equation} 
+\begin{equation}
+\nu_{n,\ell = 2} = \nu_{n,\ell = 0} + \Dnu - \delta\nu_{02} \, ,
+\end{equation} 
+\begin{equation}
+\nu_{n,\ell = 3} = \nu_{n,\ell = 0} + \Dnu/2 - \delta\nu_{03} \, ,
+\end{equation}
+where $\Dnu$ is the mean large frequency separation. The mean small frequency spacings $\delta\nu_{01}$ and $\delta\nu_{02}$ are derived through the relations provided by \cite{Corsaro12}:
+\begin{equation}
+\delta\nu_{01} \simeq b_1 \,\Delta\nu - 0.063 \, ,
+\end{equation}
+\begin{equation}
+\delta\nu_{02} \simeq b_2 \,\Delta\nu + 0.035 \, ,
+\end{equation}
+with mass-dependent slopes 
+\begin{equation}
+b_1 \simeq -0.073 + 0.044 \, \left( M/M_\odot \right) \, ,
+\end{equation}
+and
+\begin{equation}
+b_2 \simeq 0.138 - 0.014 \, \left( M/M_\odot \right) \, ,
+\end{equation}
+valid for RGB stars like in our sample.
+The mean small frequency spacing $\delta\nu_{03}$ is given by the relation \citep{Huber10}:
+\begin{equation}
+\delta\nu_{03} \simeq 0.282 \, \Dnu + 0.16 \, .
+\end{equation}
+For the $\ell = 1$ mixed modes we instead adopt the asymptotic relation provided by \cite{Mosser12} (their Eq.~(9)). The mode identification for the rotationally split modes ($m = +1$,$-1$, $m$ being the azimuthal order) is instead derived from the position of the central components since the modes are in general well separated in LRGs.   
+All the values for $\Dnu$, mass, the period spacing of $g$ modes $\DP$ and the coupling factor $q$, are taken from \cite{Mosser12Cat} and are listed in Table~\ref{tab:asymp_parameters} for a summary.
+
+Whereas the asymptotic values for $p$ modes proved to be quite accurate for all the stars, in the case of mixed modes a correction for $\DP$ and $q$ from the values listed in \cite{Mosser12Cat} was required for some targets (indicated in Table~\ref{tab:asymp_parameters}), especially those showing variations in $\DP$ with the radial order (see Sect.~\ref{sec:results} for more details). The correction was made by an auxiliary fit to the mixed mode frequencies in a bi-dimensional grid $\left(\DP,q \right)$ spanning $\pm 10\,s$  and $\pm 0.05$ units, respectively, from the literature values. The auxiliary fit has the only purpose of providing a more reliable proxy for the frequency position of the dipole mixed modes, hence used for the mode identification process. 
+
+The stars KIC~8475025, KIC~9267654, and KIC~11353313, in particular, were found to show mixed modes with a peculiar frequency position because the frequency splitting due to the rotation of the star is very similar to the frequency spacing between adjacent mixed modes. This generates a misleading mode identification at first glance. A cautious inspection of all the rotational split components for these stars was therefore needed in order to solve the ambiguity \citep[e.g. see][for more discussion on mode identification in these difficult cases]{Beck14eccentric}. For the remainder stars of the sample, the mode identification was straightforward even when rotational effects are present.
+
+\begin{table}
+\caption{Literature values for $\Dnu$, mass, $\DP$, and $q$ used for the mode identification of the stars.}             % title of Table
+\centering                         
+\begin{tabular}{l r c c c }       
+\hline\hline
+\\[-8pt]
+KIC ID & \multicolumn{1}{c}{$\Dnu$} & Mass & $\DP$ & $q$\\ [1pt]
+ & \multicolumn{1}{c}{($\mu$Hz$$)} & ($M_{\odot}$) & (s) & \\ [1pt]   
+\hline
+\\[-8pt]
+03744043 &   9.90 &   1.3 &  75.98 &   0.16\\[1pt]
+06117517 &  10.16 &   1.3 &  76.91 &   0.14\\[1pt]
+06144777\tablefootmark{a} &  11.01 &   1.1 &  69.91 &   0.22\\[1pt]
+07060732\tablefootmark{a} &  10.94 &   1.3 &  72.78 &   0.18\\[1pt]
+07619745 &  13.13 &   1.5 &  79.17 &   0.15\\[1pt]
+08366239\tablefootmark{a} &  13.70 &   1.9 &  86.77 &   0.17\\[1pt]
+08475025\tablefootmark{a,b} &   9.66 &   1.4 &  74.80 &   0.13\\[1pt]
+08718745 &  11.40 &   1.1 &  79.45 &   0.11\\[1pt]
+09145955 &  11.00 &   1.4 &  77.01 &   0.16\\[1pt]
+09267654\tablefootmark{a,b} &  10.34 &   1.3 &  78.41 &   0.13\\[1pt]
+09475697 &   9.88 &   1.5 &  75.70 &   0.12\\[1pt]
+09882316 &  13.68 &   1.6 &  80.59 &   0.15\\[1pt]
+10123207 &  13.67 &   1.0 &  83.88 &   0.17\\[1pt]
+10200377 &  12.47 &   1.1 &  81.58 &   0.16\\[1pt]
+10257278 &  12.20 &   1.4 &  79.81 &   0.18\\[1pt]
+11353313\tablefootmark{a,b} &  10.76 &   1.5 &  76.00 &   0.14\\[1pt]
+11913545 &  10.18 &   1.3 &  77.84 &   0.12\\[1pt]
+11968334 &  11.41 &   1.4 &  78.10 &   0.13\\[1pt]
+12008916\tablefootmark{a} &  12.90 &   1.3 &  80.47 &   0.14\\[1pt]
+\hline                                
+\end{tabular}
+\tablefoot{All the values are available from \cite{Mosser12Cat}.\\
+\tablefoottext{a}{Stars for which an auxiliary fit for ($\DP$,\,$q$) was required.}
+\tablefoottext{b}{Stars with a large rotational splitting, of the same magnitude of the frequency spacing between adjacent mixed modes. A careful mode identification of the split components was required for this case.}
+}
+\label{tab:asymp_parameters}
+\end{table}
+
+\begin{figure*}[t!]
+   \centering
+   \includegraphics[width=18.4cm]{KIC012008916_chunk.png}
+      \caption{Example of a fit chunk for \kic\,\,derived by \diamonds. The PSD is shown in black, whilst the resulting fit using the parameters listed in Tables~\ref{tab:12008916m} and \ref{tab:12008916p} is in indicated by a green solid line. The level of eight times the background is shown with a blue dashed line as a reference for the peak significance. The colored vertical bands underline the oscillation modes modeled by a Lorentzian profile, Eq.~(\ref{eq:resolved_profile}), with $\ell = 0$ in blue, $\ell = 2$ in green, $\ell = 3$ in orange, and $\ell = 1$ mixed modes in red. The vertical dotted lines mark the central frequency $\nu_0$ for each of the fit modes, with the corresponding mode identification (Peak \#, $\ell$, $m$) also labeled, according to the description given in Appendix~\ref{sec:pb_results}. The case of the unresolved mixed mode $(26,1,-1)$ is shown in red because the peak has a detection probability ($p_\mathrm{B} = 0.002$) below the threshold suggested in Sect.~\ref{sec:test}.}
+    \label{fig:chunk}
+\end{figure*}
+
+\section{Results}
+\label{sec:results}
+All the results for oscillation frequencies, amplitudes, linewidths for the resolved modes, and oscillation frequencies and heights for the unresolved ones are presented in Appendix~\ref{sec:pb_results}, with detection probabilities for the peaks that required a significance test as explained in Sect.~\ref{sec:test}, and with a mode identification as explained in Sect.~\ref{sec:mode_id}. A total of 1618 oscillation modes was fit for the peak bagging analysis presented in this work, with an average of $\sim85$ modes per star. We performed a peak significance test for a total of 612 peaks ($\sim$38\,\% of the entire number of oscillation modes), of which 380 ($\sim$62\,\% of tested peaks) gave a detection probability $p_\mathrm{B} \geq 0.99$. This results in a $\sim$14\,\% of the total number of peaks that did not fulfill the suggested detection threshold. The configuring parameters of \diamonds\,\,used during the computations are specified in the corresponding appendix. 
+
+The 68\,\% Bayesian credible intervals are provided for each measurement as computed from the individual marginal probability distributions of the model parameters, according to the description given by CD14. We note that for some oscillation modes, the quoted error bars of the corresponding frequencies can be smaller than the formal frequency resolution of the PSD. Although not intuitive at first glance, this may happen because the reported error bars only refer to the capability of the adopted model to reproduce the observations, an aspect that is not uniquely depending on the resolution of the dataset, in our case represented by the formal frequency resolution obtained from the Fourier analysis \citep[e.g. see][for more discussion on the presence of error bars smaller than the resolution given by the data, as obtained from another astrophysical application of the Bayesian inference]{Froehlich12}. This effect is evident for those oscillation modes for which a sinc$^2$ profile is used, whose characteristic small FWHM (few data bins) and the well appropriate profile shape at reproducing spike-like peaks (see Fig.~\ref{fig:unresolved_peak}), leads to a more precise estimate of the frequency centroid than in the case of the Lorentzian profile fitted to resolved or partially resolved modes, in this case instead averaging for the stochastic nature of the oscillation peak over many data bins (as a result from our analysis the error bar on the frequency of the unresolved mode is on average 10 times smaller than that of the resolved modes). Therefore for clarity to the reader, we stress that in general the precision level of the error bars reported in this work is not limited by the formal frequency resolution of the PSD, because it represents the adequacy of the model presented in Sect.~\ref{sec:extraction} to fit the data.
+
+As reported in Table~\ref{tab:asymp_parameters}, seven stars out of the 19 analyzed required a refitting of $\DP$ during the mode identification process, with deviations from the literature values found up to $\sim9$\,s for KIC~6144777, and $\sim4$\,s for KIC~7060732. The stars KIC~6144777 and \kic, in particular, show $\DP$ varying on the order of seconds with varying radial order. This caused the mode identification process to be more complex than for other stars of the sample, although still well feasible with an appropriate refitting of $\DP$ as explained in Sect.~\ref{sec:mode_id}. For completeness, we notice that in the newer catalogue provided by \cite{Mosser14}, the measurement of $\DP$ for the stars KIC~6144777 and KIC~8366239 was corrected, thus corresponding to the refitted value used in this work.
+
+We firmly detect the signature of rotation through the presence of rotationally split modes in all the LRGs except KIC~9145955, KIC~9882316, KIC~10123207, and KIC~10200377. However, KIC~6117517 shows only the presence of two significant rotationally split modes in the highest SNR region of the PSD, which makes a detailed study of rotation for this star difficult. The stars KIC~7619745, KIC~8366239, KIC~8475025, KIC~9267654, KIC~10257278, KIC~11913545, and \kic, instead, show very few or even no oscillation modes corresponding to the zonal component $m=0$. The mode identification was possible in most of the cases, except for those low SNR oscillation peaks in the wings of the PSD for which no clear azimuthal order could be assigned, or for oscillation peaks with double mode identification. The latter case is observable in the stars KIC~8475025, KIC~9267654, and KIC~11353313, in which the confusion limit due to the large rotational splitting is present, as mentioned in Sect.~\ref{sec:mode_id}. The double mode identification for some of the peaks in the stars mentioned before can be explained by the overlap of the split component $m = +1$ with the adjacent $m = -1$ when the rotational splitting is the same as the frequency spacing between two adjacent mixed modes of different $g$ mode. 
+
+The star KIC~7060732, despite the presence of the largest number of fit modes among the 19 LRGs (123 in total), shows the largest number of non-identified modes (40), all placed in the wings of the PSD, because of the confusion generated by the low SNR of the peaks coupled with the large rotational splitting observed. KIC~9882316 has instead the lowest number of fit modes (49) but with a clear and straightforward mode identification.
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.0cm]{KIC012008916_fwhm.png}
+      \caption{Mode linewidths for \kic\,\,as a function of the corresponding oscillation frequencies. \textit{Top panel}: linewidth measurements as defined by Eq.~(\ref{eq:resolved_profile}) for each angular degree ($\ell = 0$ blue squares, $\ell = 2$ green triangles, $\ell = 3$ yellow stars, and resolved $\ell = 1$ mixed modes red circles). Open symbols represent modes with detection probability under the suggested threshold (see Sect.~\ref{sec:test}). The 68\,\% credible intervals for the linewidths as derived by \diamonds\,\,are shown for each data point. The red solid line represents a polynomial fit to the linewidths of the $\ell = 1$ mixed modes, included to emphasize the trend with frequency. The shaded region represents the range $\numax \pm \sigma_\mathrm{env}$, with $\numax$ from Table~\ref{tab:bkg2} indicated by the dashed vertical line. \textit{Bottom panel}: the normalized fraction of resolved mixed modes with respect to unresolved ones, $f_\mathrm{res}$ (black dots), defined by Eq.~(\ref{eq:fraction_resolved}). The frequency position of each point is the average frequency of the resolved dipole mixed modes falling in each radial order (or that of the unresolved mixed modes if no resolved mixed modes are present). The horizontal dotted line represents the limit of resolved-dominated regime, as defined in Sect.~\ref{sec:fwhm}, whilst the horizontal dashed red line marks the average $f_\mathrm{res}$ given by Eq.~(\ref{eq:average_fraction}).}
+    \label{fig:fwhm}
+\end{figure}
+
+\subsection{Mode linewidths}
+\label{sec:fwhm}
+The first result related to the asteroseismic measurements of individual oscillation modes is represented by the behavior of mode linewidths with increasing frequency in the PSD. The so-called linewidth depression has been observed in several CoRoT stars \citep{Benomar09gamma,Barban09,Deheuvels10,Ballot11} and more recently in a larger sample of main-sequence and subgiant stars observed with \kepler \citep{Benomar13,App14}. Theoretical studies of solar data by \cite{Belkacem11} have confirmed that $\numax$ is intimately related to the frequency position of the linewidth depression, albeit a full interpretation of this result requires more investigation.
+
+The top panel of Fig.~\ref{fig:fwhm} shows all the linewidth measurements of \kic\,\,for the angular degrees $\ell = 0,2,3$, and the resolved (or partially resolved) $\ell = 1$ mixed modes, as a function of the corresponding oscillation frequencies in the PSD. As visible in the region marked by the vertical gray band, the linewidths either flatten or even decrease when the frequency of the oscillation peak is close to $\numax$. This is more clear for $\ell = 0,2$ modes, whilst for $\ell = 3$ the number of modes is not sufficiently large to let us conclude on a possible trend. For the case of $\ell = 1$ mixed modes we have included a low-degree polynomial fit to visualize the global trend, which also shows a depression in linewidth close to $\numax$. We note, however, that the measured linewidths of the $\ell = 2$ modes are not the physical linewidths and are only used to show the presence of the linewidth depression in comparison to the other modes with different angular degree. This is because by fitting a single Lorentzian profile to the region of the $\ell = 2$ modes we are not taking into account the possible effects arising from both the rotational splitting and from the presence of quadrupole mixed modes, thus resulting in measured linewidths that are broader than the real ones.
+
+To investigate the behavior of the mode linewidths in a star more thoroughly we computed the normalized fraction of resolved $\ell =1$ mixed modes with respect to unresolved ones, which can be expressed for each radial order as
+\begin{equation}
+f_{\mathrm{res},n} = \frac{N_{\mathrm{res},n} - N_{\mathrm{unres},n}}{\sum_n \left( N_{\mathrm{res},n} + N_{\mathrm{unres},n} \right) }
+\label{eq:fraction_resolved}
+\end{equation}
+where $N_{\mathrm{res},n}$ and $N_{\mathrm{unres},n}$ are the number of resolved and unresolved mixed modes, respectively, fit in each radial order $n$. The denominator of Eq.~(\ref{eq:fraction_resolved}) allows us to normalize by the total number of mixed modes fit in the star, hence to compare the value among different stars in the sample. The resulting normalized fraction, hereafter $f_\mathrm{res}$ for simplicity, as a function of the average frequency position of the dipole mixed modes falling in each radial order, is shown in the bottom panel of Fig.~\ref{fig:fwhm} for \kic. The horizontal dotted line separates the regime of resolved mixed modes fitting (upper part, $f_\mathrm{res} > 0$) from that of unresolved mixed modes fitting (lower part, $f_\mathrm{res} < 0$). We do not compute $f_\mathrm{res}$ for radial orders in which no mixed modes are fit. 
+
+For radial orders where the mode linewidths encounter a depression, we therefore expect $f_\mathrm{res}$ to decrease as well, since the number of fit resolved mixed modes is likely to be lower than in the case of radial orders in which the modes have a larger linewidth. This is shown again in the bottom panel of Fig.~\ref{fig:fwhm}, where the decrease in $f_\mathrm{res}$ is sited in the region close to $\numax$. This behavior is evident for all the other stars of the sample as well (see the figures in Appendix~\ref{sec:pb_results}).
+To use $f_\mathrm{res}$ as an indicator of the resolving level of the mixed modes fit in the star, we can compute an average value as
+\begin{equation}
+\langle f_{\mathrm{res}} \rangle = \frac{\sum_n f_{\mathrm{res},n}}{N_\mathrm{radial}}
+\label{eq:average_fraction}
+\end{equation}
+where $N_\mathrm{radial}$ is simply the total number of radial orders where the mixed modes are fit. The value $\langle f_{\mathrm{res}} \rangle$ for \kic\,\,is indicated in the bottom panel of Fig.~\ref{fig:fwhm} by a horizontal dashed red line, and similarly for all the other stars in the corresponding figures provided in Appendix~\ref{sec:pb_results}. For \kic\,\,we find that $\langle f_{\mathrm{res}} \rangle = 0.003$, namely the highest value in the entire sample and the only one falling in the resolved-dominated regime: the number of resolved (or partially resolved) mixed modes per radial order in this star is on average larger than that of the unresolved ones. For KIC~3744043, instead, we find the minimum value of the sample, $\langle f_{\mathrm{res}} \rangle = -0.057$, laying in the unresolved-dominated regime. The highest values of $\langle f_{\mathrm{res}} \rangle$ correspond to stars in which no rotation is detected, or in most cases to stars for which the central component of dipole mixed modes, $m=0$, is missing.
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{fwhm_temperature.png}
+      \caption{Average mode linewidth at maximum mode height, $\langle \Gamma_\mathrm{H} \rangle$, for the LRGs (red circles) and the sample of main-sequence and subgiant stars analyzed by \cite{App12fwhm} (blue triangles), as a function of the stellar effective temperature from \cite{Pin12}, in a linear-log scale. 1-$\sigma$ error bars are shown on both coordinates. The solid pink line shows a polynomial fit to the sample of RGs, while the solid teal line represents the law proposed by \cite{App12fwhm} for their sample of stars. The dashed yellow line is a polynomial fit to the total sample of stars. The 3-$\sigma$ regions coming from the polynomial fits are also shown for comparison. The inset displays a zoom-in of our sample of red giant stars.}
+    \label{fig:fwhm_temp}
+\end{figure}
+
+An often investigated quantity related to the linewidth measurements, as already mentioned in Sect.~\ref{sec:intro} and \ref{sec:data}, is their correlation with the stellar effective temperature \citep[e.g. see][for more results and details]{Hekker10,Baudin11temp,App12fwhm,Belkacem12,Corsaro12}. A theoretical modeling of the damping rates of radial modes based on the existing observations from CoRoT and \kepler \citep{Belkacem12} has proposed a common physical description of the linewidth-temperature correlation from main-sequence to low-temperature giant stars (down to $\sim 4000$\,K), although it did not exploit linewidth measurements in the critical temperature range used in this paper.
+
+Following \cite{Baudin11temp} and \cite{App12fwhm}, we have computed for each star in our sample an average linewidth at maximum mode height, $\langle \Gamma_\mathrm{H} \rangle$, by taking the average linewidth of radial modes in three radial orders around the radial mode with maximum height, which is more immune to systematic effects as discussed by e.g. \cite{App12fwhm}. The resulting $\langle \Gamma_\mathrm{H} \rangle$ values are shown in Fig.~\ref{fig:fwhm_temp} (red circles) as a function of $T_\mathrm{eff}$ from \cite{Pin12}, where the error bars on each $\langle \Gamma_H \rangle$ are the standard deviations from the three linewidths used in the calculation. This allows us to compare the result with the existing set of measurements for a sample of main-sequence and subgiant stars investigated by \cite{App12fwhm} (blue triangles). 
+We observe a steeper temperature gradient of $\langle \Gamma_H \rangle$ for the hotter main-sequence stars with respect to the cooler RGs, in agreement with previous studies \citep{Baudin11temp,Belkacem12}. This change in the slope of the correlation between $T_\mathrm{eff}$ and linewidths appears more evident in the temperature range around $T_\mathrm{eff} \sim 5400$\,K, and is emphasized by the polynomial fits overlaid to our measurements and by the confidence regions marked with gray-shaded bands, in comparison to the power law fit derived by \cite{App12fwhm}.
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.1cm]{KIC012008916_amplitude.png}
+      \caption{Mode amplitudes for \kic\,\,as a function of the corresponding oscillation frequencies. Amplitude measurements as defined by Eq.~(\ref{eq:resolved_profile}) for each angular degree ($\ell = 0$ blue squares, $\ell = 2$ green triangles, $\ell = 3$ yellow stars, and resolved $\ell = 1$ mixed modes red circles). Open symbols represent modes with detection probability under the suggested threshold (see Sect.~\ref{sec:test}). The 68\,\% credible intervals for the amplitudes as derived by \diamonds\,\,are shown for each data point. The solid red line represents a polynomial fit to the amplitudes of the $\ell = 1$ mixed modes, included to emphasize the trend with frequency. The dashed vertical line indicates the $\numax$ value listed in Table~\ref{tab:bkg2}.}
+    \label{fig:amplitude}
+\end{figure}
+
+\subsection{Mode amplitudes}
+\label{sec:amplitudes}
+Mode amplitudes are the primary information to study the detectability of the oscillations and the physical process responsible for their excitation mechanism, especially in the less known case of the mixed modes \citep[e.g.][]{Grosjean14}. Retrieving empirical relations that allow us to predict amplitudes in other RGs stars \citep[e.g.][and references therein]{Corsaro13} is certainly useful to facilitate future detailed asteroseismic analyses on a larger sample of targets.
+
+An example of the resulting mode amplitudes as a function of the corresponding oscillation frequencies for \kic\,\,is given in Fig.~\ref{fig:amplitude} for the different angular degrees, including the resolved mixed modes for which a polynomial fit to enhance the trend was added. The plots for all the other stars can be found in Appendix~\ref{sec:pb_results}. By computing an average ratio (or visibility factor) of the amplitudes between $\ell = 0$ modes, $\langle A_0 \rangle$, and $\ell = 2$, resolved $\ell = 1$, and $\ell = 3$ modes, $\langle A_2 \rangle$, $\langle A_1 \rangle$, $\langle A_3 \rangle$, respectively, we find that $\langle A_0 \rangle / \langle A_2 \rangle = 1.19 \pm 0.10$, $\langle A_0 \rangle / \langle A_1 \rangle = 1.84 \pm 0.26$, and $\langle A_0 \rangle / \langle A_3 \rangle = 2.77 \pm 0.41$. The error bars are computed from the dispersion in the ratios coming from the sample analyzed. These visibilities are useful for setting up prior distributions on mode amplitudes in other red giant stars (see Sect.~\ref{sec:discussion} for more discussion), while individual mode amplitudes can also be used to compare visibilities of LRGs with stars in different evolutionary stages \citep[e.g.][]{Ballot11visibility,Benomar13}.
+
+\begin{figure}
+   \centering
+   \includegraphics[width=9.0cm]{amax_numax.png}
+      \caption{Maximum radial mode amplitudes for the LRGs (red circles) as a function of the corresponding radial mode frequency $\nu_\mathrm{A_\mathrm{max}}$ in a log-log scale, with 68\,\% Bayesian credible intervals overlaid. Included, the amplitude measurements by \cite{Huber11} for the same stars (filled green triangles), with their 1-$\sigma$ error bars, reported as a function of their $\numax$ values. The corresponding amplitude predictions for the measurements by \cite{Huber11}, computed from the best scaling relation model found by \cite{Corsaro13}, are also included for a comparison (open green triangles).}
+    \label{fig:amax}
+\end{figure}
+
+To show how the behavior of the mode amplitude varies from star to star, we plot the maximum radial mode amplitude of each star, here indicated as $A_\mathrm{max}$, against the corresponding radial mode frequency $\nu_\mathrm{A_\mathrm{max}}$ in Fig.~\ref{fig:amax} (red circles). We note that the amplitude measurements from this work agree on average within 6\,\% with those listed by \cite{Huber11}, despite the different datasets used and the method adopted, which in the latter case provides maximum amplitudes per radial mode from a global analysis of the power excess of the stellar oscillations \citep[see][and references therein for more details]{Huber11}. The values $A_\mathrm{max}$ and $\nu_\mathrm{A_\mathrm{max}}$ from this work are all part of the results coming from a detailed peak bagging analysis (see the tables in Appendix~\ref{sec:pb_results}). The amplitude scaling relation used for computing the predictions for the measurements provided by \cite{Huber11}, indicated with open green triangles in Fig.~\ref{fig:amax}, is given by the best model $\mathcal{M}_{4,\beta}$ of \cite{Corsaro13} for the case of LC data. When comparing our $A_\mathrm{max}$ measurements with the predictions, we find an agreement on average around 19\,\%. We point out that the amplitude scaling relation adopted for the comparison is however calibrated on a set of global parameters such as $\numax$, $\Dnu$, and $A_\mathrm{max}$ from the power excess, and not on detailed measurements for an individual oscillation mode as those provided in this work.
+
+\section{Discussion \& conclusions}
+\label{sec:discussion}
+Starting from the background fitting phase, we find a good agreement ($\sim 5$\,\%) between our estimated parameters of the granulation signal, Eq.~(\ref{eq:bkg}), and those available from \cite{Kallinger14}, proving that even with an additional year of observation this background signature has remained nearly unchanged for this sample of stars. This shows that we can easily retrieve prior distributions for the background free parameters of the RGs even if new datasets are used. This aspect is helpful for improving our performances in extracting oscillations from a large number of stars since the background fitting is a necessary step in the peak bagging analysis.
+
+As shown by Fig.~\ref{fig:fwhm} for \kic, and in all the other figures in Appendix~\ref{sec:pb_results} for the entire sample of LRGs investigated, every star manifests a clear linewidth depression in the frequency region close to $\numax$, consistent with the expectations for less evolved stars. This behavior is clear for $\ell = 0, 2$ modes (although the measured linewidths of the quadrupole modes are not the real ones, as stated in Sect.~\ref{sec:fwhm}) and is less pronounced for resolved (or partially resolved) $\ell = 1$ mixed modes, although still evident (see e.g. the polynomial fit shown in red in Fig.~\ref{fig:fwhm}, top panel), whereas it is questionable for $\ell = 3$ modes because the low number of fit peaks does not fully cover the observed frequency range of the oscillations. The presence of a depression in linewidth for all the stars is also supported by our computation of the normalized fraction of resolved to unresolved mixed modes, $f_\mathrm{res}$, given by Eq.~(\ref{eq:fraction_resolved}). The average normalized fraction $\langle f_\mathrm{res} \rangle$ given by Eq.~(\ref{eq:average_fraction}) instead tells us that even with four years of nearly continuous observations with \Kepler, all the red giants in our sample are still dominated by the presence of unresolved mixed modes, except for \kic\,\,where the unresolved modes basically equal in number those that are instead resolved or partially resolved. This proves that the lifetime of the $g$ modes, clearly not lower than that of the most g-dominated mixed modes, is still not measurable. A detailed study involving the new individual linewidth measurements provided here would definitely help to tighten the constraints on the physical relation between the location of the linewidth depression, the cut-off frequency, and $\numax$ in red giants, thus shedding light to our understanding of the damping mechanism of the oscillations, especially in the case of the dipole mixed modes \citep{Grosjean14}.
+
+Another significant result involving linewidths is their correlation with the stellar effective temperatures. In the comparison given in Fig.~\ref{fig:fwhm_temp}, we observe a temperature gradient in the linewidths that is steeper for main-sequence and subgiant stars than for RGs, thus flattening toward lower temperatures, as already found by \cite{Baudin11temp} and \cite{Belkacem12}. Conversely to the large spread in linewidths found by \cite{Baudin11temp} for the RGs observed with CoRoT, our linewidths appear to be much less dispersed, systematically lower, and quite correlated with $T_\mathrm{eff}$, despite the small temperature range available, as also highlighted by the polynomial fit, and the corresponding confidence region, to our sample shown in Fig.~\ref{fig:fwhm_temp}. This is in agreement with the theoretical predictions by \cite{Belkacem12}. We find that the change in the slope of the correlation between linewidths and temperatures from our sample of RGs to that of the main-sequence and subgiant stars observed by \kepler and analyzed by \cite{App12fwhm}, is more evident in the temperature range around $T_\mathrm{eff} \sim 5400$\,K and could be related to a change in the regime responsible for the mode damping mechanism at the beginning of the RGB. Importantly, the temperature range of the RGs analyzed in this work, 4800-5500\,K, covers the gap in observations between red giants and subgiant and main-sequence stars from previous works that were using CoRoT and \kepler data \citep[e.g.][]{Baudin11temp,Belkacem12,Corsaro12}. We therefore consider that the new results presented are important to perform a more realistic modeling of the underlying physics responsible for the observed change in gradient occurring at the bottom of the RGB.
+
+We have noted that our measurements of maximum mode amplitude, available from Appendix~\ref{sec:pb_results} and plotted in Fig.~\ref{fig:amax}, are in a good agreement ($\sim 6$\,\%) with the amplitudes of maximum power derived by \cite{Huber11} according to the method described by \cite{K05,K08}. This shows that, at least for the range of $\numax$ investigated in this work, the existing amplitude scaling relations can in principle be used to retrieve raw predictions on maximum amplitudes of individual radial modes. By introducing the optimal amplitude scaling relation derived by \cite{Corsaro13}, we have that the amplitude predictions for our sample of stars agree within $\sim$19\,\%. By exploiting the average amplitude visibilities, $\langle A_0 \rangle / \langle A_{\ell} \rangle$, one is able to derive amplitude estimates for the different angular degrees. These tools are very useful for the preparation of prior distributions on mode amplitudes in RGs having $\numax \in \left[110, 200 \right]$\,\muhz, hence they build the base for setting up the peak bagging analysis for a large number of stars. A wider range of $\numax$ will certainly allow to better test these simple relations and eventually obtain and calibrate one or more specific scaling relations for individual mode amplitudes in a similar fashion as investigated by \cite{Corsaro13}. Our physical comprehension and modeling of the stochastic excitation mechanism of the mixed modes in RGs \citep[e.g. see][]{Grosjean14} will certainly benefit from individual mode amplitudes and corresponding linewidth measurements of the dipole mixed modes provided in this paper.
+
+In addition, the remarkable precision level obtained on the individual mode frequencies of the $p$ modes of all the LRGs, ranging from $10^{-2}$ to $10^{-3}$\,\muhz, coupled with the large number of $p$ modes extracted from each star (spanning from six to nine different radial orders), allow us to constrain the regions of sharp structure variation caused by the \he\,\,zone inside the red giants with an unprecedented level of detail \citep[see][for more details]{Corsaro15letter}. The new frequency measurements derived here will help to improve existing stellar structure models of evolved low-mass stars settling in the RGB phase of the stellar evolution.
+
+Through the peak bagging analysis exploiting the high-quality \kepler data used in this work, we could extract and characterize a total of more than 1600 different oscillation modes. Following the work proposed by CD14, we successfully extended the fitting procedure to the more complex case of the red giant stars, for which a large number of mixed modes is present. As shown by CD14, and now in this work, the Bayesian approach coupled with high-efficiency sampling algorithms, offers a valuable and robust way of inferring asteroseismic parameters from power spectra. This approach allows us to perform the fitting of many oscillation modes, i.e. of several tens of free parameters, in a reasonably short time (of the order of minutes). Besides, the computation of the Bayesian evidence has allowed us to quickly and easily test the peak significance of more than 600 oscillation modes, as also discussed in Sect.~\ref{sec:test} and Sect.~\ref{sec:results}.
+
+By adopting the peak bagging model given by Eq.~(\ref{eq:pb_model}), the \diamonds\,\,code has performed well for all the computations done. This is in general explained by an easy setting up of the prior distributions for the free parameters of the model, by the absence of degeneracies in the sampling of the parameter space when adopting individual parameters for each mode and with the combination of amplitude-linewidth instead of height-linewidth in the mode profile (see Eq.~\ref{eq:resolved_profile}), and by the avoided estimation of the linewidths for the narrowest (namely unresolved) oscillation peaks (see Sect.~\ref{sec:extraction}). The latter case in particular proves that by using a mixture of two different profiles, hence distinguishing between resolved (or partially resolved) modes, and unresolved ones, considerably improves our performances for the fitting of the oscillations in RGs. The main drawbacks of this approach are related to the requirement of a visual inspection of the region of the PSD of the star containing the oscillations, thus involving the selection of the modes to be fit,  the choice of the peak profile to be adopted, and the setting up of the corresponding prior distributions. However, these steps can all be improved and made easier by means of auxiliary tools based on existing asteroseismic scaling relations, as presented in Sect.~\ref{sec:mode_id}. Since the number of mixed modes in RGs is largely dominant over that of $p$ modes, and since among the mixed modes most are still unresolved, as seen in nearly all the stars analyzed here with more than four years of observations (Sect.~\ref{sec:fwhm}), we therefore recommend the adoption of a peak bagging model along the same lines as those described in Sect.~\ref{sec:extraction} for future fitting of the oscillations in evolved low-mass stars. 
+
+The mode identification process, presented in Sect.~\ref{sec:mode_id}, may sometimes be problematic for the case of the dipole mixed modes since having a reliable estimate of the true period spacing $\DP$ is necessary. By starting from the literature values listed in Table~\ref{tab:asymp_parameters}, we find that a refitting of $\DP$ was required for seven stars out of the 19 analyzed ($\sim37$\,\% of the sample), meaning that the extraction process for the mixed modes may need an additional search for a proper solution of $\DP$, always coupled with a visual inspection of the result. Based on the experience gained with the analysis done for the 19 LRGs, we consider the visual inspection for the mode identification of the mixed modes an important and often decisive step, especially for those stars where the confusion limit due to the rotational splitting is present (KIC~8475025, KIC~9267654, KIC~11353313) and for those with variations in $\DP$ with the radial order (KIC~ 6144777 and \kic). This aspect clearly represents a limitation to the full automatization of the peak bagging analysis in red giant stars, but it might be improved in the future by analyzing and comparing the results arising from a larger variety of targets, especially those having higher rotation rates. We however stress that, provided that the used values of $\DP$ are accurate enough, the asymptotic relation for the mixed modes works remarkably well at reproducing their frequencies for all the peaks identified in our analysis. This is in agreement with the recent theoretical study by \cite{Jiang14}, who investigated the asymptotic regime of the mixed modes and confirmed the reliability of their asymptotic relation.
+
+Last but not least, the firm detection of rotation in 14 stars of the sample will greatly help to constrain the physical mechanisms responsible for the angular momentum transport in RGs \citep[e.g.][and references therein]{Tayar13}. In particular, by reconstructing the rotational profile of the star up to the core level by using the mixed modes with different mixture content between $p$ and $g$ modes, provided in this work, it will be possible to investigate the evolution of the angular momentum transport inside the star starting from the main-sequence phase of the stellar evolution. Thanks to the variety of masses of the stars in our sample, spanning the range $1$-$2$\,$M_\odot$ (Table~\ref{tab:asymp_parameters}), the models involving the decoupling of the convective and radiative zones in low-mass RGs, expected after the first dredge up \citep{Tayar13}, can be intensively tested and refined.
+
+To conclude, the full set of results presented in Sect.~\ref{sec:results} and discussed in Sect.~\ref{sec:discussion}, representing the largest set of detailed asteroseismic mode measurements ever made available, with the high-precision and accuracy level achieved from four-years datasets, offers a great opportunity to perform thorough investigations and testing of the existing stellar models and stellar evolution theory, asteroseismic scaling relations, and of the underlying physics of both the damping and the excitation mechanisms of solar-like and mixed mode oscillations in red giant stars. Future works following the approach presented here to extend the peak bagging analysis to larger samples of red giants observed by \Kepler, will definitely bring an outstanding improvement to our understanding level on the stellar physics of low-mass stars.  
+
+\begin{acknowledgements}
+E.C. is funded by the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement n$^\circ$312844 (SPACEINN).
+The research leading to these results has received funding from the European
+Research Council under the European Community's Seventh Framework Programme
+(FP7/2007--2013) ERC grant agreement n$^\circ$227224 (PROSPERITY), 
+from the Fund for Scientific Research of Flanders (G.0728.11), 
+and from the Belgian federal science policy office (C90291 Gaia-DPAC).
+E.C. thanks F. Baudin, P. Beck, G. Davies, T. Kallinger and A. Miglio for useful discussions.
+\end{acknowledgements}
+
+\bibliographystyle{aa} % style aa.bst
+%\bibliography{biblio} % your references
+   \input{corsaro_cat.bbl}
+
+\appendix
+\section{Results for the background fitting}
+\label{sec:bkg_results}
+The parameter values derived by means of \diamonds\,\,for the entire sample of 19 LRGs analyzed in this work are listed in Table~\ref{tab:bkg1} for the Harvey-like profiles $B \left( \nu \right)$, Eq.~(\ref{eq:bkg}), and in Table~\ref{tab:bkg2} for the Gaussian envelope $G \left( \nu \right)$, Eq.~(\ref{eq:env}).
+The background fits are shown in Fig.~\ref{fig:bkg_tot} for all the stars except \kic, which is instead shown in Fig.~\ref{fig:bkg_case}. 
+
+Referring to the definitions presented by CD14, the configuring parameters of \diamonds\,\,used for all the computations are: initial enlargement fraction $1.5 \leq f_0 \leq 2.1$, shrinking rate $ 0.01 \leq \alpha \leq 0.03$, number of live points $N_\mathrm{live} = 500$, number of clusters $1 \leq N_\mathrm{clust} \leq 10$, number of total drawing attempts $M_\mathrm{attempts} = 10^4$, number of nested iterations before the first clustering $M_\mathrm{init} = 1500$, and number of nested iterations with the same clustering $M_\mathrm{same} = 50$.
+
+% Figures of the background fit for all the stars
+\include{background_fit}
+
+\begin{table*}
+\caption{Median values with corresponding 68.3\,\% shortest credible intervals of the background parameters for the 19 RGs investigated, related to the white noise component and the super-Lorentzian profiles given by Eq.~(\ref{eq:bkg}), as derived by \diamonds.}             % title of Table
+\centering                         
+\begin{tabular}{l r r c c c c c}       
+\hline\hline
+\\[-8pt]         
+KIC ID & \multicolumn{1}{c}{$W$} & \multicolumn{1}{c}{$a_\mathrm{long}$} & $b_\mathrm{long}$ & $a_\mathrm{gran,1}$ & $b_\mathrm{gran,1}$ & $a_\mathrm{gran,2}$ & $b_\mathrm{gran,2}$\\ [1pt]
+ & \multicolumn{1}{c}{(ppm$^2$ $\mu$Hz$^{-1}$)} & \multicolumn{1}{c}{(ppm)}  & (\muhz) & (ppm) & (\muhz) & (ppm) & (\muhz)\\ [1pt]   
+\hline
+\\[-8pt]
+03744043         & $4.13_{-0.11}^{+0.11}$   &   $72.33_{-3.80}^{+3.52}$   &   $1.47_{-0.15}^{+0.13}$   &   $194.59_{-2.09}^{+2.64}$   &   $28.45_{-0.62}^{+0.55}$   &   $173.68_{-2.10}^{+2.12}$   &   $97.81_{-1.03}^{+0.95}$ \\[1pt]
+06117517         & $6.05_{-0.19}^{+0.18}$   &   $84.16_{-4.24}^{+4.48}$   &   $1.40_{-0.17}^{+0.13}$   &   $221.66_{-2.61}^{+2.95}$   &   $29.27_{-0.59}^{+0.61}$   &   $205.40_{-2.47}^{+2.33}$   &   $102.61_{-1.04}^{+1.09}$ \\[1pt]
+06144777         & $6.17_{-0.22}^{+0.20}$   &   $73.19_{-3.87}^{+4.05}$   &   $1.00_{-0.12}^{+0.12}$   &   $197.86_{-1.97}^{+2.48}$   &   $32.88_{-0.67}^{+0.56}$   &   $179.43_{-1.94}^{+1.96}$   &   $116.04_{-1.26}^{+1.31}$ \\[1pt]
+07060732         & $19.70_{-0.38}^{+0.42}$   &   $84.34_{-3.83}^{+3.82}$   &   $1.00_{-0.08}^{+0.07}$   &   $186.61_{-2.00}^{+2.15}$   &   $32.76_{-0.60}^{+0.62}$   &   $172.96_{-1.79}^{+2.04}$   &   $115.97_{-1.91}^{+1.85}$ \\[1pt]
+07619745         & $13.99_{-0.64}^{+0.63}$   &   $75.30_{-2.99}^{+2.72}$   &   $0.99_{-0.07}^{+0.06}$   &   $152.30_{-1.38}^{+1.38}$   &   $42.75_{-0.68}^{+0.59}$   &   $138.51_{-1.60}^{+1.51}$   &   $163.48_{-4.56}^{+4.33}$ \\[1pt]
+08366239         & $15.35_{-1.17}^{+1.28}$   &   $59.11_{-2.28}^{+2.13}$   &   $1.54_{-0.12}^{+0.13}$   &   $141.32_{-1.34}^{+1.61}$   &   $46.97_{-0.75}^{+0.86}$   &   $130.43_{-2.87}^{+2.61}$   &   $182.11_{-7.96}^{+10.47}$ \\[1pt]
+08475025         & $17.36_{-0.32}^{+0.30}$   &   $134.75_{-6.23}^{+6.21}$   &   $0.91_{-0.06}^{+0.05}$   &   $210.88_{-2.34}^{+2.55}$   &   $28.57_{-0.57}^{+0.55}$   &   $182.51_{-2.32}^{+2.34}$   &   $103.50_{-1.26}^{+1.37}$ \\[1pt]
+08718745         & $9.60_{-0.26}^{+0.25}$   &   $256.99_{-16.30}^{+15.87}$   &   $0.50_{-0.03}^{+0.03}$   &   $208.05_{-2.32}^{+2.36}$   &   $31.70_{-0.63}^{+0.60}$   &   $179.29_{-2.07}^{+2.13}$   &   $114.30_{-1.47}^{+1.40}$ \\[1pt]
+09145955         & $4.57_{-0.12}^{+0.10}$   &   $73.42_{-2.83}^{+2.71}$   &   $2.13_{-0.15}^{+0.15}$   &   $169.47_{-1.48}^{+1.46}$   &   $34.73_{-0.51}^{+0.47}$   &   $147.72_{-1.31}^{+1.50}$   &   $115.63_{-1.07}^{+1.06}$ \\[1pt]
+09267654         & $16.31_{-0.29}^{+0.24}$   &   $68.38_{-3.39}^{+3.16}$   &   $1.25_{-0.12}^{+0.10}$   &   $169.16_{-2.17}^{+2.15}$   &   $29.69_{-0.58}^{+0.64}$   &   $160.61_{-1.88}^{+1.88}$   &   $103.15_{-1.43}^{+1.41}$ \\[1pt]
+09475697         & $9.04_{-0.18}^{+0.18}$   &   $72.89_{-3.73}^{+3.76}$   &   $1.19_{-0.11}^{+0.10}$   &   $220.74_{-2.27}^{+2.26}$   &   $28.88_{-0.51}^{+0.50}$   &   $191.50_{-2.28}^{+2.18}$   &   $99.58_{-1.01}^{+1.05}$ \\[1pt]
+09882316         & $12.27_{-1.64}^{+1.44}$   &   $54.20_{-2.42}^{+2.22}$   &   $1.92_{-0.20}^{+0.19}$   &   $131.26_{-1.33}^{+1.18}$   &   $46.32_{-0.85}^{+0.76}$   &   $128.26_{-4.02}^{+3.91}$   &   $212.52_{-10.58}^{+11.08}$ \\[1pt]
+10123207         & $17.05_{-0.56}^{+0.53}$   &   $98.40_{-4.89}^{+3.86}$   &   $0.81_{-0.05}^{+0.05}$   &   $184.06_{-1.46}^{+1.48}$   &   $38.50_{-0.61}^{+0.50}$   &   $169.99_{-1.43}^{+1.38}$   &   $151.14_{-2.55}^{+2.54}$ \\[1pt]
+10200377         & $18.16_{-0.35}^{+0.31}$   &   $123.99_{-4.58}^{+5.07}$   &   $1.11_{-0.12}^{+0.11}$   &   $175.97_{-1.57}^{+1.49}$   &   $38.30_{-0.58}^{+0.51}$   &   $156.51_{-1.56}^{+1.39}$   &   $122.34_{-1.95}^{+2.18}$ \\[1pt]
+10257278         & $21.74_{-0.62}^{+0.57}$   &   $80.29_{-3.83}^{+4.05}$   &   $0.90_{-0.08}^{+0.07}$   &   $186.11_{-2.06}^{+1.93}$   &   $36.20_{-0.65}^{+0.68}$   &   $172.51_{-1.77}^{+1.91}$   &   $132.72_{-2.75}^{+2.65}$ \\[1pt]
+11353313         & $16.44_{-0.29}^{+0.25}$   &   $79.99_{-3.55}^{+2.87}$   &   $1.28_{-0.13}^{+0.13}$   &   $174.74_{-1.78}^{+1.87}$   &   $32.16_{-0.57}^{+0.55}$   &   $158.82_{-1.60}^{+1.79}$   &   $112.76_{-1.54}^{+1.43}$ \\[1pt]
+11913545         & $14.80_{-0.30}^{+0.29}$   &   $79.05_{-4.04}^{+4.58}$   &   $1.17_{-0.15}^{+0.15}$   &   $221.88_{-2.62}^{+2.82}$   &   $28.92_{-0.56}^{+0.62}$   &   $210.35_{-2.32}^{+2.39}$   &   $103.91_{-1.21}^{+1.13}$ \\[1pt]
+11968334         & $23.14_{-0.57}^{+0.55}$   &   $99.13_{-4.25}^{+4.51}$   &   $1.08_{-0.08}^{+0.09}$   &   $187.52_{-2.05}^{+2.28}$   &   $35.63_{-0.72}^{+0.64}$   &   $174.42_{-1.91}^{+1.93}$   &   $131.70_{-2.43}^{+2.17}$ \\[1pt]
+12008916         & $15.81_{-0.66}^{+0.65}$   &   $91.17_{-3.50}^{+3.66}$   &   $1.03_{-0.07}^{+0.07}$   &   $171.94_{-1.70}^{+1.69}$   &   $40.86_{-0.70}^{+0.63}$   &   $159.13_{-1.70}^{+1.91}$   &   $156.39_{-3.29}^{+3.46}$ \\[1pt]
+\hline                                
+\end{tabular}
+\label{tab:bkg1}
+\end{table*}
+
+\begin{table*}
+\caption{Median values with corresponding 68.3\,\% shortest credible intervals of the parameters related to the Gaussian envelope, Eq.~(\ref{eq:env}), for the 19 RGs investigated, as derived by \diamonds.}             % title of Table
+\centering                         
+\begin{tabular}{l r c c}       
+\hline\hline
+\\[-8pt]         
+KIC ID & \multicolumn{1}{c}{$H_\mathrm{osc}$} & $\numax$ & $\sigma_\mathrm{env}$\\ [1pt]
+ & \multicolumn{1}{c}{(ppm$^2$ $\mu$Hz$^{-1}$)} & (\muhz)  & (\muhz) \\ [1pt]   
+\hline
+\\[-8pt]
+03744043         & $470.59_{-13.49}^{+11.77}$   &   $112.52_{-0.23}^{+0.25}$   &   $12.47_{-0.24}^{+0.21}$ \\[1pt]
+06117517         & $602.54_{-16.95}^{+15.48}$   &   $120.27_{-0.24}^{+0.25}$   &   $13.22_{-0.27}^{+0.26}$ \\[1pt]
+06144777         & $517.92_{-14.11}^{+12.74}$   &   $129.69_{-0.24}^{+0.22}$   &   $13.16_{-0.25}^{+0.23}$ \\[1pt]
+07060732         & $408.89_{-10.80}^{+11.58}$   &   $132.29_{-0.24}^{+0.24}$   &   $13.16_{-0.28}^{+0.27}$ \\[1pt]
+07619745         & $195.85_{-4.20}^{+4.58}$   &   $170.82_{-0.25}^{+0.24}$   &   $14.94_{-0.31}^{+0.31}$ \\[1pt]
+08366239         & $126.86_{-3.36}^{+3.02}$   &   $185.56_{-0.35}^{+0.37}$   &   $17.00_{-0.50}^{+0.52}$ \\[1pt]
+08475025         & $492.86_{-14.22}^{+14.79}$   &   $112.95_{-0.24}^{+0.28}$   &   $11.47_{-0.27}^{+0.28}$ \\[1pt]
+08718745         & $480.95_{-11.42}^{+11.78}$   &   $129.31_{-0.23}^{+0.25}$   &   $12.53_{-0.25}^{+0.23}$ \\[1pt]
+09145955         & $257.18_{-5.82}^{+5.53}$   &   $131.65_{-0.23}^{+0.25}$   &   $15.35_{-0.25}^{+0.22}$ \\[1pt]
+09267654         & $413.99_{-12.66}^{+12.50}$   &   $118.63_{-0.23}^{+0.22}$   &   $11.43_{-0.25}^{+0.25}$ \\[1pt]
+09475697         & $535.80_{-14.19}^{+14.75}$   &   $115.05_{-0.23}^{+0.26}$   &   $13.46_{-0.25}^{+0.25}$ \\[1pt]
+09882316         & $94.21_{-3.12}^{+3.04}$   &   $182.04_{-0.45}^{+0.45}$   &   $15.18_{-0.63}^{+0.60}$ \\[1pt]
+10123207         & $388.01_{-7.72}^{+10.64}$   &   $160.94_{-0.18}^{+0.19}$   &   $13.41_{-0.24}^{+0.22}$ \\[1pt]
+10200377         & $292.56_{-5.26}^{+5.53}$   &   $142.52_{-0.21}^{+0.19}$   &   $15.24_{-0.25}^{+0.22}$ \\[1pt]
+10257278         & $386.16_{-9.11}^{+10.96}$   &   $149.47_{-0.24}^{+0.26}$   &   $12.97_{-0.29}^{+0.28}$ \\[1pt]
+11353313         & $330.11_{-8.10}^{+8.54}$   &   $126.46_{-0.23}^{+0.22}$   &   $13.10_{-0.23}^{+0.25}$ \\[1pt]
+11913545         & $688.51_{-24.50}^{+20.19}$   &   $117.16_{-0.22}^{+0.27}$   &   $11.41_{-0.27}^{+0.27}$ \\[1pt]
+11968334         & $401.75_{-12.77}^{+10.99}$   &   $141.43_{-0.24}^{+0.26}$   &   $11.98_{-0.31}^{+0.28}$ \\[1pt]
+12008916         & $268.02_{-6.64}^{+5.73}$   &   $161.92_{-0.31}^{+0.30}$   &   $15.08_{-0.34}^{+0.29}$ \\[1pt]
+\hline
+\end{tabular}
+\label{tab:bkg2}
+\end{table*}
+
+\section{Results for the oscillation modes}
+\label{sec:pb_results}
+For listing the results from the peak bagging analysis we adopt a nomenclature similar to that used by CD14 and list the oscillation modes in ascending frequency order, divided by angular degree. Each mode can be identified uniquely by the set of numbers (Peak \#, $\ell$, $m$). An example of this nomenclature for \kic\,\,is displayed in Fig.~\ref{fig:chunk}. The missing values for amplitudes and linewidths correspond to the cases of unresolved mixed modes, were only the heights are fit. The missing values for the detection probability $p_\mathrm{B}$ represent peaks for which the significance test was not necessary due to their large height and the clear position with respect to the asymptotic relations for $p$ and mixed modes (Sect.~\ref{sec:mode_id}). 
+
+This appendix also includes the figures for mode linewidths and mode amplitudes, for all the stars of the sample, similarly to Fig.~\ref{fig:fwhm} and Fig.~\ref{fig:amplitude}, respectively, shown for \kic.
+
+Referring to the definitions presented by CD14, the configuring parameters of \diamonds\,\,used for all the computations are: initial enlargement fraction $0.5 \leq f_0 \leq 3.4$, shrinking rate $\alpha = 0.01$, number of live points $N_\mathrm{live} = 1000$, number of clusters $1 \leq N_\mathrm{clust} \leq 4$, number of total drawing attempts $M_\mathrm{attempts} = 10^4$, number of nested iterations before the first clustering $M_\mathrm{init} = 1000$, and number of nested iterations with the same clustering $M_\mathrm{same} = 50$.
+
+% Figures of mode linewidths and amplitudes for all the stars
+\include{figures_peakbagging}
+
+\include{KIC3744043}
+\include{KIC6117517}
+\include{KIC6144777}
+\include{KIC7060732}
+\include{KIC7619745}
+\include{KIC8366239}
+\include{KIC8475025}
+\include{KIC8718745}
+\include{KIC9145955}
+\include{KIC9267654}
+\include{KIC9475697}
+\include{KIC9882316}
+\include{KIC10123207}
+\include{KIC10200377} 
+\include{KIC10257278} 
+\include{KIC11353313}
+\include{KIC11913545}
+\include{KIC11968334}
+\include{KIC12008916}
+
+\end{document}
+
+
+
