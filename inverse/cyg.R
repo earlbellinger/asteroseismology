@@ -25,11 +25,13 @@ measB <- rbind(measB, vermB)
 
 plot_cygs <- function(name, cygA, cygB, ..., 
         text.cex=1, mgp=utils.mgp, mar=utils.mar, font=utils.font) {
-    A <- density(cygA[[name]])
-    B <- density(cygB[[name]])
+    A <- hist(cygA[[name]], plot=F, breaks=50) #density(cygA[[name]])
+    B <- hist(cygB[[name]], plot=F, breaks=50) #density(cygB[[name]])
     
-    xlim <- range(A$x, B$x)
-    ylim <- range(0, A$y, B$y)
+    #xlim <- range(A$x, B$x)
+    #ylim <- range(0, A$y, B$y)
+    xlim <- range(A$breaks, B$breaks)
+    ylim <- range(A$density, B$density)
     
     has_other <- F
     if (name %in% names(metcalfe)) {
@@ -82,20 +84,23 @@ plot_cygs <- function(name, cygA, cygB, ...,
     par(mar=c(2.5, 1, 1, 1), 
         #ifelse(name=="Y_surf" || name=="L" || name=="radius", 1.5, 1)), 
         mgp=mgp-c(.85, 0, 0))
-    plot(A, axes=F, col=red, lwd=1.5, yaxs='i', xaxs='i', lty=2,
+    plot(#A, 
+        A$breaks, c(A$density, 0), type='s',
+        axes=F, col=red, lwd=1.3, yaxs='i', xaxs='i', lty=2,
         xlim=xlim, ylim=c(0, ylim[2]*1.01), 
         xlab="", ylab="", main="")
     magaxis(side=1, family=font, tcl=0.25, labels=1, 
             las=1, mgp=mgp-c(0, 0.2, 0), cex.axis=text.cex)
-    lines(B, col=blue, lwd=1.5, lty=2)
+    #lines(B, col=blue, lwd=1.5, lty=2)
+    lines(B$breaks, c(B$density, 0), type='s', col=blue, lwd=1.3, lty=2)
     
     if (has_other) {
         apos <- max(ylim) * 0.2#quantile(A$y, .55)
         bpos <- max(ylim) * 0.3#quantile(B$y, .6)
         arrows(means[1]-2*stds[1], apos, means[1]+2*stds[1], apos, 
-            code=3, col=red, length=0.1)
+            code=3, col=red, length=0.1) w
         arrows(means[2]-2*stds[2], bpos, means[2]+2*stds[2], bpos,
-            code=3, col=blue, length=0.1)
+            code=3, col=blue, length=0.1) 
     }
     par(xpd=NA)
     eps_A <- if (mean(cygA[[name]]) > 0)

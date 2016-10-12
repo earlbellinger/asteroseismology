@@ -1,0 +1,16 @@
+&star_job
+
+    create_pre_main_sequence_model = .false. ! was .true.
+    save_model_when_terminate = .false.
+    pgstar_flag = .false.
+    change_Y = .true.
+
+/ !end of star_job namelist
+
+&controls
+
+    write_profiles_flag = .false. ! only output the history (for speed)
+    initial_mass = 1 ! in Msun units
+    max_years_for_timestep = 1d7
+
+/ ! end of controls namelist

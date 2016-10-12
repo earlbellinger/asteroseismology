@@ -1,0 +1,119 @@
+\documentclass{article}
+%\usepackage{geometry}
+%\geometry{top = 1in, bottom = 1in, left = 1in, right = 1in}
+\usepackage[top = 0.7in, bottom = 0.7in, left = 0.7in, right = 0.7in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{float}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{movie15}
+\usepackage{hyperref}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rhead{\footnotesize {09/05/2012 ; MESA version 4411} }
+\chead{\footnotesize {Authors: Jared Brooks, Lars Bildsten, Bill Paxton} }
+\lhead{\footnotesize {mesa/star/test\_suite/hb\_2M} }
+
+\begin{document}
+	
+	\begin{center}
+	  \begin{Large}
+	    \textbf{HB 2M}\\
+	  \end{Large}
+	\end{center}
+
+        This test is to show a 2 $M_\odot$ Horizontal Branch star evolving until core helium is depleted.  The run should be cut off when the helium mass boundary grows to 0.25 (\texttt{he4\_boundary\_mass\_limit = 0.25d0}).  This means that all of the cells interior to the mass coordinate 0.25 have a helium mass fraction of less than $10^{-4}$ (essentially, the core is depleted of helium).\\
+
+        The plots below of luminosity (figure \ref{fig:1}) and effective temperature (figure \ref{fig:2}) show the surface properties during the run.
+
+        \begin{figure}[H]
+          \begin{minipage}[b]{0.5\linewidth}
+	    \centering
+	    \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Luminosity_vs_Age.pdf}
+	    \caption{}
+	    \label{fig:1}
+          \end{minipage}
+          \hspace{0cm}
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Teff_vs_Age.pdf}
+            \caption{}
+            \label{fig:2}
+          \end{minipage}
+	\end{figure}
+
+        \pagebreak
+
+        The plot to the left shows the evolution of center temperature and density (figure \ref{fig:3}), starting in the lower left corner.  To the right is a plot showing the evolution of the burning luminosities (figure \ref{fig:4}).  The drop in center temperature corresponds sudden changes in burning luminosities at about 57 Myr.
+
+        \begin{figure}[H]
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Tc_vs_Rhoc.pdf}
+            \caption{Evolution of center temperature and density, starts in lower left corner}
+            \label{fig:3}
+          \end{minipage}
+          \hspace{0cm}
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Burnrate_vs_Age.pdf}
+            \caption{Sudden changes at 57 Myr correspond with drop in center temperature}
+            \label{fig:4}
+          \end{minipage}
+        \end{figure}
+
+        \pagebreak
+
+        Below are two burning rate profiles.  The one on the left is from just before the peak in center temperature (figure \ref{fig:5}), and the one on the right is from right after the peak (figure \ref{fig:6}).  Helium burning has moved from the core to a shell around the core.
+
+        \begin{figure}[H]
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Burnrate_vs_q_7.pdf}
+            \caption{Burning rate profile from before peak Tc}
+            \label{fig:5}
+          \end{minipage}
+          \hspace{0cm}
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Burnrate_vs_q_9.pdf}
+            \caption{Burning rate profile from after peak Tc}
+            \label{fig:6}
+          \end{minipage}
+        \end{figure}
+
+        \pagebreak
+
+        The abundance profiles below are from the beginning (figure \ref{fig:8}) and end (figure \ref{fig:9}) of the run.
+
+        \begin{figure}[H]
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Abundance_vs_q_1.pdf}
+            \caption{Abundance profile from start of run}
+            \label{fig:8}
+          \end{minipage}
+          \hspace{0cm}
+          \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width = 3.8in]{/Users/jaredbrooks/hb_2M/plots_out/Abundance_vs_q_18.pdf}
+            \caption{Abundance profile from end of run}
+            \label{fig:9}
+          \end{minipage}
+        \end{figure}
+
+        \pagebreak
+
+        This final plot (figure \ref{fig:7}) shows a few internal \texttt{MESA} variables, such as the size of the time-step, the number of zones, and the number of retries against the model number in order to give some understanding of how hard \texttt{MESA} is working throughout the run and where some areas of problems/interest might be.
+
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width = 5in]{/Users/jaredbrooks/hb_2M/plots_out/Mesa_Variables.pdf}
+          \caption{\texttt{MESA} variables plotted against model number show how hard \texttt{MESA} is working}
+          \label{fig:7}
+        \end{figure}
+
+
+\end{document}

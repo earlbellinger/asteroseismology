@@ -1,0 +1,60 @@
+&star_job
+
+    create_pre_main_sequence_model = .false. ! was .true.
+    save_model_when_terminate = .false.
+    pgstar_flag = .false.
+    
+    change_Y = .true.
+    new_Y = 0.27746 
+
+/ !end of star_job namelist
+
+&controls
+
+    write_profiles_flag = .true.
+    max_num_profile_zones = 2
+    history_interval = 1
+    profile_interval = 10
+    max_num_profile_models = -1
+    
+    max_years_for_timestep = 1d7
+    mesh_delta_coeff = 0.4
+    
+    initial_mass = 1 ! in Msun units
+    mixing_length_alpha = 2.047906 ! (semi-)solar-calibrated 
+    
+    smooth_outer_xa_big = 1d-4
+    smooth_outer_xa_small = 1d-8
+    ! num_cells_for_smooth_brunt_B = 0 ! changed from 2
+    ! num_cells_for_smooth_gradL_composition_term = 5 ! changed from 3
+    write_pulse_info_with_profile = .true.
+    format_for_FGONG_data = '(1P5E16.9,x)'
+    write_pulsation_plot_data = .true.
+    add_center_point_to_pulse_info = .true.
+    keep_surface_point_for_pulse_info = .true.
+    ! add_double_points_to_pulse_info = .true.
+    add_atmosphere_to_pulse_info = .true.
+    which_atm_option = 'Eddington_grey'
+    
+    ! conv_bdy_mix_softening_f0 = 0.0001
+    ! conv_bdy_mix_softening_f = 0.0005
+    
+    ! overshoot_f_above_nonburn_core = 0.005
+    ! overshoot_f_above_nonburn_shell = 0.005
+    ! overshoot_f_below_nonburn_shell = 0.005
+    ! overshoot_f_above_burn_h_core = 0.005
+    ! overshoot_f_above_burn_h_shell = 0.005
+    ! overshoot_f_below_burn_h_shell = 0.005
+    ! overshoot_f0_above_nonburn_core = 0.001
+    ! overshoot_f0_above_nonburn_shell = 0.001
+    ! overshoot_f0_below_nonburn_shell = 0.001
+    ! overshoot_f0_above_burn_h_core = 0.001
+    ! overshoot_f0_above_burn_h_shell = 0.001
+    ! overshoot_f0_below_burn_h_shell = 0.001
+
+  ! stopping conditions
+    stop_near_zams = .false.
+    xa_central_lower_limit_species(1) = 'h1'
+    xa_central_lower_limit(1) = 1d-3
+
+/ ! end of controls namelist

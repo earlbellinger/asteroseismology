@@ -9,6 +9,8 @@ source(file.path('..', 'scripts', 'utils.R'))
 library(magicaxis)
 library(deming)
 
+red <- adjustcolor(red, alpha.f=0.5)
+
 col.pal <- c('black', 'black', blue, '#900090', red)
 
 #############################################################
@@ -90,10 +92,10 @@ plot_comparison <- function(qty, ...,
         cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
     arrows(kages[[qty]]-kages[[low]],  ml[[qty]], 
            kages[[qty]]+kages[[high]], ml[[qty]], 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     arrows(kages[[qty]], ml[[qty]]-ml[[low]], 
            kages[[qty]], ml[[qty]]+ml[[high]], 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(ml[[qty]] ~ kages[[qty]], pch=1, cex=0.5)
     title(ylab=bquote("ML"~.(get_label_nameless(name))))
     par(mgp=mgp-c(0.2, 0, 0))
@@ -136,10 +138,10 @@ plot_rel_diff <- function(qty, ...,
         cex.axis=text.cex, las=1, mgp=mgp)
     arrows(kages[[qty]]-kages[[low]],  rel.dif, 
            kages[[qty]]+kages[[high]], rel.dif, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     arrows(kages[[qty]], rel.dif - rel.unc, 
            kages[[qty]], rel.dif + rel.unc, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(rel.dif ~ kages[[qty]], pch=1, cex=0.5)
     title(xlab=bquote("KAGES"~.(get_label(name))))
     title(ylab=bquote(
@@ -174,10 +176,10 @@ plot_abs_diff <- function(qty, ...,
         cex.axis=text.cex, las=1, mgp=mgp)
     arrows(kages[[qty]]-kages[[low]],  dif, 
            kages[[qty]]+kages[[high]], dif, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     arrows(kages[[qty]], dif - dif.unc, 
            kages[[qty]], dif + dif.unc, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(dif ~ kages[[qty]], pch=1, cex=0.5)
     title(xlab=bquote("KAGES"~.(get_label(name))))
     title(ylab=bquote(
@@ -212,10 +214,10 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
     abline(h=1, lty=2)
     arrows(ml$Mass, ml$D-ml$dDL, 
            ml$Mass, ml$D+ml$dDH, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     arrows(ml$Mass-ml$dMassL, ml$D,
            ml$Mass+ml$dMassH, ml$D,
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(ml$D ~ ml$Mass)
     
     title(xlab=get_label("M"))
@@ -261,7 +263,7 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
     legend.inter <- gumr(intercept, intercept.se)$value
     legend("bottomleft", cex=text.cex, pch=c(3, NA, NA, NA), bty='n', 
            inset=c(0.02, 0.01), 
-           lty=c(NA,2,1,3), col=c("darkgray", "black", "black", 'black'), 
+           lty=c(NA,2,1,3), col=c(red, "black", "black", 'black'), 
            legend=c(
         "KOIs",
         expression(D==1), 
@@ -277,8 +279,89 @@ plot_diffusion <- function(..., text.cex=1, mgp=utils.mgp, font='Palatino') {
         cex.axis=text.cex, las=1, mgp=mgp)
 }
 
+plot_diffusion_linear <- function(..., 
+        text.cex=1, mgp=utils.mgp, font='Palatino') {
+    distance <- abs(ml$D - 1) / ifelse(ml$D > 1, ml$dDL, ml$dDH)
+    distance <- ifelse(distance > 5, 5, 1+floor(distance))
+    
+    plot(NA, axes=F, ylab="", xlab="", #log='y', #yaxs='i', 
+        ylim=range(ml$D - ml$dDL, ml$D + ml$dDH),
+        xlim=range(ml$Mass - ml$dMassL, ml$Mass + ml$dMassH))
+    
+    abline(h=1, lty=2)
+    arrows(ml$Mass, ml$D-ml$dDL, 
+           ml$Mass, ml$D+ml$dDH, 
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
+    arrows(ml$Mass-ml$dMassL, ml$D,
+           ml$Mass+ml$dMassH, ml$D,
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
+    points(ml$D ~ ml$Mass)
+    
+    title(xlab=get_label("M"))
+    title(ylab=get_label("diffusion"))
+    
+    mdl <- deming(D~Mass, data=ml, xstd=Mass_s, ystd=D_s, conf=.50) 
+    
+    #abline(mdl, untf=T)
+    
+    slope <- mdl[[1]][[2]]
+    slope.se <- sqrt(mdl$variance[[4]])#/sqrt(nrow(ml))
+    print(paste("P-value:", pt(slope / slope.se, mdl$n-2)))
+    
+    intercept <- mdl[[1]][[1]]
+    M.new <- seq(0.7, 1.6, 0.001)
+    D.new <- slope * M.new + intercept
+    D.new[D.new < 0] <- 10^-10
+    lines(D.new ~ M.new)
+    
+    newMs <- seq(0.7, 1.6, 0.01)
+    lower <- mdl$ci[[1]] + mdl$ci[[2]] * newMs
+    upper <- mdl$ci[[3]] + mdl$ci[[4]] * newMs
+    lower[lower<0] <- 10^-10
+    lines(newMs, lower, lty=3)
+    lines(newMs, upper, lty=3)
+    
+    sig.figs <- gumr(slope, slope.se)
+    slope <- sig.figs$value
+    slope.se <- sig.figs$uncert
+    
+    intercept.se <- sqrt(mdl$variance[[1]])
+    sig.figs <- gumr(intercept, intercept.se)
+    intercept <- sig.figs$value
+    intercept.se <- sig.figs$uncert
+    
+    cat(paste("\\text{D} = (", 
+        signif(intercept, 3), "\\pm", signif(intercept.se, 3), 
+        ")", ifelse(slope>=0, "+", "-"), "(", 
+        abs(signif(slope, 3)), "\\pm", signif(slope.se, 3), 
+        ") \\cdot \\text{M}/\\text{M}_\\odot\n"))
+    
+    legend.slope <- gumr(slope, slope.se)$value
+    legend.inter <- gumr(intercept, intercept.se)$value
+    leg.text <- c(
+        "KOIs",
+        expression(D==1), 
+        bquote(D==
+            .(signif(intercept,3)) -
+            .(abs(signif(slope,3)))%*%M),
+        "50% Confidence interval")
+    legend("topright", inset=c(0.02, 0.01), 
+        cex=text.cex, pch=c(1,NA,NA,NA), legend=leg.text, text.col='white', 
+        lty=c(NA,NA,1,NA), bty='n')
+    legend("topright", cex=text.cex, pch=c(3, NA, NA, NA), bty='n', 
+           inset=c(0.02, 0.01), 
+           lty=c(NA,2,1,3), col=c(red, "black", "black", 'black'), 
+           legend=leg.text)
+    
+    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0),
+        cex.axis=text.cex, las=1, mgp=mgp)
+}
+
 make_plots(plot_diffusion, paste0('diffusion'), mar.paper=c(2.5, 3, 1, 1),
      filepath=file.path('plots', 'comparison'))
+
+make_plots(plot_diffusion_linear, paste0('diffusion-linear'), 
+     mar.paper=c(2.5, 3, 1, 1), filepath=file.path('plots', 'comparison'))
 
 #######################################################################
 ### Comparison with Sarbani's Hare-and-Hound ##########################
@@ -337,7 +420,7 @@ plot_comparison <- function(qty, other=basu, ...,
         cex.axis=text.cex, las=1, mgp=mgp-c(0, 0.1, 0))
     arrows(other[[qty]], ml[[qty]]-ml[[low]], 
            other[[qty]], ml[[qty]]+ml[[high]], 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(ml[[qty]] ~ other[[qty]], pch=1, cex=0.5)
     title(ylab=bquote("Predicted"~.(get_label_nameless(name))))
     par(mgp=mgp-c(0.2, 0, 0))
@@ -370,7 +453,7 @@ plot_rel_diff <- function(qty, other=basu, ...,
     
     arrows(other[[qty]], rel.low,#rel.dif - rel.unc, 
            other[[qty]], rel.high,#rel.dif + rel.unc, 
-        length=0.01, lwd=1.5, angle=90, code=3, col="darkgray")
+        length=0.01, lwd=1.5, angle=90, code=3, col=red)
     points(rel.dif ~ other[[qty]], pch=1, cex=0.5)
     
     magaxis(side=3:4, family=font, tcl=0.25, labels=c(0,0),
@@ -429,6 +512,10 @@ hares <- hares[order(hares$Model),]
 ml <- ml[order(ml$Name),]
 for (qty in names(hares)[-1]) {
     make_plots(plot_comparison, paste0('hares-', qty),
+         filepath=file.path('plots', 'comparison', 'hares'), 
+         mar.paper=c(2.5, 3, 1, 1),
+         qty=qty, other=hares)
+    make_plots(plot_rel_diff, paste0('hares-', qty, '-rel'),
          filepath=file.path('plots', 'comparison', 'hares'), 
          mar.paper=c(2.5, 3, 1, 1),
          qty=qty, other=hares)

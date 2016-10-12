@@ -1,0 +1,43 @@
+&star_job
+    
+    create_pre_main_sequence_model = .false.
+    pgstar_flag = .false.
+    
+    kappa_file_prefix = 'gs98'
+    change_lnPgas_flag = .true.
+    new_lnPgas_flag = .true.
+    
+    !relax_initial_Y = .true.
+    !relax_initial_Z = .true.
+    !change_Y = .true.
+    !change_Z = .true.
+
+/
+
+
+&controls
+   
+    initial_mass = 6
+    
+    initial_z = 0.02
+    initial_y = 0.28
+    
+    Zbase = 0.02
+    use_Type2_opacities = .true.
+    cubic_interpolation_in_Z = .true.
+    
+    max_years_for_timestep = 1d4
+    write_profiles_flag = .true.
+    history_interval = 10
+    profile_interval = 100
+    
+    mesh_delta_coeff = 0.5
+    
+    which_atm_option = 'tau_1m1_tables' ! 'Eddington_grey'
+    surf_avg_tau_min = 0.01
+    log_tau_function_weight = 1
+
+    max_age = 13.8e9
+    
+
+/ ! end of controls namelist

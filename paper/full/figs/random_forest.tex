@@ -1,0 +1,86 @@
+%\documentclass{standalone}
+%\usepackage{tikz}
+%\usetikzlibrary{arrows,positioning,shapes,decorations.markings}
+
+%\begin{document}
+
+\definecolor{mDarkBrown}{HTML}{604c38}
+\definecolor{mDarkTeal}{HTML}{23373b}
+\definecolor{DodgerBlue}{HTML}{1E90FF}
+\definecolor{DeepPurple}{HTML}{800080}
+\definecolor{mLightBrown}{HTML}{EB811B}
+\definecolor{mMediumBrown}{HTML}{C87A2F}
+
+\begin{tikzpicture}
+    [   shorten >=1pt,
+        ->,
+        draw=black!50, 
+        node distance=7cm, 
+        every node/.style={font=\normalsize}
+    ]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt];
+    \tikzstyle{neuron}=[circle,fill=black!25,minimum size=35pt,inner sep=0pt];
+    \tikzstyle{input neuron}=[neuron, fill=mMediumBrown!50!black, text=white];
+    \tikzstyle{output neuron}=[neuron, fill=DodgerBlue!50!black, text=white];
+    \tikzstyle{hidden neuron}=[neuron, fill=black, text=white];
+    \tikzstyle{annot}=[text width=10em, text centered];
+    
+    \node[input neuron, pin=left:Temperature] (I-1) at (0,-1) {};
+    \node[input neuron, pin=left:Metallicity] (I-2) at (0,-2.5) {};
+    \node[input neuron, pin=left:{\shortstack[r]{Large frequency\\separation}}] (I-3) at (0,-4) {};
+    \node[input neuron, pin=left:{\shortstack[r]{Small frequency\\separations}}] (I-4) at (0,-5.5) {};
+    \node[input neuron, pin=left:{\shortstack[r]{Frequency\\ratios}}] (I-5) at (0,-7) {};
+    \node[input neuron, pin=left:Luminosity] (I-6) at (0,-8.5) {};
+    \node[input neuron, pin=left:{\shortstack[r]{Surface\\gravity}}] (I-7) at (0,-10) {};
+    \node[input neuron, pin=left:Radius] (I-8) at (0,-11.5) {};
+
+    \foreach \name / \y in {1,...,9}
+        \path[yshift=1.25cm]
+            node[hidden neuron] (H-\name) at (3.5cm,{-\y*1.5 cm}) {$\bigwedge$};
+    
+    \node[output neuron,pin={[pin edge={->}]right:Age}] (O-1) at (7cm, -1 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:Mass}] (O-2) at (7cm, -2.5 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:\shortstack[l]{Initial\\Helium}}] (O-3) at (7cm, -4 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:\shortstack[l]{Initial\\Metallicity}}] (O-4) at (7cm, -5.5 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:{\shortstack[l]{Mixing\\length}}}] (O-5) at (7cm, -7 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:Overshoot}] (O-6) at (7cm, -8.5 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:Diffusion}] (O-7) at (7cm, -10 cm) {};
+    \node[output neuron,pin={[pin edge={->}]right:{\shortstack[l]{Other\\information}}}] (O-8) at (7cm, -11.5 cm) {};
+    
+    \foreach \source in {1,...,8}
+        \foreach \dest in {1,...,9}
+            \path (I-\source) edge (H-\dest);
+            
+    \foreach \source in {1,...,9}
+        \foreach \dest in {1,...,8}
+            \path (H-\source) edge (O-\dest);
+    
+    \node[input neuron] (I-1) at (0,-1) {\textbf{T$_{\text{eff}}$}};
+    \node[input neuron] (I-2) at (0,-2.5) {\textbf{[Fe/H]}};
+    \node[input neuron] (I-3) at (0,-4) {$\boldsymbol{\langle\Delta\nu_0\rangle}$};
+    \node[input neuron] (I-4) at (0,-5.5) {$\boldsymbol{\langle\delta\nu\rangle}$};
+    \node[input neuron] (I-5) at (0,-7) {$\boldsymbol\langle$\textbf{r}$\boldsymbol\rangle$};
+    \node[input neuron] (I-6) at (0,-8.5) {\textbf{L}};
+    \node[input neuron] (I-7) at (0,-10) {$\boldsymbol{\log}$ \textbf{g}};
+    \node[input neuron] (I-8) at (0,-11.5) {\textbf{R}};
+    
+    \foreach \name / \y in {1,...,9}
+        \path[yshift=1.25cm]
+            node[hidden neuron] (H-\name) at (3.5cm,{-\y*1.5 cm}) {$\bigwedge$};
+    
+    \node[output neuron] (O-1) at (7cm, -1 cm) {$\boldsymbol\tau$};
+    \node[output neuron] (O-2) at (7cm, -2.5 cm) {\textbf{M}};
+    \node[output neuron] (O-3) at (7cm, -4 cm) {\textbf{Y}$_{\boldsymbol{0}}$};
+    \node[output neuron] (O-4) at (7cm, -5.5 cm) {\textbf{Z}$_{\boldsymbol{0}}$};
+    \node[output neuron] (O-5) at (7cm, -7 cm) {$\boldsymbol\alpha_{\textbf{\text{MLT}}}$};
+    \node[output neuron] (O-6) at (7cm, -8.5 cm) {$\boldsymbol\alpha_{\textbf{\text{ov}}}$};
+    \node[output neuron] (O-7) at (7cm, -10 cm) {\textbf{D}};
+    \node[output neuron] (O-8) at (7cm, -11.5 cm) {\textbf{\&}};
+    
+    \node[annot, below of=H-9, node distance=1cm] (hl) {Decision Trees};
+    \node[annot, left of=hl, node distance=3.5cm] {Observations};
+    \node[annot, right of=hl, node distance=3.5cm] {Predictions};
+    
+\end{tikzpicture}
+
+%\end{document}

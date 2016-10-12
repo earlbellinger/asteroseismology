@@ -12,7 +12,7 @@ library(scales)
 
 ## Load data
 combos <- read.table(file.path('..', 'forward', 'initial_conditions.dat'), 
-    col.names=c("M", "Y", "Z", "alpha", "overshoot", "diffusion"))[1:500,]
+    col.names=c("M", "Y", "Z", "alpha", "overshoot", "diffusion"))#[1:1000,]
 
 log_vars <- c(3, 5, 6)
 
@@ -22,7 +22,7 @@ X <- 1-combos$Y-combos$Z
 # set up corner
 p = ggpairs(data=combos, axisLabels="show", upper="blank",
         aes(color=X, size=0.01), 
-        lower = list(continuous = wrap("points", alpha = 0.75, size=3.5)),
+        lower = list(continuous = wrap("points", alpha = 0.75, size=0.1)),
         columnLabels=sapply(names(combos)[1:6], 
             function (name) as.expression(get_label_nameless(name))))
 
@@ -97,7 +97,7 @@ inputs_plot <- function(..., text.cex) {
 
 # save!
 make_plots(inputs_plot, "inputs", filepath=file.path("plots", "inputs"),
-    short=FALSE, thin=FALSE, make_png=FALSE,
+    short=FALSE, thin=FALSE, make_png=TRUE,
         paper_pdf_width=1.3*6.97522, 
         paper_pdf_height=1.3*4.17309)
 

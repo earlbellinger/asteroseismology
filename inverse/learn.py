@@ -50,7 +50,8 @@ if not os.path.exists(table_dir):
 
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|mass_cc"#|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
+exclude = "nu_max|radial_velocity|mass_cc"#|Dnu|dnu"
+#|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
 data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
 
 maxs = data.max()
@@ -373,13 +374,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
             header=" ".join(y_names), comments='')
         print_star(star, predict, y_names, table_curr, table_init)
-        #plot_star(star+"_init", predict, y_names, out_dir)
         
-        #X_central = star_X.iloc[0,:]
-        #y_central = np.array([estimator.predict(X_central.reshape(1, -1))[0] 
-        #                      for estimator in forest.steps[0][1].estimators_])
         plot_star(star, predict, y_names, out_dir)#, y_central)
-        #plot_star(star+"_curr", predict, y_names, out_dir, y_show=y_curr)
+        
     
     table_curr.close()
     table_init.close()
@@ -395,8 +392,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 ################################################################################
 ### Start ######################################################################
 ################################################################################
-process_dir()
-for directory in [f for f in os.listdir(perturb_dir) 
-                  if not re.match(perturb_pattern, f)]:
-    process_dir(directory)
-
+#process_dir()
+#for directory in [f for f in os.listdir(perturb_dir) 
+#                  if not re.match(perturb_pattern, f)]:
+#    process_dir(directory)
+process_dir('procyon')

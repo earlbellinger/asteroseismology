@@ -50,7 +50,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     #acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
     nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, #acoustic_cutoff=acoustic_cutoff, 
-        outf=ifelse(sample(0:10000, 1) == 0, 
+        outf=ifelse(T, #sample(0:10000, 1) == 0, 
             gsub("/", "-", freqs_file), 
             FALSE),
         filepath=file.path('plots', dname, 'separation'))

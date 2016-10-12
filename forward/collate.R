@@ -1,4 +1,4 @@
-#### Collect nearly-evenly-spaced points from all evolutionary tracks 
+#### Collect nearly-eenly-spaced points from all evolutionary tracks 
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
@@ -21,7 +21,7 @@ simulations <- simulations[grep('.dat', simulations)]
 # Load data
 load_data <- function(filename, num_points=64, space_var='X_c') {
     DF <- read.table(filename, header=1, check.names=0)
-    #DF[DF['Fe/H'] < -10,]['Fe/H'] <- -10
+    DF[DF['Fe/H'] < -5,]['Fe/H'] <- -5
     #DF <- DF[DF['Fe/H'] > -8,]
     
     # clip PMS
@@ -69,11 +69,11 @@ load_data <- function(filename, num_points=64, space_var='X_c') {
     
     y <- new.DF[[space_var]]
     
-    make_plots(plot_spacing, paste0(basename(filename), "-spacing"), 
-        filepath=file.path('plots', sim_dir, "spacing"), 
-        x=x, y=y, ideal=ideal, num_points=num_points,
-        paper_pdf_height=3.25, slides_pdf_height=3.25,
-        mar=c(3, 1, 1, 1), thin=F, tall=F, slides=F)
+    #make_plots(plot_spacing, paste0(basename(filename), "-spacing"), 
+    #    filepath=file.path('plots', sim_dir, "spacing"), 
+    #    x=x, y=y, ideal=ideal, num_points=num_points,
+    #    paper_pdf_height=3.25, slides_pdf_height=3.25,
+    #    mar=c(3, 1, 1, 1), thin=F, tall=F, slides=F)
     
     return(new.DF)
 }

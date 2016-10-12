@@ -1,0 +1,266 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a template file for EPJ Web of Conferences 
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\documentclass[epjCONF]{svjour}
+\documentclass[epj,twocolumn]{webofc}
+\usepackage[varg]{txfonts}
+%
+\usepackage{afterpage}
+%
+\usepackage{graphics}
+%\usepackage[latin1]{inputenc}
+%\usepackage{ragged2e} % for text alignment 
+\usepackage{fix-cm}
+\usepackage{hyperref}
+\usepackage{graphicx}
+%\usepackage{siunitx}
+\usepackage{array}
+%
+% for landscape table
+\usepackage{afterpage}
+\usepackage{rotating}
+\usepackage{pdflscape}
+%
+\usepackage{xcolor}
+\newcommand\earl[1]{\textcolor{red}{ [#1]}}
+%
+\newcommand{\Teff}{T_{\rm eff}}
+\newcommand{\kmps}{\;{\rm km\;s^{{-}1}}}
+%
+\newenvironment{absolutelynopagebreak}
+  {\par\nobreak\vfil\penalty0\vfilneg
+   \vtop\bgroup}
+  {\par\xdef\tpd{\the\prevdepth}\egroup
+   \prevdepth=\tpd}
+%
+%------------------
+% Specific options
+\wocname{epj}
+%
+\woctitle{Seismology of the Sun and the Distant Stars 2016}
+%
+%
+\begin{document}
+\title{Stellar Parameters in an Instant with Machine Learning}
+\subtitle{Application to \emph{Kepler} LEGACY Targets}
+%
+%
+\author{\firstname{Earl P.} \lastname{Bellinger}\inst{1,2,3,4}\fnsep\thanks{\email{earl.bellinger@yale.edu}} 
+   \and \firstname{George C.} \lastname{Angelou}\inst{1,3} 
+   \and \firstname{Saskia} \lastname{Hekker}\inst{1,3}
+   \and \firstname{Sarbani} \lastname{Basu}\inst{2}
+   \and \firstname{Warrick H.} \lastname{Ball}\inst{5}
+   \and \firstname{Elisabeth} \lastname{Guggenberger}\inst{1,3} }
+%
+\institute{Max-Planck-Institut f{\"u}r Sonnensystemforschung, G{\"o}ttingen, Germany
+      \and Department of Astronomy, Yale University, New Haven, CT, USA 
+      \and Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Denmark
+      \and Institut f{\"u}r Informatik, Georg-August-Universit{\"a}t G{\"o}ttingen, Germany
+      \and Institut f{\"u}r Astrophysik, Georg-August-Universit{\"a}t G{\"o}ttingen, Germany}
+%Department of Astronomy, Yale University, New Haven, CT, 06511 USA 
+      %\and Max-Planck-Institut f{\"u}r Sonnensystemforschung, Justus-von-Liebig-Weg 3, D-37077 G{\"o}ttingen, Germany
+      %\and Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Ny Munkegade 120, DK-8000 Aarhus C, Denmark
+      %\and Institut f{\"u}r Informatik, Georg-August-Universit{\"a}t G{\"o}ttingen, Goldschmidtstrasse 7, D-37077 G{\"o}ttingen, Germany
+      %\and Institut f{\"u}r Astrophysik G{\"o}ttingen, Friedrich-Hund-Platz 1, D-37077 G{\"o}ttingen, Germany}
+%
+%
+\abstract{
+With the advent of dedicated photometric space missions, the ability to rapidly process huge catalogues of stars has become paramount. Bellinger and Angelou et al.~\cite{BA16} recently introduced a new method based on machine learning for inferring the stellar parameters of main-sequence stars exhibiting solar-like oscillations. The method makes precise predictions that are consistent with other methods, but with the advantages of being able to explore many more parameters while costing practically no time. Here we apply the method to 52 so-called ``LEGACY'' main-sequence stars observed by the \emph{Kepler} space mission. For each star, we present estimates and uncertainties of mass, age, radius, luminosity, core hydrogen abundance, surface helium abundance, surface gravity, initial helium abundance, and initial metallicity as well as estimates of their evolutionary model parameters of mixing length, overshooting coefficient, and diffusion multiplication factor. We obtain median uncertainties in stellar age, mass, and radius of 14.8\%, 3.6\%, and 1.7\%, respectively. The source code for all analyses and for all figures appearing in this manuscript can be found electronically at \url{https://github.com/earlbellinger/asteroseismology}. \earl{TODO: DOI from zenodo}
+} %end of abstract
+%
+\maketitle
+%
+%
+%%%%%%%%%%%%%
+%%% INTRO %%%
+%%%%%%%%%%%%%
+\section{Introduction} \label{intro}
+%
+The \emph{Kepler} seismic LEGACY sample data represents the best-quality observations of cool dwarf stars obtained during the nominal and extended 4-year mission of the \emph{Kepler} spacecraft. These stars, thought to be of a similar evolutionary stage as our Sun, serve as an excellent testbed for theories of stellar structure and evolution. In Bellinger and Angelou et al.~(hereinafter Paper 1), we introduced a method for determining the current structural parameters and evolutionary model parameters of main-sequence stars from asteroseismic observations. Here we apply that method to the LEGACY sample and present estimates of their parameters. 
+%
+%
+%%%%%%%%%%%%
+%%% DATA %%%
+%%%%%%%%%%%%
+\section{Data} \label{data}
+%
+The \emph{Kepler} seismic LEGACY sample data were obtained from Lund et al.~\cite{Lund}. These data include individual frequencies, effective temperatures, frequencies of maximum oscillation power, and metallicities of 66 main-sequence stars.
+Although none of the LEGACY stars show mixed modes, which would be an indication that the core hydrogen burning evolutionary phase has ceased, there is no way \emph{a priori} to determine the evolutionary status of a star. Some of these stars may have already depleted their supply of core hydrogen and begun hydrogen shell burning. 
+As our method is currently restricted to stars on the main sequence, i.e.~stars with a fractional core hydrogen abundance $X_c \geq 10^{-3}$, we wish to only apply the method to stars that are still being fueled by core hydrogen burning. 
+Therefore, in order to be confident in our estimates, we adopt a very conservative inclusion criterion and do not present estimates for any stars with any part of their estimated core hydrogen distribution having $X_c \leq 10^{-2}$. 
+In order to perform a selection with this criterion, we first ran our algorithm on all 66 stars. Then, for each star, we checked whether any of the $10\,000$ samples we obtained from the posterior $X_c$ distribution were smaller than that cutoff, and excluded the ones that were. 
+Of the original set, 52 stars remain. The stars are visualized in an asteroseismic frequency separation diagram in Figure~\ref{fig:jcd}. 
+%
+\begin{figure*}
+    \centering
+    \includegraphics[width=\hsize]{Bellinger_E_fig1.pdf}
+    %\caption{Large frequency separations and effective temperatures of the 66 main-sequence \emph{Kepler} Legacy stars overplotted on top of evolutionary tracks generated with MESA \cite{MESA}.}
+    \caption{Small frequency separations against large frequency separations with [Fe/H] indicated by color for 52 main-sequence \emph{Kepler} LEGACY stars overplotted on top of evolutionary models varied in mass with solar-calibrated mixing length and abundances generated using MESA \cite{MESA} with frequencies calculated using GYRE \cite{GYRE}. If all stars had the solar abundances and solar mixing length, it would suffice to look up their mass and core-hydrogen abundance in this diagram. Since they do not, a more sophisticated approach is required; here we employ the method introduced in Paper 1 for this task.}
+    \label{fig:jcd}
+\end{figure*}
+%
+%
+%%%%%%%%%%%%%%%%%%%%%
+%%% UNCERTAINTIES %%%
+%%%%%%%%%%%%%%%%%%%%%
+\section{Results} \label{results} 
+%
+In Table 1 we present the means and standard deviations of current and initial parameters for 52 stars of the \emph{Kepler} LEGACY sample as inferred via the machine learning method presented in Paper 1. Figure 2 further shows the cumulative distributions of uncertainties for each of these parameters. 
+%
+\begin{figure*}
+    %\includegraphics[width=\hsize]{Bellinger_E_fig2.pdf}
+    %\caption{Cumulative distribution functions showing the relative uncertainties in estimated surface gravities, radii, luminosities, surface helium abundances, ages, and core hydrogen abundances for 66 main-sequence \emph{Kepler} Legacy stars.}
+    %\label{fig:cdf-curr}
+%\end{figure*}
+%
+%\begin{figure*}
+    %\includegraphics[width=\hsize]{Bellinger_E_fig3.pdf}
+    \includegraphics[width=0.5\hsize]{Bellinger_E_fig2a.pdf}%
+    \includegraphics[width=0.5\hsize]{Bellinger_E_fig2b.pdf}
+    \caption{Cumulative distribution functions showing the relative uncertainties in estimated current parameters (left) and initial parameters (right) for 52 main-sequence \emph{Kepler} LEGACY stars.}
+    %\caption{Cumulative distribution functions showing the relative uncertainties in estimated initial helium abundances, masses, mixing length parameters, initial metallicities, overshooting coefficients, and diffusion multiplication factors for 52 main-sequence \emph{Kepler} Legacy stars.}
+    \label{fig:cdf}
+\end{figure*}
+%
+Nearly all of the masses are estimated to better than 5\% accuracy, with an overall average uncertainty of 3.6\%. The star with the best-constrained mass and age is KIC 8760414, an old star of 10.6 Gyr that is less massive but larger than our Sun with a mass uncertainty of 1.34\% and an age uncertainty of only 5\%. The star KIC 9139151 also has a very well-constrained age: a young star of 1.8 Gyr, its age is estimated to within just 210 million years. 
+
+Surface gravity estimates are nearly an order of magnitude more precise than any other quantity, with all stars in the sample measured to better than 1\% uncertainty. In second place are radius estimates, then followed by initial helium $Y_0$. At first glance, this may seem surprising. However, our grid imposes a uniform prior in $Y_0$ spanning from $a=0.22$ to $b=0.34$. 
+Thus, the largest uncertainty that would be possible is
+\begin{equation}
+    \max \left( \frac{\sigma^2(Y_0)}{Y_0} \right) = \frac{\abs{b-a}}{\abs{a}} \cdot 100 = 54.51\%.
+\end{equation}
+%Since the standard deviation of the uniform distribution is 
+%$$\sigma^2 = \sqrt{ \frac{1}{12} ( b-a )^2 },$$ 
+%the largest (worst) relative uncertainty that can be achieved is 
+%$$100 \cdot \frac{\sigma^2(Y_0)}{b} \approx 10.18\%.$$ 
+Hence, the ``small'' relative uncertainties on $Y_0$ are actually unsurprising despite the intrinsic uncertainty in retrodicting this quantity (c.f.~Paper 1 \textsection 2.3.3). Contrast this to stellar mass, whose uncertainties are comparable, but whose maximum uncertainty is 128\%. 
+
+\afterpage{
+    \clearpage
+    \setcounter{table}{0}
+    \begin{landscape}
+        \input{Bellinger_E_table1.tex}
+    \end{landscape}
+    \clearpage
+}
+
+In Table 2, we show these maximum possible uncertainties for all twelve quantities that we estimate. We compare them with the actual average uncertainties obtained across the 52 stars analyzed here. We also calculate a truncated average explained variance score
+\begin{equation}
+    V_{\text{e, mean}}^{\text{trunc}} = 1 - \frac{ 
+            \sqrt{\sigma^2_{\text{mean}}} 
+        } { 
+            \sqrt{\min \left( \sigma^2_{\max}, 200 \right)}
+    }
+\end{equation} (c.f.~Paper 1 equation 8), which gives an indication of how well the predictions compare with a random guess, with a score of zero being no better and a score of one being much better. We truncate at 200 because quantities that can take on a value of zero otherwise vacuously give $V_{\text{e, mean}}=1$. 
+
+\setcounter{table}{1}
+\begin{table}[!h]
+    \centering
+    \caption{Maximum possible uncertainties, average uncertainties attained, and truncated average explained variance of the twelve estimated quantities for the 52 \emph{Kepler} LEGACY stars.}
+    \label{tab:uncertainties}
+    \begin{tabular}{c|ccc}%S[table-format=3.2]S[table-format=3.2]}
+    %\begin{tabular}{
+    %    c | 
+    %    >{\centering}m{0.2\linewidth} 
+    %    >{\centering}m{0.2\linewidth} 
+    %    >{\centering}m{0.2\linewidth}}
+        \hline\noalign{\smallskip}
+Quantity              & $  \sigma^2_{\max}$ & $\sigma^2_{\text{mean}}$ & $V_{\text{e, mean}}^{\text{trunc}}$ \tabularnewline \hline
+$\tau$                & $           \infty$ & $16.76\%$ & 0.710 \tabularnewline
+$X_c$                 & $32\,612\,260   \%$ & $23.98\%$ & 0.653 \tabularnewline
+$\log g$              & $          56.42\%$ & $ 0.26\%$ & 0.932 \tabularnewline
+$L$                   & $     71\,054.89\%$ & $ 6.59\%$ & 0.818 \tabularnewline
+$R$                   & $         919.52\%$ & $ 1.74\%$ & 0.906 \tabularnewline
+$Y_{\text{surf}}$     & $           \infty$ & $13.58\%$ & 0.739 \tabularnewline \hline
+$M$                   & $         128.48\%$ & $ 3.67\%$ & 0.830 \tabularnewline
+$Y_0$                 & $          54.51\%$ & $ 3.14\%$ & 0.759 \tabularnewline
+$Z_0$                 & $    999\,060   \%$ & $18.19\%$ & 0.698 \tabularnewline
+$\alpha_{\text{MLT}}$ & $          66.65\%$ & $ 5.60\%$ & 0.710 \tabularnewline
+$\alpha_{\text{ov}}$  & $           \infty$ & $53.29\%$ & 0.483 \tabularnewline
+$D$                   & $           \infty$ & $86.86\%$ & 0.340 \tabularnewline \noalign{\smallskip}\hline
+%%\end{tabular}\\
+    \multicolumn{4}{p{0.9\linewidth}}{
+    \raggedright\textbf{Note.} Quantities that can take on a value of zero, such as a ZAMS star with $\tau=0$, have $\sigma^2_{\max}=\infty$. 
+    }
+    \end{tabular}
+\end{table}
+
+Based on these scores, the most well-constrained parameters are $\log g$, $R$, and $M$. The parameters that are hardest to constrain are the $\alpha_{\text{ov}}$ and $D$. All of the stars have $\sigma^2(D)/D > 0.2$ and nearly a third of them are more than 100\% uncertain. This highlights several aspects. First, since $D$ can take on a value of zero, an infinite relative uncertainty is possible. Second, $D$ is highly degenerate with the parameters controlling the initial chemical composition. These uncertainties may merely represent that degeneracy. Third, there are mixing processes that are not correctly accounted for in one-dimensional stellar modelling. Extreme values of $D$ may therefore be compensating for those processes. Finally, there may be seismic diagnostics, e.g.~glitch analysis, that would be able to better constrain diffusion, but are absent from the present analysis. 
+
+
+%%%%%%%%%%%%%%%%%%%
+%%% CONCLUSIONS %%%
+%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{conclusions}
+
+In this paper, we applied machine learning techniques to estimate structural and evolutionary parameters of main-sequence stars. We achieved extremely precise estimates of stellar mass and radius using asteroseismologic diagnostics that are competitive with orbital modelling and even direct interferometric measurements. Hence, these estimates represent one of the largest and most precise collections of main-sequence stellar parameters. 
+
+There are other modelling efforts of this LEGACY sample. Silva Aguirra et al.~\cite{SA} applied seven different techniques based on iterative optimization to estimate the parameters of these stars. 
+Although we have shown in Paper 1 that the results are in good agreement, the philosophy of our approach is fundamentally different from those seven. 
+Those approaches are based on various strategies for searching through grids of models in order to minimize a goodness-of-fit criterion. 
+Our approach, which is based on classification and regression trees (CART), works without searching and essentially without the tuning of hyper-parameters. 
+Our approach allows us to reliably estimate many more parameters, such as the initial helium abundance, mixing length parameter, overshooting coefficient, and diffusion multiplication factor, which would be too computationally expensive to vary with search-based methods, while still only taking seconds per star. 
+%comes from statistical regression analysis and works essentially without the tuning of any hyper-parameters. The only exception to this statement is the number of trees used, which needs to be selected as any large number, and gives basically identical results for all choices greater than $\sim$200 (c.f.~Paper 1 Appendix D). 
+
+We have omitted several stars due to their proximity to the end of the main sequence. We are currently working on extending this method to more evolved stellar types, and we are soon to release a follow-up paper analyzing these omitted stars as well as more evolved ones. 
+%
+%\input{table1.tex}
+%\input{Bellinger_E_table1.tex}
+%
+%\input{Bellinger_E_table2.tex}
+%
+
+\textbf{Acknowledgements.} The research leading to the presented results has received funding from the European Research Council under the European Community's Seventh Framework Programme (FP7/2007-2013) / ERC grant agreement no 338251 (StellarAges). This research was undertaken in the context of the International Max Planck Research School \mb{for Solar System Research}. S.B.\ acknowledges partial support from NSF grant AST-1514676 and NASA grant NNX13AE70G. W.H.B.\ acknowledges research funding by Deutsche Forschungsgemeinschaft (DFG) under grant SFB 963/1 ``Astrophysical flow instabilities and turbulence'' (Project A18).
+
+\textbf{Software.} Analysis was performed with \mb{R 3.2.3} \citep{R} and the R libraries magicaxis \mb{1.9.4} \citep{magicaxis}, parallelMap \mb{1.3} \citep{parallelMap}, data.table \mb{1.9.6} \citep{data.table}, and matrixStats \mb{0.50.1} \citep{matrixStats}.
+%
+\begin{thebibliography}{}
+\bibitem{BA16}
+Bellinger, E.~P.~and Angelou, G.~C.~{et~al.}, ApJ \textbf{828}, (2016) 20
+
+\bibitem{MESA}
+Paxton, B., Bildsten, L., Dotter, A., {et~al.}, ApJSS \textbf{192}, (2011) 3
+
+\bibitem{GYRE}
+Townsend, R.~H.~D.~and S.~A.~Teitler, MNRAS \textbf{435} (2013) 4
+
+\bibitem{Lund}
+Lund, M.~L.~{et~al.}, submitted (2016)
+
+\bibitem{SA}
+Silva Aguirra, V.~{et~al.}, submitted (2016)
+
+\bibitem{R}
+{R Core Team}, R 3.2.3 (2014)
+
+\bibitem{magicaxis}
+Robotham, A., magicaxis 1.9.4 (2015)
+
+\bibitem{parallelMap}
+Bischl, B.~and Lang, M., parallelMap 1.3 (2015)
+
+\bibitem{data.table}
+Dowle, M., Srinivasan, A., Short, T., data.table 1.9.6 (2015)
+
+\bibitem[{Bengtsson(2015)}]{matrixStats}
+Bengtsson, H., matrixStats 0.14.2 (2015)
+%% and use \bibitem to create references.
+%\bibitem{RefJ}
+%% Format for Journal Reference
+%Author, Journal \textbf{Volume}, (year) page numbers
+%% Format for books
+%\bibitem{RefB}
+%Author, \textit{Book title} (Publisher, place year) page numbers
+%% etc
+\end{thebibliography}
+\end{document}
+
+% end of file template.tex
+

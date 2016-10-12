@@ -1,0 +1,126 @@
+
+&star_job
+      show_log_description_at_start = .false.
+
+      load_saved_model = .false.
+      ! saved_model_name = 'hb_2M.mod'
+
+      save_model_when_terminate = .true.
+      save_model_filename = 'final.mod'
+      
+      write_profile_when_terminate = .true.
+      filename_for_profile_when_terminate = 'final_profile.data'
+      create_pre_main_sequence_model = .true.
+
+/ ! end of star_job namelist
+
+&controls
+
+      ! check for retries and backups as part of test_suite
+      ! you can/should delete this for use outside of test_suite
+      !   max_number_backups = 10
+      !   max_number_retries = 80
+
+      ! max_model_number = 1500
+
+      initial_mass = 0.55
+      initial_z = 0.004
+      
+      use_Type2_opacities = .true.
+      Zbase = 0.004
+      
+      max_timestep = 3.156d15 ! about 10^8 years
+
+      photo_interval = 50
+      profile_interval = 500
+      history_interval = 1
+      terminal_interval = 10
+      write_header_frequency = 10
+
+      ! c_core_mass_limit = 0.27d0
+      
+      ! min_timestep_limit = 1d4 ! (seconds)
+
+      T_mix_limit = 1d4
+
+      overshoot_f_above_nonburn_core = 0.014
+      overshoot_f_above_nonburn_shell = 0.014
+      overshoot_f_below_nonburn_shell = 0.128
+      overshoot_f_above_burn_h_core = 0.014
+      overshoot_f_above_burn_h_shell = 0.014
+      overshoot_f_below_burn_h_shell = 0.014
+      overshoot_f_above_burn_he_core = 0.014
+      overshoot_f_above_burn_he_shell = 0.014
+      overshoot_f_below_burn_he_shell = 0.014            
+
+      overshoot_f0_above_nonburn_core = 0.004
+      overshoot_f0_above_nonburn_shell = 0.004
+      overshoot_f0_below_nonburn_shell = 0.100
+      overshoot_f0_above_burn_h_core = 0.004
+      overshoot_f0_above_burn_h_shell = 0.004
+      overshoot_f0_below_burn_h_shell = 0.004
+      overshoot_f0_above_burn_he_core = 0.004
+      overshoot_f0_above_burn_he_shell = 0.004
+      overshoot_f0_below_burn_he_shell = 0.004            
+
+
+      cool_wind_full_on_T = 1d5
+      cool_wind_full_off_T = 1d6
+
+
+      hot_wind_full_on_T = 0d0
+      hot_wind_full_off_T = 0d0
+
+      cool_wind_RGB_scheme = 'Reimers'
+      cool_wind_AGB_scheme = 'Blocker'
+      RGB_to_AGB_wind_switch = 0.75d0
+      Reimers_scaling_factor = 0.1d0  
+      Blocker_scaling_factor = 0.05d0  
+
+      ! FOR DEBUGGING
+
+      !report_hydro_solver_progress = .true. ! set true to see info about newton iterations
+      !report_ierr = .true. ! if true, produce terminal output when have some internal error
+      !hydro_show_correction_info = .true.
+      
+      !max_years_for_timestep = 3.67628942044319d-05
+
+      !report_why_dt_limits = .true.
+      !report_all_dt_limits = .true.
+      
+      !show_mesh_changes = .true.
+      !mesh_dump_call_number = 5189
+      !okay_to_remesh = .false.
+      
+      !trace_evolve = .true.
+            
+
+      ! hydro debugging
+      !hydro_check_everything = .true.
+      !hydro_inspectB_flag = .true.
+      
+      !hydro_numerical_jacobian = .true.
+      !hydro_save_numjac_plot_data = .true.
+      !small_mtx_decsol = 'lapack'
+      !large_mtx_decsol = 'lapack'
+      !hydro_dump_call_number = 195
+
+      !trace_newton_bcyclic_solve_input = .true. ! input is "B" j k iter B(j,k)
+      !trace_newton_bcyclic_solve_output = .true. ! output is "X" j k iter X(j,k)
+      
+      ! trace_newton_bcyclic_steplo = 53 ! 1st model number to trace
+      ! trace_newton_bcyclic_stephi = 55 ! last model number to trace
+      
+      ! trace_newton_bcyclic_iterlo = 0 ! 1st newton iter to trace
+      ! trace_newton_bcyclic_iterhi = 20 ! last newton iter to trace
+      
+      ! trace_newton_bcyclic_nzlo = 1 ! 1st cell to trace
+      ! trace_newton_bcyclic_nzhi = 10000 ! last cell to trace; if < 0, then use nz as nzhi
+      
+      ! trace_newton_bcyclic_jlo = 1 ! 1st var to trace
+      ! trace_newton_bcyclic_jhi = 100 ! last var to trace; if < 0, then use nvar as jhi
+      
+      !trace_k = 1295
+
+/ ! end of controls namelist
+

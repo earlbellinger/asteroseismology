@@ -1,0 +1,308 @@
+%% DOCUMENT CLASS OPTION EPJ -- EPJ Web of Conferences   
+%%
+%%
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+\ProvidesFile{epjCONF.clo}
+              [2011/6/6 v2
+      style option for EPJ Web of Conferences]
+\typeout{Class option: epjCONF.clo for EPJ Web of Conferences}
+\DeclareOption{leqno}{\input{leqno.clo}}
+\let\if@columns\iffalse
+\DeclareOption{columns}{\let\if@columns\iftrue\setlength\textwidth{172mm}
+\setlength\textheight{252mm}\setlength{\hoffset}{-6.4mm}}
+\let\if@nopacs\iffalse
+\DeclareOption{nopacs}{\let\if@nopacs\iftrue}
+\ExecuteOptions{final,10pt}
+\newif\if@normhead \@normheadtrue
+\def\hugehead{\@normheadfalse
+\let\ProcessRunnHead=\relax
+\let\thanks=\footnote
+\long\def\@makefntext##1{\parindent\bibindent
+     \columnwidth\textwidth
+     \advance\columnwidth -\columnsep
+     \divide\columnwidth\tw@
+     \hsize\columnwidth
+     \linewidth\columnwidth
+     \noindent\hbox to\parindent{\hss\@makefnmark\enspace}##1}%
+}
+\let\if@mathematic\iffalse
+% No size changing allowed, hence a copy of size10.clo is included
+\renewcommand\normalsize{%
+   \@setfontsize\normalsize\@xpt{10.5dd}%
+   \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+   \belowdisplayskip \abovedisplayskip
+   \let\@listi\@listI}
+\normalsize
+\newcommand\small{%
+   \@setfontsize\small\@ixpt{10dd}%
+   \abovedisplayskip 8.5\p@ \@plus3\p@ \@minus4\p@
+   \abovedisplayshortskip \z@ \@plus2\p@
+   \belowdisplayshortskip 4\p@ \@plus2\p@ \@minus2\p@
+   \def\@listi{\leftmargin\leftmargini
+               \parsep 0\p@ \@plus1\p@ \@minus\p@
+               \topsep 8\p@ \@plus2\p@ \@minus4\p@
+               \itemsep0\p@}%
+   \belowdisplayskip \abovedisplayskip
+}
+\let\footnotesize\small
+\newcommand\scriptsize{\@setfontsize\scriptsize\@viipt\@viiipt}
+\newcommand\tiny{\@setfontsize\tiny\@vpt\@vipt}
+\newcommand\large{\@setfontsize\large\@xiipt{13dd}}
+\newcommand\Large{\@setfontsize\Large\@xivpt{15dd}}
+\newcommand\LARGE{\@setfontsize\LARGE\@xviipt{17dd}}
+\newcommand\huge{\@setfontsize\huge\@xxpt{25}}
+\newcommand\Huge{\@setfontsize\Huge\@xxvpt{30}}
+%
+\setlength\textwidth{143mm}
+\setlength\textheight{215mm}
+\setlength{\hoffset}{8mm}
+%
+\def\institutename{\par
+ \begingroup
+ \parindent=0pt
+ \parskip=0pt
+ \setcounter{inst}{1}%
+ \def\and{\par\stepcounter{inst}%
+ \if@instindent\hangindent\instindent\fi
+ \noindent
+ \hbox to\instindent{\hss$^{\theinst}$\enspace}\ignorespaces}%
+ \setbox0=\vbox{\def\thanks##1{}\@institute}
+ \ifnum\value{inst}>9\relax\setbox0=\hbox{$^{88}$\enspace}%
+                 \else\setbox0=\hbox{$^{8}$\enspace}\fi
+ \instindent=\wd0\relax
+ \ifnum\value{inst}=1\relax
+ \else
+   \setcounter{inst}{1}%
+   \if@instindent\hangindent\instindent\fi
+   \noindent
+   \hbox to\instindent{\hss$^{\theinst}$\enspace}\ignorespaces
+ \fi
+ \ignorespaces
+ \normalsize
+ \@institute\par
+ \endgroup}
+%
+\def\epj@maketitle{\par
+\ch@ckobl{journalname}{Noname}
+\ch@ckobl{title}{A title should be given}
+\ch@ckobl{author}{Name(s) and initial(s) of author(s) should be given}
+\ch@ckobl{institute}{Address(es) of author(s) should be given}
+\ch@ckobl{abstract}{Abstract is missing.}
+\begingroup
+%
+    \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
+    \def\@makefnmark{$^{\@thefnmark}$}%
+    \def\switch@fnmark{\def\thefootnote{\mathrm{\alph{footnote}}}}
+%
+ \def\lastand{\ifnum\value{inst}=2\relax
+                 \unskip{} \andname\
+              \else
+                 \unskip, \andname\
+              \fi}%
+ \def\and{\stepcounter{auth}\relax
+          \if@smartand
+             \ifnum\value{auth}=\value{inst}%
+                \lastand
+             \else
+                \unskip,
+             \fi
+          \else
+             \unskip,
+          \fi}%
+ \thispagestyle{empty}
+ \if@columns
+    \twocolumn[\@maketitle]%
+  \else
+    \@maketitle%
+ \fi
+ \global\@topnum\z@
+ \if@normhead
+    \@thanks
+ \else
+    \vspace{\@tempdima}
+    \addtocounter{page}{-1}
+    \if!\the\authorrunning!
+       \authorrunning{ }%
+    \fi
+ \fi
+ \if!\@mail!\else
+    \footnotetext[0]{\kern-\bibindent\mailname\
+    \ignorespaces\@mail}%
+ \fi
+%
+ \if@runhead
+    \ProcessRunnHead
+ \fi
+%
+ \endgroup
+ \setcounter{footnote}{0}
+ \global\let\thanks\relax
+ \global\let\maketitle\relax
+ \global\let\@maketitle\relax
+ \global\let\@thanks\@empty
+ \global\let\@author\@empty
+ \global\let\@title\@empty
+ \global\let\@subtitle\@empty
+ \global\let\title\relax
+ \global\let\author\relax
+ \global\let\and\relax}
+%
+\def\epj@@maketitle{\newpage
+ \normalfont
+ \if@normhead
+    \setbox\authrun=\vbox\bgroup
+ \fi
+ {\Large \sffamily\bfseries
+  \hrule\@height\logodepth\@width\z@
+  \pretolerance=10000
+  \rightskip=0pt plus 4cm
+ \if!\@headnote!\else
+   \noindent
+   {\LARGE\normalfont\itshape\ignorespaces\@headnote\par}\vskip 3.5mm
+ \fi
+  \noindent\ignorespaces
+  \@title \par}\vskip 11.24pt\relax
+ \authorfont
+ \if!\@subtitle!\else
+   {\large\sffamily\bfseries
+   \pretolerance=10000
+   \rightskip=0pt plus 3cm
+   \noindent\ignorespaces\@subtitle \par}\vskip 11.24pt
+ \fi
+ \lineskip .5em
+ \switch@fnmark
+ \def\@makefnmark{$^{\mathrm\@thefnmark}$}%
+ \protected@xdef\@thanks{\@thanks\protect\switch@fnmark}%
+ \setbox0=\vbox{\setcounter{auth}{1}\def\and{\stepcounter{auth} }%
+                \hfuzz=2\textwidth\def\thanks##1{}\@author}%
+ \setcounter{footnote}{0}%
+ \value{inst}=\value{auth}%
+ \setcounter{auth}{1}%
+ \rightskip=0pt plus 2cm
+ \noindent\ignorespaces\@author\vskip7.23pt
+ \rightskip=0pt\relax
+ \institutename
+ \vskip 12.85pt
+ \leftskip=1.5cm\rightskip=\leftskip
+ \vskip 12.85pt
+ {\topsep=0pt\partopsep=0pt\parsep=0pt\itemsep=0pt\relax
+  \def\pacsstart##1##2{##1\hskip5pt plus2ptminus2pt##2}%
+  \def\and##1##2{\unskip\ -- ##1\hskip5pt plus2ptminus2pt##2}%
+  \trivlist\item[\hskip\labelsep
+  {\sffamily\bfseries\abstractname}]%
+  \leftskip=1.5cm\rightskip=\leftskip
+  \small
+  \@abstract
+  \endtrivlist}%
+ \if@normhead
+    \egroup % end of header box
+    \@tempdima=\headerboxheight
+    \advance\@tempdima by-\ht\authrun
+    \ifdim\@tempdima>0pt
+       \vrule width0pt height\@tempdima
+    \fi
+    \unvbox\authrun
+    \global\@minipagetrue
+    \global\everypar{\global\@minipagefalse\global\everypar{}}
+ \else
+    \typeout{\the\c@auth\space author names and}
+    \typeout{\the\c@inst\space institutes processed}
+    \global\@tempdima=\pagetotal
+    \global\advance\@tempdima by22.47pt
+ \fi
+ \vskip22.47pt
+}
+%
+\def\epjabstract#1{\gdef\@abstract{#1}}
+%
+\def\epjrunnhead{\markboth{EPJ Web of Conferences}{\@session-title}}%
+\def\session-title#1{\gdef\@session-title{#1}}
+\def\@session-title{Give the exact title of the conference}
+
+%
+\AtEndOfClass{\let\ackname\@empty
+\let\if@runhead\iftrue
+\let\if@smartand\iftrue
+\let\@maketitle=\epj@@maketitle
+\let\maketitle=\epj@maketitle
+\let\ProcessRunnHead=\epjrunnhead
+\let\abstract=\epjabstract
+\def\@evenhead{\hfil\normalsize\leftmark\hfil}%
+\def\@oddhead{\hfil\normalsize\rightmark\hfil}%
+\def\sectcounterend{}
+\setlength\columnsep{8mm}
+\def\institutename{\par
+ \begingroup
+ \parindent=0pt
+ \parskip=0pt
+ \setcounter{inst}{1}%
+ \def\and{\par\stepcounter{inst}%
+ \if@instindent\hangindent\instindent\fi
+ \noindent
+ \hbox to\instindent{\hss$^{\theinst}$\enspace}\ignorespaces}%
+ \setbox0=\vbox{\def\thanks##1{}\@institute}
+ \ifnum\value{inst}>9\relax\setbox0=\hbox{$^{88}$\enspace}%
+                 \else\setbox0=\hbox{$^{8}$\enspace}\fi
+ \instindent=\wd0\relax
+ \ifnum\value{inst}=1\relax
+ \else
+   \setcounter{inst}{1}%
+   \if@instindent\hangindent\instindent\fi
+   \noindent
+   \hbox to\instindent{\hss$^{\theinst}$\enspace}\ignorespaces
+ \fi
+ \ignorespaces
+ \normalsize
+ \@institute\par
+ \endgroup}
+%
+\renewenvironment{thebibliography}[1]
+     {\section*{\refname
+        \@mkboth{\refname}{\refname}}
+      \list{\@biblabel{\@arabic\c@enumiv}\hfill}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \sloppy\clubpenalty4000\widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist}
+\def\section{\@startsection{section}{1}{\z@}%
+    {-21dd plus-4pt minus-4pt}{10.5dd plus 4pt
+     minus4pt}{\large\sffamily\bfseries}}
+\def\subsection{\@startsection{subsection}{2}{\z@}%
+    {-21dd plus-4pt minus-4pt}{10.5dd plus 4pt
+     minus4pt}{\normalsize\sffamily\bfseries}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+    {-21dd plus-4pt minus-4pt}{10.5dd plus 4pt
+     minus4pt}{\normalsize\sffamily}}
+\def\paragraph{\@startsection{subsubsection}{4}{\z@}%
+    {-21dd plus-4pt minus-4pt}{-1pt}{\normalsize\sffamily\bfseries}}
+\def\authorfont{\rmfamily}
+\def\leftlegendglue{\hfil}
+\def\vec#1{\ensuremath{\mathbf{#1}}}
+\journalname{EPJ}}
+%%
+%End of copy of file `epjCONF.clo'.
+\endinput

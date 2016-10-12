@@ -49,13 +49,13 @@ make_boxplot <- function(dat, ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
 }
 make_plots(make_boxplot, 'importances-perturb', 
     filepath=file.path('plots', 'importances'),
-    mar=c(3, 4.1, 1, 1), dat=dat.cyg)
+    mar=c(3, 5.1, 1, 1), dat=dat.cyg)
 make_plots(make_boxplot, 'importances-kages', 
     filepath=file.path('plots', 'importances'),
-    mar=c(3, 4.1, 1, 1), dat=dat.kages, label="KOI")
+    mar=c(3, 5.1, 1, 1), dat=dat.kages, label="KOI")
 make_plots(make_boxplot, 'importances-hares', 
     filepath=file.path('plots', 'importances'),
-    mar=c(3, 4.1, 1, 1), dat=dat.hares, label="Hare and Hound")
+    mar=c(3, 5.1, 1, 1), dat=dat.hares, label="Hares")
 
 plot_cov <- function(dat, ..., text.cex=1) {
     col.pal <- colorRampPalette(c(blue, 'white', red))(1000)

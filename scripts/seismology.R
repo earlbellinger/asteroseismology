@@ -14,6 +14,28 @@ fwhm_conversion <- (2*sqrt(2*log(2)))
 
 dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
 
+labs <- list(
+    Dnu             = bquote(Delta*nu/mu*Hz), 
+    Dnu0            = bquote(Delta*nu[0]/mu*Hz), 
+    dnu02           = bquote(delta*nu[0*","*2]/mu*Hz), 
+    r02             = bquote(r[0*","*2]), 
+    r01             = bquote(r[0*","*1]), 
+    dnu13           = bquote(delta*nu[1*","*3]/mu*Hz), 
+    r13             = bquote(r[1*","*3]), 
+    r10             = bquote(r[1*","*0])
+)
+
+parse_freqs <- function(fname, gyre=F) {
+    if (gyre) {
+        freqs <- read.table(fname, skip=5, header=1)
+        data.frame(l=freqs$l, n=freqs$n_pg, n_p=freqs$n_p, n_g=freqs$n_g,
+            nu=freqs$Re.freq., E=freqs$E_norm)
+    } else {
+        #read.table(fname, col.names=c('l', 'n', 'nu'))
+        read.table(fname, col.names=c('l', 'n', 'nu', 'E'))
+    }
+}
+
 ## build a data frame containing seismological calculations
 # freqs is a data frame with l, n, and nu
 # nu_max is the frequency of maximum oscillation power
@@ -26,6 +48,20 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     }
     freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
     ells <- unique(freqs$l)
+    
+    # remove mixed modes
+    mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
+    freqs <- freqs[freqs$n_g == 0,]
+    #l.0 <- freqs[freqs$l==0,]
+    #e.0 <- splinefun(l.0$nu, l.0$E)
+    #for (ell in ells) {
+    #    l.ell <- freqs[freqs$l == ell,]
+    #    mixed <- l.ell$E / e.0(l.ell$nu) > 10
+    #    if (any(mixed)) {
+    #        print(paste("Removing", length(mixed), "l =", ell, "mixed modes"))
+    #        freqs <- freqs[-which(freqs$nu == l.ell[mixed,]$nu),]
+    #    }
+    #}
     
     # get l=0
     seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, ...)
@@ -52,6 +88,19 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
             if (!is.null(ravg_median)) seis.DF <- cbind(seis.DF, ravg_median)
         }
     }
+    
+    # find frequencies of mixed modes 
+    if (nrow(mixed) > 0) {
+        print("nrow mixed > 0")
+        #print(mixed$nu)
+        dist_to_nu_max <- (mixed$nu - nu_max)**2
+        mixed <- data.frame(rbind(mixed$nu[order(dist_to_nu_max)]))
+        #print(mixed)
+        names(mixed) <- paste(1:ncol(mixed))
+        print(mixed)
+        seis.DF <- cbind(seis.DF, mixed)
+    }
+    print(seis.DF)
     return(seis.DF)
 }
 
@@ -63,11 +112,12 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     nus <- vals$nus
     seps <- vals$separations
     
+    if (is.null(nus) | is.null(freqs)) return(NULL)
     not.na <- complete.cases(nus) & complete.cases(seps)
     nus <- nus[not.na]
     seps <- seps[not.na]
     
-    if (length(seps)<2) {
+    if (length(seps)<5) {
         print(paste("Too few points for", sep_name))
         return(NULL)
     }
@@ -80,7 +130,13 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     if (!is.na(nu_max)) {
         fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
         gaussian_env <- dnorm(nus, nu_max, fwhm)
-        w.median <- weightedMedian(seps, gaussian_env)
+        ratios <- dnorm(nus, nu_max, fwhm)/dnorm(nu_max, nu_max, fwhm)
+        if (any(ratios < 0.05))
+            w.median <- weightedMedian(seps, gaussian_env)
+        else {
+            print(paste("All points too far from nu_max for", sep_name))
+            return(NULL)
+        }
         #int.weights <- floor(gaussian_env*10000)
         #new.nus <- rep(nus, int.weights)
         #new.seps <- rep(seps, int.weights)
@@ -98,7 +154,7 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
         seps=seps, nus=nus, 
         gaussian_env=gaussian_env, 
         w.median=result[sep_name], nu_max=nu_max, 
-        ylab=as.expression(get_label_nameless(sep_name)), 
+        ylab=as.expression(labs[sep_name]), 
         dnu.cl=dnu.cl, sep_name=sep_name, 
         freqs=freqs,
         ...)
@@ -387,7 +443,7 @@ seismology_plot <- function(seps, nus,
                     #seps), 
          col=col.pal, 
          pch=1)
-    abline(fit, lty=2)
+    #abline(fit, lty=2)
     abline(v=nu_max, lty=3)
     magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
@@ -402,10 +458,13 @@ echelle_plot <- function(freqs, large_sep=NA, ...,
     if (is.na(large_sep)) large_sep <- avg(Dnu, freqs)[[1]] 
     nus <- freqs$nu
     nus <- c(nus %% large_sep, (nus %% large_sep) + large_sep)
-    plot(nus, c(freqs$nu, freqs$nu), 
+    fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
+    gaussian_env <- dnorm(freqs$nu, nu_max, fwhm)
+    cexs <- rep(2 * gaussian_env / max(gaussian_env), 2)
+    plot(nus, rep(freqs$nu, 2), 
          tck=0, axes=FALSE, 
          pch=freqs$l+1, 
-         cex=0.5, 
+         cex=cexs, 
          col=dnu.cl[freqs$l+1], 
          xlab="", 
          ylab=expression(nu/mu*Hz),
@@ -424,7 +483,7 @@ echelle_plot <- function(freqs, large_sep=NA, ...,
     l_degs <- sort(unique(freqs$l))
     abline(v=large_sep, lty=3)
     legend("left", pch=l_degs+1, col=dnu.cl[l_degs+1], cex=0.8*text.cex, 
-           bty='n', inset=c(0.02, 0), legend=c(paste0("\u2113=", l_degs)))
+           inset=c(0.02, 0), legend=c(paste0("l=", l_degs)))
 }
 
 plot_power_spectrum <- function(freqs, nu_max, colors=0, ..., 
@@ -445,10 +504,10 @@ plot_power_spectrum <- function(freqs, nu_max, colors=0, ...,
     magaxis(1, labels=1, tcl=-0.25, cex.axis=text.cex, mgp=mgp-c(0.2, 0, 0), 
         family=font)
     legend("topleft", bty="n", col=col.pal, lty=1, cex=text.cex, legend=c(
-        expression("ℓ"==0),
-        expression("ℓ"==1),
-        expression("ℓ"==2),
-        expression("ℓ"==3)
+        expression("l"==0),
+        expression("l"==1),
+        expression("l"==2),
+        expression("l"==3)
     ))
     
     ## annotate Dnu0
@@ -544,5 +603,10 @@ plot_power_spectrum <- function(freqs, nu_max, colors=0, ...,
     arrows(left, left.pwr-0.15, right, length=0)
     text(left*0.99, left.pwr, cex=text.cex, 
         expression(delta*nu[1*","*3]), adj=c(0, NA))
+}
+
+## nu_max scaling relation
+nu_max_scaling <- function(M, R, Teff, Teff_sun=5777, nu_max_sun=3090) {
+    M * R**-2 * (Teff/Teff_sun)**(-1/2) * nu_max_sun
 }
 
