@@ -1,6 +1,11 @@
 # Asteroseismology
 Earl Bellinger's Ph.D. repository on forward and inverse problems in asteroseismology. 
 
+If any of these programs are useful to you, please consider citing
+
+Earl P. Bellinger & George C. Angelou et al., "Fundamental Parameters of Main-Sequence Stars in an Instant with Machine Learning," 2016 ApJ 830 31, http://adsabs.harvard.edu/abs/2016ApJ...830...31B
+
+
 ---
 
 ## Workflow 
