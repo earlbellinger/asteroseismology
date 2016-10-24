@@ -35,9 +35,9 @@ if [ -z ${2+x} ]; then
 fi
 
 ## Create a directory for the results and go there
-mkdir -p "$path"
+mkdir -p "$path" 
 cp "$1" "$path" 
-cd "$path"
+cd "$path" 
 
 logfile="fgong2freqs-gyre.log"
 #exec > $logfile 2>&1
@@ -62,7 +62,7 @@ echo "
 /
 
 &constants
-    G_GRAVITY = 6.67428d-8 ! 6.67408d-8
+    G_GRAVITY = 6.67408d-8 ! 6.67428d-8
 /
 
 &mode
@@ -85,7 +85,7 @@ echo "
     freq_units = 'ACOUSTIC_CUTOFF'
     freq_min = 0.01
     freq_max = 1
-    n_freq = 100
+    n_freq = 1000
 /
 
 &shoot_grid
@@ -118,8 +118,8 @@ Dnu=$(Rscript Dnu.R)
 ## Calculate nu_max-5*Dnu and nu_max+5*Dnu
 lower=$(echo "$numax - 8 * $Dnu" | bc -l)
 upper=$(echo "$numax + 8 * $Dnu" | bc -l)
-above=$(echo "$lower > 0.1" | bc -l)
-lower=$([ $above == 1 ] && echo "$lower" || echo "0.1")
+above=$(echo "$lower > 3" | bc -l)
+lower=$([ $above == 1 ] && echo "$lower" || echo "3")
 
 echo "Searching between $lower and $upper"
 
@@ -191,20 +191,20 @@ echo "
 /
 
 &shoot_grid
-	op_type = 'RESAMP_DISPERSION'	! Resample the grid based on the local dispersion relation
-	alpha_osc = 20			! At least alpha points per oscillatory wavelength
-	alpha_exp = 5			! At least alpha points per exponential 'wavelength'
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha points per exponential 'wavelength'
 /
 
 &shoot_grid
-	op_type = 'RESAMP_CENTER'	! Resample the grid at the center
-	n = 20				! At least n points in the evanescent region
+    op_type = 'RESAMP_CENTER'    ! Resample the grid at the center
+    n = 20                ! At least n points in the evanescent region
 /
 
 &recon_grid
-	op_type = 'RESAMP_DISPERSION'	! Resample the grid based on the local dispersion relation
-	alpha_osc = 10			! At least alpha points per oscillatory wavelength
-	alpha_exp = 3			! At least alpha point per exponential 'wavelength'
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha point per exponential 'wavelength'
 /
 
 &output

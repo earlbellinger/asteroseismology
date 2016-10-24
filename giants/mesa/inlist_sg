@@ -24,7 +24,7 @@
       use_Type2_opacities = .true.
       cubic_interpolation_in_Z = .true.
       
-      max_years_for_timestep = 1d8
+      max_years_for_timestep = -1
       min_timestep_limit = 1d-12
       mesh_delta_coeff = 1
       max_allowed_nz = 30000
@@ -80,7 +80,7 @@
       
       x_ctrl(1) = -3
       Teff_lower_limit = 5000
-      max_age = 15e9
+      ! max_age = 15e9
       max_model_number = 1000000
       max_num_profile_models = -1
       

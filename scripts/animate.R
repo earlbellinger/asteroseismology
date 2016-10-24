@@ -10,7 +10,7 @@ library(data.table)
 source(file.path('/', 'scratch', 'seismo', 'bellinger',
     'asteroseismology', 'scripts', 'seismology.R'))
 
-log_dir <- 'LOGS'
+log_dir <- 'LOGS_SG'
 ev.DF <- read.table(file.path(log_dir, 'history.data'), header=TRUE, skip=5)
 logs <- list.files(log_dir)
 
@@ -30,8 +30,9 @@ get_freqs <- function(model_number) {
     freq_file <- freq_files[idx]
     #prof_file <- prof_files[idx]
     #parse_freqs(file.path(freqs_dir, freq_file), gyre=1)
-    read.table(file.path(log_dir, freq_file), 
-        col.names=c('l', 'n', 'nu', 'E'))
+    #read.table(file.path(log_dir, freq_file), 
+    #    col.names=c('l', 'n', 'nu', 'E'))
+    parse_freqs(file.path(log_dir, freq_file), gyre=T)
 }
 
 collapse_freqs <- function(model_number) {

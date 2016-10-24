@@ -6,8 +6,8 @@
 
 library(magicaxis)
 library(parallelMap)
-library(akima)
-library(RColorBrewer)
+#library(akima)
+#library(RColorBrewer)
 source(file.path('..', '..', 'scripts', 'seismology.R'))
 
 separations <- function(filename) {

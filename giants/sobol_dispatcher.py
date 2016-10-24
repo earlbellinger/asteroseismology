@@ -52,6 +52,10 @@ def main(arguments):
                         default=[0, 0, 0, 0, 10**-3, 10**-5], 
                         type=list,
                         help='consider as 0 if <= this value')
+    parser.add_argument('--diffusion_cutoff', 
+                        default=1.5, 
+                        type=float,
+                        help='set D=0 for M>diffusion_cutoff')
     parser.add_argument('-c', '--cpu', default=0, type=str,
                         help='machine to run the job on')
     args = parser.parse_args(arguments)
@@ -63,11 +67,13 @@ def main(arguments):
             ranges[i] = np.log10(ranges[i])
     print(ranges)
     dispatch(ranges=ranges, N=args.N, logs=args.logs, threshold=args.threshold,
+        diffusion_cutoff=args.diffusion_cutoff, 
         directory=args.directory, light=args.light, remove=args.remove,
         skip=args.skip, parallel=args.parallel, nice=args.nice, 
         memory=args.memory, cpu=args.cpu)
 
-def dispatch(ranges, N, logs, threshold, directory, light=0, remove=0, skip=0, 
+def dispatch(ranges, N, logs, threshold, diffusion_cutoff, 
+             directory, light=0, remove=0, skip=0, 
              parallel=r"$OMP_NUM_THREADS", nice=0, memory=0, cpu=0):
     shift = ranges[:,0]
     scale = np.array([(b-a) for a,b in ranges])
@@ -81,6 +87,7 @@ def dispatch(ranges, N, logs, threshold, directory, light=0, remove=0, skip=0,
         for j, val in enumerate(vals):
             if vals[j] <= threshold[j] or np.isnan(vals[j]):
                 vals[j] = 0
+        if vals[0] >= diffusion_cutoff: vals[-1] = 0 # if M>1.5 then D=0
         bash_cmd = "maybe_sub.sh %s%s%s-p %d ./dispatch.sh -d %s "\
             "-M %.6f -Y %.6f -Z %.6f -a %.6f -o %.6f -D %.6f %s%s"%\
             tuple(["-n " if nice else ""] + 

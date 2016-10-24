@@ -8,7 +8,7 @@ source(file.path(dirname(sys.frame(1)$ofile), 'utils.R'))
 invisible(library(matrixStats))
 invisible(library(magicaxis))
 invisible(library(RColorBrewer))
-invisible(library(mblm))
+#invisible(library(mblm))
 
 fwhm_conversion <- (2*sqrt(2*log(2)))
 
@@ -49,11 +49,15 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
     ells <- unique(freqs$l)
     
+    if (!'n_g' %in% names(freqs))
+        freqs <- cbind(freqs, data.frame(n_g=0))
+    
     # remove mixed modes
-    mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
+    mixed.1 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
+    mixed.2 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 2,]
     freqs <- freqs[freqs$n_g == 0,]
-    #l.0 <- freqs[freqs$l==0,]
-    #e.0 <- splinefun(l.0$nu, l.0$E)
+    #ell.0 <- freqs[freqs$l==0,]
+    #e.0 <- splinefun(ell.0$nu, ell.0$E)
     #for (ell in ells) {
     #    l.ell <- freqs[freqs$l == ell,]
     #    mixed <- l.ell$E / e.0(l.ell$nu) > 10
@@ -89,28 +93,67 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         }
     }
     
+    ## interpolate echelle diagram
+    ell.0 <- freqs[freqs$l == 0,]
+    #central.nu <- ell.0$nu[find_closest(ell.0$nu, nu_max)$x]
+    #echelle.center <- seis.DF$Dnu0 / 2
+    #modded.nu <- central.nu %% seis.DF$Dnu0
+    #central.offset <- (modded.nu - echelle.center)
+    #centered.nus <- if (central.offset > 0) ell.0$nu - central.offset
+    #else ell.0$nu + abs(central.offset)
+    #echelle <- splinefun(centered.nus, centered.nus %% seis.DF$Dnu0)
+    
     # find frequencies of mixed modes 
-    if (nrow(mixed) > 0) {
-        print("nrow mixed > 0")
-        #print(mixed$nu)
-        dist_to_nu_max <- (mixed$nu - nu_max)**2
-        mixed <- data.frame(rbind(mixed$nu[order(dist_to_nu_max)]))
-        #print(mixed)
-        names(mixed) <- paste(1:ncol(mixed))
-        print(mixed)
-        seis.DF <- cbind(seis.DF, mixed)
+    for (mm.ell in 1:2) {
+        mixed <- if (mm.ell == 1) mixed.1 else mixed.2
+        if (nrow(mixed) > 0) {
+            #print("nrow mixed > 0")
+            
+            # only accept one mode between adjacent l=0s
+            nus <- c() # mixed$nu
+            for (ii in 1:nrow(ell.0)) {
+                # pick the one with the lowest inertia
+                candidates <- mixed[mixed$nu >= ell.0$nu[ii] & 
+                                    mixed$nu <= ell.0$nu[ii+1],]
+                nus <- c(nus, candidates[which.min(candidates$E),]$nu)
+            }
+            
+            #print(mixed$nu)
+            dist_to_nu_max <- (nus - nu_max)**2
+            mixed <- data.frame(rbind(nus[order(dist_to_nu_max)]))
+            #print(mixed)
+            names(mixed) <- paste0('nu_cross.', mm.ell, '.', 1:ncol(mixed))
+            #print(mixed)
+            seis.DF <- cbind(seis.DF, mixed)
+            
+            ## interpolate within echelle diagram and save distance
+            #mixed.offset <- if (central.offset > 0) mixed - central.offset
+            #else mixed + abs(central.offset)
+            #echelle.dist <- mixed.offset %% seis.DF$Dnu0 - echelle(mixed.offset)
+            #names(echelle.dist) <- paste0('echelle.', mm.ell, '.', 
+            #    1:ncol(echelle.dist))
+            #seis.DF <- cbind(seis.DF, echelle.dist)
+        }
     }
-    print(seis.DF)
+    #print(seis.DF)
     return(seis.DF)
 }
 
 get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
+    
     result <- NULL
     
-    vals <- get_separations(sep_name, freqs, l_deg)
+    vals <- get_separations(sep_name, freqs, l_deg, nu_max)
     
     nus <- vals$nus
     seps <- vals$separations
+    
+    #if (sep_name == "dnu") {
+    #    if (is.na(Dnu)) Dnu <- get_average("Dnu", freqs, 0)$Dnu0
+    #    keep <- abs(seps) < Dnu/2
+    #    nus <- nus[keep]
+    #    seps <- seps[keep]
+    #}
     
     if (is.null(nus) | is.null(freqs)) return(NULL)
     not.na <- complete.cases(nus) & complete.cases(seps)
@@ -162,18 +205,24 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     result
 }
 
-get_separations <- function(sep_name, freqs, l_deg) {
+get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
     if (sep_name == 'Dnu') {
         # Dnu(n, l) = nu_[n, l] - nu_[n-1, l]
         nus <- sort(freqs[freqs$l==l_deg,]$nu)
-        list(nus=nus[-1], separations=diff(nus))
+        Dnus <- diff(nus)
+        list(nus=nus[-1], separations=Dnus)
     
     } else if (sep_name == 'dnu') {
         # dnu(n, l) = nu_[n, l] - nu_[n-1, l+2]
         x <- freqs[freqs$l==l_deg,]$nu
         y <- freqs[freqs$l==l_deg+2,]$nu
         indices <- find_closest(x, y)
-        list(nus=x[indices$x], separations=x[indices$x]-y[indices$y])
+        nus <- x[indices$x]
+        separations <- x[indices$x]-y[indices$y]
+        Dnu <- get_average("Dnu", freqs, 0, nu_max)$Dnu0
+        rem <- abs(separations) > Dnu / 2
+        separations[rem] <- NA
+        list(nus=nus, separations=separations)
     
     } else if (sep_name == 'r_sep') { 
         # r(l, n) = dnu(n, l) / Dnu(n+l, 1-l)
@@ -447,8 +496,9 @@ seismology_plot <- function(seps, nus,
     abline(v=nu_max, lty=3)
     magaxis(side=2:4, family=font, tcl=0.25, labels=c(1,0,0), mgp=mgp, 
         las=1, cex.axis=text.cex)
-    par(mgp=mgp-c(0.2, 0.2, 0))
-    magaxis(side=1, family=font, tcl=0.25, labels=1, mgp=mgp-c(0.2, 0.2, 0), 
+    new.mgp <- sapply(mgp-c(0.2, 0.2, 0), function(x) max(0,x))
+    par(mgp=new.mgp)
+    magaxis(side=1, family=font, tcl=0.25, labels=1, mgp=new.mgp, 
         las=1, cex.axis=text.cex)
     title(xlab=expression("Frequency" ~ nu / mu*Hz))
 }
@@ -478,7 +528,8 @@ echelle_plot <- function(freqs, large_sep=NA, ...,
     ticks <- axTicks(1)
     ticks <- ticks[ticks < large_sep]
     ticks <- c(ticks, ticks+large_sep)
-    axis(1, tcl=0.25, mgp=mgp-c(0, 0.2, 0), cex.axis=text.cex, tick=F, 
+    new.mgp <- sapply(mgp-c(0, 0.2, 0), function(x) max(0,x))
+    axis(1, tcl=0.25, mgp=new.mgp, cex.axis=text.cex, tick=F, 
         at=ticks, labels=ticks%%large_sep)
     l_degs <- sort(unique(freqs$l))
     abline(v=large_sep, lty=3)
@@ -501,7 +552,8 @@ plot_power_spectrum <- function(freqs, nu_max, colors=0, ...,
          col=adjustcolor('black', alpha=0.5))
     #points(nus, power/max(power), type='h', lwd=2,
     #    col=adjustcolor(col.pal[freqs$l+1], alpha=0.25))
-    magaxis(1, labels=1, tcl=-0.25, cex.axis=text.cex, mgp=mgp-c(0.2, 0, 0), 
+    new.mgp <- sapply(mgp-c(0.2, 0.2, 0), function(x) max(0,x))
+    magaxis(1, labels=1, tcl=-0.25, cex.axis=text.cex, mgp=new.mgp, 
         family=font)
     legend("topleft", bty="n", col=col.pal, lty=1, cex=text.cex, legend=c(
         expression("l"==0),

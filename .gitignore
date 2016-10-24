@@ -1,10 +1,11 @@
-forward/simulations/**
-forward/simulations-**/**
-forward/simulations*
+**/simulations/**
+**/simulations-**/**
+**/simulations*
+**/testing/**
+
 forward/procyonA/**
 forward/procyonB/**
 inverse/perturb/**
-giants
 
 **/M=**
 **/photos/**
@@ -20,6 +21,9 @@ giants
 **.dat
 **.1
 **.o
+**.mod
+**.avi
+**.mp4
 
 **~
 

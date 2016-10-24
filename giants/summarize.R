@@ -161,7 +161,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
     
     PMS_age <- min(track['age'])
     track['age'] <- track['age'] - PMS_age # remove PMS age 
-    tams_age <- with(track[track['X_c']>=(X_c.lim/10),],
+    tams_age <- with(track[track['X_c']>=(X_c.lim/100),],
         splinefun(X_c, age)(X_c.lim))
     
     tau_MS <- track['age']/tams_age
@@ -427,7 +427,6 @@ if (length(args)>0) {
     print(directory)
     dname <- dirname(directory)
     parsed_dir <- parse_dir(directory, dname=dname)
-    print('hi')
     DF <- unique(parsed_dir)
     #DF <- DF[complete.cases(DF),]
     DF <- DF[order(DF$age),]

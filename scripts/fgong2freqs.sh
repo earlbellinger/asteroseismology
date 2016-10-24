@@ -80,7 +80,8 @@ osc:
        0,     -1,      0,     -1,  @
 cst:
   cgrav
-  6.67408e-8  @
+  6.67408e-8 @
+  6.67428e-8 
 int:
   iplneq,iturpr,icow,alb,
         ,      ,    ,   , @

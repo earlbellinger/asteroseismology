@@ -56,7 +56,7 @@ def load_fgong(filename, N=16):
 def kernel(ell, nu, eig, fgong):
     """Returns a dict of structural kernels.  I have tried to make this as
     notationally similar to Gough & Thompson (1991) as possible.
-
+    
     Parameters
     ----------
     ell: int
@@ -68,7 +68,7 @@ def kernel(ell, nu, eig, fgong):
     fgong: dict
         Stellar model data in a dictionary, as per load_fgong()
         above.
-
+    
     Returns
     -------
     kernel: np.array, length N
@@ -80,7 +80,7 @@ def kernel(ell, nu, eig, fgong):
     L = np.sqrt(L2)
     M, R = fgong['glob'][:2]                 # mass and radius from FGONG
     sigma = np.sqrt(R**3/G/M)*omega          # dimensionless frequency
-
+    
     ## unpack fgong file (c.f. page 6 section 2.1.3 of above doc)
     r = fgong['var'][::-1,0]                 # radial co-ordinate
     m = M*np.exp(fgong['var'][::-1,1])       # mass co-ordinate
@@ -91,9 +91,9 @@ def kernel(ell, nu, eig, fgong):
     Y = 1 - fgong['var'][::-1,5] - fgong['var'][::-1,16] # helium abundance
     
     # Gamma_1,Y = ( partial ln Gamma_1 / partial ln Y ) _ {P, rho} etc
-    Gamma_1rho = fgong['var'][::-1,25]
-    Gamma_1p = fgong['var'][::-1,26]
-    Gamma_1Y = fgong['var'][::-1,27]
+    #Gamma_1rho = fgong['var'][::-1,25]
+    #Gamma_1p = fgong['var'][::-1,26]
+    #Gamma_1Y = fgong['var'][::-1,27]
     
     ## equilibrium model (c.f. ADIPLS - The Aarhus adi. osc. pack., section 2.1)
     A = fgong['var'][::-1,14] # 1/Gamma_1 (dln p / dln r) - (dln rho / dln r)
@@ -177,57 +177,57 @@ def kernel(ell, nu, eig, fgong):
     # where psi is obtained by solving
     # d[psi(r)]/dr - 4 pi G rho r^2 int_r^R rho/(r^2 P) psi dr = -z(r)
     # z(r) = K_rho_Gamma1 + (Gamma_1,p + Gamma_1,rho) K_Gamma1_rho
-    K_Y_u = Gamma_1Y * K_Gamma1_rho
-
-    z = K_rho_Gamma1 + ( Gamma_1p + Gamma_1rho ) * K_Gamma1_rho
-    
-    rho_spl = UnivariateSpline(r, rho)
-    P_spl = UnivariateSpline(r, P)
-    z_spl = UnivariateSpline(r, z)
-    
-    drho = rho_spl.derivative()
-    dz = z_spl.derivative()
-    
-    def bvp(t, psi):
-        # psi'' + a(r) psi' + b(r) psi = f(r)
-        # where
-        # a(r) =  P/rho (r rho' - 2 rho)
-        # b(r) = -P/rho [ 1 / ( 4 pi G r^2 rho ) ]
-        # f(r) =  P/rho ( z r rho' - rho r z' + 2 z rho )
-        # rearrange into y_1' = y_2
-        #                y_2' = f(t) - a(t) y_2 - b(t) psi 
-        
-        # remesh onto variable x from r
-        rhot = rho_spl(t) 
-        Pt = P_spl(t) 
-        zt = z_spl(t) 
-        
-        # differentiate with respect to x
-        drhot = drho(t) 
-        dzt = dz(t) 
-        
-        # calculate variables on mesh x
-        #Prhot = Pt / rhot
-        #at = Prhot * ( t * rhot - 2 * rhot )
-        #bt = - Prhot * ( 1 / ( 4 * np.pi * G * t**2 * rhot ) )
-        #ft = Prhot * ( zt * t * drhot - \
-        #               rhot * x * dzt + \
-        #               2 * zt * rhot )
-        
-        drhorho = drhot / rhot
-        
-        at = drhorho - 2 / t
-        bt = 4 * np.pi * G * t * rhot**2 / Pt
-        ft = zt * (2/t + drhorho) - dzt
-        
-        return np.vstack(( psi[1], 
-                           ft - at * psi[1] - bt * psi[0] ))
-    
-    result = solve_bvp(bvp, 
-        lambda ya, yb: np.array([ ya[0]-1, yb[0]-1 ]), 
-        r, 
-        np.array([ np.ones(len(r)), np.ones(len(r)) ]), 
-        max_nodes=1000000)#, tol=1e-5)
+#    K_Y_u = Gamma_1Y * K_Gamma1_rho
+#
+#    z = K_rho_Gamma1 + ( Gamma_1p + Gamma_1rho ) * K_Gamma1_rho
+#    
+#    rho_spl = UnivariateSpline(r, rho)
+#    P_spl = UnivariateSpline(r, P)
+#    z_spl = UnivariateSpline(r, z)
+#    
+#    drho = rho_spl.derivative()
+#    dz = z_spl.derivative()
+#    
+#    def bvp(t, psi):
+#        # psi'' + a(r) psi' + b(r) psi = f(r)
+#        # where
+#        # a(r) =  P/rho (r rho' - 2 rho)
+#        # b(r) = -P/rho [ 1 / ( 4 pi G r^2 rho ) ]
+#        # f(r) =  P/rho ( z r rho' - rho r z' + 2 z rho )
+#        # rearrange into y_1' = y_2
+#        #                y_2' = f(t) - a(t) y_2 - b(t) psi 
+#        
+#        # remesh onto variable x from r
+#        rhot = rho_spl(t) 
+#        Pt = P_spl(t) 
+#        zt = z_spl(t) 
+#        
+#        # differentiate with respect to x
+#        drhot = drho(t) 
+#        dzt = dz(t) 
+#        
+#        # calculate variables on mesh x
+#        #Prhot = Pt / rhot
+#        #at = Prhot * ( t * rhot - 2 * rhot )
+#        #bt = - Prhot * ( 1 / ( 4 * np.pi * G * t**2 * rhot ) )
+#        #ft = Prhot * ( zt * t * drhot - \
+#        #               rhot * x * dzt + \
+#        #               2 * zt * rhot )
+#        
+#        drhorho = drhot / rhot
+#        
+#        at = drhorho - 2 / t
+#        bt = 4 * np.pi * G * t * rhot**2 / Pt
+#        ft = zt * (2/t + drhorho) - dzt
+#        
+#        return np.vstack(( psi[1], 
+#                           ft - at * psi[1] - bt * psi[0] ))
+#    
+#    result = solve_bvp(bvp, 
+#        lambda ya, yb: np.array([ ya[0]-1, yb[0]-1 ]), 
+#        r, 
+#        np.array([ np.ones(len(r)), np.ones(len(r)) ]), 
+#        max_nodes=1000000)#, tol=1e-5)
     
     
     
@@ -311,24 +311,24 @@ def kernel(ell, nu, eig, fgong):
     #    r, [ np.ones(len(r)), np.zeros(len(r)) ], 
     #    max_nodes=1e6)#, tol=1e-5)
     
-    print(result)
-    psi = result.sol(r)[0] #interp1d(result['x'], result['y'][0])(r)
-    print('psi', psi)
+    #print(result)
+    #psi = result.sol(r)[0] #interp1d(result['x'], result['y'][0])(r)
+    #print('psi', psi)
     
     #result = least_squares(resid, np.ones(len(r)))
     #print(result)
     #psi = result['x']
     #psi = minimize(sqdiff, np.ones(len(r)), method='Nelder-Mead')['x']
     
-    K_u_Y = P * UnivariateSpline(P**-1 * psi, r).derivative()(r) \
-        + Gamma_1p * K_Gamma1_rho
+#    K_u_Y = P * UnivariateSpline(P**-1 * psi, r).derivative()(r) \
+#        + Gamma_1p * K_Gamma1_rho
     
     
     return { 
         ('c',      'rho'): (K_c_rho,      K_rho_c2),
         ('c2',     'rho'): (K_c2_rho,     K_rho_c2),
-        ('Gamma1', 'rho'): (K_Gamma1_rho, K_rho_Gamma1),
-        ('u',      'Y'):   (K_u_Y,        K_Y_u),
-        ('psi', 'psi'):    (psi,          psi)
+        ('Gamma1', 'rho'): (K_Gamma1_rho, K_rho_Gamma1)
+        #('u',      'Y'):   (K_u_Y,        K_Y_u),
+        #('psi', 'psi'):    (psi,          psi)
     }
 

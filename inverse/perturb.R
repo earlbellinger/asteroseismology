@@ -7,6 +7,8 @@ source(file.path('..', 'scripts', 'seismology.R'))
 library(parallel)
 library(parallelMap)
 
+#options(warn=1)
+
 dir.create('perturb', showWarnings=FALSE)
 
 speed_of_light = 299792 # km/s
@@ -16,7 +18,8 @@ n_perturbations = 10000
 perturb <- function(star, obs_data_file, freqs_data_file, n_perturbations) {
     obs_data <<- read.table(obs_data_file, header=TRUE) 
     freqs <<- read.table(freqs_data_file, header=TRUE)
-    seis.DF <- seismology(freqs, obs_data[obs_data$name == 'nu_max',]$value, 
+    nu_max <<- obs_data[obs_data$name == 'nu_max',]$value
+    seis.DF <- seismology(freqs, nu_max, 
         outf=star, filepath=file.path('plots', 'perturb')) 
     cols <<- length(seis.DF)
     start.time <- proc.time()
@@ -87,8 +90,9 @@ process_star <- function(star, star_dir, out_dir="perturb") {
 
 ## Perturb every star 10k times and save the results
 parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
-process_dir(file.path("data", "procyon"))
+process_dir(file.path("data", "Dnu"))
 stop()
+process_dir(file.path("data", "procyon"))
 process_dir(file.path("data", "legacy"))
 process_dir(file.path("data", "kages"))
 process_dir(file.path("data", "basu"))

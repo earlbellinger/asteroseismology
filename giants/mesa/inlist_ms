@@ -111,10 +111,9 @@
       
       ! main sequence
       x_ctrl(1) = -1d99
-      x_ctrl(2) = -1d99
       xa_central_lower_limit_species(1) = 'h1'
-      xa_central_lower_limit(1) = 1d-1
-      max_age = 15e9
+      xa_central_lower_limit(1) = 1d-2
+      ! max_age = 15e9
       max_model_number = 1000000
       max_num_profile_models = -1
       

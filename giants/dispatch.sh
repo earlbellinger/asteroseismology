@@ -3,6 +3,32 @@
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
+#### Department of Astronomy, Yale University 
+
+################################################################################
+### GLOBAL VARIABLES ###########################################################
+################################################################################
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+num_process=128 # try to get at least this many profile files 
+init_mesh_delta_coeff=1 # the number in the inlist file 
+mesh_delta_coeff=$init_mesh_delta_coeff
+ms_mesh_delta=0.4 # the mesh spacing we will use on the main sequence
+max_years_for_timestep=-1 # dt_max 
+min_years_for_timestep=100000
+profile_interval=1 # how often a profile should be output 
+inlist='inlist_pms'
+
+### Log files 
+pmslog="pms.log" 
+mslog="ms.log"
+sglog="sg.log"
+logfile="mesa.log"
+
+### Success and failure conditions 
+msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
+pmsuccess="termination code: Lnuc_div_L_zams_limit"
+meshfail="mesh_plan problem"
+convfail="terminated evolution: convergence problems"
 
 ################################################################################
 ### PARSE COMMAND LINE ARGUMENTS ###############################################
@@ -75,31 +101,6 @@ if [ $HELP -gt 0 ]; then
     echo
     exit
 fi
-
-################################################################################
-### GLOBAL VARIABLES ###########################################################
-################################################################################
-scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-num_process=75 # try to get at least this many profile files 
-init_mesh_delta_coeff=1 # the number in the inlist file 
-mesh_delta_coeff=$init_mesh_delta_coeff
-ms_mesh_delta=0.4 # the mesh spacing we will use on the main sequence
-max_years_for_timestep=-1 # dt_max 
-min_years_for_timestep=100000
-profile_interval=1 # how often a profile should be output 
-inlist='inlist_pms'
-
-### Log files 
-pmslog="pms.log" 
-mslog="ms.log"
-sglog="sg.log"
-logfile="mesa.log"
-
-### Success and failure conditions 
-msuccess="termination code: max_age\|termination code: xa_central_lower_limit"
-pmsuccess="termination code: Lnuc_div_L_zams_limit"
-meshfail="mesh_plan problem"
-convfail="terminated evolution: convergence problems"
 
 ################################################################################
 ### HELPER FUNCTIONS ###########################################################
@@ -185,12 +186,13 @@ run() { # logs_dir  final_mod
     change 'write_profiles_flag' '.false.' '.true.'
     ./rn
     fix_mod $final_mod
-    ls $logs_dir/*.GYRE | xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-        "echo start {}; fgong2freqs-gyre.sh {}; echo end {}"
+    Rscript $scriptdir/model_select.R $num_process $logs_dir | 
+        xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
+            "echo start {}; timeout 3600 fgong2freqs-gyre.sh {}; echo end {}"
 }
 
 ################################################################################
-### INITIALIZATION AND PRE-MAIN SEQUENCE #######################################
+### INITIALIZATION AND EVOLUTION ###############################################
 ################################################################################
 ## Make directory and copy over simulation files 
 expname="M=$M""_""Y=$Y""_""Z=$Z""_""alpha=$alpha"\
@@ -202,23 +204,22 @@ cd "$dirname"
 cp -r $scriptdir/mesa/* .
 rm -rf LOGS/*
 
+# pre-main sequence
 set_params
 ./rn
 fix_mod "zams.mod"
 
-################################################################################
-### MAIN SEQUENCE ##############################################################
-################################################################################
+# main sequence
 change_inlists "inlist_ms"
 run "LOGS_MS" "tams.mod" "history-ms.data"
 
-################################################################################
-### SUB-GIANT ##################################################################
-################################################################################
+# sub-giant
 change_inlists "inlist_sg"
 run "LOGS_SG"
 
-## Process pulsation files with GYRE 
-#ls LOGS/*.FGONG | xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-#    "echo start {}; fgong2freqs.sh {}; echo end {}"
+# summarize and be done 
+cd ../..
+Rscript summarize.R "$dirname"
+cleanup
 
+# fin.

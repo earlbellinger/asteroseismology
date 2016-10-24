@@ -147,7 +147,7 @@ def weighted_avg_and_std(values, weights):
 def gumr(xn, xu):
     z2 = np.trunc(np.log10(xu))+1
     z1 = np.around(xu/(10**z2), 3)
-    y1 = np.around(xn*10**(-z2), 2)
+    y1 = np.around(xn*10**(-z2), 3)
     value = y1*10**z2
     uncert = z1*10**z2
     return('%g'%value, '%g'%uncert)
@@ -396,4 +396,6 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 #for directory in [f for f in os.listdir(perturb_dir) 
 #                  if not re.match(perturb_pattern, f)]:
 #    process_dir(directory)
-process_dir('procyon')
+process_dir('Dnu')
+#process_dir('legacy')
+#process_dir('procyon')
