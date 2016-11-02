@@ -1,6 +1,5 @@
 
  2  'ModelS-freqs.amdl' @
- 4  'ModelS-freqs.amde' @
  9  'ModelS-freqs.log'  @
  11 'ModelS-freqs.agsm' @
  4  'ModelS-freqs.amde' @
@@ -26,8 +25,8 @@ osc:
        0,     -1,      0,     -1,  @
 cst:
   cgrav
-  6.67408e-8  
-  6.67428e-8  @
+  6.67232e-8 @
+  6.67428e-8 
 int:
   iplneq,iturpr,icow,alb,
         ,      ,    ,   , @

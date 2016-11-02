@@ -76,6 +76,7 @@ y_latex = {
     "X_c": r"Core-hydrogen X$_{\mathrm{c}}$",
     "log_g": r"Surface gravity log g (cgs)", 
     "L": r"Luminosity L$/$L$_\odot$",
+    "Teff": r"Effective Temperature T$_{\mathrm{eff}}$/K",
     "mass_cc": r"Convective-core mass M$_{\mathrm{cc}}$"
 }
 
@@ -95,11 +96,12 @@ y_latex_short = {
     "X_c": r"X$_{\mathrm{c}}$",
     "log_g": r"log g", 
     "L": r"L$/$L$_\odot$",
+    "Teff": r"T$_{\mathrm{eff}}$/K",
     "mass_cc": r"M$_{\mathrm{cc}}$"
 }
 
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
-y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf']
+y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'Teff']
 
 def train_regressor(data, X_columns, y_show=y_init+y_curr):
     X = data.loc[:,X_columns]
@@ -334,6 +336,11 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         star_data = star_data.drop([i for i in star_data.columns 
             if re.search(exclude, i)], axis=1).dropna()
         
+        
+        #star_data = star_data.drop([i for i in data.columns 
+        #                            if re.search('Teff', i)], axis=1)
+        
+        
         if forest is None: # train the regressor
             X_columns = star_data.columns
             out = train_regressor(data, X_columns)
@@ -393,9 +400,9 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 ### Start ######################################################################
 ################################################################################
 #process_dir()
-#for directory in [f for f in os.listdir(perturb_dir) 
-#                  if not re.match(perturb_pattern, f)]:
-#    process_dir(directory)
-process_dir('Dnu')
+for directory in [f for f in os.listdir(perturb_dir) 
+                  if not re.match(perturb_pattern, f)]:
+    process_dir(directory)
+#process_dir('Dnu')
 #process_dir('legacy')
 #process_dir('procyon')

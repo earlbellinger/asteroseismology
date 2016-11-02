@@ -188,7 +188,7 @@ run() { # logs_dir  final_mod
     fix_mod $final_mod
     Rscript $scriptdir/model_select.R $num_process $logs_dir | 
         xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-            "echo start {}; timeout 3600 fgong2freqs-gyre.sh {}; echo end {}"
+            "echo start {}; fgong2freqs-gyre.sh {}; echo end {}"
 }
 
 ################################################################################

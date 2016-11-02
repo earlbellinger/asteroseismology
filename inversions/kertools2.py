@@ -1,7 +1,10 @@
 import numpy as np
+from numpy.linalg import inv
 from scipy.integrate import cumtrapz, simps, trapz, odeint, solve_bvp
 from scipy.optimize import least_squares #minimize
 from scipy.interpolate import interp1d, UnivariateSpline
+from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.special import sph_harm
 
 np.seterr(divide='ignore')
 
@@ -10,6 +13,9 @@ def integrate(y, x):
 
 def complement(y, x):
     return np.trapz(y, x) - integrate(y, x)
+
+def derivative(y, x):
+    return InterpolatedUnivariateSpline(x, y, k=2).derivative()(x)
 
 def load_fgong(filename, N=16):
     '''Given an FGONG file, returns a Python dictionary containing
@@ -75,7 +81,7 @@ def kernel(ell, nu, eig, fgong):
         The density or sound speed structure kernel.
     """
     omega = 2.*np.pi*nu                      # convert to cyclic frequency
-    G = 6.672e-8                             # gravitational constant
+    G = 6.67232e-8                           # gravitational constant
     L2 = ell*(ell+1)
     L = np.sqrt(L2)
     M, R = fgong['glob'][:2]                 # mass and radius from FGONG
@@ -91,15 +97,15 @@ def kernel(ell, nu, eig, fgong):
     Y = 1 - fgong['var'][::-1,5] - fgong['var'][::-1,16] # helium abundance
     
     # Gamma_1,Y = ( partial ln Gamma_1 / partial ln Y ) _ {P, rho} etc
-    #Gamma_1rho = fgong['var'][::-1,25]
-    #Gamma_1p = fgong['var'][::-1,26]
-    #Gamma_1Y = fgong['var'][::-1,27]
+    Gamma_1rho = fgong['var'][::-1,25]
+    Gamma_1P = fgong['var'][::-1,26]
+    Gamma_1Y = fgong['var'][::-1,27]
     
     ## equilibrium model (c.f. ADIPLS - The Aarhus adi. osc. pack., section 2.1)
     A = fgong['var'][::-1,14] # 1/Gamma_1 (dln p / dln r) - (dln rho / dln r)
-    A1 = (m/M)/(r/R)**3                      # fractional volume
+    A1 = (m/M)/(r/R)**3                       # fractional volume
     Vg = (G*m*rho)/(Gamma1*P*r)
-    drho_dr = -(Vg+A)*rho/r                  # density gradient
+    #drho_dr = -(Vg+A)*rho/r                  # density gradient
     
     ## unpack eigenfunction (c.f. page 7 of Notes on adi. osc. prog.)
     x = eig[:,0]                             # dimensionless radius (i.e. r/R)
@@ -109,32 +115,59 @@ def kernel(ell, nu, eig, fgong):
   # y4 = eig[:,4]                            # x^2 * d/dx (y_3 / x)
     
     xi_r = y1*R                              # radial component of eigenfunction
+    xi_h = y2*R/L2 if ell > 0 else xi_r*0.   # horiz. component of eigenfunction
     
-    dxi_r_dr = np.hstack((0., np.diff(xi_r)/np.diff(r)))
+    #dxi_r_dr = np.hstack((0., np.diff(y1)/np.diff(x)))
+    #drho_dr = np.hstack((0., np.diff(rho)/np.diff(r)))
+    drho_dr = derivative(rho, r)
+    dxi_r_dr = derivative(y1, x)
     
-    # chi is the "dilatation"
-    if ell == 0:
-        xi_h = 0.*xi_r 
-      # eta = G*m/r**3/omega**2
-        chi = Vg/x*(y1-sigma**2/A1/x*y2)
-    elif ell > 0:
-        xi_h = y2*R/L2
-      # eta = L2*G*m/r**3/omega**2
-        chi = Vg/x*(y1-y2*sigma**2/(A1*L2)-y3)
-    else:
-        raise ValueError('ell must be non-negative')
+    #print(dxi_r_dr)
     
     # most stellar models include the central point, at which the
     # numerical value of chi and drho_dr might be buggy.
-    chi[0] = 0.
+    dxi_r_dr[0] = 0.
     drho_dr[0] = 0.
     
-    S = np.trapz((xi_r**2+L2*xi_h**2)*rho*r**2, r)
+    # chi is the "dilatation"
+    #if ell == 0:
+    #    xi_h = 0.*xi_r 
+    #    eta = G*m/r**3/omega**2
+    #   chi = np.hstack((0, Vg[1:]/x[1:]*(y1[1:]-sigma**2/A1[1:]/x[1:]*y2[1:])))
+    #elif ell > 0:
+    #    xi_h = y2*R/L2
+    #    eta = L2*G*m/r**3/omega**2
+    #    chi = np.hstack((0, Vg[1:]/x[1:]*(y1[1:]-y2[1:]*sigma**2/(A1[1:]*L2)-y3[1:])))
+    #else:
+    #    raise ValueError('ell must be non-negative')
+    
+    
+    # eta = m_0 / r**3
+    #eta = xi_h #m_0 / r**3
+    
+    # chi ("dilatation") = (d(xi)/dr) + 2(xi)/r - l(l+1)*eta/r
+    chi = dxi_r_dr + np.hstack((0., 2*y1[1:]/x[1:])) #2*xi_r/r
+    if ell > 0:
+        chi -= np.hstack((0., y2[1:]/x[1:]))
+        #chi[0] = 3*dxi_r_dr[0] # Daniel Reese does this 
+    
+    
+    S = 1 / ( omega**2 * np.trapz((xi_r**2 + L2*xi_h**2) * rho * r**2, r) )
+    #if ell > 0:
+    #    S = np.trapz((y1**2 + L2*(y2/L2)**2) * rho * x**2, x)
+    #else:
+    #    S = np.trapz(y1**2 * rho * x**2, x)
+    
+    
+    #S = np.trapz((xi_r**2 + L2*eta**2)*rho*r**2, r)
+    #S = np.trapz((y1**2 + L2*eta**2)*rho*x**2, r)
     
     
     ### Calculate c, rho pair
     # c.f. Gough & Thompson 1991 equation (60)
-    K_c_rho = rho*cs2*chi**2*r**2 / (S*omega**2)
+    #K_c_rho = rho * cs2 * chi**2 * r**2 / (S * omega**2)
+    K_c_rho = rho * cs2 * chi**2 * r**2 * S #/ S #/ (S * sigma**2)
+    K_c_rho[0] = 0.
     
     # first compute the huge bracketed terms 
     # in last two lines of equation (61) 
@@ -150,8 +183,46 @@ def kernel(ell, nu, eig, fgong):
         +G*m*rho*xi_r*dxi_r_dr \
         +0.5*G*(m*drho_dr+4.*np.pi*r**2*rho**2)*xi_r**2 \
         -4*np.pi*G*rho/(2.*ell+1.)*K_rho_c
-    K_rho_c = K_rho_c / (S*omega**2)
+    K_rho_c = K_rho_c * S #(S*omega**2)
+    K_rho_c[0] = 0.
     
+    ### Reese implementation
+    # m_0 = 4*pi*int_s=0^r rho_0(s) s^2 ds
+    #m_0 = 4 * np.pi * integrate(rho * r**2, r)
+    #g = G * m_0 / r**2 #4.*np.pi/3.*G*rho*r
+    #rho2 = - drho_dr * xi_r - rho * chi
+    
+    #psi = np.hstack((0, np.cumsum([
+    #        np.trapz(rho2[:i] * r[:i]**(ell+2) / r[i]**(ell+1),  r[:i]) + \
+    #        np.trapz(rho2[i:] * r[i]**ell      / r[i:]**(ell-1), r[i:])
+    #    for i in range(1, len(r))])))
+    
+    #dpsi_dr = np.hstack((0, np.cumsum([(ell+1) * \
+    #        np.trapz(rho2[:i] * r[:i]**(ell+2) / r[i]**(ell+2), r[:i]) + \
+    #        ell * np.trapz(rho2[i:] * r[i]**(ell-1) / r[i:]**(ell-1), r[i:])
+    #    for i in range(1, len(r))])))
+    
+    
+    #psi = integrate(rho*r**(ell+2), r)/(r**(ell+1)) + \
+    #    r**ell*complement(rho/r**(ell-1), r)
+    
+    #dpsi_dr = -(ell+1)*integrate(rho*r**(ell+2), r)/(r**(ell+1)) + \
+    #    ell*complement(rho/r**(ell-1), r)*r**(ell-1)
+            
+    #c_psi = -4*np.pi*G / (2*ell+1)
+    #psi = psi * c_psi
+    #dpsi_dr = dpsi_dr * c_psi
+    
+    #K_rho_c = rho * r**2 * S/2 * \
+    #    ( cs2 * chi**2 - omega**2 * ( xi_r**2 + L2 * xi_h**2 ) - \
+    #      2. * g * xi_r * chi - \
+    #      4. * np.pi * G * complement(2*rho*xi_r*chi + drho_dr * xi_r**2, r) + \
+    #      2. * g * xi_r * dxi_r_dr + \
+    #      4. * np.pi * G * rho * xi_r**2 + \
+    #      2. * (xi_r * dpsi_dr + L2*xi_h*psi / r) )
+    #K_rho_c[0] = 0.
+    
+    #print(K_rho_c)
     
     ### Calculate c^2, rho pair
     # d(c^2)/c^2 = 2 * d(c)/c
@@ -163,15 +234,87 @@ def kernel(ell, nu, eig, fgong):
     ### Calculate Gamma_1, rho pair
     # K_Gamma1_rho = K_c2_rho (c.f. Basu, Studying Stars 2011, eq 3.20)
     # K_rho_Gamma1 (c.f. InversionKit v. 2.2, eq. 105)
-    K_rho_Gamma1 = K_rho_c2
-    integrand = Gamma1*chi**2*r**2 / (2*S*omega**2)
-    first_int = integrate(integrand , r)
-    second_int = complement(4*np.pi*G*rho/r**2*integrate(integrand, r), r)
-    K_Gamma1_rho = K_rho_c2 - K_c2_rho + G*m*rho/r**2 * \
+    K_Gamma1_rho = K_c2_rho
+    #integrand = Gamma1*chi**2*r**2 / (2*S*omega**2)
+    first_int = integrate(K_c2_rho/P , r)
+    second_int = complement(4*np.pi*G*rho/r**2*first_int, r)
+    K_rho_Gamma1 = K_rho_c2 - K_c2_rho + G*m*rho/r**2 * \
         first_int + rho*r**2 * second_int
     
     
+    
     ### Calculate u, Y pair
+    # Kosovichev 1999 eq 40
+    #V = G * m * rho / (r * P)
+    #U = 4 * np.pi * rho * r**3 / m
+    
+    # Kosovichev 1999 eqs 43, 44, 45
+    #A_1 = np.array( [ [  V, -V ], [          0,        -U ] ] )
+    #B_1 = np.array( [ [ -V,  0 ], [          U,         0 ] ] )
+    #B_2 = np.array( [ [  0,  0 ], [          0,         0 ] ] )
+    #C_1 = np.array( [ [  1,  0 ], [ Gamma_1P  ,         0 ] ] )
+    #D_1 = np.array( [ [  1,  0 ], [ Gamma_1rho,         1 ] ) )
+    #D_2 = np.array( [ [ -1,  0 ], [          0,  Gamma_1Y ] ) ) 
+    
+    # Kosovichev 1999 eq 48
+    #A = A_1 + np.matmul(np.matmul(B_1, inv(D_1)), C_1)
+    #B = np.matmul(np.matmul(B_1, inv(D_1)), D_2) + B_2
+    #C = np.matmul(inv(D_1), C_1)
+    #D = np.matmul(inv(D_1), D_2)
+    
+    # now we want to solve for K^(2) = (K_{u,Y}, K_{Y,u}) 
+    # we have that (eqs 26, 27)
+    #   dy/dx = Ay + Bz_2
+    #   z_1 = Cy + Dz_2
+    # with (underneath eq 42)
+    #   z_2 = (drho/rho, dGamma1/Gamma1)
+    # which means (eqs 33, 34)
+    #   dw/dx = -A^T w - C^T K^(1)
+    #   K^(2) = D^T K^(1) + B^T w
+    # with boundary conditions (eq 28)
+    #   w * y = 0   at both  r=0 and r=R
+    # where (underneath eq 42)
+    #   y = (dp/p, dm/m)
+    
+    #z_1 = np.array([ K_rho_Gamma1, K_Gamma1_rho ])
+    #dw_dx = -A.T * w - np.matmul(C.T, K_1)
+    #K_2 = np.matmul(D.T, K_1) + B.T * w 
+    
+    K_Y_u = 1/Gamma_1Y * K_Gamma1_rho
+    
+    rho_spl = UnivariateSpline(r, rho)
+    P_spl = UnivariateSpline(r, P)
+    m_spl = UnivariateSpline(r, m)
+    Gamma_1P_spl = UnivariateSpline(r, Gamma_1P)
+    Gamma_1rho_spl = UnivariateSpline(r, Gamma_1rho)
+    K_rho_Gamma1_spl = UnivariateSpline(r, K_rho_Gamma1)
+    K_Gamma1_rho_spl = UnivariateSpline(r, K_Gamma1_rho)
+    
+    def bvp(t, w):
+        rho_t = rho_spl(t)
+        P_t = P_spl(t)
+        m_t = m_spl(t)
+        Gamma_1P_t = Gamma_1P_spl(t)
+        Gamma_1rho_t = Gamma_1rho_spl(t)
+        K_rho_Gamma1_t = K_rho_Gamma1_spl(t)
+        K_Gamma1_rho_t = K_Gamma1_rho_spl(t)
+        
+        dw1dr = -4*np.pi*rho_t*t**3/m_t * Gamma_1P_t * Gamma_1rho_t * w[1] - \
+            K_rho_Gamma1_t + (Gamma_1P_t + Gamma_1rho_t) * K_Gamma1_rho_t
+        dw2dr = G*m_t*rho_t/(t*P_t) * w[0] + 4*np.pi*rho_t*t**3/m_t * w[1]
+        return np.array((dw1dr, dw2dr))
+    
+    result = solve_bvp(bvp, 
+        lambda ya, yb: np.array([ ya[0], yb[1] ]), 
+        r, 
+        np.array([ np.ones(len(r)), np.ones(len(r)) ]), 
+        max_nodes=1000000)#, tol=1e-5)
+    
+    w_1 = result.sol(r)[0]
+    
+    K_u_Y = Gamma_1rho/Gamma_1Y * K_Gamma1_rho - K_rho_Gamma1 + \
+        G * m * rho / (r * P) * w_1
+    
     # K_Y_u = Gamma_1,Y * K_Gamma1_rho (c.f. Basu & Chaplin 2016, eq 10.40)
     # K_u_Y = P * d(P^-1 psi)/dr + Gamma_1,p * K_Gamma1_rho
     # where psi is obtained by solving
@@ -179,7 +322,7 @@ def kernel(ell, nu, eig, fgong):
     # z(r) = K_rho_Gamma1 + (Gamma_1,p + Gamma_1,rho) K_Gamma1_rho
 #    K_Y_u = Gamma_1Y * K_Gamma1_rho
 #
-#    z = K_rho_Gamma1 + ( Gamma_1p + Gamma_1rho ) * K_Gamma1_rho
+#    z = K_rho_Gamma1 + ( Gamma_1P + Gamma_1rho ) * K_Gamma1_rho
 #    
 #    rho_spl = UnivariateSpline(r, rho)
 #    P_spl = UnivariateSpline(r, P)
@@ -237,7 +380,7 @@ def kernel(ell, nu, eig, fgong):
     #    return 4*np.pi*G * np.interp(s, r, rho) * s**2 \
     #        * trapz(rho[r>=s] / (r[r>=s]**2 * P[r>=s]) * psi, r[r>=s]) \
     #        - ( np.interp(s, r, K_rho_Gamma1) \
-    #            + ( np.interp(s, r, Gamma_1p) + np.interp(s, r, Gamma_1rho) ) \
+    #            + ( np.interp(s, r, Gamma_1P) + np.interp(s, r, Gamma_1rho) ) \
     #              * np.interp(s, r, K_Gamma1_rho) \
     #          )
     #psi = odeint(dpsi_dr, 1.0, r).T[0]
@@ -251,13 +394,13 @@ def kernel(ell, nu, eig, fgong):
     #    print('len(psi) == len(r)', len(psi) == len(r))
     #    return np.vstack((4*np.pi*G*rho*r**2 \
     #        * complement(rho/(r**2*P)*psi, r) \
-    #        + ( K_rho_Gamma1 + ( Gamma_1p + Gamma_1rho ) * K_Gamma1_rho ))).T
+    #        + ( K_rho_Gamma1 + ( Gamma_1P + Gamma_1rho ) * K_Gamma1_rho ))).T
     
     #def dpsi_dr(r2, psi):
     #    psi = psi[0]
     #    return np.vstack((4*np.pi*G*np.interp(r2, r, rho)*r2**2 \
     #        * complement(np.interp(r2, r, rho)/(r2**2*np.interp(r2,r,P))*psi, r2) \
-    #        + ( np.interp(r2, r, K_rho_Gamma1) + ( np.interp(r2, r, Gamma_1p) \
+    #        + ( np.interp(r2, r, K_rho_Gamma1) + ( np.interp(r2, r, Gamma_1P) \
     #        + np.interp(r2, r, Gamma_1rho) ) * np.interp(r2, r, K_Gamma1_rho) ))).T
     
     ##psi = np.zeros(len(r))
@@ -321,14 +464,14 @@ def kernel(ell, nu, eig, fgong):
     #psi = minimize(sqdiff, np.ones(len(r)), method='Nelder-Mead')['x']
     
 #    K_u_Y = P * UnivariateSpline(P**-1 * psi, r).derivative()(r) \
-#        + Gamma_1p * K_Gamma1_rho
+#        + Gamma_1P * K_Gamma1_rho
     
     
     return { 
         ('c',      'rho'): (K_c_rho,      K_rho_c2),
         ('c2',     'rho'): (K_c2_rho,     K_rho_c2),
-        ('Gamma1', 'rho'): (K_Gamma1_rho, K_rho_Gamma1)
-        #('u',      'Y'):   (K_u_Y,        K_Y_u),
+        ('Gamma1', 'rho'): (K_Gamma1_rho, K_rho_Gamma1),
+        ('u',      'Y'):   (K_u_Y,        K_Y_u)#,
         #('psi', 'psi'):    (psi,          psi)
     }
 

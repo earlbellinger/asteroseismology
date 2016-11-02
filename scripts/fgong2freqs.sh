@@ -5,6 +5,8 @@
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
+cgrav=6.67232 #6.67408
+
 ### Parse command line tokens 
 ## -h and --help will display help instructions 
 if [ -z ${1+x} ] || [ $1 == '-h' ] || [ $1 == '--help' ]; then
@@ -42,7 +44,7 @@ logfile="fgong2freqs.log"
 exec > $logfile 2>&1
 
 ## Convert the FGONG file to AMDL format
-(echo "$bname"; echo "$fname.amdl"; echo 6.67408; echo 1) | \
+(echo "$bname"; echo "$fname.amdl"; echo $cgrav; echo 1) | \
     $aprgdir/adiajobs/fgong-amdl.d.x
 
 ## Check that the amdl file was created 
@@ -80,7 +82,7 @@ osc:
        0,     -1,      0,     -1,  @
 cst:
   cgrav
-  6.67408e-8 @
+  "$cgrav"e-8 @
   6.67428e-8 
 int:
   iplneq,iturpr,icow,alb,
@@ -95,7 +97,7 @@ out:
   istdpr,nout,nprcen,irsord,iekinr,
        9,    ,      ,    20,      , @
   iper,ivarf,kvarf,npvarf,nfmode,
-     1,    1,     ,      ,     0, @
+     1,    1,     ,      ,     1, @
   irotkr,nprtkr,igm1kr,npgmkr,ispcpr,
        0,      ,     0,      ,     0, @
   icaswn, sigwn1, sigwn2, frqwn1, frqwn2,iorwn1, iorwn2, frlwn1, frlwn2

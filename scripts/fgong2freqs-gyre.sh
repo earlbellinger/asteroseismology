@@ -36,7 +36,7 @@ fi
 
 ## Create a directory for the results and go there
 mkdir -p "$path" 
-cp "$1" "$path" 
+#cp "$1" "$path" 
 cd "$path" 
 
 logfile="fgong2freqs-gyre.log"
@@ -55,7 +55,7 @@ numax=$(Rscript nu_max.R)
 echo "
 &model
     model_type = 'EVOL'
-    file = '$bname'
+    file = '../$bname'
     file_format = 'MESA'
     ! file_format = 'FGONG'
     ! data_format = '(1P5E16.9,x)'
@@ -104,8 +104,7 @@ echo "
 " >| "Dnu.in"
 
 ## Run GYRE
-OMP_NUM_THREADS=1
-$GYRE_DIR/bin/gyre_ad "Dnu.in"
+$GYRE_DIR/bin/gyre_ad Dnu.in
 
 ## Calculate the large frequency separation
 echo "nus <- read.table('Dnu.dat', header=1, skip=5)[['Re.freq.']]
@@ -124,10 +123,11 @@ lower=$([ $above == 1 ] && echo "$lower" || echo "3")
 echo "Searching between $lower and $upper"
 
 ## Create a gyre.in file to search from nu_max-5*Dnu to nu_max+5*Dnu
+## for ONLY l=0 and l=2 
 echo "
 &model
     model_type = 'EVOL'
-    file = '$bname'
+    file = '../$bname'
     file_format = 'MESA'
     ! file_format = 'FGONG'
     ! data_format = '(1P5E16.9,x)'
@@ -140,11 +140,6 @@ echo "
 &mode
     l = 0          ! Harmonic degree
     tag = 'radial'
-/
-
-&mode
-    l = 1          ! Harmonic degree
-    tag = 'nonradial'
 /
 
 &mode
@@ -214,10 +209,98 @@ echo "
     freq_units = 'UHZ'
 /
 
-" >| "$fname.in"
+" >| "l02.in"
 
 ## Run GYRE
-$GYRE_DIR/bin/gyre_ad "$fname.in"
+timeout 3600 $GYRE_DIR/bin/gyre_ad l02.in
+
+RETVAL=$?
+if [ $RETVAL -eq 124 ]; then
+    echo "l=0,2 search failed"
+    exit 1
+fi
+
+## Create a gyre.in file to search from nu_max-5*Dnu to nu_max+5*Dnu
+## for ONLY l=1
+echo "
+&model
+    model_type = 'EVOL'
+    file = '../$bname'
+    file_format = 'MESA'
+    ! file_format = 'FGONG'
+    ! data_format = '(1P5E16.9,x)'
+/
+
+&constants
+    G_GRAVITY = 6.67408d-8
+/
+
+&mode
+    l = 1          ! Harmonic degree
+/
+
+&osc
+    outer_bound = 'JCD'
+    variables_set = 'JCD'
+    inertia_norm = 'BOTH'
+    !reduce_order = .FALSE.
+/
+
+&num
+    ivp_solver = 'MAGNUS_GL2'
+/
+
+&scan
+    grid_type = 'INVERSE'
+    freq_units = 'UHZ'
+    freq_min = $lower
+    freq_max = $upper
+    n_freq = 1000
+/
+
+&shoot_grid
+    op_type = 'CREATE_CLONE'
+/
+
+&recon_grid
+    op_type = 'CREATE_CLONE'
+/
+
+&shoot_grid
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha points per exponential 'wavelength'
+/
+
+&shoot_grid
+    op_type = 'RESAMP_CENTER'    ! Resample the grid at the center
+    n = 20                ! At least n points in the evanescent region
+/
+
+&recon_grid
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha point per exponential 'wavelength'
+/
+
+&output
+    summary_file = 'l1.dat'
+    summary_file_format = 'TXT'
+    summary_item_list = 'l,n_pg,n_p,n_g,freq,omega,E_norm'
+    freq_units = 'UHZ'
+/
+
+" >| "l1.in"
+
+## Run GYRE
+timeout 3600 $GYRE_DIR/bin/gyre_ad l1.in
+
+RETVAL=$?
+if [ $RETVAL -eq 124 ]; then
+    echo "l=1 search failed"
+else
+    tail -n +7 l1.dat >> "$fname".dat
+fi
 
 ### Hooray!
 cp "$fname.dat" ..
