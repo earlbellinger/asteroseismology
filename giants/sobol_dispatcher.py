@@ -26,7 +26,7 @@ def main(arguments):
     parser.add_argument('-o', '--overshoot', default=[10**-4, 1], nargs=2,
                         type=float, 
                         help='range of overshoot values')
-    parser.add_argument('-D', '--diffusion', default=[10**-6, 100], nargs=2,
+    parser.add_argument('-D', '--diffusion', default=[10**-6, 10], nargs=2,
                         type=float, 
                         help='range of diffusion factors')
     parser.add_argument('-N', default=1000, type=int, 
@@ -100,7 +100,7 @@ def dispatch(ranges, N, logs, threshold, diffusion_cutoff,
         print(bash_cmd)
         #exit()
         subprocess.Popen(bash_cmd.split(), shell=False)
-        #sleep(0.01)
+        sleep(1)
     #np.savetxt('initial_conditions.dat', np.array(init_conds))
 
 if __name__ == '__main__':

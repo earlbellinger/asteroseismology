@@ -1,0 +1,63 @@
+&star_job
+      
+      !save_model_filename = 'tams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'zams.mod'
+      
+      set_initial_age = .true.
+      initial_age = 0
+      
+      write_profile_when_terminate = .true.
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_MS'
+      
+      mesh_delta_coeff = 5
+      varcontrol_target = 1d-1
+      
+      profile_interval = 100000000
+      history_interval = 100000000
+      
+      do_element_diffusion = .true.
+      
+      diffusion_dt_limit = 3d12
+      diffusion_calculates_ionization = .false.
+      diffusion_min_dq_at_surface = 1d-3
+      
+      diffusion_num_classes = 5
+      diffusion_class_factor(1) = 1
+      diffusion_class_factor(2) = 1
+      diffusion_class_factor(3) = 1
+      diffusion_class_factor(4) = 1
+      diffusion_class_factor(5) = 1
+      
+      diffusion_class_representative(1) = 'h1'
+      diffusion_class_representative(2) = 'he3'
+      diffusion_class_representative(3) = 'he4'
+      diffusion_class_representative(4) = 'o16'
+      diffusion_class_representative(5) = 'fe56'
+      
+      diffusion_class_A_max(1) = 2
+      diffusion_class_A_max(2) = 3
+      diffusion_class_A_max(3) = 4
+      diffusion_class_A_max(4) = 16
+      diffusion_class_A_max(5) = 10000
+      
+      which_atm_option = 'Eddington_grey'
+      
+      xa_central_lower_limit_species(1) = 'h1'
+      xa_central_lower_limit(1) = 1d-3
+      
+      max_age = 4.572e9
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

@@ -1,0 +1,24 @@
+! example inlist setting details for the explore mode
+
+&star_job
+      
+      pgstar_flag = .true.
+      
+/ ! end of star_job namelist
+
+&controls
+
+      ! output specifications
+      !-----------------------
+      !photostep = 10
+
+      ! if true: write pulse info file whenever a profile is written
+      write_pulse_info_with_profile = .false. 
+            
+/ ! end of controls namelist
+
+&pgstar
+         
+/ ! end of pgstar namelist
+
+

@@ -1,0 +1,71 @@
+&model
+	model_type = 'EVOL'                ! Get *-struct. from MESA.gyre model
+	file = 'profile255.data.GYRE'  ! File name of the MESA.gyre model
+	file_format = 'MESA'  		   ! File format of the MESA.gyre model
+/
+
+&constants
+/
+
+&mode
+	l        = 0          ! Harmonic degree
+	n_pg_min = 0
+	n_pg_max = 3          ! maximum order, k, being computed: n_pg_max - 1     
+        
+
+
+/
+
+&osc
+        outer_bound = 'ZERO'  ! zero-pressure perturbation @ outer OBC
+		              ! Options: DZIEM
+			      !          UNNO
+			      !          JCD
+         nonadiabatic = .TRUE.
+/
+
+!&num
+!	diff_scheme    = 'MAGNUS_GL2'  ! MAGNUS_GL2 currently the only NAD choice
+!	matrix_type   = 'BLOCK'	
+!
+!/
+
+&grid
+/
+
+&scan
+        grid_type  = 'LINEAR' ! frequency sampling: 'LINEAR'  for p-modes, 
+		              !                     'INVERSE' for g-modes 
+        !freq_units = 'NONE'   ! Interpret freq_min and freq_max as dimensionless
+        !freq_min   = 1.5      ! Minimum frequency to scan from
+	!freq_max   = 8.0      ! Maximum frequency to scan to
+	n_freq     = 6000      ! Number of frequency points in scan
+/
+
+&shoot_grid ! If left empty, adoption of defaults
+	op_type = 'CREATE_CLONE'
+/
+
+&recon_grid ! If left empty, adoption of defaults
+	op_type = 'CREATE_MIDPOINT' ! for NAD comps, might try 'CREATE_MIDPOINT'
+/
+
+!&ad_output
+!/
+
+&nad_output
+        ! File name for summary file
+        summary_file = 'NAD/evals_7try.txt'                    
+        
+	! Format of summary file
+	summary_file_format = 'TXT'                       
+        
+	! Items to appear in summary file
+        summary_item_list = 'M_star,R_star,L_star,l,n_pg,omega'  
+  	  
+/
+
+&output
+/
+
+

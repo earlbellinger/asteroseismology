@@ -1,0 +1,47 @@
+&star_job
+      
+      kappa_file_prefix = 'gs98'
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag = .true.
+      show_log_description_at_start = .false.
+      write_profile_when_terminate = .false.
+      pgstar_flag = .false.
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      Zbase = 0.0184
+      mixing_length_alpha = 1.92
+      
+      use_Type2_opacities = .false.
+      cubic_interpolation_in_Z = .false.
+      
+      convective_bdy_weight = 1
+      convective_bdy_min_dt_yrs = 1d4 ! default is 1d-3
+      T_mix_limit = 2d4
+      skip_rotation_in_convection_zones = .true.
+      
+      photo_interval = 0
+      terminal_interval = 10000000
+      write_header_frequency = 10000000
+      min_timestep_limit = 1d-12
+      
+      write_profiles_flag = .true.
+      
+      max_age = 20e9
+      
+      step_overshoot_f_above_burn_h_core = 0.09
+      overshoot_f0_above_burn_h_core = 0.018
+      
+      max_model_number = 1000000
+      max_num_profile_models = 10000
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

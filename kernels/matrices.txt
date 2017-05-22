@@ -1,0 +1,15 @@
+A = {{0, -V}, {U, -U}}
+B = {{V,0},{-U,0}}
+C = {{1, 0}, {Gamma_1P + Gamma_1rho, 0}}
+D = {{-1, 0}, {Gamma_1rho, Gamma_1Y}}
+
+-A.T = {{0, -U}, {-V, U}}
+B.T = {{V,-U},{0,0}}
+C.T = {{1, Gamma_1P + Gamma_1rho}, {0, 0}}
+D.T = {{-1, Gamma_1rho}, {0, Gamma_1Y}}
+
+w = {w_1, w_2}
+K1 = {K_a, K_b}
+K2 = {K_c, K_d}
+z1 = {z_a, z_b}
+z2 = {z_c, z_d}

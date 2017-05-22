@@ -1,0 +1,80 @@
+&star_job
+      
+      show_log_description_at_start = .false.
+      
+      history_columns_file = 'history_cols.list'
+      profile_columns_file = 'profile_cols.list'
+      
+      
+      pgstar_flag            = .true.
+      pause_before_terminate = .true.
+
+ 
+      ! .mod file-handling
+      !-------------------
+      !load_saved_model    = .true.
+      !saved_model_name    = 'm025_z001_pms.mod'
+
+
+      ! Microphysics part
+      !------------------
+      !...Opacity treatment 
+      kappa_file_prefix = 'gs98'   ! much microphysics goes by default with gs98 Zfracs 
+
+
+      !...Nuclear physics
+      !------------------
+      change_net        = .true.     
+      new_net_name      = 'o18_and_ne22.net'  ! good enough for basic H, He burning
+
+      ! Macrophysics part
+      !------------------
+
+      !...use ln P as primary variable, instead of ln rho
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag	 = .true.
+      
+/ ! end of star_job namelist
+
+&controls
+
+      initial_mass = 8.0
+      initial_z    = 2.0d-2
+
+      ! Microphysics control
+      !---------------------
+      !...Opacity
+      cubic_interpolation_in_Z = .true.
+
+      !...Convection
+      mixing_length_alpha = 1.8d0 
+
+
+      ! time-step & grid control
+      !--------------------------
+      ! slow down evolution around the S-bend
+      ! lg_XH_cntr is log10(h1 mass fraction at center)
+      ! small timesteps as the center hydrogen is exhausted
+      delta_lg_XH_cntr_min = -6 ! ignore changes in lg_XH_cntr if value is less
+      delta_lg_XH_cntr_max = -1 ! ignore changes in lg_XH_cntr if value is more
+      delta_lg_XH_cntr_limit      = 0.1
+      delta_lg_XH_cntr_hard_limit = 0.2
+      !report_why_dt_limits       = .true.
+
+      !...grid mesh modificiations
+      mesh_delta_coeff = 1.0  ! default is 1.0, < 1: increase no. grid points
+
+
+      ! output specifications
+      !-----------------------
+
+      profile_interval       =    2
+      max_num_profile_models = 1000
+
+      history_interval       =    1
+      !terminal_cnt           = 1000
+      write_header_frequency = 1000
+
+
+/ ! end of controls namelist
+

@@ -1,0 +1,48 @@
+&star_job
+      
+      save_model_when_terminate = .true.
+      save_model_filename = 'tams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'zams.mod'
+      
+      set_initial_age = .true.
+      initial_age = 0
+      
+      write_profile_when_terminate = .true.
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS'
+      
+      mesh_delta_coeff = 0.8
+      !varcontrol_target = 1d-5 ! default is 1d-4
+      
+      delta_lgTeff_limit = 0.001
+      delta_lgL_phot_limit = 0.01
+      
+      history_interval = 1
+      profile_interval = 10
+      
+      write_profiles_flag = .true.
+      do_element_diffusion = .false.
+      which_atm_option = 'Eddington_grey'
+      
+      !xa_central_lower_limit_species(1) = 'h1'
+      !xa_central_lower_limit(1) = 1d-3
+      x_ctrl(1) = -1d99 ! stop when (d log L / d log Teff) > -3
+      x_ctrl(2) = -1d99 ! decrease diffusion by this amount each time step
+      x_ctrl(3) = 150 ! stop when delta_Pg < 150
+      x_integer_ctrl(1) = 6 ! stop when He flash is over 
+      
+      !num_cells_for_smooth_brunt_B = 3
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

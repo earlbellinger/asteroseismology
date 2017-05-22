@@ -115,6 +115,7 @@ set_params() {
     
     if [ $diffusion -eq 1 ]; then
         change 'do_element_diffusion' '.false.' '.true.'
+        #change 'mesh_delta_coeff' '0.3' '0.1'
     fi
 }
 

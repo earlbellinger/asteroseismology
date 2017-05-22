@@ -13,9 +13,9 @@ DF <- read.table(file.path(log_dir, 'history.data'), header=1, skip=5)
 
 ## if main sequence, crop PMS
 if (grepl('LOGS_MS', log_dir)) {
-    decreasing_L <- which(diff(DF$L) < 0 & DF$center_h1[-1] > 0.55)
+    decreasing_L <- which(diff(DF$log_L) < 0 & DF$center_h1[-1] > 0.55)
     if (any(decreasing_L)) {
-        goes_back_up <- diff(decreasing_L) > 1
+        goes_back_up <- diff(decreasing_L) > 0
         pms <- max(decreasing_L)
         DF <- DF[-1:-pms,]
     }

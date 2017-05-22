@@ -1,0 +1,36 @@
+&star_job
+
+    read_extra_star_job_inlist1 = .true.
+    read_extra_star_job_inlist2 = .true.
+
+    !...here, define star model settings
+    extra_star_job_inlist1_name = 'model.inlist'
+
+    !...switch between exploration- and GYRE-mode output
+    !extra_star_job_inlist2_name = 'explore_mode.inlist'
+    extra_star_job_inlist2_name = 'gyre_mode.inlist'
+
+/ ! end of star_job namelist
+
+&controls
+
+    read_extra_controls_inlist1 = .true.
+    read_extra_controls_inlist2 = .true.
+
+    !...here define star model settings
+    extra_controls_inlist1_name = 'model.inlist'
+
+    !...switch between exploration- and GYRE-mode output
+    !extra_controls_inlist2_name = 'explore_mode.inlist'
+    extra_controls_inlist2_name = 'gyre_mode.inlist'
+
+/ ! end of controls namelist
+
+&pgstar
+
+    read_extra_pgstar_inlist1 = .true.
+    extra_pgstar_inlist1_name = 'pg.inlist'
+
+/ ! end of pgstar namelist
+
+! Extra empty line at the end of the file is required !

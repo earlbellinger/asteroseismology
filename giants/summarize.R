@@ -1,15 +1,12 @@
 #### Obtain model properties from evolutionary tracks 
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
-#### Stellar predictions & Galactic Evolution Group 
+#### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
 source(file.path('..', 'scripts', 'seismology.R'))
 library(parallel)
 library(parallelMap)
-
 library(lpSolve)
-library(parallel)
-library(parallelMap)
 library(magicaxis)
 library(mblm)
 
@@ -25,7 +22,7 @@ X_c.lim <- 1e-3
 
 ### Obtain observable properties from models 
 summarize <- function(pro_file, freqs_file, ev.DF, dname) {
-    #print(pro_file)
+    print(pro_file)
     
     pro_header <- read.table(pro_file, header=TRUE, nrows=1, skip=1)
     hstry <- ev.DF[ev.DF$model_number==pro_header$model_number,]
@@ -54,11 +51,23 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["Fe/H"] <- log10(10**hstry$log_surf_cell_z / 
             hstry$surface_h1 / Z_div_X_solar)
     
+    
+    obs.DF["log_LH"] <- hstry$log_LH
+    obs.DF["log_LHe"] <- hstry$log_LHe
+    
+    obs.DF["cz_base"] <- hstry$cz_bot_radius
+    obs.DF["delta_nu_asym"] <- hstry$delta_nu
+    obs.DF["delta_Pg_asym"] <- hstry$delta_Pg
+    
+    nu_max <- hstry$nu_max
+    obs.DF["nu_max"] <- nu_max
+    
+    obs.DF["acoustic_radius"] <- hstry$acoustic_radius
+    
     ## Seismology 
     freqs <- parse_freqs(freqs_file, gyre=T)
     #read.table(freqs_file, col.names=freqs.cols, fill=TRUE)
     #acoustic_cutoff <- hstry$acoustic_cutoff/(2*pi)
-    nu_max <- hstry$nu_max
     seis.DF <- seismology(freqs, nu_max, #acoustic_cutoff=acoustic_cutoff, 
         outf=ifelse(F, #sample(0:10000, 1) == 0, 
             gsub("/", "-", freqs_file), 
@@ -85,7 +94,6 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
     
     ## obtain history
     dir_files <- list.files(directory)
-    print(dir_files)
     track <- data.frame()
     for (log_dir in file.path(directory, dir_files[grep('LOGS_', dir_files)])) {
         logs <- list.files(log_dir)
@@ -118,6 +126,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
             as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
         obs.DF <- do.call(plyr:::rbind.fill, 
             parallelMap(function(pro_file, freqs_file)
+            #Map(function(pro_file, freqs_file)
                     summarize(pro_file, freqs_file, ev.DF, dname=dname), 
                 pro_file=file.path(log_dir, pro_files), 
                 freqs_file=file.path(log_dir, freq_files)))
@@ -126,9 +135,9 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
         
         ## if main sequence, crop PMS
         if (grepl('LOGS_MS', log_dir)) {
-            decreasing_L <- which(diff(DF$L) < 0 & DF$center_h1[-1] > 0.55)
+            decreasing_L <- which(diff(DF$log_L) < 0 & DF$center_h1[-1] > 0.55)
             if (any(decreasing_L)) {
-                goes_back_up <- diff(decreasing_L) > 1
+                goes_back_up <- diff(decreasing_L) > 0
                 pms <- max(decreasing_L)
                 print(paste(fgong.dir, "Clipping", pms, "points"))
                 DF <- DF[-1:-pms,]
@@ -181,14 +190,15 @@ plot_HR <- function(DF, ev.DF, ...,
         NA,
         tcl=0, axes=FALSE,
         xlab=expression('Temperature' ~ 'lg'*(T[eff]/K)),
-        ylab=expression('Luminosity' ~ 'lg'*(L / L['\u0298'])),
+        ylab=expression('Luminosity' ~ 'lg'*(L / L['Sun'])),
         xlim=rev(log10(range(DF$Teff))),
         ylim=log10(range(DF$L)))
     #abline(v=log10(5771), lty=3, col='lightgray')
     abline(v=log10(7000), lty=2, col='gray')
     #abline(h=0, lty=3, col='lightgray')
-    points(log10(5777), 0, pch=1, cex=1)
-    points(log10(5777), 0, pch=20, cex=0.1)
+    points(log10(5777.73), 0, pch=1, cex=1)
+    points(log10(5777.73), 0, pch=20, cex=0.1)
+    lines(ev.DF$log_Teff, ev.DF$log_L, lty=1, col='gray')
     points(log10(DF$Teff), log10(DF$L), pch=1, cex=0.1, 
         #col=col.pal[floor((DF$X_c-min(DF$X_c)) / (max(DF$X_c)-min(DF$X_c))
         col=col.pal[floor((DF$age-min(DF$age)) / (max(DF$age)-min(DF$age))
@@ -453,8 +463,16 @@ if (length(args)>0) {
     }
     
     ## make plots
-    ev.DF <- read.table(file.path(directory, 'LOGS', 'history.data'), 
-            header=TRUE, skip=5)
+    ev.DF <- data.frame()
+    dir_files <- list.files(directory)
+    for (log_dir in file.path(directory, dir_files[grep('LOGS_', dir_files)])) {
+        ev.DF <- plyr:::rbind.fill(ev.DF, 
+            read.table(file.path(log_dir, 'history.data'), 
+                header=TRUE, skip=5))
+    }
+    ev.DF <- ev.DF[order(ev.DF$star_age),]
+    #ev.DF <- read.table(file.path(directory, 'LOGS', 'history.data'), 
+    #        header=TRUE, skip=5)
     make_plots(plot_HR, paste0(basename(directory), "-HR", rejection), 
         filepath=file.path('plots', dirname(directory), 'HR'), 
         mar=c(3, 4, 1, 7), DF=DF, ev.DF=ev.DF)

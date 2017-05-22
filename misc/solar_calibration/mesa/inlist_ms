@@ -25,17 +25,15 @@
 
       mixing_length_alpha = 2.1
       Zbase = 0.02
-      use_Type2_opacities = .false.
-      cubic_interpolation_in_Z = .true.
       
-      max_years_for_timestep = -1
-      ! min_timestep_limit = 1d-12
-      mesh_delta_coeff = 0.8
-      max_allowed_nz = 30000
-      ! varcontrol_target = 1d-3 ! default is 1d-4
-      delta_lgTeff_limit = 0.001
-      delta_lgL_phot_limit = 0.01
-      ! max_years_for_timestep = 1d8
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12 ! default is 1d-6
+      mesh_delta_coeff = 0.3
+      !max_allowed_nz = 2500
+      varcontrol_target = 1d-5 ! default is 1d-4
+      !delta_lgTeff_limit = 0.001
+      !delta_lgL_phot_limit = 0.01
+      !max_years_for_timestep = 1d8
       
       photo_interval = 10000000
       write_profiles_flag = .true.
@@ -49,10 +47,6 @@
       convective_bdy_min_dt_yrs = 1d4 ! default is 1d-3
       T_mix_limit = 2d4
       skip_rotation_in_convection_zones = .true.
-      
-      ! conv_bdy_mix_softening_f0 = 0.0001
-      ! conv_bdy_mix_softening_f = 0.0005
-      
       
       step_overshoot_f_above_nonburn_core = 0.005
       step_overshoot_f_above_nonburn_shell = 0.005
@@ -72,53 +66,22 @@
       do_element_diffusion = .false.
       diffusion_dt_limit = 7d11
       
-      ! diffusion_calculates_ionization = .false.
-      ! diffusion_use_isolve = .true.
-      ! diffusion_use_cgs_solver = .true.
+      !diffusion_calculates_ionization = .false.
+      !diffusion_use_isolve = .true.
+      !diffusion_min_dq_at_surface = 1d-3
       
-      diffusion_num_classes = 4 ! 5
-      diffusion_class_factor(1) = 1
-      diffusion_class_factor(2) = 1
-      diffusion_class_factor(3) = 1
-      diffusion_class_factor(4) = 1
-      ! diffusion_class_factor(5) = 1
-      
-      diffusion_class_representative(1) = 'h1'
-      ! diffusion_class_representative(2) = 'he3'
-      diffusion_class_representative(2) = 'he4'
-      diffusion_class_representative(3) = 'o16'
-      diffusion_class_representative(4) = 'fe56'
-      
-      diffusion_class_A_max(1) = 2
-      ! diffusion_class_A_max(2) = 3
-      diffusion_class_A_max(2) = 4
-      diffusion_class_A_max(3) = 16
-      diffusion_class_A_max(4) = 10000
-      
-      
-      ! smooth_outer_xa_big = 1d-4
-      ! smooth_outer_xa_small = 1d-8
-      
-      ! calculate_Brunt_N2 = .true.
-      write_pulse_info_with_profile = .true.
-      pulse_info_format = 'FGONG'
+      write_pulse_data_with_profile = .true.
+      pulse_data_format = 'FGONG'
       format_for_FGONG_data = '(1P5E16.9,x)'
       
-      add_atmosphere_to_pulse_info = .true.
-      write_pulse_info_with_profile = .true.
-      add_center_point_to_pulse_info = .true.
-      keep_surface_point_for_pulse_info = .true.
-      add_double_points_to_pulse_info = .false.
-      which_atm_option = 'solar_Hopf_grey' ! 'Eddington_grey'
+      keep_surface_point_for_pulse_data = .true.
+      add_atmosphere_to_pulse_data = .true.
+      add_center_point_to_pulse_data = .false.
+      add_double_points_to_pulse_data = .false.
+      which_atm_option = 'Eddington_grey' ! 'simple_photosphere'
       
       ! main sequence
-      x_ctrl(1) = -1d99
-      x_ctrl(2) = 1d-7
-      xa_central_lower_limit_species(1) = 'h1'
-      xa_central_lower_limit(1) = 1d-2
-      max_age = 5d9 ! 4.572d9
-      ! log_L_upper_limit = 0.000001
-      ! photosphere_r_upper_limit = 1.00002
+      max_age = 4.572d9
       max_model_number = 1000000
       max_num_profile_models = 1
       

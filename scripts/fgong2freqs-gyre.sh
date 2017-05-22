@@ -42,6 +42,8 @@ cd "$path"
 logfile="fgong2freqs-gyre.log"
 #exec > $logfile 2>&1
 
+OMP_NUM_THREADS=1
+
 ## Calculate nu_max from the corresponding profile file 
 echo "scaling_nu_max <- function(R, M, Teff, Teff_sun=5777, nu_max_sun=3090)
     M * nu_max_sun / ( R**2 * sqrt(Teff/Teff_sun) )
@@ -62,7 +64,7 @@ echo "
 /
 
 &constants
-    G_GRAVITY = 6.67408d-8 ! 6.67428d-8
+    G_GRAVITY = 6.67428d-8 ! 6.67408d-8 ! 
 /
 
 &mode
@@ -77,7 +79,7 @@ echo "
 /
 
 &num
-    ivp_solver = 'MAGNUS_GL2'
+    !ivp_solver = 'MAGNUS_GL2'
 /
 
 &scan
@@ -89,22 +91,44 @@ echo "
 /
 
 &shoot_grid
+    op_type = 'CREATE_CLONE'
 /
 
 &recon_grid
+    op_type = 'CREATE_CLONE'
 /
 
-&output
+&shoot_grid
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha points per exponential 'wavelength'
+/
+
+&shoot_grid
+    op_type = 'RESAMP_CENTER'    ! Resample the grid at the center
+    n = 20                ! At least n points in the evanescent region
+/
+
+&recon_grid
+    op_type = 'RESAMP_DISPERSION'    ! Resample the grid based on the local dispersion relation
+    alpha_osc = 5            ! At least alpha points per oscillatory wavelength
+    alpha_exp = 3            ! At least alpha point per exponential 'wavelength'
+/
+
+&ad_output
     summary_file = 'Dnu.dat'
     summary_file_format = 'TXT'
     summary_item_list = 'freq'
     freq_units = 'UHZ'
 /
 
+&nad_output
+/
+
 " >| "Dnu.in"
 
 ## Run GYRE
-$GYRE_DIR/bin/gyre_ad Dnu.in
+$GYRE_DIR/bin/gyre Dnu.in &>Dnu.out
 
 ## Calculate the large frequency separation
 echo "nus <- read.table('Dnu.dat', header=1, skip=5)[['Re.freq.']]
@@ -139,12 +163,10 @@ echo "
 
 &mode
     l = 0          ! Harmonic degree
-    tag = 'radial'
 /
 
 &mode
     l = 2          ! Harmonic degree
-    tag = 'nonradial'
 /
 
 &osc
@@ -152,20 +174,10 @@ echo "
     variables_set = 'JCD'
     inertia_norm = 'BOTH'
     !reduce_order = .FALSE.
-    tag_list = 'radial,nonradial'
 /
 
 &num
-    ivp_solver = 'MAGNUS_GL2'
-/
-
-&scan
-    grid_type = 'LINEAR'
-    freq_units = 'ACOUSTIC_CUTOFF'
-    freq_min = 0.01
-    freq_max = 1
-    n_freq = 1000
-    tag_list = 'radial'
+    !ivp_solver = 'MAGNUS_GL2'
 /
 
 &scan
@@ -174,7 +186,6 @@ echo "
     freq_min = $lower
     freq_max = $upper
     n_freq = 1000
-    tag_list = 'nonradial'
 /
 
 &shoot_grid
@@ -202,17 +213,20 @@ echo "
     alpha_exp = 3            ! At least alpha point per exponential 'wavelength'
 /
 
-&output
-    summary_file = '$fname.dat'
+&ad_output
+    summary_file = 'Dnu.dat'
     summary_file_format = 'TXT'
-    summary_item_list = 'l,n_pg,n_p,n_g,freq,omega,E_norm'
+    summary_item_list = 'freq'
     freq_units = 'UHZ'
+/
+
+&nad_output
 /
 
 " >| "l02.in"
 
 ## Run GYRE
-timeout 3600 $GYRE_DIR/bin/gyre_ad l02.in
+timeout 3600 $GYRE_DIR/bin/gyre l02.in &>l02.out
 
 RETVAL=$?
 if [ $RETVAL -eq 124 ]; then
@@ -247,7 +261,7 @@ echo "
 /
 
 &num
-    ivp_solver = 'MAGNUS_GL2'
+    !ivp_solver = 'MAGNUS_GL2'
 /
 
 &scan
@@ -283,17 +297,20 @@ echo "
     alpha_exp = 3            ! At least alpha point per exponential 'wavelength'
 /
 
-&output
-    summary_file = 'l1.dat'
+&ad_output
+    summary_file = 'Dnu.dat'
     summary_file_format = 'TXT'
-    summary_item_list = 'l,n_pg,n_p,n_g,freq,omega,E_norm'
+    summary_item_list = 'freq'
     freq_units = 'UHZ'
+/
+
+&nad_output
 /
 
 " >| "l1.in"
 
 ## Run GYRE
-timeout 3600 $GYRE_DIR/bin/gyre_ad l1.in
+timeout 3600 $GYRE_DIR/bin/gyre l1.in &>l1.out
 
 RETVAL=$?
 if [ $RETVAL -eq 124 ]; then
@@ -303,6 +320,8 @@ else
 fi
 
 ### Hooray!
+exit 
+
 cp "$fname.dat" ..
 rm -rf *
 currdir=$(pwd)

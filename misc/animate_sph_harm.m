@@ -13,7 +13,7 @@ for degree = 1:3
 
 %degree = 3;
 order = 0;
-amplitude = 15/degree;
+amplitude = 30; %15/degree;
 radius = 7;
 
 Ymn = legendre(degree,cos(theta(:,1)));

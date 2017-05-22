@@ -251,6 +251,20 @@
          ! to update the star log,
             ! s% need_to_update_history_now = .true.
          
+         ! write(*, *) s% diffusion_class_factor(1)
+         if (s% x_ctrl(2) > -1d99 .and. s% do_element_diffusion) then
+             if (s% diffusion_class_factor(1) > 0) then
+                 ! write(*, *) 'decreasing'
+                 s% diffusion_class_factor(:) = &
+                     s% diffusion_class_factor(:) - s% x_ctrl(2)
+             end if 
+             if (s% diffusion_class_factor(1) <= 0) then 
+                 s% do_element_diffusion = .false.
+                 s% diffusion_class_factor(:) = 0.
+                 ! write(*, *) 'turning off'
+             end if
+         end if
+         
          log_L = safe_log10_cr(s% L_phot)
          log_L_old = safe_log10_cr(s% L_phot_old)
          log_Teff = safe_log10_cr(s% Teff)
@@ -259,6 +273,11 @@
          d_log_L_dT = (log_L - log_L_old) / (log_Teff - log_Teff_old)
          if (s% x_ctrl(1) > -1d99 .and. d_log_L_dT > s% x_ctrl(1) &
              .and. log_Teff > 3.675 .and. log_Teff < 3.74) then
+             extras_finish_step = terminate
+         end if
+         
+         if (s% x_ctrl(3) > -1d99 .and. s% delta_Pg > 0 &
+             .and. s% delta_Pg < s% x_ctrl(3)) then
              extras_finish_step = terminate
          end if
          

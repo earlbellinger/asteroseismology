@@ -1,6 +1,6 @@
 #### Utility functions for forward & inverse asteroseismology
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de )
-#### Stellar predictions & Galactic Evolution Group
+#### Stellar Ages & Galactic Evolution Group
 #### Max-Planck-Institut fur Sonnensystemforschung
 
 invisible(library(magicaxis))
@@ -9,7 +9,7 @@ invisible(library(magicaxis))
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
-utils.font <<- "Palatino"
+utils.font <<- "Times" #"Palatino"
 
 font <- "Palatino"
 text.cex <- 1
@@ -20,8 +20,8 @@ mgp <- c(2, 0.25, 0)
 ## Constants
 solar_Teff = log10(5777)
 solar_age = 4.57e9
-solar_radius = 6.955*10**10 # cm
-solar_mass = 1.9891*10**30
+solar_radius = 6.955*10**10 # cm 
+solar_mass = 1.9891*10**30 # kg 
 solar_scale = sqrt(solar_mass/solar_radius^3)
 FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
 
@@ -34,6 +34,9 @@ FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
 blue <- "#0571b0"
 red <- "#ca0020"
 
+################################################################################
+### PLOTTING ###################################################################
+################################################################################
 ### Make the same plot as a pdf and a png suitable for papers and for slides
 # takes a plotting function plot_f that calls `plot`
 #
@@ -179,6 +182,24 @@ pdfpng <- function(plot_f, filename, directory,
                mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
     }
+}
+
+################################################################################
+### FGONG ######################################################################
+################################################################################
+read.fgong <- function(filename) {
+    ## Create connection
+    #con <- file(description=file, open="r")
+    
+    ## Hopefully you know the number of lines from some other source or
+    #com <- paste("wc -l ", file, " | awk '{ print $1 }'", sep="")
+    #n <- system(command=com, intern=TRUE)
+    
+    ## Loop over a file connection
+    #for(i in 1:n) {
+    #    tmp <- scan(file=con, nlines=1, quiet=TRUE)
+        ## do something on a line of data 
+    #}
 }
 
 ################################################################################
@@ -693,7 +714,12 @@ plot_HR <- function(DF, ...,
 ## R/R_sun = nu_max/nu_max_sun (Dnu/Dnu_sun)^-2 (Teff/Teff_sun)^(1/2)
 ## M/M_sun = (R/R_sun)^3 (Dnu/Dnu_sun)^2
 scaling_nu_max <- function(R, M, Teff, Teff_sun=5777, nu_max_sun=3090) {
-    M * nu_max_sun / (R**2 * sqrt(Teff/Teff_sun) )
+    M * nu_max_sun / ( R**2 * sqrt(Teff/Teff_sun) )
+}
+
+scaling_nu_max_Viani <- function(R, M, Teff, mu,
+        Teff_sun=5777.739, nu_max_sun=3090, mu_sun=1.260134) {
+    M * nu_max_sun * sqrt(mu / mu_sun) / ( R**2 * sqrt(Teff/Teff_sun) )
 }
 
 scaling_Delta_nu_Guggenberger <- function(Teff=5777, FeH=0) {
@@ -705,9 +731,48 @@ scaling_Delta_nu_Guggenberger <- function(Teff=5777, FeH=0) {
     A * exp( lambda * Teff / 10**4 ) * cos( omega * Teff / 10**4 + phi ) + B
 }
 
+scaling_Delta_nu <- function(R, M, Delta_nu_Sun=135) {
+    Delta_nu_Sun * M / R**3
+}
+
 ## Delta_nu = 1 / ( 2 * integral_0^R [ dr/c ] )
 ## c.f. Aerts et al. 2010, Asteroseismology, eq. 3.217
 asymptotic_Delta_nu <- function(radius, csound) {
     invisible(library(Bolstad))
     1 / (2*sintegral(radius*solar_radius, 1/(csound*10**6))$value)
 }
+
+
+################################################################################
+### B-splines ##################################################################
+################################################################################
+
+B <- function(x, i, j, ks) {
+    if (j == 0) {
+        if (ks[i] <= x && x < ks[i+1]) 1 else 0
+    } else {
+        den.1 <- ks[i+j] - ks[i]
+        den.2 <- ks[i+j+1] - ks[i+1]
+        exp.1 <- if (den.1 == 0) 0 else (x-ks[i])/den.1 * B(x, i, j-1, ks)
+        exp.2 <- if (den.2 == 0) 0 else (ks[i+j+1]-x)/den.2 * B(x, i+1, j-1, ks)
+        exp.1 + exp.2
+    }
+}
+
+dB_dx <- function(x, i, j, ks) {
+    den.1 <- ks[i+j] - ks[i+1]
+    den.2 <- ks[i+j-1] - ks[i]
+    exp.1 <- if (den.1 == 0) 0 else -B(x, i+1, j-1, ks) / den.1
+    exp.2 <- if (den.2 == 0) 0 else B(x, i, j-1, ks) / den.2
+    (j-1) * ( exp.1 + exp.2 )
+}
+
+d.n_B_dx.n <- function(x, i, j, ks, n=2) {
+    if (n==1) return(dB_dx(x, i, j, ks))
+    den.1 <- ks[i+j] - ks[i+1]
+    den.2 <- ks[i+j-1] - ks[i]
+    exp.1 <- if (den.1 == 0) 0 else -d.n_B_dx.n(x, i+1, j-1, ks, n-1) / den.1
+    exp.2 <- if (den.2 == 0) 0 else d.n_B_dx.n(x, i, j-1, ks, n-1) / den.2
+    (j-1) * ( exp.1 + exp.2 )
+}
+

@@ -1,0 +1,113 @@
+
+This directory contains Fortran 77 programs using various
+subprograms described in Appendix B. All programs use double
+precision (REAL*8 / COMPLEX*16) arithmetic. Single and quadruple
+precision versions of these programs can be found in f77/xmp4 and
+f77/xmp16 respectively. 
+
+All these programs have been tested to some extent, but there may
+be some bugs. Users are welcome to use these programs at their
+own risk. Any bugs discovered in these routines may be notified to
+
+antia@tifr.res.in
+
+The main purpose of the programs in this directory is to provide
+concrete examples of using the subprograms described in Appendix B.
+Most of these programs are based on either solved examples or
+exercises in the book. Sample outputs obtained from these programs
+is also included in files *.out. These output files may be useful
+to check if the program is running correctly (at least giving the
+same output!) on your computer. Because of differences in
+roundoff errors between different compilers and computers the
+output may not exactly match on two different machines. In most
+cases the output refers to output on Fortran logical unit 6 which
+is normally the terminal. This output has been redirected to a
+file which is included in the directory. In a few cases
+(anneal.f, bsplin.f, rls.f, smooth.f) the programs directly write
+to a file on the disk. Of these bsplin.f and smooth.f do not have
+any significant output on the screen and it is not included in
+the CD. While for anneal.f and rls.f the screen output is
+included in addition to the files directly written. 
+
+Some Fortran compilers running under Windows operating system
+require a Fortran file with extension .for rather than .f as
+required by compilers under Unix. To allow for this, two
+copies of all Fortran files are provided with names *.f and
+*.for. Except for the name, these pairs of files are identical.
+Nevertheless, all links in html files point to files *.f only. 
+
+
+
+
+
+
+Apart from 117 pairs of Fortran programs and the corresponding
+output files this directory contains the following files: 
+
+kernel		Data file containing kernels for Inverse problem (Example 12.5)
+
+readme		This file
+
+readme.htm	readme file with HTML link
+
+xmp.ind		Index of subprograms used in different examples
+
+xmp.lst		Subject wise list of programs
+
+xmp.sor		Alphabetic list of programs
+
+xmplst.htm	Subject wise list of programs with HTML links
+
+xmplsta.htm	Alphabetic list of programs with HTML links
+
+
+
+
+
+The following 117 pairs of Fortran programs (files *.f and *.for)
+are included in this directory
+
+adi.f      adm.f      adpint.f   anneal.f   bessel.f   bfgs.f     brentm.f
+broydn.f   bspfit.f   bspfit2.f  bspfitn.f  bspintn.f  bsplin.f   bspode.f
+bspqd2.f   bspqdn.f   cauchy.f   chebap.f   chebcf.f   chebex.f   cmat.f
+crank.f    davidm.f   dawson.f   delves.f   drvt.f     erf.f      euler.f
+extp.f     fdm.f      fermi.f    fft.f      fftn.f     fftr.f     filon.f
+fred.f     fred3.f    fredco.f   gamma.f    gaubnd.f   gaucb1.f   gaucb2.f
+gaucby.f   gauher.f   gaujac.f   gaulag.f   gauleg.f   gaulog.f   gausq.f
+gausrc.f   gauswt.f   genevp.f   gevp.f     gevp_c.f   golden.f   herevp.f
+hermit.f   interp.f   invit.f    lagurw.f   lapinv.f   lax.f      linear.f
+lines.f    linrn.f    llsq.f     llsq1.f    matinv.f   minmax.f   mstep.f
+muler2.f   muller.f   multi.f    multisp.f  newrap.f   newton.f   nllsq.f
+nminf.f    pade.f     plm.f      pold.f     polfit.f   polfit2.f  polfitn.f
+poly2.f    polyc.f    polyl1.f   polyr.f    quad.f     realrt.f   realsy.f
+recin2.f   recin3.f   recrt2.f   remes.f    rkm.f      rkm_2.f    rls.f
+rmk.f      rmk1.f     root.f     round.f    search.f   secan_2.f  secanc.f
+shoot.f    simplx.f   smooth.f   sor.f      splint.f   sum.f      sum_a.f
+unsym.f    unsyml.f   volt.f     volt2.f    ylm.f
+
+The 120 output files from these programs are as follows:
+
+adi.out      adm.out      adpint.out   anneal.out   bessel.out   bfgs.out
+brentm.out   broydn.out   bspfit.out   bspfit2.out  bspfitn.out  bspintn.out
+bsplin.out   bspode.out   bspqd2.out   bspqdn.out   cauchy.out   chebap.out
+chebcf.out   chebex.out   cmat.out     crank.out    davidm.out   dawson.out
+delves.out   drvt.out     erf.out      euler.out    extp.out     fdm.out
+fermi.out    fft.out      fftn.out     fftr.out     filon.out    fred.out
+fred3.out    fredco.out   gamma.out    gaubnd.out   gaucb1.out   gaucb2.out
+gaucby.out   gauher.out   gaujac.out   gaulag.out   gauleg.out   gaulog.out
+gausq.out    gausrc.out   gauswt.out   genevp.out   gevp.out     gevp_c.out
+golden.out   herevp.out   hermit.out   interp.out   invers.out   invit.out
+lagurw.out   lapinv.out   lax.out      lcurv.out    linear.out   lines.out
+linrn.out    llsq.out     llsq1.out    matinv.out   minmax.out   mstep.out
+muler2.out   muller.out   multi.out    multisp.out  newrap.out   newton.out
+nllsq.out    nminf.out    pade.out     plm.out      pold.out     polfit.out
+polfit2.out  polfitn.out  poly2.out    polyc.out    polyl1.out   polyr.out
+quad.out     realrt.out   realsy.out   recin2.out   recin3.out   recrt2.out
+remes.out    rkm.out      rkm_2.out    rls.out      rmk.out      rmk1.out
+root.out     round.out    search.out   secan_2.out  secanc.out   shoot.out
+simplx.out   smooth.out   sor.out      splint.out   sum.out      sum_a.out
+titan.out    unsym.out    unsyml.out   volt.out     volt2.out    ylm.out
+
+The files invers.out and lcurv.out are additional outputs from rls.f,
+while titan.out is additional output from anneal.f
+

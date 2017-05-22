@@ -178,7 +178,7 @@
       !cz_logT
       !cz_logRho
       !cz_logP
-      !cz_bot_radius ! Rsun
+      cz_bot_radius ! Rsun
       !cz_log_column_depth
       !cz_log_radial_depth
       !cz_luminosity ! Lsun

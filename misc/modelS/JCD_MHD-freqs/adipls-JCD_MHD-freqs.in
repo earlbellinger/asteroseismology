@@ -1,0 +1,53 @@
+
+ 2  'JCD_MHD-freqs.amdl' @
+ 9  'JCD_MHD-freqs.log'  @
+ 11 'JCD_MHD-freqs.agsm' @
+ 4  'JCD_MHD-freqs.amde' @
+ 13 'JCD_MHD-freqs.g1k'  @
+ 15 'JCD_MHD-freqs.ssm'  @
+ -1 ''   @
+  cntrd,
+mod.osc.cst.int.out.dgn     @
+
+mod:
+  ifind,xmod,imlds,in,irname,nprmod,
+       ,    ,     ,  ,      ,      ,  @
+  ntrnct,ntrnsf,imdmod,
+       ,       ,      , @
+osc:
+  el,nsel,els1,dels,dfsig1,dfsig2,nsig1,nsig2,
+    ,   4,   0,   1,     0,      ,    1,    1, @
+  itrsig,sig1,istsig,inomde,itrds,
+       1,   5,     1,     2,     , @
+  dfsig,nsig,iscan,sig2,
+       ,  2,  5000,2500, @
+  eltrw1, eltrw2, sgtrw1, sgtrw2,
+       0,     -1,      0,     -1,  @
+cst:
+  cgrav
+  6.67408e-8 @
+  6.67428e-8 
+int:
+  iplneq,iturpr,icow,alb,
+        ,      ,    ,   , @
+  istsbc,fctsbc,ibotbc,fcttbc,
+        ,      ,      ,      , @
+  mdintg,iriche,xfit,fcnorm,eps,epssol,itmax,dsigre,
+       5,      ,0.99,      ,   ,      ,  100,      , @
+  fsig,dsigmx,irsevn,xmnevn,nftmax,itsord,
+      ,      ,      ,      ,      ,      , @
+out:
+  istdpr,nout,nprcen,irsord,iekinr,
+       9,    ,      ,    20,      , @
+  iper,ivarf,kvarf,npvarf,nfmode,
+     1,    1,     ,      ,     3, @
+  irotkr,nprtkr,igm1kr,npgmkr,ispcpr,
+       0,      ,     0,      ,     0, @
+  icaswn, sigwn1, sigwn2, frqwn1, frqwn2,iorwn1, iorwn2, frlwn1, frlwn2
+        ,      0,     -1,      0,   9999,     0,     50,      0,     -1, @
+dgn:
+  itssol,idgtss,moddet,iprdet,npout,
+        ,      ,      ,      ,     , @
+  imstsl,imissl,imjssl,idgnrk,
+        ,      ,      ,      , @
+

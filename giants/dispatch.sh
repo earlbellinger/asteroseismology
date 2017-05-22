@@ -14,9 +14,10 @@ init_mesh_delta_coeff=1 # the number in the inlist file
 mesh_delta_coeff=$init_mesh_delta_coeff
 ms_mesh_delta=0.4 # the mesh spacing we will use on the main sequence
 max_years_for_timestep=-1 # dt_max 
-min_years_for_timestep=100000
+min_years_for_timestep=1000
 profile_interval=1 # how often a profile should be output 
 inlist='inlist_pms'
+continue=1
 
 ### Log files 
 pmslog="pms.log" 
@@ -58,10 +59,10 @@ done
 ## Set defaults if they weren't supplied
 if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${M+x} ]; then M=1; fi
-if [ -z ${Y+x} ]; then Y=0.266; fi
-if [ -z ${Z+x} ]; then Z=0.018; fi
-if [ -z ${alpha+x} ]; then alpha=1.81; fi
-if [ -z ${overshoot+x} ]; then overshoot=0.07; fi
+if [ -z ${Y+x} ]; then Y=0.26929755; fi
+if [ -z ${Z+x} ]; then Z=0.01758726; fi
+if [ -z ${alpha+x} ]; then alpha=1.80003929; fi
+if [ -z ${overshoot+x} ]; then overshoot=0.08212582; fi
 if [ -z ${diffusion+x} ]; then diffusion=1; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${light+x} ]; then light=0; fi
@@ -121,6 +122,8 @@ change() { #param initval newval
     newval=$3
     if grep -q "\!$param = $initval" "$inlist"; then
         sed -i.bak "s/\!$param = $initval/$param = $initval/g" "$inlist"
+    elif grep -q "\! $param = $initval" "$inlist"; then
+        sed -i.bak "s/\! $param = $initval/$param = $initval/g" "$inlist"
     fi
     sed -i.bak "s/$param = $initval/$param = $newval/g" "$inlist"
 }
@@ -148,6 +151,7 @@ set_params() {
         change 'step_overshoot_f_above_burn_h_core' '0.005' "$overshoot"
         change 'step_overshoot_f_above_burn_h_shell' '0.005' "$overshoot"
         change 'step_overshoot_f_below_burn_h_shell' '0.005' "$overshoot"
+        change 'step_overshoot_f_above_burn_he_core' '0.005' "$overshoot"
         
         f0=$(echo "scale=8; $overshoot / 5" | bc -l)
         change 'overshoot_f0_above_nonburn_core' '0.001' "$f0"
@@ -156,39 +160,61 @@ set_params() {
         change 'overshoot_f0_above_burn_h_core' '0.001' "$f0"
         change 'overshoot_f0_above_burn_h_shell' '0.001' "$f0"
         change 'overshoot_f0_below_burn_h_shell' '0.001' "$f0"
+        change 'overshoot_f0_above_burn_he_core' '0.001' "$f0"
+    fi
+}
+
+set_diffusion() {
+    if (( $(echo "$diffusion > 0" | bc -l) )); then
+        change "do_element_diffusion" ".false." ".true." "$inlist"
+        change 'diffusion_class_factor(1)' '1' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(2)' '1' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(3)' '1' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(4)' '1' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(5)' '1' "$diffusion" "$inlist"
+        decrease=$(echo "scale=8; $diffusion / 100" | bc -l)
+        change 'x_ctrl(2)' '0.01' "$decrease" "$inlist"
     fi
 }
 
 fix_mod() { # final_mod
     final_mod=$1
-    # MESA r8118 has a bug that makes it print numbers of the form *.***### 
+    # MESA has a bug that makes it print numbers of the form *.***### 
     # (i.e. no letter for the exponent, and all the numbers are asterisks) 
     # This sed command replaces those with zeros. 
     sed -i.bak "s/\*\.\**-[0-9]*/0.0000000000000000D+00/g" $final_mod
 }
 
 run() { # logs_dir  final_mod
+    if ((!continue)); then return 0; fi
+    
     logs_dir=$1
     final_mod=$2
-    ./rn
+    
+    ./rn | tee output
     num_logs=$(cat $logs_dir/history.data | wc -l)
-    if [ $num_logs -lt $num_process ]; then
+    while [ $num_logs -lt $num_process ]; do
         age_range=$(R --slave -q -e "options(scipen = 999);"\
-"DF <- read.table('$logs_dir/history.data', header=1, skip=5);"\
+"DF <- read.table('"$logs_dir"/history.data', header=1, skip=5);"\
 "cat(max(DF[['star_age']])-min(DF[['star_age']]))")
         max_years_for_timestep=$(echo "$age_range / $num_process" | bc)
         if [ $max_years_for_timestep -lt $min_years_for_timestep ]; then
             echo "Too small timesteps"
             exit 1
         fi
-        change 'max_years_for_timestep' '-1' $max_years_for_timestep
-    fi
-    change 'write_profiles_flag' '.false.' '.true.'
-    ./rn
+        change 'max_years_for_timestep' '.\+' $max_years_for_timestep
+        rm -rf "$logs_dir"
+        ./rn
+        num_logs=$(cat $logs_dir/history.data | wc -l)
+    done
+    #change 'write_profiles_flag' '.false.' '.true.'
+    #./rn
     fix_mod $final_mod
     Rscript $scriptdir/model_select.R $num_process $logs_dir | 
         xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
             "echo start {}; fgong2freqs-gyre.sh {}; echo end {}"
+    
+    if grep -q "termination code: max_age" output; then continue=0; fi
 }
 
 ################################################################################
@@ -211,11 +237,13 @@ fix_mod "zams.mod"
 
 # main sequence
 change_inlists "inlist_ms"
-run "LOGS_MS" "tams.mod" "history-ms.data"
+set_diffusion
+run "LOGS_MS" "tams.mod"
 
 # sub-giant
 change_inlists "inlist_sg"
-run "LOGS_SG"
+set_diffusion
+run "LOGS_SG" "brgb.mod"
 
 # summarize and be done 
 cd ../..

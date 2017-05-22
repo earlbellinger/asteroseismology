@@ -52,9 +52,17 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     if (!'n_g' %in% names(freqs))
         freqs <- cbind(freqs, data.frame(n_g=0))
     
+    if (!'n_p' %in% names(freqs))
+        freqs <- cbind(freqs, data.frame(n_p=1))
+    
+    if (!'E' %in% names(freqs))
+        freqs <- cbind(freqs, data.frame(E=0))
+    
+    orig <- freqs
+    
     # remove mixed modes
-    mixed.1 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
-    mixed.2 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 2,]
+    mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
+    #mixed.2 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 2,]
     freqs <- freqs[freqs$n_g == 0,]
     #ell.0 <- freqs[freqs$l==0,]
     #e.0 <- splinefun(ell.0$nu, ell.0$E)
@@ -71,8 +79,8 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, ...)
     
     # make echelle
-    if (outf != FALSE) make_plots(echelle_plot, paste0(outf, '-echelle'), 
-        freqs=freqs, large_sep=seis.DF[[1]], ...)
+    if (outf != FALSE) make_plots(echelle_plot, paste0(outf, '-echelle'), ..., 
+        freqs=freqs, large_sep=seis.DF[[1]])
     
     # get averages for dnu, r01, r02, r10, r13
     for (l_deg in 0:1) {
@@ -104,38 +112,63 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     #echelle <- splinefun(centered.nus, centered.nus %% seis.DF$Dnu0)
     
     # find frequencies of mixed modes 
-    for (mm.ell in 1:2) {
-        mixed <- if (mm.ell == 1) mixed.1 else mixed.2
-        if (nrow(mixed) > 0) {
-            #print("nrow mixed > 0")
-            
-            # only accept one mode between adjacent l=0s
-            nus <- c() # mixed$nu
-            for (ii in 1:nrow(ell.0)) {
-                # pick the one with the lowest inertia
-                candidates <- mixed[mixed$nu >= ell.0$nu[ii] & 
-                                    mixed$nu <= ell.0$nu[ii+1],]
-                nus <- c(nus, candidates[which.min(candidates$E),]$nu)
-            }
-            
-            #print(mixed$nu)
-            dist_to_nu_max <- (nus - nu_max)**2
-            mixed <- data.frame(rbind(nus[order(dist_to_nu_max)]))
-            #print(mixed)
-            names(mixed) <- paste0('nu_cross.', mm.ell, '.', 1:ncol(mixed))
-            #print(mixed)
-            seis.DF <- cbind(seis.DF, mixed)
-            
-            ## interpolate within echelle diagram and save distance
-            #mixed.offset <- if (central.offset > 0) mixed - central.offset
-            #else mixed + abs(central.offset)
-            #echelle.dist <- mixed.offset %% seis.DF$Dnu0 - echelle(mixed.offset)
-            #names(echelle.dist) <- paste0('echelle.', mm.ell, '.', 
-            #    1:ncol(echelle.dist))
-            #seis.DF <- cbind(seis.DF, echelle.dist)
-        }
+    if (nrow(mixed) <= 0) return(seis.DF)
+    
+    #print("nrow mixed > 0")
+    
+    # only accept one mode between adjacent l=0s
+    nus <- c() # mixed$nu
+    for (ii in 1:nrow(ell.0)) {
+        # pick the one with the lowest inertia
+        candidates <- mixed[mixed$nu >= ell.0$nu[ii] & 
+                            mixed$nu <= ell.0$nu[ii+1],]
+        if (nrow(candidates) > 0)
+            nus <- c(nus, candidates[which.min(candidates$E),]$nu)
     }
-    #print(seis.DF)
+    
+    if (length(nus) <= 0) return(seis.DF)
+
+    dist_to_nu_max <- abs(nus - nu_max)
+    closest <- order(dist_to_nu_max)[1:min(length(nus), 3)]
+    
+    # frequency of mixed mode closest to nu_max
+    mixed <- data.frame(rbind(nus[closest]))
+    names(mixed) <- paste0('mm_nu.', 1:ncol(mixed))
+    seis.DF <- cbind(seis.DF, mixed)
+    
+    # distance of mixed mode closest to nu_max
+    mixed <- data.frame(rbind(dist_to_nu_max[closest]))
+    names(mixed) <- paste0('mm_dist_nu_max.', 1:ncol(mixed))
+    seis.DF <- cbind(seis.DF, mixed)
+    
+    # distance from mixed mode closest to nu_max to l=0 and l=1 modes 
+    # above and below it 
+    for (mm.ell in 0:1) {
+        mixed <- data.frame(rbind(sapply(nus[closest], function(nu) {
+            others <- orig[orig$l==mm.ell,]$nu
+            nu - max(others[others < nu])
+        })))
+        names(mixed) <- paste0('mm_dist.lower.', mm.ell, '.', 1:ncol(mixed))
+        seis.DF <- cbind(seis.DF, mixed)
+        
+        mixed <- data.frame(rbind(sapply(nus[closest], function(nu) {
+            others <- orig[orig$l==mm.ell,]$nu
+            nu - min(others[others > nu])
+        })))
+        names(mixed) <- paste0('mm_dist.upper.', mm.ell, '.', 1:ncol(mixed))
+        seis.DF <- cbind(seis.DF, mixed)
+    }
+    
+    
+    
+    ## interpolate within echelle diagram and save distance
+    #mixed.offset <- if (central.offset > 0) mixed - central.offset
+    #else mixed + abs(central.offset)
+    #echelle.dist <- mixed.offset %% seis.DF$Dnu0 - echelle(mixed.offset)
+    #names(echelle.dist) <- paste0('echelle.', mm.ell, '.', 
+    #    1:ncol(echelle.dist))
+    #seis.DF <- cbind(seis.DF, echelle.dist)
+
     return(seis.DF)
 }
 
@@ -160,7 +193,7 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     nus <- nus[not.na]
     seps <- seps[not.na]
     
-    if (length(seps)<5) {
+    if (length(seps)<3) {
         print(paste("Too few points for", sep_name))
         return(NULL)
     }
@@ -173,10 +206,14 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     if (!is.na(nu_max)) {
         fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
         gaussian_env <- dnorm(nus, nu_max, fwhm)
-        ratios <- dnorm(nus, nu_max, fwhm)/dnorm(nu_max, nu_max, fwhm)
-        if (any(ratios < 0.05))
+        #ratios <- dnorm(nus, nu_max, fwhm)/dnorm(nu_max, nu_max, fwhm)
+        #if (any(ratios < 0.05))
+        if (length(nus[nus>nu_max-fwhm & nus<nu_max+fwhm]))
             w.median <- weightedMedian(seps, gaussian_env)
         else {
+            #cat("Ratios: ")
+            #cat(ratios)
+            #cat('\n')
             print(paste("All points too far from nu_max for", sep_name))
             return(NULL)
         }
@@ -193,14 +230,13 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     colnames(result) <- sep_name #c(sep_name, paste0(sep_name, "_slope"))
     
     if (outf != FALSE && !is.na(result)) make_plots(seismology_plot, 
-        paste0(outf, '-', sep_name), 
+        paste0(outf, '-', sep_name), ...,
         seps=seps, nus=nus, 
         gaussian_env=gaussian_env, 
         w.median=result[sep_name], nu_max=nu_max, 
         ylab=as.expression(labs[sep_name]), 
         dnu.cl=dnu.cl, sep_name=sep_name, 
-        freqs=freqs,
-        ...)
+        freqs=freqs)
     
     result
 }
@@ -220,7 +256,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         nus <- x[indices$x]
         separations <- x[indices$x]-y[indices$y]
         Dnu <- get_average("Dnu", freqs, 0, nu_max)$Dnu0
-        rem <- abs(separations) > Dnu / 2
+        rem <- abs(separations) > Dnu / 1.5
         separations[rem] <- NA
         list(nus=nus, separations=separations)
     
@@ -260,7 +296,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
             x.smaller <- find_closest(x[n], xs)
             if (is.null(x.smaller$x)) next
             x.smaller <- xs[x.smaller$y]
-            if (x.smaller < (x[n]-1.5*large_sep)) next
+            if (x.smaller < (x[n]-1.75*large_sep)) next
             
             # nu_[n-1] or nu_[n] of the other l, 
             # depending on whether l=0 or l=1
@@ -281,7 +317,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
             x.bigger <- find_closest(x[n], xs)
             if (is.null(x.bigger$x)) next
             x.bigger <- xs[x.bigger$y]
-            if (x.bigger > (x[n]+1.5*large_sep)) next
+            if (x.bigger > (x[n]+1.75*large_sep)) next
             
             separations <- c(separations,
                 x.smaller - 4*y.smaller + 6*x[n] - 4*y.bigger + x.bigger)
@@ -369,13 +405,13 @@ avg <- function(separator, freqs,
     #DF[paste0(sep_name, "_slope")] <- coef(fit)[2]
     
     if (outf != FALSE) make_plots(seismology_plot, 
-        paste0(outf, '-', sep_name), 
+        paste0(outf, '-', sep_name),
+        ..., 
         seps=seps, nus=nus, #fit=fit, 
         gaussian_env=gaussian_env, 
         w.median=w.median, nu_max=nu_max, l_degs=l_degs, 
         ylab=ylab, dnu.cl=dnu.cl, pchs=pchs, sep_name=sep_name, 
-        freqs=freqs,
-        ...)
+        freqs=freqs)
     
     DF
 }

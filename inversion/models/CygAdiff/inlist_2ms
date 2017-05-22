@@ -1,0 +1,42 @@
+&star_job
+      
+      !save_model_filename = 'tams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'zams.mod'
+      
+      set_initial_age = .true.
+      initial_age = 0
+      
+      write_profile_when_terminate = .true.
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_MS'
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      mesh_delta_coeff = 0.8
+      !varcontrol_target = 1d-5 ! default is 1d-4
+      
+      delta_lgTeff_limit = 0.001
+      delta_lgL_phot_limit = 0.01
+      
+      profile_interval = 100000000
+      history_interval = 100000000
+      
+      do_element_diffusion = .true.
+      which_atm_option = 'Eddington_grey'
+      
+      !xa_central_lower_limit_species(1) = 'h1'
+      !xa_central_lower_limit(1) = 1d-3
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

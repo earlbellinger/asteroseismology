@@ -1,0 +1,37 @@
+      PROGRAM TEST
+      IMPLICIT REAL*8(A-H,O-Z)
+      EXTERNAL SUBR
+      DIMENSION PAR(7446),T(2482)
+      N=2482
+
+      OPEN(13,FILE='PAR',STATUS='OLD',BLANK='ZERO',ERR=21)
+      DO 20 I=1,7446
+        READ(13,*) PAR(I)
+20    CONTINUE
+21    CLOSE(13)
+
+      OPEN(14,FILE='T',STATUS='OLD',BLANK='ZERO',ERR=31)
+      DO 30 I=1,N
+        READ(14,140) T(I)
+140     FORMAT(E25.10)
+C        WRITE(*,141) T(I)
+C141     FORMAT(E25.10)
+30    CONTINUE
+31    CLOSE(14)
+
+      CALL SUBR(T)
+
+      END
+
+
+
+      SUBROUTINE SUBR(T)
+      IMPLICIT REAL*8(A-H,O-Z)
+      DIMENSION T(*)
+
+140   FORMAT(E25.10)
+      DO 10 J=1,2482
+        WRITE(*,*) T(J)
+10    CONTINUE
+      
+      END

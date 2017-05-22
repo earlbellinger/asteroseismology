@@ -152,15 +152,16 @@ plot_CD_diagram <- function(DF,
             c("#FC89AC", red, "#000000", blue, "#ADD8E6"))(15),
         #brewer.pal(11, 'Spectral'))(15),
         #c(blue, "black", red))(15),
-        ..., text.cex=1, mgp=utils.mgp, font="Times") {
+        ..., text.cex=1, mgp=utils.mgp, font="Times", mar=utils.mar) {
+    par(mar=mar+c(0,1,0,4), mgp=mgp+c(0, 0.2, 0))
     plot(NA, type='l', axes=F,
-        xlim=range(DF$Dnu)+c(0, 10), #33), 
+        xlim=range(DF$Dnu)+c(0, 30), #33), 
         ylim=c(0.5, max(DF$dnu)),#range(DF$dnu), #+c(0, 0.5),
         xlab=expression("Large frequency separation"~"<"*Delta*nu[0]*">"/mu*Hz),
-        ylab=expression("Small frequency separation"~
+        ylab=expression("Small separation"~
             "<"*delta*nu[0*","*2]*">"/mu*Hz))
     magaxis(side=1:4, tcl=-0.25, labels=c(1,0,0,0), las=1, family=font,
-            cex.axis=text.cex, mgp=mgp)
+            cex.axis=text.cex, mgp=mgp+c(0, 0.25, 0))
     magaxis(side=2, tcl=-0.25, labels=T, las=1, family=font,
             cex.axis=text.cex, mgp=mgp+c(0, 0.25, 0))
     #legend("topleft", bty='n', cex=0.66, lty=1, pch=20, col="blue",
@@ -177,7 +178,7 @@ plot_CD_diagram <- function(DF,
                  pretty(range(FeHs)),
                  cex=text.cex,
                  col.pal[1:length(col.pal)], gradient='y', align='rb')
-    mtext(expression("[Fe/H]"), 4, cex=text.cex, line=3)#2)
+    mtext(expression("[Fe/H]"), 4, cex=text.cex, line=4)#2)
 
     for (h1_i in 1:length(h1s)) {
         h1 <- h1s[h1_i]
@@ -193,7 +194,7 @@ plot_CD_diagram <- function(DF,
         track <- Dnu_dnu(DF[DF$mass==paste(mass),], h1s)
         with(track, lines(Dnu, dnu, lwd=2, col='#999999'))
         if (mass==5)
-            text(track$Dnu[1]-5, #-9, 
+            text(track$Dnu[1]-15, #-9, 
                  track$dnu[1]-0.15, #-0.5, 
                  pos=3, labels=expression(M==5), cex=text.cex)
         else
@@ -245,6 +246,7 @@ plot_CD_diagram <- function(DF,
     }
 }
 make_plots(plot_CD_diagram, 'CD', DF=DF, make_png=F, short=F, thin=F,
+           paper=F, 
            #tall=F, wide=F,
            mar=utils.mar+c(0,-1,0,3.5))#2.5))
 

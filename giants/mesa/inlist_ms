@@ -29,28 +29,28 @@
       cubic_interpolation_in_Z = .true.
       
       max_years_for_timestep = -1
-      min_timestep_limit = 1d-12
-      mesh_delta_coeff = 1
-      max_allowed_nz = 30000
-      ! varcontrol_target = 1d-3 ! default is 1d-4
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !max_allowed_nz = 30000
+      !varcontrol_target = 1d-3 ! default is 1d-4
       delta_lgTeff_limit = 0.001
       delta_lgL_phot_limit = 0.01
       
-      photo_interval = 0
-      write_profiles_flag = .false.
+      photo_interval = 10000000
+      write_profiles_flag = .true.
       profile_interval = 1
       history_interval = 1
       terminal_interval = 10000000
       write_header_frequency = 10000000
-      !max_num_profile_zones = 2 ! so fast!
+      max_num_profile_zones = 2 ! so fast!
       
       convective_bdy_weight = 1
       convective_bdy_min_dt_yrs = 1d4 ! default is 1d-3
       T_mix_limit = 2d4
       skip_rotation_in_convection_zones = .true.
       
-      conv_bdy_mix_softening_f0 = 0.0001
-      conv_bdy_mix_softening_f = 0.0005
+      !conv_bdy_mix_softening_f0 = 0.0001
+      !conv_bdy_mix_softening_f = 0.0005
       
       
       step_overshoot_f_above_nonburn_core = 0.005
@@ -59,6 +59,7 @@
       step_overshoot_f_above_burn_h_core = 0.005
       step_overshoot_f_above_burn_h_shell = 0.005
       step_overshoot_f_below_burn_h_shell = 0.005
+      step_overshoot_f_above_burn_he_core = 0.005
       
       overshoot_f0_above_nonburn_core = 0.001
       overshoot_f0_above_nonburn_shell = 0.001
@@ -66,14 +67,16 @@
       overshoot_f0_above_burn_h_core = 0.001
       overshoot_f0_above_burn_h_shell = 0.001
       overshoot_f0_below_burn_h_shell = 0.001
+      overshoot_f0_above_burn_he_core = 0.001
       
       
       do_element_diffusion = .false.
-      diffusion_dt_limit = 3d12
+      !diffusion_dt_limit = 3d12
       
       diffusion_calculates_ionization = .false.
       diffusion_use_isolve = .true.
       diffusion_use_cgs_solver = .true.
+      diffusion_min_dq_at_surface = 1d-3
       
       diffusion_num_classes = 5
       diffusion_class_factor(1) = 1
@@ -93,27 +96,28 @@
       diffusion_class_A_max(3) = 4
       diffusion_class_A_max(4) = 16
       diffusion_class_A_max(5) = 10000
+      x_ctrl(2) = -1d99
       
+      !smooth_outer_xa_big = 1d-4
+      !smooth_outer_xa_small = 1d-8
       
-      smooth_outer_xa_big = 1d-4
-      smooth_outer_xa_small = 1d-8
-      
-      calculate_Brunt_N2 = .true.
+      !calculate_Brunt_N2 = .true.
       write_pulse_info_with_profile = .true.
       pulse_info_format = 'GYRE'
       
       add_atmosphere_to_pulse_info = .true.
       write_pulse_info_with_profile = .true.
-      add_center_point_to_pulse_info = .true.
-      keep_surface_point_for_pulse_info = .true.
-      add_double_points_to_pulse_info = .true.
+      add_center_point_to_pulse_info = .false.
+      keep_surface_point_for_pulse_info = .false.
+      add_double_points_to_pulse_info = .false.
       which_atm_option = 'Eddington_grey'
       
       ! main sequence
       x_ctrl(1) = -1d99
+      x_ctrl(3) = -1d99
       xa_central_lower_limit_species(1) = 'h1'
-      xa_central_lower_limit(1) = 1d-2
-      ! max_age = 15e9
+      xa_central_lower_limit(1) = 5d-2
+      !max_age = 15e9
       max_model_number = 1000000
       max_num_profile_models = -1
       
