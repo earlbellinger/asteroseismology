@@ -12,7 +12,7 @@ param.strs <- c("beta", "mu", "deltaf")
 
 
 plot_inversion <- function(model, inversion, k.pair,
-        log='', xlim=NA, ylim=NA, legend.spot='topleft', 
+        log='', xlim=NA, ylim=NA, legend.spot='topleft', should.cull=T,
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
         font="Times") {
     
@@ -23,7 +23,7 @@ plot_inversion <- function(model, inversion, k.pair,
     
     result <- inversion$result
     
-    result <- result[with(result, 
+    if (should.cull) result <- result[with(result, 
         fwhm.left < rs & 
         fwhm.right > rs & 
         err < 0.2 &
@@ -70,8 +70,10 @@ plot_inversion <- function(model, inversion, k.pair,
     #legend(legend.spot, lty=c(2, 1), col=c('darkgray', 'darkred'), lwd=2, 
     #       inset=c(0.01, 0.015),
     #       pch=c(NA, 20), legend=c("Actual", "Inverted"))
-    legend(legend.spot, lty=NULL, inset=c(0.01, 0.015), bty='n',
-        legend=bquote(K^(.(k.pair$f1.exp)*','~.(k.pair$f2.exp))))
+    if (!is.null(legend.spot)) {
+        legend(legend.spot, lty=NULL, inset=c(0.01, 0.015), bty='n',
+            legend=bquote(K^(.(k.pair$f1.exp)*','~.(k.pair$f2.exp))))
+    }
     
     par(mgp=mgp+c(1.5, 0, 0))
     f1.exp <- model$f1.exp
@@ -213,11 +215,13 @@ plot_inversion_mean <- function(model, inversion.list,
     title(ylab=bquote('Relative difference' ~ d*.(f1.exp)/.(f1.exp)))
 }
 
-plot_inversion_lists_mean <- function(model, inversion.lists,
-                           ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
-                           font="Times") {
-    text.cex <- text.cex*1.25
-    par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
+plot_inversion_lists_mean <- function(model, inversion.lists, 
+        k.pair=NULL, ylim=NULL, sampler=T, legend.spot="topleft",
+        ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
+        font="Times") {
+    #text.cex <- text.cex*1.25
+    #par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
+    par(mgp=mgp-c(0.5,0,0))
     
     get_q <- function(q_name, lists=inversion.lists) {
         sapply(lists, function(inversion.list) {
@@ -238,40 +242,82 @@ plot_inversion_lists_mean <- function(model, inversion.lists,
         apply(results, 1, sd)
     })
     
-    w.f.means <- apply(w.f.means, 1, mean)
-    w.f.stds <- apply(w.f.stds, 1, mean)
-    fwhm.left <- apply(fwhm.left, 1, mean)
-    fwhm.mid <- apply(fwhm.mid, 1, mean)
-    fwhm.right <- apply(fwhm.right, 1, mean)
+    w.f.means <- apply(w.f.means, 1, mean)[sampler]
+    w.f.stds <- apply(w.f.stds, 1, mean)[sampler]
+    fwhm.left <- apply(fwhm.left, 1, mean)[sampler]
+    fwhm.mid <- apply(fwhm.mid, 1, mean)[sampler]
+    fwhm.right <- apply(fwhm.right, 1, mean)[sampler]
     
-    m.f <- model$f1.spl(fwhm.mid)
+    m.f <- model$f1.spl(fwhm.mid)#[sampler]
     
+    #for (r_i in length(inversion.lists[[1]][[1]]$rs)) {
+    #    fs <- sapply(inversion.lists, function(inversion.list) 
+    #        sapply(inversion.list, function(result) result$f[r_i]))
+    #    errs <- sapply(inversion.lists, function(inversion.list) 
+    #        sapply(inversion.list, function(result) result$f.err[r_i]))
+    #}
     
-    for (r_i in length(inversion.lists[[1]][[1]]$rs)) {
-        fs <- sapply(inversion.lists, function(inversion.list) 
-            sapply(inversion.list, function(result) result$f[r_i]))
-        errs <- fs <- sapply(inversion.lists, function(inversion.list) 
-            sapply(inversion.list, function(result) result$f.err[r_i]))
-    }
+    if (is.null(ylim)) ylim <- range(
+        (m.f - w.f.means + w.f.stds) / m.f, 
+        (m.f - w.f.means - w.f.stds) / m.f) + c(-0.01, 0.01)
     
     plot(NA, axes=F, 
          xlim=c(0, 0.35),#range(fwhm.left, fwhm.right),
-         ylim=c(-0.2, .1),
+         ylim=ylim,
               #range((m.f - w.f.means-w.f.stds)/m.f, 
               #      (m.f - w.f.means+w.f.stds)/m.f),
               #      #c(-0.2, .1),
          xlab="Radius r/R",
          ylab="")
     
+    abline(h=0, lty=2, lwd=1)
+    
     d.f1.true <- if ('d.f1.true' %in% names(model)) model$d.f1.true else NULL
     if (!is.null(d.f1.true)) { 
-        lines(model$r, d.f1.true, type='l', lty=2, col='gray', lwd=3)
+        lines(model$r, d.f1.true, type='l', lty=2, col="#969696", lwd=3)
+        
+        legend(legend.spot, lty=c(NA, 2), bty='n', pch=c(20, NA), cex=text.cex, 
+           col=c('#214E34', '#969696'), lwd=2.5, 
+           inset=c(0.05, 0.015),
+           legend=as.expression(c(
+               bquote((.(k.pair$f1.exp)*','*.(k.pair$f2.exp))~"inversion"),
+               "Actual")))
+    } else {
+        legend(legend.spot, lty=c(NA), bty='n', pch=c(20), cex=text.cex, 
+           col=c('#214E34'), lwd=2.5, 
+           inset=c(0.05, 0.015),
+           legend=as.expression(c(
+               bquote((.(k.pair$f1.exp)*','*.(k.pair$f2.exp))~"inversion"))))
     }
     
-    segments(fwhm.left,  (m.f - w.f.means) / m.f, 
-             fwhm.right, (m.f - w.f.means) / m.f, lwd=2)
-    segments(fwhm.mid, (m.f - w.f.means-w.f.stds)/m.f, 
-             fwhm.mid, (m.f - w.f.means+w.f.stds)/m.f, lwd=2)
+    #if (!is.null(k.pair) & !is.null(legend.spot)) {
+    #    legend("bottomright", lty=NULL, inset=c(0.01, 0.015), bty='n',
+    #        cex=text.cex,
+    #        legend=bquote(K^(.(k.pair$f1.exp)*','~.(k.pair$f2.exp))))
+    #}
+    
+    #legend(legend.spot, bty='n', pch=c(NA, 3), cex=text.cex,
+    #    legend=c(" ", " "), inset=c(0.01, 0.015), col=c(1,1))
+    
+    #color <- adjustcolor('darkred', alpha.f=0.75)
+    arrows(fwhm.left, (m.f - w.f.means) / m.f, 
+          fwhm.right, (m.f - w.f.means) / m.f, 
+        code=3, angle=90, length=0.02,
+        col=1, lwd=0.5)
+        #col=adjustcolor('#214E34', alpha.f=0.5), lwd=1.5)
+    arrows(fwhm.mid, (m.f - w.f.means - w.f.stds) / m.f, 
+           fwhm.mid, (m.f - w.f.means + w.f.stds) / m.f, 
+        code=3, angle=90, length=0.02,
+        col=1, lwd=0.5)
+        #col=adjustcolor('#214E34', alpha.f=0.5), lwd=1.5)
+    points(fwhm.mid, (m.f - w.f.means) / m.f, 
+        pch=20, cex=0.66, col='#214E34')
+    
+    #segments(fwhm.left,  (m.f - w.f.means) / m.f, 
+    #         fwhm.right, (m.f - w.f.means) / m.f, lwd=2,
+    #         col=color)
+    #segments(fwhm.mid, (m.f - w.f.means-w.f.stds)/m.f, 
+    #         fwhm.mid, (m.f - w.f.means+w.f.stds)/m.f, lwd=2)
     
     magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
             las=1, mgp=mgp-c(0.5,0.15,0), 
@@ -280,14 +326,10 @@ plot_inversion_lists_mean <- function(model, inversion.lists,
             las=1, mgp=mgp+c(1,0,0),
             family=font, cex.axis=text.cex)
     
-    legend("bottomright", lty=c(2, NA), pch=c(NA, 3), 
-           col=c('gray', 'black'), lwd=3, 
-           inset=c(0.01, 0.015),
-           legend=c("Actual", "Mean Inversion"))
-    
-    par(mgp=mgp+c(1.5, 0, 0))
+    par(mgp=mgp+c(0.25, 0, 0))
     f1.exp <- model$f1.exp
-    title(ylab=bquote('Relative difference' ~ d*.(f1.exp)/.(f1.exp)))
+    title(ylab=bquote(#'Relative difference' ~ 
+        delta*.(f1.exp)/.(f1.exp)))
 }
 
 plot_inversion_lists_mean_points <- function(model, inversion.lists,
@@ -565,20 +607,22 @@ plot_results_spline <- function(model, results.lists,
     title(ylab=bquote('Relative difference' ~ d*.(f1.exp)/.(f1.exp)))
 }
 
-plot_kernels <- function(model, inversion, log='', xlim=NA,
+plot_kernels <- function(model, inversion, cross=F, log='', xlim=NA,
+         should.cull=T,
          legend.spot='topright', ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
          font="Times") {
     text.cex <- text.cex*1.25
     par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
     
-    keep <- which(with(inversion$result, 
+    
+    keep <- if (should.cull) which(with(inversion$result, 
         fwhm.left < rs & 
         fwhm.right > rs & 
         err < 0.05 & 
-        fwhm.right - fwhm.left < 0.15))
+        fwhm.right - fwhm.left < 0.15)) else T
     
     kernels <- if (cross) inversion$cross_kerns else inversion$avg_kerns 
-    kernels <- kernels[,keep]
+    if (should.cull) kernels <- kernels[,keep]
         
     if (length(xlim)<=1) xlim <- c(0, 1)
     
@@ -613,6 +657,62 @@ plot_kernels <- function(model, inversion, log='', xlim=NA,
             las=1, mgp=mgp+c(1,0,0),
             family=font, cex.axis=text.cex)
     par(mgp=mgp+c(1.5, 0, 0))
+    if (cross) {
+        title(ylab=bquote('Cross-Term Kernel'~
+                              kappa^(.(model$f2.exp)*','~.(model$f1.exp))))
+    } else {
+        title(ylab=bquote('Averaging Kernel'~
+                              kappa^(.(model$f1.exp)*','~.(model$f2.exp))))
+    }
+}
+
+plot_kernel_lists <- function(kernel.lists, cross=F, model, log='', xlim=NULL,
+         sampler=c(T), legend.spot='topright', 
+         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
+    #text.cex <- text.cex*1.25
+    #par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
+    par(mgp=mgp-c(0.5,0,0))
+    
+    #xs <- seq(0, 1, 0.001)
+    kernels <- do.call(cbind, Map(function(radius_i) {
+        apply(do.call(cbind, Map(function(ii) {
+            trial. <- kernel.lists[[ii]]
+            do.call(cbind, Map(function(jj) {
+                ref.mod. <- trial.[[jj]]
+                #splinefun(ref.mod.$x, ref.mod.[,radius_i])(xs)
+                ref.mod.[,radius_i]
+            }, jj=1:length(trial.)))
+        }, ii=1:length(kernel.lists))), 1, mean)
+    }, radius_i=1:ncol(kernel.lists[[1]][[1]])))[,sampler]
+    
+    if (is.null(xlim)) xlim <- c(0, 1)
+    
+    plot(NA, log=log, 
+         type='l', lty=2, col='gray', lwd=3, 
+         ylim=range(0, kernels), 
+         xlim=xlim,
+         axes=F, 
+         xlab="Radius r/R",
+         ylab="")
+    
+    abline(h=0, lty=2)
+    
+    col.pal <- c("#351431", "#8DAA9D", "#7B0828", "#522B47", "#FAB3A9")
+    col.pal <- adjustcolor(col.pal, alpha.f=0.8)
+    for (kern_i in 1:ncol(kernels)) {
+        xs <- if (cross) model$k2$x else model$k1$x
+        col. <- col.pal[kern_i%%length(col.pal)+1]
+        lines(xs, kernels[,kern_i], lty=kern_i, lwd=1.5, col=col.)
+    }
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
+            las=1, mgp=mgp-c(0.5,0.15,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=0.25, labels=1, 
+            las=1, mgp=mgp+c(1,0,0),
+            family=font, cex.axis=text.cex)
+    
+    par(mgp=mgp+c(0.25, 0, 0))
     if (cross) {
         title(ylab=bquote('Cross-Term Kernel'~
                               kappa^(.(model$f2.exp)*','~.(model$f1.exp))))

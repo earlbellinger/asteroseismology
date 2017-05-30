@@ -22,6 +22,9 @@ Tagesstern <- list(freq.path=file.path('data', 'Tagesstern-freqs.dat'),
 CygA <- list(freq.path=file.path('data', '16CygA-freqs.dat'),
                    freq.col.names=F)
 
+CygB <- list(freq.path=file.path('data', '16CygB-freqs.dat'),
+                   freq.col.names=F)
+
 subgiant <- list(freq.path=file.path('data', '16CygA-freqs.dat'),
                    freq.col.names=F)
 

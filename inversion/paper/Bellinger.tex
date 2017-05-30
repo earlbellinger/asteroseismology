@@ -1,0 +1,712 @@
+%% This is emulateapj reformatting of the AASTEX sample document
+%%
+%\documentclass[iop,apj,twocolappendix]{emulateapj}
+%\documentclass[manuscript]{aastex}
+
+%\documentclass[manuscript]{aastex6}
+%\newcommand{\colwidth}{0.5\textwidth}
+
+\documentclass[twocolumn,twocolappendix]{aastex6}
+\newcommand{\colwidth}{\linewidth}
+
+\newcommand{\vdag}{(v)^\dagger}
+\newcommand{\myemail}{bellinger@mps.mpg.de}
+
+\usepackage{graphicx}	% Including figure files
+%\usepackage{subfig}     % For subcaptions 
+\usepackage{amsmath}	% Advanced maths commands
+\usepackage{amssymb}	% Extra maths symbols
+\usepackage{bm}		    % Bold maths symbols, including upright Greek
+
+%\usepackage{mathrsfs} \mathscr{K}
+\usepackage{microtype}
+
+\usepackage{lipsum}
+%\usepackage{physics}
+%\usepackage{subcaption}
+\usepackage{bookmark}
+
+\usepackage{xcolor}
+\usepackage{color}
+
+\usepackage{blkarray}
+
+\usepackage{natbib}     % Bibliography
+\usepackage{lineno} 
+%\linenumbers
+\usepackage{mathrsfs}%,amsmath}
+
+\newif\ifref
+%\reftrue 
+\reffalse
+\newcommand{\mb}[1]{\ifref\boldmath\textbf{#1}\unboldmath\else #1\fi}
+
+
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\Ltwo}{\ell(\ell+1)}
+\newcommand{\U}{\frac{4\pi\rho r^3}{m}}
+\newcommand{\VV}{\frac{G m \rho}{rP}}
+\newcommand{\ddr}{\frac{\text{d}}{\text{d}r}}
+\newcommand{\ddx}{\frac{\text{d}}{\text{d}\ln r}}
+\newcommand{\ddls}{\frac{\text{d}}{\text{d}\ln s}}
+\newcommand{\ddra}[1]{\frac{\text{d} #1}{\text{d}r}}
+\newcommand{\ddxa}[1]{\frac{\text{d} #1}{\text{d}\ln r}}
+\newcommand{\ddsa}[1]{\frac{\text{d} #1}{\text{d} s}}
+\newcommand{\ddlsa}[1]{\frac{\text{d} #1}{\text{d}\ln s}}
+\newcommand{\dP}{\frac{\delta P}{P}}
+%\newcommand{\dm}{\frac{\delta m}{m}}
+\newcommand{\drho}{\frac{\delta \rho}{\rho}}
+\newcommand{\dG}{\frac{\delta \Gamma_1}{\Gamma_1}}
+\newcommand{\du}{\frac{\delta u}{u}}
+\newcommand{\dY}{\frac{\delta Y}{Y}}
+\newcommand{\Gr}{\Gamma_{1,\rho}}
+\newcommand{\GP}{\Gamma_{1,P}}
+\newcommand{\GY}{\Gamma_{1,Y}}
+\newcommand{\Kcr}{K_i^{(c_s, \rho)}}
+\newcommand{\Krc}{K_i^{(\rho, c_s)}}
+\newcommand{\Kcsr}{K_i^{(c_s^2, \rho)}}
+\newcommand{\Krcs}{K_i^{(\rho, c_s^2)}}
+\newcommand{\KuY}{K_i^{(u,Y)}}
+\newcommand{\KYu}{K_i^{(Y,u)}}
+\newcommand{\KGr}{K_i^{(\Gamma_1,\rho)}}
+\newcommand{\KrG}{K_i^{(\rho, \Gamma_1)}}
+
+\definecolor{echelle-yellow}{HTML}{A57C29}
+\definecolor{echelle-blue}{HTML}{177E89}
+\definecolor{echelle-red}{HTML}{DB3A34}
+\definecolor{echelle-black}{HTML}{323031}
+
+\definecolor{surf-red}{HTML}{DB4D48}
+\definecolor{surf-brown}{HTML}{F29559}
+\definecolor{surf-gray}{HTML}{B8B08D}
+
+\definecolor{turn-blue}{HTML}{283845}
+\definecolor{turn-orange}{HTML}{B16D41}
+
+\shorttitle{Asteroseismic Inversions for Stellar Structure}
+\shortauthors{E.~P.~Bellinger et al.}
+
+\begin{document}
+
+%\title{Asteroseismic Inversions for the Internal Structures of Solar-type Stars} 
+\title{Surmising the Seismic Structures of Solar-type Stars} 
+
+\author{Earl P.~Bellinger\altaffilmark{1,2,3,4}, Sarbani Basu\altaffilmark{2}, Saskia Hekker\altaffilmark{1,3}, and Warrick H.~Ball\altaffilmark{5}}
+\affil{\altaffilmark{1} Max-Planck-Institut f{\"u}r Sonnensystemforschung, Justus-von-Liebig-Weg 3, 37077 G{\"o}ttingen, Germany\\
+\altaffilmark{2} Department of Astronomy, Yale University, New Haven, CT 06520, USA \\
+\altaffilmark{3} Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Ny Munkegade 120, DK-8000 Aarhus C, Denmark \\
+\altaffilmark{4} Institut f{\"u}r Informatik, Georg-August-Universit{\"a}t G{\"o}ttingen, Goldschmidtstrasse 7, 37077 G{\"o}ttingen, Germany \\
+\altaffilmark{5} School of Physics and Astronomy, University of Birmingham, Edgbaston, Birmingham B15 2TT, United Kingdom}
+
+\begin{abstract}
+Measurements of stellar pulsation frequencies provide strong constraints on evolutionary models of solar-like stars. However, pulsation frequencies of best-fitting stellar models still bear significant differences with the stars they are fitting. These differences arise both due to differences in internal structure between the observed star and the stellar model, and due to near-surface errors in modelling (i.e., the surface term). 
+Here we extend the seismic inversion technique of Optimally Localized Averages to draw inferences on the deep interiors of asteroseismic targets. We present an algorithm for automatic determination of inversion parameters that is robust to imprecise stellar mass and radius estimates. We validate the method using hare-and-hound exercises, and then apply the method to measure the internal isothermal sound speed profiles for two of the best-observed solar-like stars, 16 Cyg A \& B. Finally, we remark on the differences in the internal sound speed profile between these stars and their best-fitting evolutionary models.%
+\footnote{The source code for all analyses and for all figures appearing in this manuscript can be found electronically at \url{https://github.com/earlbellinger/asteroseismology} \citep{earl_bellinger_2016_55400}.} %% TODO
+\end{abstract}
+
+
+\keywords{methods: statistical --- stars: low-mass --- stars: oscillations --- stars: solar-type}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% BODY OF PAPER %%%%%%%%%%%%%%%%%%
+\section{Introduction} %\lipsum{5}
+
+The theory of stellar evolution developed in part out of a desire to explain the strikingly non-random occupations of stars in the Hertzsprung-Russell (H-R) diagram and in Color-Magnitude (C-M) diagrams of stellar populations. %The theory that emerged is markedly simple, based only on a small collection of macrophysical equations for stellar structure and microphysical prescriptions for stellar opacities, reaction rates, and equations of state. 
+Positing that a star begins as an initially homogeneous cloud of mostly hydrogen that collapses under its own weight until the conditions are ripe for fusion to sustain it, the evolution of a star is then the collection of physical processes that cause the mixture of elements throughout the stellar interior to vary over time from this state. Reposition in terms of luminosity and color---diagnostics that are visible from the stellar surface---are hence predicted from the ensemble of processes that cause the star to transform. 
+Many such processes are known. 
+Nuclear fusion causes adjustment to the overall elemental abundances in the core or within a shell inside a star. 
+Gravitational settling causes heavier elements to sink inward, and radiative levitation selectively resists this sinking. 
+Energy transport via convection causes entire regions in a star to maintain the same mixture of elements, leading to chemical discontinuities when the boundaries of such zones recede; and dredge-up events when a convective zone that extends to the stellar surface deepens into an area of disparate composition. 
+Overshooting extends convective zones beyond its ordinary boundaries and serves to smooth the otherwise resultant discontinuties. 
+Stars rotate, and this causes material to mix in the familiar way. 
+Thermohaline mixing, magnetic fields, binary accretion, and other processes affect the evolution of stars as well. 
+
+This collection of processes---of which only a subset is usually employed---has been remarkably successful at not only explaining the occupations of the H-R and C-M diagrams, but also for predicting dynamical stellar phenomena: namely, pulsations. 
+Theory predicts both the types of pulsations that cause stars to shake, each according to the internal characteristics of the star at each stage of its life; and the frequencies of those pulsations as well---within microhertz of the observed values. 
+
+Observations of stellar pulsations grant a new kind of insight into the behavior of stars. Whereas classical measurements of stars probe the properties of the stellar surface; observations of stellar pulsations, which traverse the interiors of stars, necessarily bring deeper information to light. As the frequencies of stellar pulsations profoundly depend on the chemical abundances throughout the stellar interior (and their variation), pulsation measurements therefore provide stringent tests on the processes of stellar evolution. 
+Stars exhibiting solar-like oscillations in particular vibrate in a superposition of a great number of oscillation modes simultaneously, and hence provide many new constraints to stellar models. 
+Recent space missions such as \emph{Kepler} and \emph{CoRoT} detected stellar pulsations in many stars, and established a very high level of congruity between theory and observation. 
+
+
+The agreement between pulsation frequencies of stars and models is not perfect, however. Figure \ref{fig:echelle} shows \`Echelle diagrams comparing models of the Sun to data of the quiet Sun collected by the Birmingham Solar Oscillations Network \citep[BiSON,][]{2014MNRAS.439.2025D} as well as comparisons with models for \emph{Kepler}'s perhaps best-observed solar-type stars, 16 Cyg A and B \citep{2015MNRAS.446.2959D}. 
+The evolutionary models of 16 Cyg A and B were constructed using the optimization procedure described in Section 2.4 of \citet{2017A&A...600A.128B}. %to generate evolutionary models of 16 Cyg A and B fitting to the observed data after correction for the surface term.
+Stellar pulsation frequencies in these stars significantly disagree with theory by up to about 14 $\mu\text{Hz}$ (a difference in pulsation period of about one second), or about half a percent. That the agreement is so close shows that the theory mostly gets the predictions right. That the differences are significant is partly a testament to how well pulsation frequencies have been measured, but also goes to show that there are important ingredients significantly missing in the evolutionary models of stars. 
+
+
+A major source of disagreement comes from the so-called ``surface term,'' a name given to the collection of processes neglected in the modelling of the near-surface layers of stars. 
+The surface term causes disagreement between model and star that increases as a function of frequency. The disagreement is independent of the spherical degree $\ell$ that describes how many nodal points lie along the stellar surface for a given mode. 
+A handful of methods aim to correct the disparities imposed by the surface term. The methods of \citet{2008ApJ...683L.175K}, \citet{2014A&A...568A.123B}, and \citet{2015A&A...583A.112S}, to name a few, correct the surface term by fitting a relation to the differences between model and stellar frequencies and subtracting them off. %\citet{Roxburgh2003} take a different approach and consider combinations of frequencies that can be shown to be insensitive to the outermost layers of the star \citep[e.g.]{Floranes2005}. 
+
+\begin{figure*}%[!ht]
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{echelles.pdf}
+    %\includegraphics[width=\linewidth,keepaspectratio]{echelle-BiSON.pdf}\\
+    %\includegraphics[width=\linewidth,keepaspectratio]{echelle-CygA.pdf}\\
+    %\includegraphics[width=\linewidth,keepaspectratio]{echelle-CygB.pdf}
+    \caption{\`Echelle diagrams comparing frequencies of a solar model to BiSON data (left) and models of 16 Cyg A and B to \emph{Kepler} data (center and right, respectively). The dashed black line indicates the large frequency separation ($\Delta\nu$). The dotted gray line indicates the frequency at which power is maximum ($\nu_{\max}$). 
+    Open symbols are model frequencies and filled symbols are observed frequencies. 
+    Spherical degrees of \textcolor{echelle-yellow}{2}, \textcolor{echelle-blue}{0}, \textcolor{echelle-red}{3}, and \textcolor{echelle-black}{1} are colored with \textcolor{echelle-yellow}{yellow circles}, \textcolor{echelle-blue}{blue squares}, \textcolor{echelle-red}{red triangles}, and \textcolor{echelle-black}{black diamonds}, respectively. Arrows show $1\sigma$ uncertainties, which in most cases are so small as to be invisible. Model frequencies significantly differ from observed frequencies in almost all cases. }
+    \label{fig:echelle} 
+\end{figure*}
+
+Even after correcting for the surface term, however, differences remain. Figure \ref{fig:bg-corr} shows the left-over discrepancies between models and observations of 16 Cygni after subtracting off the Ball \& Gizon surface term. 
+More than half (50.9\%) of the mode frequencies are significantly different from the observed values. 
+No longer differences in the near-surface layers of the star, these differences run deeper: the remaining residuals are due to inadequacies in evolutionary modelling of the stellar interior. 
+
+\begin{figure}%[!ht]
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{surfless.pdf}
+    \caption{Differences in oscillation mode frequency between models and observations after correcting for surface effects. % for 16 Cyg A (\textcolor{surf-red}{red}) and B (\textcolor{surf-brown}{brown}). %Shown are comparisons between the Sun and a classically solar-calibrated model (\textcolor{surf-red}{red}) and asteroseismically-constrained models of 16 Cyg A (\textcolor{surf-brown}{brown}) and 16 Cyg B (\textcolor{surf-gray}{gray}). 
+    %Spherical degrees of 2, 0, 3, and 1 are shown with circles, squares, triangles, and diamonds, respectively. 
+    %Significant residuals for most modes of oscillation remain after subtraction of the surface term, which are caused by differences in internal structure between model and star. 
+    Oscillation modes outside of the shaded regions have significant difference between star and model that arise due to differences in internal structure (outside dark gray: $p < 0.05$, outside light gray: $p < 0.01$). 
+    } 
+    \label{fig:bg-corr}
+\end{figure}
+
+While the theory of stellar evolution (at least with canonical ingredients) has not yet produced stellar models that agree within uncertainty with all observed stellar pulsation frequencies, the theory of stellar structure provides a path forward. We may ask of our best-fitting evolutionary model: can we adjust the structure of this model so that it pulsates in the same way as the star? 
+This question is an inverse problem; normally, one uses the stellar structure to calculate oscillation mode frequencies.  %; or, relatedly, one considers how a modification to the structure of a star will modify the frequencies of that star. 
+We seek to solve the inverse of that problem: from stellar pulsations, we wish to deduce the structure of a star. 
+%the pulsation frequencies of the adjusted model then agree with the observed star? %If we are able to answer this question, then we may adjust our stellar model until it agrees with the observed star, and thus we generate a better stellar model. 
+
+This inverse problem is difficult for multiple reasons:% 
+\begin{itemize}
+    \item A modification to the structure anywhere in a stellar model may cause several or all of its pulsation modes to shift in their frequency of oscillation, but each frequency may shift in a different way. 
+    %Changes to stellar structure may cause changes to multiple pulsation frequencies; a change anywhere may modify the frequencies of several (or all) of a star's pulsations. 
+    \item The various aspects of stellar structure are not independent variables: the pressure $P$, density $\rho$, and first adiabatic exponent $\Gamma_1$ at any location $r$ inside of a star are all related to each other via the hydrostatic equation and the thermodynamic equation of state. 
+    A change to any one requires a change to another. 
+    Indeed, we must consider adjustments to our stellar model with respect to two variables at a time. 
+    \item Whereas we are trying to measure a continuous function, we have only a finite (and small) set of frequencies with which to do it. %There are only a small number of mode frequencies that must be used to estimate a continuous function.\footnote{There is a widely held misconception in the inversion literature that a continuous inverse problem is ill-posed because a finite amount of information (oscillation mode frequencies) is used to estimate an ``infinite'' amount of information. This is not the case; a continuous real function does not have infinite information. Consider the function $f(x)=1;\; x\in\mathbb{R}$. Far from having infinite information, this function .}
+    \item The measurements of pulsation mode frequencies are uncertain. An exact solution to any set of frequencies can always be found, so na\"ive adjustment according to the data without careful consideration of their potential errors will give nonphysical solutions. Regularization techniques must therefore be applied. 
+    \item Oscillation modes trace unique yet highly similar paths throughout the stellar interior. As such they are nearly linearly dependent. The problem is hence ill-conditioned, in the sense that small changes to the oscillation mode frequencies can lead to large changes in the inferred internal profile. This exacerbates the previous point. 
+    \item %Different oscillation modes trace different paths throughout the stellar interior. 
+    The modes of oscillation only carry information about the regions that they traverse. 
+    The modes that are observable in solar-type stars are p-modes: acoustic modes that are stochastically excited by turbulent convection in the envelope of the star and subsequently restored to the equilibrium state by pressure. Non-radial (spherical degree $\ell>0$) p-modes, i.e.~a p-mode whose path through the star has horizontal in addition to radial motions, travel to a finite depth in the star before turning around. As such, most observable oscillation modes are not sensitive to the deep stellar interior. Moreover, all of the modes are very sensitive to the outermost layers of the star, where contributions are at least attempted to be subtracted off, as these regions are already known to be poorly-modelled. %In the asteroseismic case, there is not enough information available to unambiguously probe most regions of the star. 
+    \item The solutions are not unique. 
+    For a simple example, consider a case where none of the observed modes descend into the stellar core---this is fortunately not the case for solar-type targets, because core-probing radial oscillations can be observed. 
+    An infinity of adjustments to the stellar core are hence equally supported by the data. 
+    From any solution to the inverse problem, a different solution can be generated by considering the combination of regions to which the observed modes are not sensitive \citep[for a discussion, see][]{GoughThompson1991}.
+\end{itemize}
+
+These difficulties are not new. This problem has already been tackled in the Sun, and the Earth before it, and there is a wealth of literature available on these subjects \citep[for a detailed introduction to local and global helioseismology, see e.g.~][]{Kosovichev2011}. Inversions of asteroseismic data do present some unique challenges, however. Unlike in helioseismology, in which the solar mass and radius are known to high precision, the masses and radii of solar-like oscillators are uncertain by at least a percent \citep[see e.g.][]{2013MNRAS.433.1262W,2015MNRAS.452.2127S,Bellinger2016}. Although seemingly small, the uncertainties in stellar mass and radius are generally about two orders of magnitude greater than the uncertainties in oscillation mode frequencies. The number of observed oscillation modes is also much smaller, and the inner radii at which these modes turn around is much more limited as well. Figure \ref{fig:turning-points} shows a comparison between the lower turning points of solar oscillation modes that were observed with the Michaelson Doppler Imager \citep[MDI,][]{1997SoPh..175..287R} to the Sun-as-a-star BiSON data set, and also compares them to the mode set that is observable from 16 Cyg A (that is, solar frequencies but with the spherical degrees and radial orders that are observed in 16 Cyg A). This diagram makes it clear that it will not be possible with current asteroseismic data of 16 Cyg A to resolve discrepancies between model and theory in the outer envelope of that star. As a consequence, inference of the global profile of structural differences will not be possible either, as has been accomplished in helioseismology for example with the regularized least squares inversion technique \citep[RLS, see e.g.][]{1994A&AS..107..421A,basu2017asteroseismic}. Instead, we must rely on localized estimates at specific target radii inside of the star. 
+
+In this paper, we introduce an extension to existing inversion techniques that facilitate inference for the internal structures of solar-type main-sequence stars. We apply the technique to 16 Cyg A and B, for which about 55 frequencies each have been observed. These stars and their frequencies have already been inverted for their internal rotation rates \citep{2015MNRAS.446.2959D} and mean densities \citep{Buldgen2015a}, among other things. In this paper, we seek to invert for their hydrostatic structures; namely, their isothermal sound speeds at various points in their interiors, and we compare their characteristics to evolutionary models. 
+
+The main sequence is a well-studied phase of evolution, and the different types of observations that are possible for main sequence stars facilitate robust estimates of their masses, ages, and radii in a well-known way \citep{2017ApJ...839..116A}. Being the first and also the longest-lived stage of evolution, getting the details of the main sequence evolution right is necessary for also getting the later stages right. Any neglected processes that cause substantial errors on the main sequence will propagate into errors in later stages of evolution as well. 
+
+
+\begin{figure}%[!ht]
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{turning_points.pdf}
+    \caption{Lower turning points as a function of frequency for a solar model with the MDI mode set (open circles), BiSON mode set (all filled points) and the 16 Cyg A mode set (\textcolor{turn-orange}{orange} points). Modes of the same spherical degree are connected by lines, with low-degree modes of spherical degree 0, 1, 2, and 3 shown with squares, diamonds, circles, and triangles, respectively. } 
+    \label{fig:turning-points}
+\end{figure}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% METHODS %%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Methods} 
+We seek to measure the difference in internal structure between a star and its best-fitting evolutionary models. 
+We will achieve this by considering differences between model and stellar oscillation mode frequencies as perturbations to the model frequencies; correspondingly, the differences in structure are perturbations to the model structure. From this, we may deduce the structure of the observed star. 
+
+This exploration comes aided by the use of kernel functions, which quantify the sensitivity of each oscillation mode frequency to a change in structure at any place in the stellar interior. The calculation of kernels is possible because stellar models obey a variational principle: to first-order approximation, perturbations to oscillation mode eigenfrequencies do not depend on the perturbations to their eigenfunctions \citep{Chandrasekhar1964}. 
+
+We begin with an equation that relates the differences in frequency between a star and a reference model to differences in their structure.
+Assume we have a set of $\mathscr{M}$ pulsation modes whose frequencies $\vec\nu$ have been observed, e.g.~$\mathscr{M}=\left\{(\ell=0, n=10), (\ell=1, n=11), \ldots\right\}$. For each oscillation mode $i\in\mathscr{M}$ we have an equation relating a frequency perturbation to perturbations in stellar structure: 
+%\begin{align}
+%    \frac{\delta\nu_i}{\nu_i} 
+%    =
+%    \left\langle \vec K_i^{(f1,f2)} \cdot \frac{\delta \vec f}{\vec f} \right\rangle
+%\end{align}
+\begin{align} \label{eq:forward}
+         \frac{\delta\nu_i}{\nu_i} 
+         =
+         &\int_0^R K_i^{(f_1, f_2)}(r) \cdot \frac{\delta f_1}{f_1}(r) \; \text{d}r 
+\notag\\+&\int_0^R K_i^{(f_2, f_1)}(r) \cdot \frac{\delta f_2}{f_2}(r) \; \text{d}r 
+\notag\\+& \frac{F_\text{surf}(\nu_i)}{\mathcal{I}_i} + \epsilon_i 
+%\qquad i\in\mathscr{M}%\notag
+%\\ +&
+% \\+ & a_1 \left(\frac{\nu_i}{\nu_{ac}}\right)^{-2}/\mathcal{I}_i + a_2 \left(\frac{\nu_i}{\nu_{ac}}\right)^2/\mathcal{I}_i
+\end{align}
+where $R$ is the total radius of the star, $\delta f$ is the difference in $f$ between the stellar model and the star, $F_\text{surf}$ is a surface term that varies as a function of frequency, $\vec{\mathcal{I}}$ are the mode inertias, and $\vec\epsilon$ are the observational errors, which are assumed to be independent and normally distributed with zero mean and variance $\vec{\sigma^2}$. The functions $\vec{K}^{(f_1, f_2)}$ are known as kernel functions and serve relate changes in the structural variables $f_1$ and $f_2$ to changes in oscillation mode frequency $\nu$. For a given pair of physical variables, the kernels for that pair may be derived from a perturbation analysis of the equations of stellar structure. For statements of various kernel functions, see Appendix \ref{sec:kernel-functions}. %The equation is due to \citet{} but was cast into its modern form by \citet{}. 
+\citet{2016LRSP...13....2B} gives a derivation of this equation in her Section 6.2.
+In plain English, this equation says that changes to stellar structure translate into changes in oscillation mode frequencies (modulo a surface term); and the kernel functions describe those translations. 
+In this work, we use the \citet{2014A&A...568A.123B} surface term, which \citet{2015ApJ...808..123S} showed to be a favorable choice, which in this case\footnote{Note that the exponents in Equation \ref{eq:surf-term} are $(-2, 2)$ instead of $(-1, 3)$ as in their paper because we use not $\delta\nu$ but rather $\delta\nu/\nu$.} has
+\begin{equation} \label{eq:surf-term}
+    F_\text{surf}(\nu) 
+    = 
+    a_1 \left(\frac{\nu}{\nu_{ac}}\right)^{-2}%/\mathcal{I}_i 
+  + a_2 \left(\frac{\nu}{\nu_{ac}}\right)^2%/\mathcal{I}_i 
+\end{equation}
+where $\nu_{ac}$ is the acoustic frequency cutoff of the reference model and $a_1$ and $a_2$ are coefficients that must be estimated during the inversion procedure. 
+
+%Appendix \ref{sec:ola-method} gives a detailed introduction to the method of Optimally Localized Averages. 
+
+%plots to make: brunt-vaisalas (maybe) 
+
+
+We use the Subtractive Optimally Localized Averages (SOLA) inversion technique as the basis of our method. For the mathematical details of SOLA, Appendix \ref{sec:ola-method} gives an introduction. %\citep[see also e.g.][]{basu2017asteroseismic}. 
+Briefly, the aim of SOLA is to make an estimate of a structural quantity $f_1$ at a given radius $r_0$. 
+The idea is as follows. 
+If the kernel function of an oscillation mode were only sensitive to a change in $f_1(r)$ in one small region of a star around $r=r_0$ and nothing else, then a departure in that oscillation mode's frequency from the observed value would demand that $f_1$ in the star at location $r_0$ is different from in the model. 
+According to Equation \ref{eq:forward}, the relative difference in $f_1(r_0)$ between the model and the star would be proportional to their relative difference in that mode's frequency. 
+The problem is that the the kernel functions of stellar p-mode oscillations are not by nature of this type; they are instead peaked at many places throughout the stellar interior (see Figure \ref{fig:same-ell-uY} for examples) and can have large amplitudes in the stellar envelope (i.e.~near $r/R=1$) where surface effects dominate. 
+SOLA gets around this issue by constructing new kernel functions, called \emph{averaging} kernels, that are more useful than the original set for probing specific regions of the star. 
+
+SOLA attempts to combine together the observed oscillation modes into a a new mode that has a kernel (the averaging kernel) resembling a narrow Gaussian peaked at some chosen target radius $r_0$ inside the star. 
+It does this by simply adding all the kernel functions together and weighting each mode $i$ by some coefficient $c_i$. 
+If a vector of coefficients $\vec c$ exist such that an averaging kernel with the desired properties can be formed, then it can then be used to measure the difference in $f_1$ between model and star at the radius to which it has been constructed to be sensitive. 
+The fake mode that is made will have its own frequency, which can be formed by applying the same transformation to the mode frequencies as is done to the kernel functions to get the averaging kernel, i.e.~$\nu_\text{new} = \vec c \cdot \vec \nu$, with $\nu_i$ being the frequency of mode $i$. 
+After removal of the surface term, a difference in the frequency of this fake mode will then indicate a difference in $f_1$ between the model and the star at the target radius $r_0$. 
+
+As mentioned earlier, however, changes to the stellar structure must be considered using pairs of variables, not just a single variable in isolation. 
+The same process that creates a mode with a kernel function that is sensitive to changes of a given variable $f_1$ must also combine the kernels of a complementary function $f_2$. 
+Hence, we wish not only to find the combination of kernel functions that makes a good averaging kernel, but also the combination that makes a good \emph{cross-term} kernel. 
+Since we seek to have a correspondence between changes in the frequency of our new mode and changes in $f_1$, the cross-term kernel should be very small: we want differences in $f_2$ to make only little contribution to changes in the mode frequency. 
+
+We must similarly control the influence of frequency uncertainty in our construction of the averaging kernel. 
+If we are not careful, the method can over-fit to the noise component of the observation and construct kernels that give false inferences. 
+The uncertainty of each mode will also combine in the same way to become the uncertainty of the new mode. 
+%and the influence of mode frequency uncertainties will need to be controlled as well. 
+
+Hence, SOLA has multiple free parameters that must be chosen: $\beta$, a variable controlling the influence of the cross-term kernel; $\mu$, a variable controlling the influence of the mode uncertainties; and $\Delta_f$, a variable controlling the width of the averaging kernel. It is not clear \emph{a priori} which inversion parameters should be chosen, and the results are very sensitive to the choice. \citet{1998ESASP.418..505R} showed an exploration of this parameter space with solar models. They conclude that even with hundreds of modes having spherical degree $0\leq \ell \leq 80$, an ``unfortunate choice'' of inversion parameters gives an incorrect picture of the stellar interior. 
+The situation is even more extreme for other stars, where the mode set is smaller ($0 \leq \ell \leq 3$) and the data errors are larger. 
+In helioseismic inversions, one has the luxury of comparing SOLA inversion results with inferences made with the complementary technique of RLS. 
+As each technique represents a one-sided inverse, with SOLA being a left inverse and RLS being a right inverse \citep[][Section 3.3]{Sekii1997}, the inversion parameters that produce agreement between the two techniques are likely to be good. 
+As previously discussed, however, this luxury is not available in asteroseismic inversions, so another path must be taken. 
+\citet{Basu2000} provide a hint, there showing that the inversion results do not depend on the choice of reference model; with proper selection of inversion parameters, a wide range of reference models are able to give the desired inference. 
+We use this result as the basis of the new method that we present here for the algorithmic selection of asteroseismic inversion parameters on the basis of agreement across an array of reference models. 
+
+
+\subsection{Selecting Inversion Parameters}
+
+The first problem we must confront is discrepancies in mass and radius between the star and the reference model. The inversion procedure uses non-dimensionalized variables which assume equality in mass and radius between the star and the reference model. 
+The basic inputs to the inversion procedure are the relative differences in oscillation mode frequencies between a reference model and the star, which are non-dimensional by nature.  
+However, a proper non-dimensionalization of the frequency differences would first divide each frequency by the mean density of the star, since dimensional frequencies scale with $\sqrt{M/R^3}$; $M$ being the total stellar mass and $R$ being the total stellar radius. 
+Since the mass and radius of an asteroseismic target is unknown, this presents a difficulty. 
+\citet{Basu2003a} showed however that the relative frequency differences between models of different mass and radius essentially shift by a constant offset. 
+Therefore, prior to performing an inversion, we first subtract a constant offset in relative frequency differences that we fit via weighted least squares. 
+Consequently, a proper non-dimensionalization of the frequency differences is emulated. 
+
+To further address this problem, we evolve an array of 9 reference models that are calibrated to span the $1\sigma$ uncertainties in mass and radius for each star whose interior structure we seek to infer. 
+We use the interferometric radius and luminosity estimates of 16 Cygni from \citet{2013MNRAS.433.1262W}, the asteroseismic mass and age estimates from \citet{Bellinger2016}, and the metallicities from \citet{2009A&A...508L..17R}. We use the Modules for Experiments in Stellar Astrophysics \citep[MESA, r9575,][]{Paxton2011} stellar evolution code to generate the array of models and post-process them for oscillation mode frequencies using the Aarhus adiabatic oscillation package \citep[ADIPLS,][]{2008ApSS.316..113C}. 
+%We use the same treatments of evolution and pulsation that are described in Section 2.1 of \citet{Bellinger2016}. 
+
+Normally, the inferred quantity from the inversion procedure is a (non-dimensional) relative difference, which in this case we choose to do as: 
+\begin{equation}
+    \frac{(\text{model} - \text{star})}{\text{model}} = 
+    \frac{ (f^{\text{ref}} - f^{\text{star}}) }{f^{\text{ref}}}
+    =
+    \frac{\delta f}{f}
+\end{equation} 
+for some quantity $f$. Obviously, this can be re-dimensionalized via
+\begin{equation} \label{eq:dimensional}
+     f^{\text{star}} = f^{\text{ref}} \left( 1 - \frac{\delta f}{f} \right)
+\end{equation}
+which is useful because each reference model is inverting for a different $\delta f_1/f_1$. 
+
+We optimize the inversion parameters across each of the 9 models for consensus in the inversion result. We then take an average among their inferred values of $f_1$. %We choose the parameters $\vec \beta$, $\vec \mu$, and $\vec \Delta_f$ such that there is agreement among the inversion results. 
+Formally, we postulate that the optimal inversion parameters across all of the reference models is 
+\begin{align} \label{eq:invert-for-agree}
+    (\hat \beta, \hat \mu, \hat \Delta_f)
+    &=
+    \underset{(\vec \beta, \vec \mu, \vec \Delta_f)}{\arg\min} \Bigg\{ 
+    \sum_{r_j\in \vec{r_0}} 
+        \sum_{k=1}^{9} 
+            \Big[ f_{1,k}\left(r_j; \beta_k, \mu_k, \Delta_k\right) 
+\notag\\& - \frac{1}{9}\sum_k^9 f_{1,k}\left(r_j; \beta_k, \mu_k, \Delta_k\right) \Big]^2
+    \Bigg\}
+\end{align}
+where $f_{1,k}(r_0; \beta, \mu, \Delta)$ is the inferred value of $f_1^{\text{star}}$ at target radius $r_0$ using the inversion parameters $(\beta, \mu, \Delta)$ with the $k$th reference model, which can be calculated with
+\begin{align}
+    f_{1,k}(r_0; \beta, \mu, \Delta) 
+    = 
+    f_{1,k}^{\text{(ref)}}(r_0) \left[ 1 - \sum_{i \in \mathscr{M}} c_i(r_0; \beta, \mu, \Delta) \frac{\delta\nu_i}{\nu_i} \right]
+\end{align}
+(c.f.~Equations \ref{eq:dimensional} and \ref{eq:local-avg}), where $c_i$ are inversion coefficients that are estimated via the SOLA procedure (see Appendix \ref{sec:ola-method} for details of estimating $c_i$ with SOLA). 
+Put simply, Equation \ref{eq:invert-for-agree} says that the optimal inversion parameters for a given reference model are the ones that give the same inference of $f_1^{\text{star}}$ as all the other reference models, given that their inversion parameters have been selected in the same way. Since the inversion results depend on (uncertain) frequency values, we introduce a random realization of noise on a model-by-model basis. We use the \citet{nelder1965simplex} downhill simplex method to numerically search for the parameters that satisfy \ref{eq:invert-for-agree}. We then repeat the procedure multiple times with different realizations of noise and report the average result. 
+
+Although we have written this quite generally, using the functions $f_1$ and $f_2$ to stand in for any structural quantities, we do not have enough information in the asteroseismic case to invert for every possible pair of variables. 
+Since the mode set is very limited, controlling the cross-term kernel is in most cases quite difficult. 
+A path forward here can be forged by assuming that the equation of state of stellar matter is known exactly, i.e., that
+\begin{equation}
+    \Gamma_1 = \Gamma_1(P, \rho, Y)
+\end{equation}
+operates the same in the star as it does in the stellar model.
+The advantage here is that we then gain access to kernel functions for the helium abundance $Y$, which only has amplitude in its ionization zones \citep[see][]{Kosovichev1999,ThompsonJCD2002,Basu2009}; the drawback obviously being that a gross violation of the model equation of state would invalidate the inversion result. 
+This approach then allows us to form averaging kernels for $K^{(u,Y)}$, with $u$ being the isothermal sound speed $u \equiv P/\rho$; the definition of which we give in Appendix \ref{sec:KuY} and visualize in Figures \ref{fig:same-n-uY} and \ref{fig:same-ell-uY}.
+
+
+\section{Results}
+\subsection{Tests on Models} 
+
+In order to validate our technique, we first apply the method to a solar model using an array of 9 models spanning the same fractional uncertainties in mass and radius that were measured in 16 Cygni. We test the procedure using both the BiSON and 16 Cyg A mode sets. Since we are inverting with respect to a model instead of a real star, we are able to verify that the procedure produces the correct result. To further validate our technique, we invert for the structure of our best-fitting evolutionary model of 16 Cyg A using an array of 9 reference models spanning its uncertainties in mass and radius. None of the models in the array have the same mass or radius as the model whose structure we are inferring. Figure \ref{fig:model-inv} shows the inversion results, confirming that the internal structures of these models are able to be deduced with our technique. Figure \ref{fig:model-kerns} shows the averaging and cross-term kernels for these inversions.
+
+
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-p_CygAwball-m_CygA-e_CygA-mod_Gauss.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-p_CygAwball-m_CygA-e_CygA-mod_Gauss.pdf}
+    \caption{Results of the SOLA inversion-for-agreement method for the structure of a solar model (left) and stellar model with an unknown mass and radius (right) using the BiSON mode set () and the 16 Cyg A mode set (). The differences are shown in the sense of (model - star)/model, with the true relative difference in the isothermal sound speed profile $u$ shown with a gray dashed line.}
+    \label{fig:model-inv} 
+\end{figure*}
+
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-kerns-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-kerns-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}\\
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-cross-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-cross-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}
+    \caption{Averaging (top) and cross-term (bottom) kernels for the SOLA inversion-for-agreement of a solar model (left) and a stellar model (right) using the 16 Cyg A mode set.}
+    \label{fig:model-kerns} 
+\end{figure*}
+
+
+\subsection{Inversions of 16 Cygni} 
+We now apply our technique to invert for the seismic structures of 16 Cyg A and B. Figure \ref{fig:Cyg-inv} shows inversions for the internal isothermal sound speeds of 16 Cyg A and B. Due to their limited mode sets, we are only able to form well-localized averaging kernels at the radii $0.18, 0.2,$ and $0.22$. The averaging kernels and cross-term kernels for these inversions are shown in Figure \ref{fig:Cyg-kerns}. From these investigations, we can infer that the stars have sound speeds at these radii that exceed the model sound speeds by about a percent. 
+
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}%
+    \caption{OLA inversion for relative differences in the isothermal sound speed $u$ between 16 Cyg A and its best-fitting evolutionary model (left) and 16 Cyg B and its model (right) at target radii $r_0 = 0.18, 0.2, 0.22$. The sound speed of the model at these radii is approximately 1\% lower than the star. TODO: insert Cyg B plots } 
+    \label{fig:Cyg-inv} 
+\end{figure*}
+
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-kerns-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-kerns-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}\\
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-cross-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{inv-lists-optim2-cross-p_CygA-m_CygA-e_CygA-mod_Gauss.pdf}
+    \caption{Averaging (top) and cross-term (bottom) kernels for the OLA inversion of 16 Cyg A (left) and 16 Cyg B (right). TODO: insert Cyg B plots }
+    \label{fig:Cyg-kerns} 
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Discussion %%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Discussion \& Conclusions} 
+In this work, we have presented a new algorithm for the automatic determination of OLA asteroseismic inversion parameters. We validated this technique on solar data and models, and then applied it to the solar-type stars 16 Cyg A and B. We inferred the internal isothermal sound speed profiles at several different radii within these stars and compared them to their best-fitting evolutionary models. 
+
+We found that there are differences in structure between 16 Cygni and their best-fitting evolutionary models. This result suggests that there is something missing in the evolutionary modeling of stars. There are a number of processes that are absent in canonical stellar modelling, such as rotation and magnetic fields. It is possible that inclusion of these effects would resolve these discrepancies. 
+
+As is always the case with inversions, there is no mathematical guarantee that the end result will be the true profile of the star. That being said, as we have shown, the procedure works well on blind tests using models, so some confidence can be put in its results. 
+
+Here we have inverted for the seismic structures of main-sequence solar-like oscillators. Other types of stars exhibit solar-like oscillations as well. In particular, stars that are more advanced along the evolutionary path of solar-type stars---namely, sub-giant and red giant stars---continue to express these types of pulsations. Some pulsations of these stars additionally couple with internal gravity waves and hence provide an exciting opportunity to probe much deeper into the stellar interior. We will explore in a future publication the prospect of inverting these types of stars. 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Conclusions %%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%\section{Conclusions} 
+
+
+
+\iffalse
+\begin{deluxetable*}{cc}
+%\tabletypesize{\scriptsize}
+\tablecaption{ \label{tab:}}
+\tablewidth{0pt}
+\tablehead{\colhead{KIC} & \colhead{M$/$M$_\odot$}}
+\startdata
+ 3425851 & 1.15 $\pm$ 0.053 
+\enddata
+\end{deluxetable*}
+\fi
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Acknowledgements %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\acknowledgments The research leading to the presented results has received funding from the European Research Council under the European Community's Seventh Framework Programme (FP7/2007-2013) / ERC grant agreement no 338251 (StellarAges). This research was undertaken in the context of the International Max Planck Research School for Solar System Research. S.B.\ acknowledges partial support from NSF grant AST-1514676 and NASA grant NNX13AE70G.
+
+\software Analysis in this manuscript was performed with R 3.2.3 \citep{R} and the R libraries magicaxis 1.9.4 \citep{magicaxis}, parallelMap 1.3 \citep{parallelMap}, matrixStats 0.50.1 \citep{matrixStats}, plyr 1.8.3 \citep{plyr}, and Bolstad 0.2-33 \citep{Bolstad}. Kernel functions were calculated using kerexact \citep{kerexact}. 
+
+
+\clearpage
+\appendix
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Kernel functions %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kernel functions} \label{sec:kernel-functions}
+For the sake of completeness, here we provide definitions of some kernel functions, ultimately leading up to the $(u,Y)$ kernel functions that we use in this work. 
+
+\subsection{Kernel pair \texorpdfstring{$(c_s, \rho)$}{(cs,rho)}}
+
+\citet[][Eqns.\ 60-61]{GoughThompson1991} give\footnote{We have corrected a typographical error in their line 4 of their Eqn.~61, in which an $\ell$ term appears as the number 1.} the kernels for the sound speed $c_s = \sqrt{\Gamma_1 P/\rho}$ and density $\rho$, i.e.\ $(f_1, f_2) = (c_s, \rho)$, as
+\begin{align}
+    \omega_i^2 \mathcal{S}_i \Kcr =& \rho c_s^2 \chi_i^2 r^2
+\\  \omega_i^2 \mathcal{S}_i \Krc =& -\half \left( \xi_i^2 + \Ltwo \eta_i^2 \right) \rho \omega_i^2 r^2
+\notag\\&\hspace*{-1cm} + \frac{1}{2} \rho c_s^2 \chi_i^2 r^2 - G m \rho \left( \chi_i + \half \xi_i \ddra{\ln \rho} \right) \xi_i
+\notag\\&\hspace*{-1cm} - 4\pi G \rho r^2 \int_{s=r}^R \left( \chi + \half \xi_i \ddlsa{\ln \rho} \right) \xi_i \rho \; \text{d}s
+\notag\\&\hspace*{-1cm} + G m \rho \; \xi_i \ddra{\xi_i} + \half G \left(m \ddra{\rho} + 4\pi r^2 \rho^2 \right) \xi_i^2
+\notag\\&\hspace*{-1cm} - \frac{4 \pi G}{\Ltwo} \rho (\ell+1) r^{-\ell} (\xi_i - \ell \eta_i)
+\notag\\&\int_{s=0}^r \left(\rho \chi + \xi_i \ddsa{\rho} \right) s^{\ell+2} \; \text{d}s 
+\notag\\&\hspace*{-1cm} - \frac{4 \pi G}{\Ltwo} \rho \ell r^{(\ell+1)} \left( \xi_i + (\ell+1) \eta_i \right)
+\notag\\&\int_{s=r}^R \left( \rho \chi + \xi_i \ddsa{\rho} \right) s^{-(\ell-1)} \; \text{d}s
+%\notag\\&\hspace*{-1cm} - A (\ell+1) r^{-\ell} (\xi_i - \ell \eta_i) \int_{s=0}^r \left(\rho \chi + \xi_i \ddsa{\rho} \right) s^{\ell+2} \; \text{d}s 
+%\notag\\&\hspace*{-1cm}- A \ell r^{(\ell+1)} \left( \xi_i + (\ell+1) \eta_i \right) \int_{s=r}^R \left( \rho \chi + \eta_i_r \ddsa{\rho} \right) s^{-(\ell-1)} \; \text{d}s\notag
+\end{align}
+where $\omega_i=2\pi\nu_i$ is the cyclic mode frequency for the $i$th mode of oscillation, $\ell$ is the spherical degree of the mode, $\xi_i$ and $\eta_i$ are the radial and horizontal components of the mode eigenfunction, $m$ is the fractional mass, $G$ is the gravitational constant, 
+$\mathcal{S}_i$ is a quantity proportional to the energy of the mode (ibid.\ Eqn.\ 56):
+\begin{equation}
+    \mathcal{S}_i = \int \left( \xi_i^2 + \Ltwo \eta_i^2 \right) \rho r^2 \; \text{d}r
+\end{equation}
+and $\chi_i$ is the dilatation:
+\begin{equation}
+    \chi_i = \ddra{\xi_i} + 2\frac{\xi_i}{r} - \Ltwo \frac{\eta_i}{r}.
+\end{equation}
+%$A$ is a quantity that depends on stellar density:
+%\begin{equation}
+%    A = \frac{4 \pi G}{\Ltwo} \rho
+%\end{equation}
+%The quantities ... standard stellar evolution 
+Note that while $i$, $\omega_i$, $\mathcal{S}_i$, $\ell$ and $G$ are scalar quantities, $\Kcr$, $\Krc$, $\xi_i$, $\eta_i$, $\chi_i$, $\rho$, and $m$ all vary as a function of stellar radius $r$; for the convenience of notation, we have dropped all instances of ``$(r)$'' when writing them. 
+
+\subsection{Kernel pair \texorpdfstring{$(c_s^2, \rho)$}{(cs2,rho)}}
+Since all kernel pairs must satisfy Eqn.\ \ref{eq:forward}, it is easy to transform from kernel pair $(c_s, \rho)$ to $(c_s^2, \rho)$. We have that
+\begin{align}
+    \frac{\delta\nu_i}{\nu_i} 
+    &= 
+    \int_0^1 K^{(c_s,\rho)}_i \frac{\delta c_s}{c_s} + K^{(\rho,c_s)}_i \frac{\delta \rho}{\rho} \; \text{d}x
+\notag\\&=
+    \int_0^1 K^{(c_s^2,\rho)}_i \frac{\delta c_s^2}{c_s^2} + K^{(\rho,c_s^2)}_i \frac{\delta \rho}{\rho} \; \text{d}x.
+\end{align}
+We may expand the sound speed perturbation as
+\begin{equation}
+    \frac{\delta c_s^2}{c_s^2} = \frac{2 c_s\delta c_s}{c_s^2} = 2 \frac{\delta c_s}{c_s}
+\end{equation}
+hence we have
+\begin{align}
+    \Kcsr &= \frac{1}{2} \Kcr \label{eq:Kcsr}
+\\  \Krcs &= \Krc. \label{eq:Krcs}
+\end{align}
+%It is instructive at this point to inspect some kernel functions. Figures \ref{fig:same-n} and \ref{fig:same-ell} show equations \ref{eq:Kcsr} and \ref{eq:Krcs} for various different oscillation modes of a solar model. These kernels tell us how perturbations to the relevant physical variables would translate into perturbations of the respective oscillation mode frequencies. 
+
+\subsection{Kernel pair \texorpdfstring{$(\Gamma_1, \rho)$}{(Gamma1,rho)}}
+
+Kernel functions for the first adiabatic exponent $\Gamma_1$ and density $\rho$ may be transformed from $(c_s^2, \rho)$ kernels via \citep[][Eqns.\ 104-105]{InversionKit}:
+\begin{align}
+    \KGr &= \Kcsr
+\\  \KrG &= \Krcs - \Kcsr 
+\notag\\&\hspace*{-5mm} + \frac{G m \rho}{r^2} \int_{s=0}^r \frac{\Gamma_1 \chi_i^2 s^2}{2 \mathcal{S}_i \omega^2} \; \text{d}s
+\notag\\&\hspace*{-5mm} + \rho r^2 \int_{s=r}^R \frac{4\pi G \rho}{s^2} \left( \int_{t=0}^s \frac{\Gamma_1 \chi_i^2 t^2}{2 \mathcal{S}_i \omega_i^2} \; \text{d}t \right) \text{d}s.
+\end{align}
+
+
+\subsection{Kernel pair (u,Y)} \label{sec:KuY}
+By assuming the thermodynamic state of stellar matter, we may formulate kernels involving the fractional helium abundance throughout the stellar interior. For each mode $i$ we wish to obtain the pair of kernel functions for squared isothermal sound speed $u \equiv P/\rho$ and helium abundance $Y$
+\begin{equation}
+    \vec K^{(2)}_i = \left[ \KuY, \KYu \right]
+\end{equation}
+via conversion from the kernel pair of $(\Gamma_1, \rho)$
+\begin{equation}
+    \vec K^{(1)}_i = \left[ \KrG, \KGr \right].
+\end{equation}
+In order to calculate the difference in helium abundance, we will need to assume an equation of state. The calculations will therefore depend on the following variables that we may obtain from our reference model:
+\begin{align}
+    %\Gr &= \left( \pdv{\ln \Gamma_1}{\ln \rho} \right)_{P, Y} \quad 
+    \Gr &= \left( \frac{\partial \ln \Gamma_1}{\partial \ln \rho} \right)_{P, Y} \quad 
+     \\ \GP &= \left( \frac{\partial \ln \Gamma_1}{\partial \ln P} \right)_{\rho, Y} \quad
+% \\ \GP &= \left( \pdv{\ln \Gamma_1}{\ln P} \right)_{\rho, Y} \quad
+% \\ \GY &= \left( \pdv{\ln \Gamma_1}{Y} \right)_{\rho, P}.
+\\ \GY &= \left( \frac{\partial \ln \Gamma_1}{\partial Y} \right)_{\rho, P}.
+\end{align} 
+\citet[][Eqn.\ A9]{ThompsonJCD2002} give that this kernel pair may be calculated with
+\begin{align}
+    \KYu &= \GY \cdot \KGr
+\\  \KuY &= \GP \cdot \KGr - P \cdot \ddr \left( \frac{\psi_i}{P} \right)  \label{eq:Gough-JCD-KuY}
+\end{align}
+where $\psi_i(r)$ is the solution to the system of differential equations (ibid.\ Eqn.\ A5)
+\begin{equation} \label{eq:bvp}
+    \ddr \left[ \frac{1}{r^2 \rho} \cdot \ddra{\psi_i} \right]
+    +
+    \frac{4\pi G \rho}{r^2 P} \psi_i
+    =
+    \ddr \left[ \frac{F}{r^2 \rho} \right]
+\end{equation}
+\begin{equation}
+    F(r) = (\GP + \Gr) \cdot \KGr + \KrG
+\end{equation}
+with boundary conditions
+\begin{equation} \label{eq:bcs1}
+    \psi_i(r=0) = \psi_i(r=R) = 0.
+\end{equation}
+In order to calculate these kernels, we must first solve Eqn.\ \ref{eq:bvp} for $\psi_i$ numerically. As it is a system of second-order differential equations, we must first massage it into a first-order system. We may integrate both sides of Eqn.\ \ref{eq:bvp} to obtain 
+\begin{equation}
+    \ddra{\psi_i} = F - 4\pi G r^2 \rho \int_{r}^R \frac{\rho}{r^2 P} \psi_i \; \text{d}r.
+\end{equation}
+After solving this equation, we may inspect the resulting $(u, Y)$ kernel pair. %As with the $(c_s^2,\rho)$ kernels, 
+Figures \ref{fig:same-n-uY} and \ref{fig:same-ell-uY} show examples of these kernels for stellar oscillation modes of fixed radial order and fixed spherical degree, respectively. 
+
+
+
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{kernel-u_Y-D.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{kernel-Y_u-D.pdf}
+    \caption{Kernel functions for the squared isothermal sound speed and helium abundance $K^{(u, Y)}$ (left) and $K^{(Y, u)}$ (right) as a function of fractional radius for oscillation modes of a solar model with the same radial order but different spherical degree. Notice that $K^{(Y, u)}$ is very small ($0 < K^{(Y,u)} < 0.01$) in the interior $r/R < 0.9$.} %($n=5$) but different spherical degree ($\ell=0$ in black solid, $\ell=1$ in blue dashed, and $\ell=2$ in orange dotted). Notice that $K^{(Y, u)}$ is essentially zero in the interior $r/R < 0.9$. } 
+    \label{fig:same-n-uY} 
+\end{figure*}
+\begin{figure*}%[!ht]
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{kernel2-u_Y-D.pdf}%
+    \includegraphics[width=0.5\linewidth,keepaspectratio]{kernel2-Y_u-D.pdf}
+    \caption{Kernel functions $K^{(u, Y)}$ (left) and $K^{(Y, u)}$ (right) as a function of radius for oscillation modes of a solar model with the same spherical degree but different radial order.}%($\ell=2$) but different radial order ($n=3$ in black solid, $n=6$ in blue dashed, and $n=9$ in orange dotted).} 
+    \label{fig:same-ell-uY} 
+\end{figure*}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% The OLA Method %%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The OLA Method} \label{sec:ola-method}
+The method of Optimally Localized Averages (OLA), which is also known in geology as the Gilbert-Backus method after its discoverers (\citeyear{1968GeoJ...16..169B}, \citeyear{1970RSPTA.266..123B}), is an inversion technique for probing the interior of an oscillating body. 
+The idea is to combine the kernel functions of all observed oscillation modes into a new kernel function that is ``localized,'' i.e., sensitive only to a particular region of the star. 
+If able to be formed, that kernel function can then be used to investigate the properties of the star in the region to which it is sensitive, in the sense that one can then estimate differences between the model and the star, such as a higher pressure and or a lower density at that location. 
+Depending on the data that is available, it may be possible to form zero, one, or more well-localized averaging kernels at different locations in the stellar interior. 
+
+More formally, for a given target radius $r_0$, the OLA method aims to construct a function $\mathcal{K}(r)$ called an averaging kernel that is well-localized around a target radius $r_0$. Recalling the inversion equation, Equation \ref{eq:forward}, this can be achieved by summing up a linear combination of all available kernel functions such that they form a function with the desired properties. We therefore have:
+\begin{align}
+    \sum_{i \in \mathscr{M}} c_i(r_0) \frac{\delta\nu_i}{\nu_i}
+    =
+     &\int_0^R \mathscr{K}(r; r_0) \cdot \frac{\delta f_1}{f_1}(r) \; \text{d}r \notag
+\\ +& \int_0^R \mathscr{C}(r; r_0) \cdot \frac{\delta f_2}{f_2}(r) \; \text{d}r \notag
+\\ &\hspace{-1cm} + \sum_{i \in \mathscr{M}} c_i(r_0) \frac{F_\text{surf}(\nu_i)}{\mathcal{I}_i} + \sum_{i \in \mathscr{M}} c_i(r_0) \epsilon_i
+\end{align}
+where $\vec c$ are inversion coefficients that need to be estimated for a given $r_0$ and
+\begin{align}
+    \mathscr{K}(r; r_0) &= \sum_{i \in \mathscr{M}} c_i(r_0) K_i^{(f_1, f_2)}(r)
+\\  \mathscr{C}(r; r_0) &= \sum_{i \in \mathscr{M}} c_i(r_0) K_i^{(f_2, f_1)}(r)
+%\\  \mathcal{F} &= \sum_{i \in \mathscr{M}} c_i(r_0) \frac{F_\text{surf}(\nu_i)}{\mathcal{I}_i}.
+\end{align}
+subject to the constraint that 
+\begin{equation} \label{eq:sum-to-one}
+    \int \mathscr{K}(r; r_0) \; \text{d}r = 1.
+\end{equation}
+Provided that the cross-term kernel $\mathscr{C}$, the surface-term contributions, and the data errors are small; this linear combination of relative frequency differences gives a localized average of $f_1$ at the radius $r_0$:
+\begin{equation} \label{eq:local-avg}
+    \left\langle \frac{\delta f_1}{f_1} \right\rangle (r_0) = \sum_{i \in \mathscr{M}} c_i(r_0) \frac{\delta\nu_i}{\nu_i}
+\end{equation}
+with the uncertainty in the solution being
+\begin{equation}
+    e^2(r_0) = \sum_{i\in\mathscr{M}} c_i^2(r_0) \sigma_i^2.
+\end{equation}
+We seek to select the coefficients $\vec c$ that best meet those conditions. The optimal coefficients $\hat c$ for a given target radius $r_0$ are described by the following optimization equation: 
+\begin{align} \label{eq:opt}
+        \hat c(r_0&; \beta, \mu, \Delta_f) 
+        = 
+        \underset{\vec c}{\arg\min} \; \Bigg\{
+            \mathscr{F}(\vec c; r_0, \Delta_f) 
+\notag\\& + \beta \int_0^R \mathscr{C}(r; r_0) \; \text{d}r 
+          + \mu \sum_{i,j \in \mathscr{M}^2} c_i c_j E_{i,j}
+         \Bigg\}
+\end{align}
+where $\mathbf{E}$ is the error covariance matrix, which can often be assumed to be diagonal (i.e.~the errors are independent); $\beta$ and $\mu$ are Lagrange multipliers that must be chosen to penalize the amplitude of the cross-term kernel and the effect of data errors, respectively; and $\Delta_f$ is an optional free parameter that assigns desired widths to the target kernel. The function $\mathscr{F}$ has two choices, depending on whether or not $\Delta_f$ is used. The first is known as Multiplicative OLA \citep{1985SoPh..100...65G,1989ApJ...343..526B} and proceeds via
+\begin{equation}
+        \mathscr{F}^{\text{MOLA}}(\vec c; r_0)
+        = 
+        \int_0^R \mathscr{K}(r; r_0)^2 J(r; r_0) \; \text{d}r 
+\end{equation}
+where e.g.~$J=(r-r_0)^2$ is a function that penalizes the averaging kernel from having amplitude far from the target radius. The other method is Subtractive OLA  \citep{Pijpers1992,Pijpers1994} which uses
+\begin{equation}
+        \mathscr{F}^{\text{SOLA}}(\vec c; r_0, \Delta_f)
+        =  
+        \int_0^R \left[ \mathscr{K}(r; r_0) - \mathcal{T}(r; r_0, \Delta_f) \right]^2 \; \text{d}r 
+\end{equation}
+where the target kernel can be chosen e.g.~as a modified Gaussian that decays to zero at $r=0$ with 
+\begin{align}
+    \mathcal{T}(r; r_0, \Delta_f) &= A r \exp\left\{-\mathcal{G}(r; r_0, \Delta_f)^2\right\}
+\\ \mathcal{G}(r; r_0, \Delta_f) &= \frac{r-r_0}{\Delta(r_0, \Delta_f)} + \frac{\Delta(r_0, \Delta_f)}{2 r_0}
+\\ \Delta(r_0, \Delta_f) &= \Delta_f \frac{c_s(r_0)}{c_s(r_f)}
+\end{align}
+%\begin{align}
+%    \mathcal{T}(r; r_0, \Delta_f) &= A r \exp\left\{
+%    \frac{r-r_0}{\Delta(r_0)} + \frac{\Delta(r_0)}{2 r_0} \right\}
+    %-\mathcsh{G}(r; r_0, \Delta_f, r_f)^2\right\}%
+%\\ G(r; r_0, \Delta_f, r_f) &= 
+%\\ \Delta(r_0) &= \Delta_f \frac{c_s(r_0)}{c_s(r_f)}
+%\end{align}
+with $c_s(r)$ being the speed of sound at radius $r$, $r_f$ being an arbitrary reference point (e.g. $r_f=0$), and $A$ being a normalization factor that is chosen to ensure $\int \mathcal{T} \; \text{d}r = 1$. Example target kernel functions for a solar model are shown in Figure \ref{fig:target-kerns}. We note that there are other choices of $J$, $\mathcal{T}$, $\mathcal{G}$, and $\Delta$ that are possible, but they will not be explored here. 
+
+\begin{figure}
+    \includegraphics[width=\linewidth,keepaspectratio]{target_functions-BiSON.pdf}
+    \caption{Example target kernel functions for a solar model with target radii $r_0 = 0.05$, $0.15$, $0.25$, $0.35$, and $0.45$. The width of the target kernel adjusts based on both the choice of the target kernel width $\Delta_f$ as well as the sound speed of the target radius. \label{fig:target-kerns} }  
+\end{figure}
+
+Now we are ready to formulate the inversion problem to solve Eqn.~\ref{eq:opt}. Let 
+\begin{align}
+    \mathcal{A}_{i,j} 
+    = 
+    &\int_0^R K_i^{(f_1, f_2)}(r) \cdot K_j^{(f_1, f_2)}(r) \cdot 
+    \mathcal{M}(r_0; r)\; \text{d}r
+\notag\\+ \beta &\int_0^R K_i^{(f_2, f_1)}(r) \cdot K_j^{(f_2, f_1)}(r) \; \text{d}r 
+  + \mu E_{i,j}
+\end{align}
+where $\mathcal{M}^{\text{SOLA}}=1$ and $\mathcal{M}^{\text{MOLA}} = J$, and
+\begin{align}
+        y_i^{\text{SOLA}} &= \int_0^R K_i^{(f_1, f_2)}(r) \cdot \mathcal{T}(r; r_0, \Delta_f) \; \text{d}r
+\\      y_i^{\text{MOLA}} &= 0.
+\end{align}
+We hence have the matrix equation $\mathbf{A}\mathbf{x} = \mathbf{b}$ that is shown in Eqn.~\ref{eq:OLA-mat}, where $\mathbf{A}$ is a symmetric $(N+3)\times (N+3)$ matrix with $N=|\mathscr{M}|$. The variable $\lambda$ appears to enforce Eqn.~\ref{eq:sum-to-one}. The matrix $\mathbf{A}$ may be inverted e.g.~via $LDL^T$ decomposition to yield $\mathbf{A}^{-1}\mathbf{b}=\mathbf{x}$, from which we may deduce $\vec c(r_0)$ and hence $f_1(r_0)$. 
+
+\begin{figure*}
+    \begin{equation} \label{eq:OLA-mat}
+        \begin{blockarray}{rcccccc}
+               & {\color{gray} j=1}  & {\color{gray} \ldots} & {\color{gray} N} & {\color{gray} N+1} & {\color{gray} N+2} & {\color{gray} N+3} \\[0.5em]
+            \begin{block}{r(cccccc)}
+              {\color{gray} i=1} & \mathcal{A}_{1,1}  & \cdots & \mathcal{A}_{1,N}  & \int K_1^{(f_1, f_2)} \; \text{d}r & (\nu_1/\nu_{ac})^{-2}/\mathcal{I}_1  &  (\nu_1/\nu_{ac})^{2}/\mathcal{I}_1  \\[0.75em]
+         {\color{gray} \vdots} & \vdots             & \ddots & \vdots             & \vdots &  \vdots  &  \vdots  \\[0.75em]
+              {\color{gray} N} & \mathcal{A}_{N,1}  & \cdots & \mathcal{A}_{N,N}  & \int K_N^{(f_1, f_2)} \; \text{d}r &  (\nu_N/\nu_{ac})^{-2}/\mathcal{I}_N  &  (\nu_N/\nu_{ac})^{2}/\mathcal{I}_N  \\[0.75em]
+            {\color{gray} 1+N} & \int K_1^{(f_1, f_2)} \; \text{d}r & \cdots & \int K_N^{(f_1, f_2)} \; \text{d}r &  0  & 0  & 0  \\[0.75em]
+            {\color{gray} 2+N} & (\nu_1/\nu_{ac})^{-2}/\mathcal{I}_1  &  \cdots   &  (\nu_N/\nu_{ac})^{-2}/\mathcal{I}_N  & 0  & 0  & 0  \\[0.75em]
+            {\color{gray} 3+N} & (\nu_1/\nu_{ac})^{2} /\mathcal{I}_1  &  \cdots   &  (\nu_N/\nu_{ac})^{2}/\mathcal{I}_N   & 0  & 0  & 0  \\%[-2mm]
+            \end{block}\\[-5mm]
+            & \BAmulticolumn{6}{c}{\color{gray} \underbrace{\hspace*{12.25cm}}_{\textstyle \mathbf{\vphantom{x}A\vphantom{b}}}} \\%
+        \end{blockarray} \hspace*{1mm}
+        \begin{blockarray}{c}
+            \\[0.75em]
+            \begin{block}{(c)}
+                c_1 \\[0.75em]
+                \vdots \\[0.75em]
+                c_N \\[0.75em]
+                \lambda \\[0.75em]
+                a_1 \\[0.75em]
+                a_2 \\%[-2mm]
+            \end{block}\\[-5mm]
+            {\color{gray} \underbrace{ }_{\textstyle \mathbf{\vphantom{A}x\vphantom{b}}}} \\
+        \end{blockarray} = 
+        \begin{blockarray}{c}
+            \\[0.75em]
+            \begin{block}{(c)}
+                y_1 \\[0.75em]
+                \vdots \\[0.75em]
+                y_N \\[0.75em]
+                1 \\[0.75em]
+                0 \\[0.75em]
+                0 \\%[-2mm]
+            \end{block}\\[-5mm]
+            {\color{gray} \underbrace{ }_{\textstyle \mathbf{\vphantom{A}b\vphantom{x}}}} \\
+        \end{blockarray} 
+    \end{equation}
+\end{figure*}
+
+The difference between MOLA and SOLA is more than cosmetic. The MOLA technique builds a different $\mathbf{A}$ matrix for each target radius, and hence requires as many matrix inversions as there are target radii. When the mode set and the number of desired target radii is large, as is the case with helioseismic inversions, this can become computationally intractable. This motivated the invention of the SOLA method, which uses the same $\mathbf{A}^{-1}$ matrix but a different $\mathbf{b}$ at each $r_0$. In the asteroseismic case, both the number of modes and the range of possible target radii is relatively small, so both methods are fairly equal from a computational standpoint. 
+
+
+%\subsection{Computational Complexity}
+%% TODO
+
+\clearpage
+\bibliographystyle{apj.bst}
+\bibliography{astero}
+
+
+\end{document}
+

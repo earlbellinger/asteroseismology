@@ -12,7 +12,7 @@ library(akima)
 library(Bolstad)
 library(RColorBrewer)
 source(file.path('..', 'inversion', 'kernels.R'))
-source(file.path('..', 'inversion', 'invert_OLA.R'))
+source(file.path('..', 'inversion', 'OLA_invert.R'))
 source(file.path('..', 'inversion', 'models.R'))
 source(file.path('..', 'inversion', 'OLA_plots.R'))
 #source(file.path('..', 'inversion', 'frequencies.R'))
@@ -187,6 +187,7 @@ for (model_number in mdls) {
         fgong.path=file.path(path, paste0('profile', proxy_mdl, '-freqs'), 
             paste0('profile', proxy_mdl, '.data.FGONG.dat')))
     
+    
     freqs.0 <- tracks$gemma0$all_freqs
     freqs.0 <- freqs.0[,names(freqs.)]
     freqs.0 <- freqs.0[complete.cases(freqs.0),]
@@ -256,7 +257,7 @@ for (model_number in mdls) {
         '_r-', m1$short, model_number)
     
     make_plots(plot_one_surfless, paste0('kernel-comp', k.str),
-        model=m1, k.pair=k.pair, legend.spot='bottomright')
+        model=m1, k.pair=k.pair, legend.spot='topright')
     make_plots(plot_kernel_diffs, paste0('kernel-diffs', k.str),
         model=m1, k.pair=k.pair, legend.spot='left')
     make_plots(plot_kernel_diffs_surf, paste0('kernel-diffs-surf', k.str),
@@ -266,7 +267,9 @@ for (model_number in mdls) {
     #rs <- c(0.05)#
     #rs <- c(0.001, 0.01, 0.1)
     #rs <- seq(0.001, 0.3, 0.001)
-    rs <- c(0.002, seq(0.01, 0.3, 0.01))
+    #rs <- c(0.002, seq(0.01, 0.3, 0.01))
+    #rs <- 10**seq(-4, log10(0.4), 0.1)
+    rs <- seq(0.05, 0.25, 0.02)
     
     #m1.inversion <- invert.OLA(model=m1, rs=rs, cross.term=1, error.sup=0,
     #    width=0.01, use.BG=T)
@@ -276,7 +279,6 @@ for (model_number in mdls) {
     #    targ.kern.type='mod_sinc')
     #plot_inversion(m1, m1.inversion, log='x', xlim=c(min(rs)/2, 1))
     
-    rs <- 10**seq(-4, log10(0.4), 0.1)
     
     m1.inversion <- minimize_dist_individual(model=m1, rs=rs, 
         initial_params=c(100, 100, 0.01, 10))#, targ.kern.type='mod_sinc')
@@ -286,12 +288,20 @@ for (model_number in mdls) {
     
     plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, log='x', ylim=c(-0.25, 0.2)); dev.off()
     
-    make_plots(plot_inversion, paste0(model_number),
-        model=m1, inversion=m1.inversion, legend.spot='topright')
+    make_plots(plot_inversion, paste0('inversion', k.str),#paste0(model_number),
+        model=m1, inversion=m1.inversion, legend.spot='bottomleft', 
+        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
+    make_plots(plot_kernels, paste0('ker-avg', k.str),#paste0(model_number),
+        model=m1, inversion=m1.inversion, cross=F, #legend.spot='bottomleft', 
+        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
+    make_plots(plot_kernels, paste0('ker-cross', k.str),#paste0(model_number),
+        model=m1, inversion=m1.inversion, cross=T, #legend.spot='bottomleft', 
+        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
     
-    make_plots(plot_inversion, paste0(model_number, 'log'),
-        model=m1, inversion=m1.inversion, legend.spot='topright',
-        log='x', xlim=c(min(rs)/1.5, min(1, max(rs+.1))))#1))
+    
+    #make_plots(plot_inversion, paste0(model_number, 'log'),
+    #    model=m1, inversion=m1.inversion, legend.spot='topright',
+    #    log='x', xlim=c(min(rs)/1.5, min(1, max(rs+.1))))#1))
     
     #par(mfrow=c(2,1))
     #plot_inversion(m1, m1.inversion, log='x', xlim=c(min(rs)/2, 1))

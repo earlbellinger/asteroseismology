@@ -15,16 +15,24 @@ parallelStartMulticore(8)#max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
 
 models <- get_model_list()
 
-k.pair <- u_Y#rho_Gamma1#rho_c2#rho_c2#rho_c2#c2_rho # 
+k.pair <- rho_Gamma1#rho_c2#u_Y#rho_c2#rho_c2#c2_rho # 
 target.name <- 'CygAwball'#'modmix'#'hl.no_d'#'CygAbasu3'#'no_diffusion'#'CygAdiff'#
-ref.mod <- 'CygAdiff'#'diffusion'#'hl.diff'#'CygAwball'#'lowRhighM'#
-mode.set <- 'CygA'#'BiSON'#'BiSON.MDI'#
+ref.mod <- 'CygAdiff'#'CygAdiff'#'diffusion'#'hl.diff'#'CygAwball'#'lowRhighM'#
+mode.set <- 'BiSON'#'CygA'#'BiSON.MDI'#
 perturb <- F
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, perturb=perturb) 
 m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
                 k.pair=k.pair, square.Ks=T) 
 #m2 <- get_model(freqs=freqs, model.name='lowRlowM', target.name=target.name, 
 #                k.pair=k.pair, square.Ks=T) 
+
+#rs <- c(0.13, 0.2, 0.24, 0.3)
+#rs <- seq(0.1, 0.25, 0.05)
+#rs <- seq(0.11, 0.26, 0.03)
+#rs <- seq(0.05, 0.5, 0.06)
+#rs <- seq(0, 1, 0.05)
+rs <- seq(0.01, 0.35, 0.02)
+#rs <- seq(0.11, 0.23, 0.02)
 
 k.str <- paste0('-k_', k.pair$f1, k.pair$f2,
     '-p_', target.name, '_r-', m1$short, '_m-', mode.set)
@@ -49,12 +57,6 @@ make_plots(plot_kernels, filename=paste0("kernels", k.str),
            #kernels=m1.inversion$avg_kerns, 
            #target_radii=m1.inversion$result$rs, xlim=c(0, 1.3))
 
-#rs <- c(0.13, 0.2, 0.24, 0.3)
-#rs <- seq(0.1, 0.25, 0.05)
-#rs <- seq(0.11, 0.26, 0.03)
-#rs <- seq(0.05, 0.5, 0.06)
-#rs <- seq(0, 1, 0.05)
-rs <- seq(0.01, 0.35, 0.02)
 
 target.name <- 'modmix'
 ref.mod <- 'diffusion'#'CygAdiff'

@@ -23,7 +23,6 @@ make_symmetric <- function(mat) {
 
 get_square_Ks <- function(modes, K, x0=NULL) {
     Ks <- do.call(plyr:::rbind.fill, Map(function(mode_i) {
-        #print(modes[mode_i])
         data.frame(do.call(cbind, Map(function(mode_j) {
             if (mode_i > mode_j) return(0)
             K_ij.integrand <- K[[modes[mode_i]]] * K[[modes[mode_j]]]
@@ -57,14 +56,13 @@ get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
         
         if (use.BG) {
             BG_surfs <- data.frame(do.call(cbind, Map(function(pow) 
-                ifelse(nu != 0, (nu/nu_ac)**pow / E, 0), 
-                #ifelse(nu != 0, (nu/nu_ac)**pow / Q_norm, 0), 
+                ifelse(nu != 0, (nu/nu_ac)**pow / E, 0), # Q_norm, 0), #
                 pow=c(-2, 2))))
             names(BG_surfs) <- paste0('a_', 1:length(BG_surfs)) 
         } else BG_surfs <- NULL 
         
         if (num.knots > 0) {
-            #deg <- (length(nu.knots)-length(unique(nu.knots)))/2
+            #deg <- (length(nu.knots)-length(unique(nu.knots)))/2 
             F_surfs <- data.frame(do.call(cbind, Map(function(knot) 
                     if (nu==0) 0 else B(nu, knot, nu.deg, nu.knots) / Q_norm, 
                 knot=1:(length(nu.knots)-(nu.deg+1)))))
@@ -84,55 +82,37 @@ get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
     }, ell=l, nn=n, nu=nu.x, E=E, Q_norm=Q_norm)))
 }
 
-get_A.mat <- function(cross.term, error.sup, K, C, modes, nus, nu_ac=5000,
-                      K_ijs=NA, C_ijs=NA, K.ints=NA,
-                      x0=NULL, use.BG=T, num.knots=NULL) {
-    if (length(K.ints) <= 1) K.ints <- get_K.ints(modes, K)
-    #if (!is.null(x0) || length(K_ijs) <= 1 || length(C_ijs) <= 1) {
+get_A.mat <- function(cross.term, error.sup, K, C, modes, nus, F_surf, 
+        K_ijs=NULL, C_ijs=NULL, K.ints=NULL, x0=NULL) {
+    if (length(K.ints) <= 1) {
+        cat("Calculating integrals\n")
+        K.ints <- get_K.ints(modes, K)
+    }
     if (length(K_ijs) <= 1 || length(C_ijs) <= 1) {
+        cat("Calculating square matrices\n")
         K_ijs <- get_square_Ks(modes, K, x0)
         C_ijs <- get_square_Ks(modes, C, x0)
     }
     
     first.ij <- K_ijs + cross.term * C_ijs + error.sup * diag(nus$d.r.diff**2)
-    
-    #first.ij <- do.call(plyr:::rbind.fill, parallelMap(function(mode_i) {
-    #    ln <- get_ln(mode_i)
-    #    dnu <- nus[nus$l==ln$l & nus$n==ln$n,]$d.r.diff
-    #    data.frame(do.call(cbind, Map(function(mode_j) {
-    #        #if (mode_i > mode_j) return(0)
-    #        E_ij <- ifelse(mode_i == mode_j, dnu**2, 0)
-    #        K_ijs[mode_i, mode_j] + 
-    #            cross.term * C_ijs[mode_i, mode_j] + 
-    #            error.sup * E_ij
-    #    }, mode_j=modes)))
-    #}, mode_i=modes))
-    #names(first.ij) <- modes
-    #rownames(first.ij) <- modes
-    #first.ij <- make_symmetric(first.ij)
-    
-    mat <- rbind(cbind(first.ij, K.ints), c(K.ints, 0))
-    F_surf <- get_F_surf(nus, num.knots=num.knots, use.BG=use.BG, nu_ac=nu_ac)
-    mat <- cbind(mat, rbind(F_surf, 0))
-    tsurf <- cbind(t(F_surf), 
-                   matrix(0L, nrow=ncol(F_surf), ncol=ncol(F_surf)+1))
+    mat <- cbind(rbind(cbind(first.ij, K.ints), c(K.ints, 0)), rbind(F_surf, 0))
+    surf.zeros <- matrix(0L, nrow=ncol(F_surf), ncol=ncol(F_surf)+1)
+    tsurf <- cbind(t(F_surf), surf.zeros)
     colnames(tsurf) <- names(mat)
     rbind(mat, tsurf)
 }
 
 mod_Gauss <- function(r, r_0, width, normalization_factor=1) {
-    normalization_factor * 
-        r * exp( -( (r-r_0)/width + width/(2*r_0) )**2 )
+    normalization_factor * r * exp( -( (r-r_0)/width + width/(2*r_0) )**2 )
 } 
 
 mod_sinc <- function(r, r_0, width, normalization_factor=1) {
-    normalization_factor * 
-        ifelse(r==r_0, (1-r_0)**4 * r_0 * width * 1000, 
-                       (1-r  )**4 * r   * sin(width*1000*(r-r_0)) / (r-r_0))
+    normalization_factor * ifelse(r==r_0, 
+        (1-r_0)**4 * r_0 * width * 1000, 
+        (1-r  )**4 * r   * sin(width*1000*(r-r_0)) / (r-r_0))
 }
 
 get_target_kernel <- function(r_0, r_f, width.r_f, K, f.spl, targ.kern.type) {
-    #targ.fun <- get(targ.kern.type)
     targ.fun <- if (targ.kern.type == 'mod_Gauss') {
         mod_Gauss
     } else if (targ.kern.type == 'mod_sinc') {
@@ -145,10 +125,6 @@ get_target_kernel <- function(r_0, r_f, width.r_f, K, f.spl, targ.kern.type) {
         sapply(K$x, function(r) targ.fun(r=r, r_0=r_0, width=width.k, 
             normalization_factor=norm_fac))
     } else 0*K$x
-    #norm_fac <- 1/sintegral(K$x, mod_Gauss(r=K$x, r_0=r_0, width=width.k, 
-    #                                           normalization_factor=1))$value
-    #sapply(K$x, function(r) mod_Gauss(r=r, r_0=r_0, width=width.k, 
-    #                                  normalization_factor=norm_fac))
 } 
 
 get_SOLA_v.vec <- function(r_0, r_f, width.r_f, K, modes, f.spl, 
@@ -172,14 +148,28 @@ get_averaging_kernel <- function(coefs, modes, K) {
     }, mode.idx=1:length(modes))))
 }
 
+get_target_kernels <- function(rs, width, model, K, r_f=0) {
+    do.call(cbind, parallelMap(function(target_radius) {
+        get_target_kernel(r_0=target_radius, r_f=r_f, 
+            width.r_f=width, f.spl=model$cs.spl, K=K,
+            targ.kern.type=targ.kern.type)
+    }, target_radius=rs))
+}
+
 invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
-                       use.BG=T, num.knots=0, targ.kern.type='mod_Gauss',
-                       MOLA.K_ijs=NA, MOLA.C_ijs=NA) {
+        use.BG=T, num.knots=0, F_surf=NULL,
+        MOLA.K_ijs=NULL, MOLA.C_ijs=NULL, 
+        targ.kern.type='mod_Gauss', targ_kerns=NULL,
+        get_cross_kerns=T) {
     K <- model$k1
     C <- model$k2
     nus <- model$nus
     modes <- model$modes
-    nu_ac = model$nu_ac
+    nu_ac <- model$nu_ac
+    
+    if (is.null(F_surf)) F_surf <- 
+        get_F_surf(nus, num.knots=num.knots, use.BG=use.BG, nu_ac=nu_ac)
+    
     
     if (is.null(width)) { # MOLA
         
@@ -187,10 +177,12 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         parornot <- if (length(rs) == 1) Map else parallelMap
         c.vecs <- do.call(cbind, parornot(function(x0) {
             cat(paste("Inverting radius", x0, '\n'))
-            MOLA.K_ij <- if (!is.na(MOLA.K_ijs) & is.list(MOLA.K_ijs)) {
+            MOLA.K_ij <- if (!is.null(MOLA.K_ijs) & 
+                             paste0(x0) %in% names(MOLA.K_ijs)) {
                 MOLA.K_ijs[[paste0(x0)]]
             } else MOLA.K_ijs
-            MOLA.C_ij <- if (!is.na(MOLA.C_ijs) & is.list(MOLA.C_ijs)) {
+            MOLA.C_ij <- if (!is.null(MOLA.C_ijs) & 
+                             paste0(x0) %in% names(MOLA.C_ijs)) {
                 MOLA.C_ijs[[paste0(x0)]]
             } else MOLA.C_ijs
             A.mat <- get_A.mat(cross.term=cross.term, 
@@ -199,8 +191,9 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
                                #K_ijs=model$K_ijs, C_ijs=model$C_ijs,
                                K_ijs=MOLA.K_ij, C_ijs=MOLA.C_ij, 
                                K.ints=model$K.ints, x0=x0, 
-                               use.BG=use.BG, num.knots=num.knots,
-                               nu_ac=nu_ac)
+                               #use.BG=use.BG, num.knots=num.knots,
+                               #nu_ac=nu_ac, 
+                               F_surf=F_surf)
             A.inv <- solve(A.mat, system="LDLt", tol=0)
             
             v.vec <- c(rep(0, length(modes)), 1, 
@@ -215,20 +208,14 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
                            modes=modes, nus=nus, K=K, C=C, 
                            K_ijs=model$K_ijs, C_ijs=model$C_ijs, 
                            K.ints=model$K.ints, x0=NULL, 
-                           use.BG=use.BG, num.knots=num.knots,
-                           nu_ac=nu_ac)
+                           #use.BG=use.BG, num.knots=num.knots,
+                           #nu_ac=nu_ac, 
+                           F_surf=F_surf)
         A.inv <- solve(A.mat, system="LDLt", tol=0)
         
-        #targ_kerns <- sapply(rs, function(target_radius) {
-        #    get_target_kernel(r_0=target_radius, r_f=0, 
-        #                      width.r_f=width, f.spl=model$cs.spl, K=K)
-        #})
-        
-        targ_kerns <- do.call(cbind, parallelMap(function(target_radius) {
-            get_target_kernel(r_0=target_radius, r_f=0, 
-                              width.r_f=width, f.spl=model$cs.spl, K=K,
-                              targ.kern.type=targ.kern.type)
-        }, target_radius=rs))
+        targ_kerns <- if (is.null(targ_kerns)) {
+            get_target_kernels(rs, width, model, K, r_f=0)
+        }
         
         c.vecs <- do.call(cbind, parallelMap(function(targ_kern_i) {
             targ_kern <- targ_kerns[,targ_kern_i]
@@ -248,9 +235,10 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     avg_kerns <- do.call(cbind, parallelMap(function(coefs_j) {
         get_averaging_kernel(coefs=inv.coefs[,coefs_j], modes=modes, K=K)
     }, coefs_j=1:ncol(inv.coefs)))
-    cross_kerns <- do.call(cbind, parallelMap(function(coefs_j) {
-        get_averaging_kernel(coefs=inv.coefs[,coefs_j], modes=modes, K=C)
-    }, coefs_j=1:ncol(inv.coefs)))
+    cross_kerns <- if (get_cross_kerns)
+        do.call(cbind, parallelMap(function(coefs_j) {
+            get_averaging_kernel(coefs=inv.coefs[,coefs_j], modes=modes, K=C)
+        }, coefs_j=1:ncol(inv.coefs))) else NULL
     
     #avg_kerns <- apply(inv.coefs, 2, function(coefs) {
     #    get_averaging_kernel(coefs=coefs, modes=modes, K=K)
@@ -277,8 +265,8 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         if (is.na(right)) right <- 1
         
         inside <- K$x > left & K$x < right
-        inside.left <- inside & K$x<fwhm.mid
-        inside.right <- inside & K$x>fwhm.mid
+        inside.left <- inside & to.left
+        inside.right <- inside & to.right
         fwhm.left <- if (!any(inside.left)) 0 else
             K$x[inside.left][which.min((avg_kern[inside.left]-hm)**2)]
         fwhm.right <- if (!any(inside.right)) 1 else 
@@ -295,6 +283,10 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     f <- m.f1 - df_dr * m.f1
     f.err <- err * abs(m.f1)
     result <- cbind(rs, df_dr, err, errbars, f, f.err)
+    
+    if ('d.f1.spl' %in% names(model)) {
+        result <- cbind(result, data.frame(true_df_dr=model$d.f1.spl(rs)))
+    }
     
     params <- if (is.null(width)) {
         data.frame(cross.term=cross.term, 
@@ -327,8 +319,8 @@ minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
         names(MOLA.K_ijs) <- rs
         names(MOLA.C_ijs) <- rs
     } else {
-        MOLA.K_ijs <- NA
-        MOLA.C_ijs <- NA
+        MOLA.K_ijs <- NULL
+        MOLA.C_ijs <- NULL
     }
     d.f1.spl <- splinefun(model$r, model$d.f1.true)
     optim_result <- optim(log10(initial_params), fn=function(params) {
@@ -364,8 +356,11 @@ minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
         
         #chi2 <- with(result, sum( ((d.f1.spl(fwhm.mid) - df_dr)/err)**2 ) )
         chi2 <- with(result, 
-            sum( ( (d.f1.spl(fwhm.mid) - df_dr) )**2 ) #+ #* err ) #+
-            #sum( ( (fwhm.mid - rs) )**2 ) #+
+            sum( ( (d.f1.spl(fwhm.mid) - df_dr)**2 ) ) #+ #* err ) #+
+            #
+            #sum( abs( (d.f1.spl(fwhm.mid) - df_dr) ) ) + #* err ) #+
+            #sum( abs( (d.f1.spl(rs) - df_dr) ) ) + #* err ) #+
+            #sum( abs( (fwhm.mid - rs) ) ) #+
             #
             #sum( (d.f1.spl(fwhm.mid) - df_dr)**2 ) +
             #sum( (fwhm.mid - rs) ) #+
@@ -406,7 +401,7 @@ minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
 }
 
 minimize_dist_individual <- function(model, rs, use.BG=T, num.knots=0,
-        initial_params=c(100, 100, 0.01), max.width=0.1,
+        initial_params=c(100, 100, 0.01), max.width=0.2,
         targ.kern.type='mod_Gauss', max.err=0.1) {
     
     inversion.results <- parallelMap(function(r)
