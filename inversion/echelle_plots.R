@@ -17,19 +17,19 @@ target.name <- 'BiSON'
 ref.mod <- 'diffusion'
 freqs.1 <- get_freqs(target.name=target.name) 
 m1 <- get_model(freqs=freqs.1, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 target.name <- 'CygA'
 ref.mod <- 'CygAwball'
 freqs.2 <- get_freqs(target.name=target.name) 
 m2 <- get_model(freqs=freqs.2, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 target.name <- 'CygB'
 ref.mod <- 'CygBwball'
 freqs.3 <- get_freqs(target.name=target.name) 
 m3 <- get_model(freqs=freqs.3, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 model.list <- list(m1, m2, m3)
 freqs.list <- list(freqs.1, freqs.2, freqs.3)
@@ -53,7 +53,8 @@ plot_echelle <- function(model, freqs, xlim=NULL, nu_max=3090,
         ylim=c(1000, 4000),#range(model$nus$nu.x, model$nus$nu.y),
         xlab=bquote((nu~mod~.(round(Delta.nu,0)))/mu*Hz),
         ylab="")
-    abline(h=nu_max, lwd=2, lty=3, col='gray')
+    #abline(h=nu_max, lwd=2, lty=3, col='gray')
+    #abline(v=Delta.nu, lwd=2, lty=3, col='gray')
     abline(v=Delta.nu, lwd=1, lty=2, col='black')
     
     col.pal <- c("#177E89", "#323031", "#FFBF3F", "#DB3A34")

@@ -92,6 +92,8 @@ for (mode.i in c('l.1_n.11', 'l.0_n.11', 'l.1_n.15')) {
 out_dir <- paste0('animate-', k.pair, '-', mode.i)
 if (k.pair == 'psi') {
     k.fname1 <- 'psi.dat'
+if (k.pair == 'rotk') {
+    k.fname1 <- 'rotk.dat'
 } else {
     k.f1 <- strsplit(k.pair, '-')[[1]][1]
     k.f2 <- strsplit(k.pair, '-')[[1]][2]
@@ -530,12 +532,96 @@ make_plots(plot_contour,
 
 
 
+## ROT KERNEL
+
+
+#for (mode.i in c('l.1_n.11', 'l.1_n.15', 'l.0_n.11')) {
+xs <- seq(0.001, 1, 0.001)
+r.max <- do.call(rbind, parallelMap(function(model_number) {
+    selector <- track$model_number == model_number
+    model <- track[selector,]
+    idx <- which(mdl_nums == model_number)
+    
+    rotk <- read.table(file.path('LOGS', 
+            sub('.data', '-freqs', prof_files[idx]), 'rotk.dat'), 
+        header=1)
+    #dgam1 <- read.table(file.path('LOGS', 
+    #  sub('.data', '-freqs', prof_files[idx]), 'rotk.dat'), 
+    #  col.names=c('x', 'p', 'rho', 'y'))
+    
+    #splinefun(dgam1[['x']], dgam1[['P']])(xs)
+    res <- splinefun(rotk[['x']], rotk[[mode.i]])(xs)
+    #res / max(abs(res))
+}, model_number=sort(mdl_nums[mdl.selector])))
+age.selector <- T#ages>=3.9
+x.selector <- T
+r.max. <- r.max#[,-1]
+
+plot_contour <- function(..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
+                           font="Times") {
+    text.cex <- text.cex*1.25
+    par(cex.lab=text.cex, mar=mar+c(0.5, 0.5, 0, 4))
+    
+    filled.contour(10**(ages[age.selector]), 
+        log10(xs[x.selector]), 
+        #xs[x.selector],
+        r.max.[age.selector,x.selector], 
+        log='y',
+        nlevels=22,
+        xlim=c(0, 10**max(ages[age.selector])),
+        color=colorRampPalette(c('white', 
+            "#DAE0E0", '#909590', '#313E50', '#181B1C')),
+        xaxs='i', yaxs='i',
+        key.axes={
+            #par(fg='black')
+            axis(4, tcl=0, line=0)
+            mtext(bquote('Rotation Kernel'~R^K), 
+                side=4, las=3, line=3, family=font, cex.axis=text.cex)
+        },
+        plot.axes={
+            abline(v=10**5.589, lty=2, lwd=1)
+            
+            legend('topright', bty='n', lty=NULL, pch=NULL, cex=text.cex,
+                legend=c(expression((l==1*','~n==11))))
+            
+            magaxis(side=c(2,4), tcl=0.25, labels=c(1,0),
+                unlog='y', 
+                family=font, cex.axis=text.cex)
+            
+            labs <- signif(log10(pretty(10**ages[age.selector])), 2)
+            labs[1] <- 0
+            yticks <- 10**labs
+            
+            axis(1, tick=T, at=yticks, cex.axis=text.cex, las=1,
+                labels=labs, tcl=0.25)
+            axis(1, tick=T, at=10**seq(0, max(ages), 0.05), tcl=0.125, labels=F)
+            
+            axis(1, tick=T, at=yticks, cex.axis=text.cex, las=1,
+                labels=F, tcl=0.25)
+            axis(3, tick=T, at=10**seq(0, max(ages), 0.05), tcl=0.125, labels=F)
+        },
+        plot.title={
+            title(xlab=expression("Age"~tau/Gyr), line=2)
+            title(ylab=expression("Radius"~r/R["*"]), line=2)
+        })
+    
+    #par(mgp=mgp+c(1.5, 0, 0))
+    #title(ylab=bquote(''))
+}
+make_plots(plot_contour, paste0("rotk-unnorm"), short=F, thin=F)
 
 
 
 
 
 
+
+
+
+
+
+
+## EOS DERIVATIVES
 
 #for (mode.i in c('l.1_n.11', 'l.1_n.15', 'l.0_n.11')) {
 xs <- seq(0.001, 1, 0.001)

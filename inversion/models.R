@@ -203,6 +203,35 @@ get_model_list <- function() {
         }
     }
     
+    perturbed.CygB.names <<- c()
+    logRs <- c(0.04139269, 0.04921802, 0.05690485)
+    Ms <- c(1.015, 1.03, 1.045)
+    for (logR in logRs) {
+        for (M in Ms) {
+            path <- file.path('..', 'calibration', 'calibrate2', 
+                paste0('M=', M, '_logR=', logR, '_age=6800000000'), 'LOGS_MS')
+            
+            model.name.R <- if (logR==logRs[1]) 'lowR' else 
+                if (logR==logRs[3]) 'highR'
+            model.name.M <- if (M==Ms[1]) 'lowM' else if (M==Ms[3]) 'highM'
+            model.name <- if (length(model.name.R) < 1 && 
+                              length(model.name.M) < 1)
+                'Diffusion' else paste0(model.name.R, model.name.M)
+            model.name <- paste0('CygA', model.name)
+            perturbed.CygB.names <<- c(perturbed.CygB.names, model.name)
+            
+            model <- list(name=model.name, short=model.name,
+                          kerns.dir=file.path(path, 'profile1-freqs'),
+                          freq.path=file.path(path, 'profile1-freqs.dat'),
+                          freq.col.names=c('l', 'n', 'nu', 'E'),
+                          fgong.path=file.path(path, 'profile1-freqs',
+                                               'profile1.data.FGONG.dat'),
+                          profile.path=file.path(path, 'profile1.data'))
+            
+            models[[model.name]] <- model
+        }
+    }
+    
     models
 }
 

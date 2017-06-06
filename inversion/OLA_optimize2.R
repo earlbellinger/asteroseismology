@@ -22,9 +22,9 @@ mode.set <- if (length(args)>1) args[2] else 'CygA'
 error.set <- if (length(args)>2) args[3] else 'CygA'
 target.name <- if (length(args)>3) args[4] else 'CygAwball'
 targ.kern.type <- if (length(args)>4) args[5] else 'mod_Gauss'
-n_trials <- if(length(args)>5) args[6] else 128
+n_trials <- if (length(args)>5) args[6] else 1
 model.list.name <- if (length(args)>6) args[7] else 'perturbed.CygA.names'
-half <- F
+perturb <- if (length(args)>7) as.logical(as.numeric(args[8])) else F
 k.pair <- u_Y
 rs <- seq(0.08, 0.35, 0.01)
 targ.mode <- paste0('-p_', target.name, '-m_', mode.set, '-e_', error.set,
@@ -42,11 +42,10 @@ model.names <- get(model.list.name)
 
 for (trial_i in 1:n_trials) {
 
-
 print(paste("TRIAL_I =", trial_i))
 
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, 
-    error.set=error.set, perturb=T) 
+    error.set=error.set, perturb=perturb) 
 
 model.list <- list()
 for (perturbed.model.name in model.names) {
@@ -227,7 +226,7 @@ SOLA_optim <- function(inversion_params) {
 
 best_params <- optim(log10(initial_params), fn=SOLA_optim, 
     control=list(trace=999, parscale=parscale, 
-    maxit=128))#, abstol=sum(model.list[[1]]$f1.spl(rs)/1000)))
+    maxit=10000)) 
 
 print(best_params)
 
@@ -250,63 +249,41 @@ inversion.list <- parallelMap(function(model_i) {
 names(inversion.list) <- model.names
 
 
-#model.lists[[trial_i]] <- model.list 
 inversion.lists[[trial_i]] <- Map(function(inversion) inversion$result, 
     inversion=inversion.list)
 avg.kerns.lists[[trial_i]] <- Map(function(inversion) inversion$avg_kern, 
     inversion=inversion.list)
 cross.kerns.lists[[trial_i]] <- Map(function(inversion) inversion$cross_kern, 
     inversion=inversion.list)
-#inversion.list 
-#inversion.lists[[trial_i]] <- inversion.list
 
-save(ref.mod, file=paste0("save/ref.mod", targ.mode))
-save(inversion.lists, file=paste0("save/inversion.lists", targ.mode))
-save(avg.kerns.lists, file=paste0("save/avg.kerns.lists", targ.mode))
-save(cross.kerns.lists, file=paste0("save/cross.kerns.lists", targ.mode))
+save(ref.mod, file=paste0("save3/ref.mod", targ.mode))
+save(inversion.lists, file=paste0("save3/inversion.lists", targ.mode))
+save(avg.kerns.lists, file=paste0("save3/avg.kerns.lists", targ.mode))
+save(cross.kerns.lists, file=paste0("save3/cross.kerns.lists", targ.mode))
 
 }
 }
-
-#save(model.lists, file="model.lists")
-
-#sampler <- c(F, T)#c(F, T, F, T, F, T, F, T, F)
 
 ref.mod2 <- if (target.name=='CygA') get_model(freqs=freqs, 
-        model.name='CygAwball', 
-        target.name='CygA', 
-        k.pair=k.pair, square.Ks=F) else ref.mod 
+    model.name='CygAwball', 
+    target.name='CygA', 
+    k.pair=k.pair, square.Ks=F) else ref.mod 
 
-sampler <- c(T) #
-#sampler <- c(F, F, F, F, F, T, T, T, F, F, F, F)#c(F, T)
+sampler <- c(T) 
 
-#plot_inversion_lists_mean(model=ref.mod, inversion.lists=inversion.lists);dev.off;
 make_plots(plot_inversion_lists_mean,
-    filename=paste0("inv-lists-optim", targ.mode), 
+    filename=paste0("inv-lists-optim3", targ.mode), 
     model=ref.mod2, inversion.lists=inversion.lists, legend.spot="topleft",
-    #ylim=c(-0.03, 0.03), #c(-0.03, 0.015),#
-    #xlim=c(0.05, 0.35), 
-    k.pair=k.pair, sampler=sampler)#c(T))#
+    k.pair=k.pair, sampler=sampler)
 
 make_plots(plot_kernel_lists,
-    filename=paste0("inv-lists-optim-kerns", targ.mode), 
+    filename=paste0("inv-lists-optim3-kerns", targ.mode), 
     kernel.lists=avg.kerns.lists, cross=F, legend.spot="topleft",
-    model=ref.mod, k.pair=k.pair, sampler=sampler)#c(T))#
+    model=ref.mod, k.pair=k.pair, sampler=sampler)
 
 make_plots(plot_kernel_lists,
-    filename=paste0("inv-lists-optim-cross", targ.mode), 
+    filename=paste0("inv-lists-optim3-cross", targ.mode), 
     kernel.lists=cross.kerns.lists, cross=T, legend.spot="topleft",
-    model=ref.mod, k.pair=k.pair, sampler=sampler)#c(T))#
+    model=ref.mod, k.pair=k.pair, sampler=sampler)
 
-#for (ref.mod in model.list) plot_inversion_lists_mean(ref.mod=ref.mod, inversion.lists=inversion.lists)
-#plot_inv_diffs_mean(model.list, inversion.list)
-#dev.off()
-
-#make_plots(plot_inv_diffs_mean,
-#    filename=paste0("inv-diffs-mean-optim", targ.mode), 
-#    model.list=model.list, inversion.list=inversion.list)
-
-#make_plots(plot_inversion_mean,
-#    filename=paste0("inv-mean-optim", targ.mode), 
-#    model=model.list[[5]], inversion.list=inversion.list)
 

@@ -18,17 +18,15 @@ parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))#9
 
 args <- commandArgs(TRUE)
 MOLA <- if (length(args)>0) as.logical(as.numeric(args[1])) else T
-mode.set <- if (length(args)>1) args[2] else 'CygA'
-error.set <- if (length(args)>2) args[3] else 'CygA'
-target.name <- if (length(args)>3) args[4] else 'CygAwball'
+mode.set <- if (length(args)>1) args[2] else 'BiSON'
+error.set <- if (length(args)>2) args[3] else 'BiSON'
+target.name <- if (length(args)>3) args[4] else 'modmix'
 targ.kern.type <- if (length(args)>4) args[5] else 'mod_Gauss'
-n_trials <- if(length(args)>5) args[6] else 128
-half <- F
+#n_trials <- if(length(args)>5) args[6] else 128
 k.pair <- u_Y
-rs <- seq(0.05, 0.29, 0.06)
+rs <- seq(0.05, 0.29, 0.03)
 
 targ.mode <- paste0('-p_', target.name, '-m_', mode.set, '-e_', error.set,
-    '-n_', n_trials, 
     if (MOLA) "-MOLA" else paste0("-", targ.kern.type))
 
 print(targ.mode)
@@ -36,16 +34,36 @@ print(targ.mode)
 models <- get_model_list()
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, 
         error.set=error.set, perturb=T) 
-perturbed.model.name <- perturbed.CygA.names[3]
+#perturbed.model.name <- perturbed.CygA.names[3]
 ref.mod <- get_model(freqs=freqs, 
-    model.name=perturbed.model.name, 
+    model.name='diffusion', 
     target.name=target.name, 
-    k.pair=k.pair, square.Ks=F) 
-model.names <- perturbed.CygA.names
+    k.pair=k.pair, square.Ks=T) 
+#model.names <- perturbed.CygA.names
 #c(perturbed.CygA.names[1], perturbed.CygA.names[1])
 #perturbed.model.names[9])
 
 #cat <- function(x) if (F) cat(x)
+
+
+K.ints <- ref.mod$K.ints
+K_ijs <- ref.mod$K_ijs
+C_ijs <- ref.mod$C_ijs
+nus <- ref.mod$nus
+F_surf <- get_F_surf(nus, num.knots=0, use.BG=T, nu_ac=ref.mod$nu_ac)
+for (mode_i in 1:nrow(freqs)) {
+    model. <- ref.mod
+    model.$nus <- model.$nus[-mode_i,]
+    model.$modes <- model.$modes[-mode_i]
+    model.$K.ints <- model.$K.ints[-mode_i]
+    model.$K_ijs <- model.$K_ijs[-mode_i,-mode_i]
+    model.$C_ijs <- model.$C_ijs[-mode_i,-mode_i]
+    
+}
+
+
+
+
 
 print_params <- function(model_i, r, cross.term, error.sup, width, MOLA) {
     cat(paste("Inverting model", model_i, 
@@ -59,8 +77,8 @@ print_params <- function(model_i, r, cross.term, error.sup, width, MOLA) {
 }
 
 optim_fn <- function(log10_inversion_params, model.list, 
-                       r, targ.kern.type, MOLA, 
-                       MOLA.K.list=list(), MOLA.C.list=list()) {
+        r, targ.kern.type, MOLA, 
+        MOLA.K.list=list(), MOLA.C.list=list()) {
     inversion_params <- 10**log10_inversion_params
     
     iteration <<- iteration + 1

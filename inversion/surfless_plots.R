@@ -17,21 +17,45 @@ target.name <- 'BiSON'
 ref.mod <- 'diffusion'
 freqs <- get_freqs(target.name=target.name) 
 m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 target.name <- 'CygA'
 ref.mod <- 'CygAwball'
 freqs <- get_freqs(target.name=target.name) 
 m2 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 target.name <- 'CygB'
 ref.mod <- 'CygBwball'
 freqs <- get_freqs(target.name=target.name) 
 m3 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=F) 
+                k.pair=k.pair, square.Ks=F, match.nl=F) 
 
 model.list <- list(m2, m3) #m1, #
+
+for (ii in 1:length(model.list)) {
+    nus <- model.list[[ii]]$nus 
+    
+    diffs <- nus$nu.y - nus$nu.x 
+    
+    nu <- nus$nu.x / model.list[[ii]]$nu_ac 
+    inertia <- nus$E #Q# 
+    Xp <- matrix(c(nu**-1, nu**3) / (inertia * nus$dnu), ncol=2) 
+    a. <- ginv( Xp ) %*% ( diffs / nus$dnu ) 
+    F_surf <- ( a.[[1]]*nu**-1 + a.[[2]]*nu**3 ) / (inertia) 
+    
+    surf.diff <- (nus$nu.x+F_surf-nus$nu.y)
+    sigma.dist <- (surf.diff/nus$dnu) 
+    
+    model.list[[ii]]$nus <- cbind(model.list[[ii]]$nus, 
+        data.frame(surf.diff = surf.diff, 
+                   surfless = sigma.dist, 
+                   surf.unc = abs(sigma.dist) * nus$dnu/nus$nu.y,
+                   r_ts = model.list[[ii]]$r_ts))
+}
+
+
+
 
 plot_surfless <- function(model.list, legend.spot="topleft", ..., 
         text.cex=1, mgp=utils.mgp, font="Times", thin=F) {
@@ -137,3 +161,72 @@ make_plots(plot_surfless,
     model.list=model.list, #xlim=c(40, 140), 
     legend.spot='left')
 
+
+
+
+plot_surfless <- function(model.list, legend.spot="topleft", ..., 
+        text.cex=1, mgp=utils.mgp, font="Times", thin=F) {
+    
+    par(mgp=mgp-c(0.5,0,0))
+    
+    ylim <- c(1400, 3450)
+    plot(NA, axes=F,
+        ylim=c(0,1),
+        xlim=c(-13, 5),
+        ylab="",
+        xlab=bquote("(Data - Model)/Uncertainty")) 
+    rect(-3, ylim[1]*0.5, 3, ylim[2]*1.5, 
+        col=adjustcolor("gray", alpha.f=0.5), border=NA)
+    rect(-2, ylim[1]*0.5, 2, ylim[2]*1.5, 
+        col=adjustcolor("gray", alpha.f=0.5), border=NA)
+    abline(v=0, lty=2)
+    
+    col.pal <- c("#DB4D48", "#F29559", "#B8B08D")
+    for (ii in 1:length(model.list)) {
+        model <- model.list[[ii]]
+        
+        with(model$nus, 
+            arrows(surfless-surf.unc, r_ts, 
+                   surfless+surf.unc, r_ts, 
+                code=3, angle=90, length=0.01, lwd=0.5))
+        #with(model$nus, 
+        #    arrows(surfless, nu.y-surf.unc, 
+        #           surfless, nu.y+surf.unc, 
+        #        code=3, angle=90, length=0.001, lwd=0.5))
+    }
+    for (ii in 1:length(model.list)) {
+        model <- model.list[[ii]]
+        
+        points(model$nus$surfless, model$nus$r_ts, cex=1, 
+            col=1, lwd=0.6, 
+            bg=col.pal[ii], 
+            pch=c(22,23,21,24)[model$nus$l+1])
+    }
+    
+    legend(legend.spot, inset=c(0.04,-0.03), pch=c(20, 20, 22,23,21,24), 
+        col=c(col.pal[1:length(model.list)], 1, 1, 1, 1), cex=text.cex, 
+        legend=as.expression(c("CygA", "CygB", 
+            bquote("\u2113"==0), 
+            bquote("\u2113"==1), 
+            bquote("\u2113"==2), 
+            bquote("\u2113"==3))))
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0), 
+            las=thin, mgp=mgp-c(2,0.3,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=0.25, labels=1, 
+            las=thin, mgp=mgp+c(1,0,0), 
+            family=font, cex.axis=text.cex)
+    par(mgp=mgp+c(0.5,0,0))
+    title(ylab=bquote("Frequency"~nu/mu*Hz))
+
+}
+
+make_plots(plot_surfless, 
+    paste0('surfless2'), 
+    filepath=file.path('plots', 'echelle'), 
+    model.list=model.list, 
+    legend.spot='left')
+
+
+    

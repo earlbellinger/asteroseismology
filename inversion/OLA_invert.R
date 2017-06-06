@@ -82,8 +82,8 @@ get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
     }, ell=l, nn=n, nu=nu.x, E=E, Q_norm=Q_norm)))
 }
 
-get_A.mat <- function(cross.term, error.sup, K, C, modes, nus, F_surf, 
-        K_ijs=NULL, C_ijs=NULL, K.ints=NULL, x0=NULL) {
+get_A.mat <- function(cross.term, error.sup, modes, nus, F_surf, 
+        K=NULL, C=NULL, K_ijs=NULL, C_ijs=NULL, K.ints=NULL, x0=NULL) {
     if (length(K.ints) <= 1) {
         cat("Calculating integrals\n")
         K.ints <- get_K.ints(modes, K)
@@ -112,26 +112,26 @@ mod_sinc <- function(r, r_0, width, normalization_factor=1) {
         (1-r  )**4 * r   * sin(width*1000*(r-r_0)) / (r-r_0))
 }
 
-get_target_kernel <- function(r_0, r_f, width.r_f, K, f.spl, targ.kern.type) {
+get_target_kernel <- function(r_0, r_f, width.r_f, K.x, f.spl, targ.kern.type) {
     targ.fun <- if (targ.kern.type == 'mod_Gauss') {
         mod_Gauss
     } else if (targ.kern.type == 'mod_sinc') {
         mod_sinc        
     } else stop(paste('Invalid target kernel type:', targ.kern.type))
     width.k <- width.r_f * f.spl(r_0) / f.spl(r_f)
-    norm_fac <- 1/sintegral(K$x, targ.fun(r=K$x, r_0=r_0, width=width.k, 
+    norm_fac <- 1/sintegral(K.x, targ.fun(r=K.x, r_0=r_0, width=width.k, 
         normalization_factor=1))$value
     if (is.finite(norm_fac)) {
-        sapply(K$x, function(r) targ.fun(r=r, r_0=r_0, width=width.k, 
+        sapply(K.x, function(r) targ.fun(r=r, r_0=r_0, width=width.k, 
             normalization_factor=norm_fac))
-    } else 0*K$x
+    } else 0*K.x
 } 
 
 get_SOLA_v.vec <- function(r_0, r_f, width.r_f, K, modes, f.spl, 
         targ.kern.type) {
     target_kernel <- get_target_kernel(r_0=r_0, r_f=r_f, 
                                        width.r_f=width.r_f, 
-                                       K=K, f.spl=f.spl,
+                                       K.x=K$x, f.spl=f.spl,
                                        targ.kern.type=targ.kern.type)
     get_SOLA_v.vec.(target_kernel=target_kernel, K=K, modes=modes)
 }
@@ -148,10 +148,10 @@ get_averaging_kernel <- function(coefs, modes, K) {
     }, mode.idx=1:length(modes))))
 }
 
-get_target_kernels <- function(rs, width, model, K, r_f=0) {
+get_target_kernels <- function(rs, width, f.spl, K.x, r_f=0) {
     do.call(cbind, parallelMap(function(target_radius) {
         get_target_kernel(r_0=target_radius, r_f=r_f, 
-            width.r_f=width, f.spl=model$cs.spl, K=K,
+            width.r_f=width, f.spl=f.spl, K.x=K.x,
             targ.kern.type=targ.kern.type)
     }, target_radius=rs))
 }
@@ -166,6 +166,10 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     nus <- model$nus
     modes <- model$modes
     nu_ac <- model$nu_ac
+    K.ints <- model$K.ints
+    K_ijs <- model$K_ijs
+    C_ijs <- model$C_ijs
+    f.spl <- model$cs.spl
     
     if (is.null(F_surf)) F_surf <- 
         get_F_surf(nus, num.knots=num.knots, use.BG=use.BG, nu_ac=nu_ac)
@@ -188,11 +192,8 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
             A.mat <- get_A.mat(cross.term=cross.term, 
                                error.sup=error.sup, 
                                modes=modes, nus=nus, K=K, C=C, 
-                               #K_ijs=model$K_ijs, C_ijs=model$C_ijs,
                                K_ijs=MOLA.K_ij, C_ijs=MOLA.C_ij, 
-                               K.ints=model$K.ints, x0=x0, 
-                               #use.BG=use.BG, num.knots=num.knots,
-                               #nu_ac=nu_ac, 
+                               K.ints=K.ints, x0=x0, 
                                F_surf=F_surf)
             A.inv <- solve(A.mat, system="LDLt", tol=0)
             
@@ -206,15 +207,13 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         cat("SOLA inversion\n")
         A.mat <- get_A.mat(cross.term=cross.term, error.sup=error.sup, 
                            modes=modes, nus=nus, K=K, C=C, 
-                           K_ijs=model$K_ijs, C_ijs=model$C_ijs, 
-                           K.ints=model$K.ints, x0=NULL, 
-                           #use.BG=use.BG, num.knots=num.knots,
-                           #nu_ac=nu_ac, 
+                           K_ijs=K_ijs, C_ijs=C_ijs, 
+                           K.ints=K.ints, x0=NULL, 
                            F_surf=F_surf)
         A.inv <- solve(A.mat, system="LDLt", tol=0)
         
         targ_kerns <- if (is.null(targ_kerns)) {
-            get_target_kernels(rs, width, model, K, r_f=0)
+            get_target_kernels(rs=rs, width=width, f.spl=f.spl, K.x=K$x, r_f=0)
         }
         
         c.vecs <- do.call(cbind, parallelMap(function(targ_kern_i) {
@@ -305,6 +304,7 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
          cross_kerns=cross_kerns, 
          params=params,
          targ.kern.type=targ.kern.type, 
+         c.vecs=c.vecs,
          result=result)
 }
 

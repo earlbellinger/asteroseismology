@@ -17,7 +17,7 @@ k.pair <- u_Y
 target.name <- 'BiSON'
 ref.mod <- 'diffusion'
 freqs.1 <- get_freqs(target.name=target.name) 
-m1 <- get_model(freqs=freqs.1, model.name=ref.mod, target.name=target.name, 
+model <- get_model(freqs=freqs.1, model.name=ref.mod, target.name=target.name, 
                 k.pair=k.pair, square.Ks=T) 
 
 kernels <- Map(function(width.r_f) {
@@ -53,11 +53,11 @@ plot_target_functions <- function(legend.spot="topleft", ...,
     
     legend(legend.spot, #bty='n', #lty=NA, pch=NA, 
         cex=text.cex, inset=c(0.02, 0.04),
-        lty=c(3,1,2), col=col.pal, lwd=c(2,2,2.5),
+        lty=c(2,1,3), col=col.pal, lwd=c(2,2,2.5),
         legend=as.expression(c(
-            bquote(Delta["f"]==0.01),
-            bquote(Delta["f"]==0.02),
-            bquote(Delta["f"]==0.03))
+            bquote(Delta==0.01),
+            bquote(Delta==0.02),
+            bquote(Delta==0.03))
         ))
     
     magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),

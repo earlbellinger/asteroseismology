@@ -136,6 +136,7 @@ outputs
  11 '$fname.agsm' @
  13 '$fname.g1k'  @
  15 '$fname.ssm'  @
+ 12 '$fname.rotk' @ 
  -1 ''   @
 
 cntrd:
@@ -205,7 +206,7 @@ out:
      1,    1,    1,      ,     3, 
      1,     ,     ,      ,     3, 
   irotkr,nprtkr,igm1kr,npgmkr,ispcpr,
-       0,      ,     0,      ,     0, @
+       1,      ,     0,      ,     0, @
   icaswn, sigwn1, sigwn2, frqwn1, frqwn2,iorwn1, iorwn2, frlwn1, frlwn2
         ,      0,     -1,      0,   9999,     0,     50,      0,     -1, 
         ,      0,     -1,       "$frqwn",      "$iorwn",      0,     -1, @
@@ -259,6 +260,11 @@ cp "$fname.var" "$fname.var.bak"
 cat "$fname.var.bak" | cut -b 1-38 | \
     awk -v FIELDWIDTHS="5 7 12 14" -v OFS=, '{print $1,$2,$3,$4}' | \
     sed "s/,/ /g" | tr -s ' ' >| "$fname.var"
+
+
+python3 $SCRIPTS_DIR/rotk_extractor.py -i $fname.rotk -o rotk -p
+paste rotk/* >| rotk.dat
+
 
 ### Hooray!
 cp "$fname.dat" ..
