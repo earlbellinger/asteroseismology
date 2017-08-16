@@ -1,0 +1,45 @@
+&star_job
+      
+      create_pre_main_sequence_model = .true.
+      
+      save_model_when_terminate = .true.
+      save_model_filename = 'zams.mod'
+      
+      pre_ms_relax_num_steps = 100
+      pre_ms_T_c = 9e5
+      
+      relax_initial_Y = .true.
+      relax_initial_Z = .true.
+      new_Y = 0.271795394339516
+      new_Z = 0.0217209817301077
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      initial_y = 0.271795394339516
+      initial_z = 0.0217209817301077
+      
+      which_atm_option = 'simple_photosphere'
+      do_element_diffusion = .false.
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !max_allowed_nz = 30000
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      write_profiles_flag = .false.
+      do_history_file = .false.
+      
+      Lnuc_div_L_zams_limit = 0.999
+      stop_near_zams = .true.
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

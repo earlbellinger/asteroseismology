@@ -4,7 +4,9 @@ ls *.FGONG | xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
     a={};
     bname=$(basename $a); 
     fname="${bname%%.*}-freqs";
-    maybe_sub.sh fgong2freqs.sh {};
+    maybe_sub.sh python3 fgong2ascii.py -i {}
+    #python3 $SCRIPTS_DIR/fgong2ascii.py -i {}
+    #maybe_sub.sh fgong2freqs.sh {};
     #if [ ! -d $fname ] || [ ! -f $fname/E_K_u-Y.dat ]; then
     #    echo $fname;
     #    maybe_sub.sh kerexact.sh {} $fname 5;

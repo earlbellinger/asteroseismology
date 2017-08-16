@@ -38,7 +38,7 @@ xlims <- list( c(20, 155), c(30, 125), c(40, 140) )
 
 plot_echelle <- function(model, freqs, xlim=NULL, nu_max=3090, 
         legend.spot="topleft", ..., 
-        text.cex=1, mgp=utils.mgp, font="Times", short=F) {
+        text.cex=1, mgp=utils.mgp, font="CM Roman", short=F) {
     
     text.cex <- text.cex*1.5
     par(mar=utils.mar+c(0, 0.05, 0, 0), cex.lab=text.cex, mgp=mgp+c(0.25,0,0))
@@ -61,7 +61,7 @@ plot_echelle <- function(model, freqs, xlim=NULL, nu_max=3090,
     
     for (ii in 0:1) {
     points(model$nus$nu.x %% Delta.nu + Delta.nu*ii, model$nus$nu.x, 
-        cex=0.8, lwd=1, 
+        cex=if (model$nus$l==2) 1 else 0.8, lwd=1, 
         col=col.pal[model$nus$l+1],
         pch=c(0,5,1,2)[model$nus$l+1])
         #pch=c(0,1,2,5)[model$nus$l+1])
@@ -76,17 +76,20 @@ plot_echelle <- function(model, freqs, xlim=NULL, nu_max=3090,
     #           nu.y%%Delta.nu, nu.y+dnu, 
     #        code=3, angle=90, length=0.001, lwd=0.5))
     
-    points(model$nus$nu.y %% Delta.nu + Delta.nu*ii, model$nus$nu.y, cex=0.7,
+    points(model$nus$nu.y %% Delta.nu + Delta.nu*ii, model$nus$nu.y, 
+        cex=if (model$nus$l==2) 1 else 0.7,
         col=1, lwd=0.5, #col.pal[model$nus$l+1], 
         bg=col.pal[model$nus$l+1], 
         pch=c(22,23,21,24)[model$nus$l+1])
         #pch=c(22,21,24,23)[model$nus$l+1])
     }
     
-    legend(legend.spot[1], legend.spot[2], bty='n', #lty=NA, pch=NA, 
-        cex=text.cex, #inset=c(-0.5, 0),
-        #title.adj=-0.2,
-        legend=model$target.name)
+    if (F) {
+        legend(legend.spot[1], legend.spot[2], bty='n', #lty=NA, pch=NA, 
+            cex=text.cex, #inset=c(-0.5, 0),
+            #title.adj=-0.2,
+            legend=model$target.name)
+    }
     
     magaxis(side=c(1,3,4), tcl=0.25, labels=c(0,0,0),
             las=short, mgp=mgp-c(0.5,0.15,0), 
@@ -121,7 +124,7 @@ make_plots(plot_echelle,
 
 plot_echelles <- function(model.list, freqs.list, 
         xlims=NULL, legend.spot="topleft", ..., 
-        text.cex=1, mgp=utils.mgp, font="Times", short=F) {
+        text.cex=1, mgp=utils.mgp, font="CM Roman", short=F) {
     par(mfrow=c(1,length(model.list)))
     for (ii in 1:length(model.list)) {
         plot_echelle(model.list[[ii]], freqs.list[[ii]], 

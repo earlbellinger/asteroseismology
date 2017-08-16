@@ -134,7 +134,7 @@ for (pred.fname in list.files(pred.dir)) {
 print(exclude)
 
 
-legacy.dir <- file.path('..', '..', 'inverse', 'perturb', 'legacy')
+legacy.dir <- file.path('..', '..', 'regression', 'perturb', 'legacy')
 legacy.fnames <- setdiff(list.files(legacy.dir),
                          paste0(exclude, '_perturb.dat'))
 
@@ -224,7 +224,7 @@ plot_CD_diagram <- function(DF,
     points(137, 9, pch=20, cex=0.1,
            col=col.pal[floor((-min(FeHs)) / (max(FeHs)-min(FeHs))
                              * (length(col.pal)-1)) + 1])
-
+    
     for (legacy.fname in legacy.fnames) {
         legacy.data <- read.table(file.path(legacy.dir, legacy.fname), header=1)
         Dnu <- fivenum(legacy.data[['Dnu0']])
@@ -245,8 +245,8 @@ plot_CD_diagram <- function(DF,
                )
     }
 }
-make_plots(plot_CD_diagram, 'CD', DF=DF, make_png=F, short=F, thin=F,
-           paper=F, 
+make_plots(plot_CD_diagram, 'CD', DF=DF, #make_png=F, short=F, thin=F,
+           #paper=F, 
            #tall=F, wide=F,
            mar=utils.mar+c(0,-1,0,3.5))#2.5))
 

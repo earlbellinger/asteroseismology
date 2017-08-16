@@ -3,7 +3,7 @@
 #### Stellar predictions & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
-#source(file.path('..', 'scripts', 'seismology.R'))
+source(file.path('..', 'scripts', 'seismology.R'))
 source(file.path('..', 'scripts', 'utils.R'))
 library(parallel)
 library(parallelMap)
@@ -23,7 +23,7 @@ ev.stages <- list(
     'LOGS_MS'=1, 
     'LOGS_SG'=2, 
     'LOGS_RGB'=3, 
-    'LOGS_BUMP'=4,
+    'LOGS_BUMP'=4, 
     'LOGS_HEB'=5)
 
 ### Obtain observable properties from models 
@@ -31,6 +31,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     print(pro_file)
     
     pro_header <- read.table(pro_file, header=TRUE, nrows=1, skip=1)
+    pro_body <- read.table(pro_file, header=TRUE, nrows=1, skip=5)
     hstry <- ev.DF[ev.DF$model_number==pro_header$model_number,]
     if (nrow(hstry) == 0) {#|| hstry$mass_conv_core > 0) 
         print(paste("Model", pro_file, "failed: no history information"))
@@ -48,6 +49,9 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
             pro_header$star_mass_he4)/pro_header$star_mass
     obs.DF["X_surf"] <- hstry$surface_h1
     obs.DF["Y_surf"] <- hstry$surface_he4 + hstry$surface_he3
+    obs.DF["C_surf"] <- hstry$surface_c12
+    obs.DF["N_surf"] <- hstry$surface_n14
+    obs.DF["O_surf"] <- hstry$surface_o16
     
     obs.DF["log_LH"] <- hstry$log_LH
     obs.DF["log_LHe"] <- hstry$log_LHe
@@ -61,16 +65,22 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     
     obs.DF["cz_base"] <- hstry$cz_bot_radius
     obs.DF["acoustic_radius"] <- hstry$acoustic_radius
+    obs.DF["center_mu"] <- hstry$center_mu
+    obs.DF["surface_mu"] <- pro_body$mu
     
-    nu_max <- hstry$nu_max
-    obs.DF["nu_max_classical"] <- nu_max
-    #print("asdf")
-    #obs.DF["Dnu"] <- as.numeric(readLines(freqs_file, n=1, warn=F))
-    #print(obs.DF["Dnu"])
-    obs.DF["delta_nu_asym"] <- hstry$delta_nu
     obs.DF["delta_Pg_asym"] <- hstry$delta_Pg
     
-    seis.DF <- read.table(freqs_file, header=1)
+    obs.DF["nu_max_classic"] <- scaling_nu_max(R=obs.DF[["radius"]], 
+        M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]])
+    obs.DF["nu_max"] <- scaling_nu_max_Viani(R=obs.DF[["radius"]], 
+        M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]], 
+        mu=obs.DF[["surface_mu"]]) 
+    
+    obs.DF["delta_nu_asym"] <- hstry$delta_nu
+    freqs <- parse_freqs(freqs_file, gyre=T)
+    obs.DF["Dnu0_classic"] <- seismology(freqs, 
+        nu_max=obs.DF[["nu_max_classic"]])[["Dnu0"]]
+    seis.DF <- seismology(freqs, nu_max=obs.DF[["nu_max"]])
     
     #as.data.frame(cbind(obs.DF, seis.DF))
     merge(rbind(obs.DF), rbind(seis.DF))
@@ -92,7 +102,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
         logs <- list.files(log_dir)
         if (length(logs) <= 1) {
             print(paste(directory, "No logs found!"))
-            return(NA)
+            next 
         }
         ev.DF <- read.table(file.path(log_dir, 'history.data'), 
                 header=TRUE, skip=5)
@@ -111,7 +121,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
         }
         if (length(pro_files) <= min_num_models) {
             print(paste(directory, "Too few profile files"))
-            return(NA)
+            next 
         }
         
         ## call summarize on all pairs 
@@ -156,6 +166,8 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
         new.DF <- DF[apply(sol, 1, which.max),]
         
         new.DF$ev.stage <- rep(ev.stages[basename(log_dir)][[1]], nrow(new.DF))
+        new.DF <- new.DF[order(new.DF$age),]
+        new.DF$ev.tau <- new.DF$ev.stage + ((1:nrow(new.DF))-1)/nrow(new.DF)
         track <- plyr:::rbind.fill(track, new.DF)
     }
     

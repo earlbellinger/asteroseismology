@@ -58,7 +58,7 @@ for (ii in 1:length(model.list)) {
 
 
 plot_surfless <- function(model.list, legend.spot="topleft", ..., 
-        text.cex=1, mgp=utils.mgp, font="Times", thin=F) {
+        text.cex=1, mgp=utils.mgp, font="CM Roman", thin=F) {
     
     #par(mar=utils.mar+c(0, 0.05, 0, 0))
     par(mgp=mgp-c(0.5,0,0))
@@ -165,7 +165,7 @@ make_plots(plot_surfless,
 
 
 plot_surfless <- function(model.list, legend.spot="topleft", ..., 
-        text.cex=1, mgp=utils.mgp, font="Times", thin=F) {
+        text.cex=1, mgp=utils.mgp, font="CM Roman", thin=F) {
     
     par(mgp=mgp-c(0.5,0,0))
     
@@ -230,3 +230,83 @@ make_plots(plot_surfless,
 
 
     
+
+
+
+
+
+
+plot_surfless <- function(model.list, xlim=c(1400, 3450), ylim=c(-13, 8),
+        legend.spot="topleft", ..., 
+        text.cex=1, mgp=utils.mgp, font="CM Roman", thin=F) {
+    
+    par(mgp=mgp-c(0.5,0,0))
+    par(mar=par('mar') + c(0, 0, 0.4, 0))
+    
+    for (ii in 1:length(model.list)) {
+        nus <- model.list[[ii]]$nus
+        diffs <- nus$nu.y - nus$nu.x
+        nu <- nus$nu.x / model.list[[ii]]$nu_ac
+        inertia <- nus$E 
+        Xp <- matrix(c(nu**-1, nu**3) / (inertia * nus$dnu), ncol=2)
+        a. <- ginv( Xp ) %*% ( diffs / nus$dnu )
+        F_surf <- ( a.[[1]]*nu**-1 + a.[[2]]*nu**3 ) / (inertia)
+        sigma.dist <- ((nus$nu.x+F_surf-nus$nu.y)/nus$dnu)
+        model.list[[ii]]$nus <- cbind(model.list[[ii]]$nus, 
+            data.frame(surfless = sigma.dist,
+                       surf.unc = abs(sigma.dist) * nus$dnu/nus$nu.y))
+    }
+    
+    plot(NA, axes=F, #log='y',
+        ylim=ylim,
+        xlim=xlim,
+        ylab="",
+        xlab="")
+    rect(xlim[1]*0.5, -3, xlim[2]*1.5, 3, 
+        col=adjustcolor("gray", alpha.f=0.5), border=NA)
+    rect(xlim[1]*0.5, -2, xlim[2]*1.5, 2, 
+        col=adjustcolor("gray", alpha.f=0.5), border=NA)
+    abline(v=0, lty=2)
+    
+    col.pal <- c(1, "#DB4D48", "#F29559", blue)
+    for (ii in 1:length(model.list)) {
+        model <- model.list[[ii]]
+        
+        points(model$nus$nu.y, model$nus$surfless, cex=1, 
+            col=1, lwd=1, 
+            bg=col.pal[model$nus$l+1], 
+            pch=c(22,23,21,24)[model$nus$l+1])
+    }
+    
+    if (!is.null(legend.spot))
+        legend(legend.spot, inset=c(0.04,-0.03), 
+            pch=c(22,23,21,24), pt.bg=col.pal, bg="white",
+            col=1, cex=text.cex,
+            legend=as.expression(c(
+                bquote(' '==0),#"\u2113"==0),
+                bquote(' '==1),#"\u2113"==1),
+                bquote(' '==2),#"\u2113"==2),
+                bquote(' '==3))))#"\u2113"==3))))
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
+            las=thin, mgp=mgp-c(2,0.3,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=0.25, labels=1, #usepar=1,
+            las=thin, mgp=mgp+c(1,0,0),#+c(1,0.2,0), 
+            family=font, cex.axis=text.cex)
+    title(xlab=bquote("Frequency"~nu/mu*Hz))
+    par(mgp=mgp+c(0.5,0,0))
+    title(ylab=bquote("(Data - Model)/Uncertainty"))
+}
+
+make_plots(plot_surfless, 
+    paste0('surfless-CygA'), 
+    filepath=file.path('plots', 'echelle'), 
+    model.list=list(m2), xlim=c(1400, 3700), 
+    legend.spot='right')
+make_plots(plot_surfless, 
+    paste0('surfless-CygB'), 
+    filepath=file.path('plots', 'echelle'), 
+    model.list=list(m3), xlim=c(1400, 3700), 
+    legend.spot=NULL)
+

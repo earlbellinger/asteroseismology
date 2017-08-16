@@ -15,14 +15,14 @@ parallelStartMulticore(8)#max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
 
 models <- get_model_list()
 
-k.pair <- rho_Gamma1#rho_c2#u_Y#rho_c2#rho_c2#c2_rho # 
-target.name <- 'CygAwball'#'modmix'#'hl.no_d'#'CygAbasu3'#'no_diffusion'#'CygAdiff'#
-ref.mod <- 'CygAdiff'#'CygAdiff'#'diffusion'#'hl.diff'#'CygAwball'#'lowRhighM'#
+k.pair <- u_Y#rho_Gamma1#rho_c2#rho_c2#rho_c2#c2_rho # 
+target.name <- 'modmix'#'CygAwball'#'hl.no_d'#'CygAbasu3'#'no_diffusion'#'CygAdiff'#
+ref.mod <- 'lowRhighM'#'CygAno_diff'#'CygAdiff'#'diffusion'#'hl.diff'#'CygAwball'#
 mode.set <- 'BiSON'#'CygA'#'BiSON.MDI'#
-perturb <- F
+perturb <- F#T
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, perturb=perturb) 
 m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
-                k.pair=k.pair, square.Ks=T) 
+                k.pair=k.pair, square.Ks=T, subtract.mean=F)# T) 
 #m2 <- get_model(freqs=freqs, model.name='lowRlowM', target.name=target.name, 
 #                k.pair=k.pair, square.Ks=T) 
 
@@ -31,7 +31,7 @@ m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name,
 #rs <- seq(0.11, 0.26, 0.03)
 #rs <- seq(0.05, 0.5, 0.06)
 #rs <- seq(0, 1, 0.05)
-rs <- seq(0.01, 0.35, 0.02)
+rs <- seq(0.05, 0.3, 0.02)
 #rs <- seq(0.11, 0.23, 0.02)
 
 k.str <- paste0('-k_', k.pair$f1, k.pair$f2,
@@ -85,8 +85,25 @@ for (k.pair in k.pairs) {#list(rho_c2, u_Y)) {
 
 m1.inversion <- minimize_dist_individual(model=m1, rs=rs, initial_params=c(1,1,0.05,30))
 m1.inversion <- minimize_dist(model=m1, rs=rs, initial_params=c(100,100,0.01,22), use.BG=F)
+m1.inversion <- minimize_dist(model=m1, rs=rs, initial_params=c(1000,100,0.04))
 
-plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, legend.spot='topleft', ylim=c(-0.1, 0.1)); dev.off()
+plot_inversion_all(model=m1, inversion=m1.inversion, 
+                   k.pair=k.pair, k.str=k.str, mode.set=mode.set,
+                   legend.spot='topright')
+
+m1.inversion <- invert.OLA(model=m1, rs=seq(0.05, 0.35, 0.05), 
+    cross.term=10**3, error.sup=10**3, width=0.03, dM=m1$dM, dR=m1$dR,
+    subtract.mean=T, num_realizations=100)
+plot_inversion_all2(model=m1, inversion=m1.inversion, 
+                    k.pair=k.pair, k.str=k.str, mode.set=mode.set,
+                    legend.spot='bottomright', xlim=c(0, 0.5))
+
+make_plots(plot_inversion_all, paste0("inversion-all", k.str), 
+           model=m1, inversion=m1.inversion, k.pair=k.pair, k.str=k.str, 
+           mode.set=mode.set)#, #legend.spot='bottomright') 
+
+plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, 
+               legend.spot='topleft', ylim=c(-0.1, 0.1)); dev.off()
 dev.off()
 
 make_plots(plot_inversion, filename=paste0("inversion", k.str),
@@ -325,4 +342,39 @@ m2.inversion <- invert.OLA(model=m2,
                            rs=rs, 
                            cross.term=10**best_params$par[3], #257.7427,#
                            error.sup=10**best_params$par[4])#0.04083236)#
+
+
+
+
+
+
+
+
+rs <- seq(0.05, 0.35, 0.05)
+m1.inversion <- minimize_dist(model=m1, rs=rs, initial_params=c(1000,1000,0.03),
+    num_realizations=1, dM=m1$dM, dR=m1$dR)
+
+m1.inversion <- invert.OLA(model=m1, rs=rs, 
+    cross.term=866.94, error.sup=1951.9366, width=0.035, dM=m1$dM, dR=m1$dR,
+    subtract.mean=T, num_realizations=100)
+plot_inversion_all2(model=m1, inversion=m1.inversion, 
+                    k.pair=k.pair, k.str=k.str, mode.set=mode.set,
+                    legend.spot='bottomright', xlim=c(0, 0.5), plot_nondim=F)
+
+m1.inversion <- invert.OLA(model=m1, rs=rs, 
+    cross.term=866.94, error.sup=1951.9366, width=0.035, #dM=m1$dM, dR=m1$dR,
+    subtract.mean=F, num_realizations=100)
+plot_inversion_all2(model=m1, inversion=m1.inversion, 
+                    k.pair=k.pair, k.str=k.str, mode.set=mode.set,
+                    legend.spot='bottomright', xlim=c(0, 0.5), plot_nondim=F)
+
+
+
+m1.inversion2 <- minimize_dist(model=m1, rs=rs, initial_params=c(866.94, 1951.9366, 0.035),
+    num_realizations=1, d.f1.true=F)
+
+
+
+
+
 

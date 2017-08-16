@@ -8,7 +8,7 @@
 maybe_sub() {
     cmd=$*
     
-    ## Check if it should be run in parallel
+    ## Check if job should be run in parallel
     threads=""
     if [ "$OMP_NUM_THREADS" -gt 1 ]; then
         threads="environment  = OMP_NUM_THREADS=$OMP_NUM_THREADS
@@ -38,6 +38,7 @@ request_cpus = $OMP_NUM_THREADS
     fi
     
     name=${cmd// /_}
+    #name=${name//./_}
     if command -v condor_submit >/dev/null 2>&1
       then
         ## Make directory for script

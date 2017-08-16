@@ -12,7 +12,7 @@
 
 &controls
       
-      log_directory = 'LOGS_SG'
+      log_directory = 'LOGS_SG3'
       
       mesh_delta_coeff = 0.9
       ! varcontrol_target = 5d-5 ! default is 1d-4
@@ -35,7 +35,7 @@
       x_integer_ctrl(1) = 6 ! stop when He flash is over 
       
       num_cells_for_smooth_brunt_B = 1
-      max_years_for_timestep = 400000
+      max_years_for_timestep = 10000
       
 / ! end of controls namelist
 

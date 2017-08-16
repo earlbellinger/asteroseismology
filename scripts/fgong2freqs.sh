@@ -203,6 +203,7 @@ out:
   iper,ivarf,kvarf,npvarf,nfmode,
      1,    1,     ,      ,     3, 
      1,    3,     ,      ,     3, @
+     1,    2,     ,      ,     3, 
      1,    1,    1,      ,     3, 
      1,     ,     ,      ,     3, 
   irotkr,nprtkr,igm1kr,npgmkr,ispcpr,
@@ -257,14 +258,16 @@ fi
 cp "$fname.var" "$fname.var.bak"
 
 ## Remove the text so that the data can be parsed 
-cat "$fname.var.bak" | cut -b 1-38 | \
-    awk -v FIELDWIDTHS="5 7 12 14" -v OFS=, '{print $1,$2,$3,$4}' | \
+cat "$fname.var.bak" | cut -b 1-26 | \
+    awk -v FIELDWIDTHS="5 7 12" -v OFS=, '{print $1,$2,$3,$4}' | \
     sed "s/,/ /g" | tr -s ' ' >| "$fname.var"
 
 
 python3 $SCRIPTS_DIR/rotk_extractor.py -i $fname.rotk -o rotk -p
 paste rotk/* >| rotk.dat
+rm -rf "$fname.rotk" rotk/
 
+#rm -rf "$fname.amde"
 
 ### Hooray!
 cp "$fname.dat" ..

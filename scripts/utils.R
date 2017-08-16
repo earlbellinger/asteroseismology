@@ -4,14 +4,14 @@
 #### Max-Planck-Institut fur Sonnensystemforschung
 
 invisible(library(magicaxis))
+invisible(library(extrafont))
 
 ## Plotting values
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
-utils.font <<- "Times" #"Palatino"
-
-font <- "Palatino"
+utils.font <<- "CM Roman" #"Helvetica" #"Times" #"Palatino"
+font <- "CM Roman" #"Helvetica" #"Palatino"
 text.cex <- 1
 mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
@@ -32,7 +32,8 @@ FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
 #latex_pt_per_in <- 5 * 72.27
 
 blue <- "#0571b0"
-red <- "#ca0020"
+red <- "#CA0020"
+orange <- "#F97100"
 
 ################################################################################
 ### PLOTTING ###################################################################
@@ -66,10 +67,10 @@ make_plots <- function(plot_f, filename,
         mgp.slides=utils.mgp,
         mgp.paper=c(1.5, 0.15, 0),
         hack.mgp=c(2, 0.5, 0), thin.hack=FALSE,
-        cex.paper=0.75, cex.slides=1.3, cex.hack=1.4,
+        cex.paper=0.77, cex.slides=1.3, cex.hack=1.4,
         wide=TRUE, thin=TRUE,
         tall=TRUE, short=TRUE,
-        make_png=TRUE, make_pdf=TRUE,
+        make_png=TRUE, make_pdf=TRUE, make_tikz=FALSE,
         paper=TRUE, slides=TRUE,
         paper_pdf_width=6.97522, # inches
         paper_pdf_height=4.17309,
@@ -77,7 +78,8 @@ make_plots <- function(plot_f, filename,
         slides_pdf_height=4.1511,
         latex_pt_per_in=5*72.27,
         png_res=400,
-        font=utils.font, ...) {
+        font=utils.font, 
+        use.cairo=F, ...) {
 
     paper_png_width <- paper_pdf_width * latex_pt_per_in
     paper_png_height <- paper_pdf_height * latex_pt_per_in
@@ -113,7 +115,7 @@ make_plots <- function(plot_f, filename,
 }
 
 widethin <- function(plot_f, filename, directory,
-        pdf_width, pdf_height, png_width, png_height, text.cex, ...,
+        pdf_width, pdf_height, png_width, png_height, text.cex, use.cairo, ...,
         wide=T, thin=T) {
 
     if (thin) {
@@ -121,7 +123,7 @@ widethin <- function(plot_f, filename, directory,
         dir.create(thin_dir, showWarnings=FALSE, recursive=TRUE)
         tallshort(plot_f, filename, thin_dir,
                   pdf_width/2, png_width/2,
-                  pdf_height, png_height, text.cex, ...,
+                  pdf_height, png_height, text.cex, use.cairo, ...,
                   thin=T, wide=F)
     }
 
@@ -130,13 +132,13 @@ widethin <- function(plot_f, filename, directory,
         dir.create(wide_dir, showWarnings=FALSE, recursive=TRUE)
         tallshort(plot_f, filename, wide_dir,
                   pdf_width, png_width,
-                  pdf_height, png_height, text.cex, ...,
+                  pdf_height, png_height, text.cex, use.cairo, ...,
                   thin=F, wide=T)
     }
 }
 
 tallshort <- function(plot_f, filename, directory,
-        pdf_width, png_width, pdf_height, png_height, text.cex, ...,
+        pdf_width, png_width, pdf_height, png_height, text.cex, use.cairo, ...,
         tall=T, short=T, thin.hack=F) {
 
     if (short) {
@@ -144,7 +146,7 @@ tallshort <- function(plot_f, filename, directory,
         dir.create(short_dir, showWarnings=FALSE, recursive=TRUE)
         pdfpng(plot_f, filename, short_dir,
                pdf_width, pdf_height/2,
-               png_width, png_height/2, text.cex, ...,
+               png_width, png_height/2, text.cex, use.cairo, ...,
                tall=F, short=T)
     }
     if (tall) {
@@ -152,15 +154,16 @@ tallshort <- function(plot_f, filename, directory,
         dir.create(tall_dir, showWarnings=FALSE, recursive=TRUE)
         pdfpng(plot_f, filename, tall_dir,
                pdf_width, pdf_height,
-               png_width, png_height, text.cex, ...,
+               png_width, png_height, text.cex, use.cairo, ...,
                tall=T, short=F)
     }
 }
 
 pdfpng <- function(plot_f, filename, directory,
         pdf_width, pdf_height, png_width, png_height,
-        text.cex, png_res, ..., font=utils.font, mar=utils.mar, thin.hack=F,
-        make_png=T, make_pdf=T, mgp=utils.mgp) {
+        text.cex, png_res, use.cairo, ..., 
+        font=utils.font, mar=utils.mar, thin.hack=F,
+        make_png=T, make_pdf=T, make_tikz=T, mgp=utils.mgp) {
 
     if (make_png) {
         png(file.path(directory, paste0(filename, '.png')),
@@ -173,13 +176,24 @@ pdfpng <- function(plot_f, filename, directory,
         dev.off()
     }
     if (make_pdf) {
-        cairo_pdf(file.path(directory, paste0(filename, '.pdf')),
-            width=pdf_width, height=pdf_height,
-            family=utils.font)
+        cairornot <- if (use.cairo) cairo_pdf else pdf
+        cairornot(file.path(directory, paste0(filename, '.pdf')),
+            width=pdf_width, height=pdf_height, family=font)
         par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex,
-               font=font,
-               mgp=if (thin.hack) hack.mgp else mgp, ...)
+               font=font, mgp=if (thin.hack) hack.mgp else mgp, ...)
+        dev.off()
+        if (font == "CM Roman") {
+            embed_fonts(file.path(directory, paste0(filename, '.pdf')), 
+                outfile=file.path(directory, paste0(filename, '.pdf')))
+        }
+    }
+    if (make_tikz) {
+        tikz(file.path(directory, paste0(filename, '.tex')),
+            width=pdf_width, height=pdf_height)
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+        plot_f(text.cex=if (thin.hack) cex.hack else text.cex,
+               font=font, mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
     }
 }
@@ -569,6 +583,7 @@ scatter_plot <- function(seis.DF, X, Y, Z, combos, col.pal,
 
 ## A basic normalization function
 normalize <- function(x) (x-min(x))/(max(x)-min(x))
+standardize <- function(x) (x-mean(x))/sd(x)
 
 ## Get mesh
 get_mesh <- function(X, Y, Z, seis.DF, cygA_stds) {
@@ -713,7 +728,7 @@ plot_HR <- function(DF, ...,
 
 ## R/R_sun = nu_max/nu_max_sun (Dnu/Dnu_sun)^-2 (Teff/Teff_sun)^(1/2)
 ## M/M_sun = (R/R_sun)^3 (Dnu/Dnu_sun)^2
-scaling_nu_max <- function(R, M, Teff, Teff_sun=5777, nu_max_sun=3090) {
+scaling_nu_max <- function(R, M, Teff, Teff_sun=5777.739, nu_max_sun=3090) {
     M * nu_max_sun / ( R**2 * sqrt(Teff/Teff_sun) )
 }
 
@@ -722,7 +737,7 @@ scaling_nu_max_Viani <- function(R, M, Teff, mu,
     M * nu_max_sun * sqrt(mu / mu_sun) / ( R**2 * sqrt(Teff/Teff_sun) )
 }
 
-scaling_Delta_nu_Guggenberger <- function(Teff=5777, FeH=0) {
+scaling_Delta_nu_Guggenberger <- function(Teff=5777.739, FeH=0) {
     A <- 0.64 * FeH + 1.78
     lambda <- -0.55 * FeH + 1.23
     omega <- 22.21
@@ -776,3 +791,15 @@ d.n_B_dx.n <- function(x, i, j, ks, n=2) {
     (j-1) * ( exp.1 + exp.2 )
 }
 
+
+################################################################################
+### MISC #######################################################################
+################################################################################
+
+cbind.fill <- function(...){
+    nm <- list(...) 
+    nm <- lapply(nm, as.matrix)
+    n <- max(sapply(nm, nrow)) 
+    do.call(cbind, lapply(nm, function (x) 
+        rbind(x, matrix(, n-nrow(x), ncol(x))))) 
+}

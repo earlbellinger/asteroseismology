@@ -38,7 +38,7 @@
       x_integer_ctrl(1) = 6 ! stop when He flash is over 
       
       num_cells_for_smooth_brunt_B = 1
-      max_age = 5.181d9
+      max_age = 5.75d9
       
 / ! end of controls namelist
 

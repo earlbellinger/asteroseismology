@@ -9,7 +9,7 @@
 ### Variables ###
 #################
 # Adjust this if you want a different version 
-GYRE_VER=4.4
+GYRE_VER=5.0
 
 #########################################
 ### Download and install GYRE ###

@@ -1,0 +1,24 @@
+
+2 'CygA_JCD-freqs.amdl'    @
+3 'CygA_JCD-freqs.model'   @
+-1 ''        @
+nn  ,icnmsh
+4800,      ,,  @
+10000,      ,,  
+icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
+211  ,      ,     ,0.013,      ,5.    ,      , 
+11   ,      ,     ,   64,      ,5.    ,      , old
+24   ,      ,     ,     ,      ,      ,      , @  
+23   ,      ,     ,     ,      ,      ,      , 
+cg,  cx,ca  ,sig1,sig2,lmax,alphsf,adda4,accrm
+  ,    ,    ,    ,    ,    ,      ,     ,     , @
+1.,0.05,0.05,0.  ,0.  ,   2,      , 0.02, 0.01, old
+,,,,,,,,,,,,,,,,, 
+nout,cn,irsu,unew   
+60  ,  ,    ,    ,,,,,,, old
+30  ,  ,    ,    ,,,,,,, @
+20,,,,,,,,,  
+nmodel,kmodel,itsaml,ioldex
+      ,      ,      ,     2,,,,,,,,  old
+      ,      ,      ,      ,,,,,,,,  @
+

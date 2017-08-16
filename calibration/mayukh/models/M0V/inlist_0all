@@ -1,0 +1,95 @@
+&star_job
+      
+      kappa_file_prefix = 'gs98'
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag = .true.
+      show_log_description_at_start = .false.
+      write_profile_when_terminate = .false.
+      pgstar_flag = .false.
+      
+      change_net = .true. 
+      change_initial_net = .true. 
+      new_net_name = 'o18_and_ne22.net' 
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      initial_mass = 0.496215
+      Zbase = 0.01654506
+      mixing_length_alpha = 0.806697
+      
+      !use_Type2_opacities = .true.
+      !cubic_interpolation_in_Z = .true.
+      
+      step_overshoot_f_above_nonburn_core = 0.26819598
+      step_overshoot_f_above_nonburn_shell = 0.26819598
+      step_overshoot_f_below_nonburn_shell = 0.26819598
+      step_overshoot_f_above_burn_h_core = 0.26819598
+      step_overshoot_f_above_burn_h_shell = 0.26819598
+      step_overshoot_f_below_burn_h_shell = 0.26819598
+      
+      overshoot_f0_above_nonburn_core = .05363919
+      overshoot_f0_above_nonburn_shell = .05363919
+      overshoot_f0_below_nonburn_shell = .05363919
+      overshoot_f0_above_burn_h_core = .05363919
+      overshoot_f0_above_burn_h_shell = .05363919
+      overshoot_f0_below_burn_h_shell = .05363919
+      
+      diffusion_dt_limit = 3d12
+      diffusion_calculates_ionization = .false.
+      diffusion_use_isolve = .true.
+      !diffusion_use_cgs_solver = .true.
+      diffusion_min_dq_at_surface = 1d-3
+      
+      diffusion_num_classes = 5
+      diffusion_class_factor(1) = 1
+      diffusion_class_factor(2) = 1
+      diffusion_class_factor(3) = 1
+      diffusion_class_factor(4) = 1
+      diffusion_class_factor(5) = 1
+      
+      diffusion_class_representative(1) = 'h1'
+      diffusion_class_representative(2) = 'he3'
+      diffusion_class_representative(3) = 'he4'
+      diffusion_class_representative(4) = 'o16'
+      diffusion_class_representative(5) = 'fe56'
+      
+      diffusion_class_A_max(1) = 2
+      diffusion_class_A_max(2) = 3
+      diffusion_class_A_max(3) = 4
+      diffusion_class_A_max(4) = 16
+      diffusion_class_A_max(5) = 10000
+      
+      convective_bdy_weight = 1
+      convective_bdy_min_dt_yrs = 1d4 ! default is 1d-3
+      T_mix_limit = 2d4
+      skip_rotation_in_convection_zones = .true.
+      
+      photo_interval = 100000
+      terminal_interval = 10000000
+      write_header_frequency = 10000000
+      max_num_profile_zones = 2
+      min_timestep_limit = 1d-12
+      
+      write_profiles_flag = .true.
+      ! write_pulse_data_with_profile = .true.
+      pulse_data_format = 'FGONG'
+      format_for_FGONG_data = '(1P5E16.9,x)'
+      
+      add_atmosphere_to_pulse_data = .true.
+      add_center_point_to_pulse_data = .true.
+      keep_surface_point_for_pulse_data = .true.
+      add_double_points_to_pulse_data = .false.
+      
+      max_model_number = 1000000
+      max_num_profile_models = 1
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

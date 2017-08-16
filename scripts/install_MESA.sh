@@ -10,7 +10,7 @@
 #################
 # Adjust these if you want a different version 
 MESA_VER=9575 
-SDK_VER=20160129
+SDK_VER=20170802
 
 # Adjust this if you want to use more than one processor
 export OMP_NUM_THREADS=1 

@@ -111,6 +111,19 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     #else ell.0$nu + abs(central.offset)
     #echelle <- splinefun(centered.nus, centered.nus %% seis.DF$Dnu0)
     
+    
+    # calculate epsilon_p
+    #central <- find_closest(ell.0$nu, rep(3090, 3))$x[1:3]
+    #epsilon_p <- mean(ell.0$nu[central] / seis.DF[['Dnu0']] - ell.0$n[central])
+    epsilon_p <- weighted.mean(ell.0$nu / seis.DF[['Dnu0']] - ell.0$n,
+        dnorm(ell.0$nu, nu_max, (0.66*nu_max**0.88)/fwhm_conversion))
+    #epsilon_p <- mean((ell.0$nu[central] / (ell.0$nu[central] - ell.0$nu[central-1])) %% 1)
+    #epsilon_p <- mean((ell.0$nu[central] / mean(ell.0$nu[central] - ell.0$nu[central-1])) %% 1)
+    #epsilon_p <- mean((ell.0$nu[central] / seis.DF[['Dnu0']]) %% 1)
+    #if (epsilon_p < 0.5 && seis.DF[['Dnu0']] > 3) epsilon_p <- epsilon_p + 1
+    #nu_c.0 <- seis.DF[['Dnu']]
+    seis.DF <- cbind(seis.DF, data.frame(epsilon_p=epsilon_p))
+    
     # find frequencies of mixed modes 
     if (nrow(mixed) <= 0) return(seis.DF)
     
@@ -159,8 +172,6 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         seis.DF <- cbind(seis.DF, mixed)
     }
     
-    
-    
     ## interpolate within echelle diagram and save distance
     #mixed.offset <- if (central.offset > 0) mixed - central.offset
     #else mixed + abs(central.offset)
@@ -168,7 +179,8 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     #names(echelle.dist) <- paste0('echelle.', mm.ell, '.', 
     #    1:ncol(echelle.dist))
     #seis.DF <- cbind(seis.DF, echelle.dist)
-
+    
+    
     return(seis.DF)
 }
 

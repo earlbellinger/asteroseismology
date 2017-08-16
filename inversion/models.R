@@ -28,7 +28,8 @@ paths <- list(diffusion=file.path('models', 'diffusion', 'LOGS_MS'),
               CygAbasu1=file.path('models', 'CygAbasu'),
               CygAbasu2=file.path('models', 'CygAbasu'),
               CygAbasu3=file.path('models', 'CygAbasu'),
-              CygAbasu4=file.path('models', 'CygAbasu'))
+              CygAbasu4=file.path('models', 'CygAbasu'),
+              CygAjcd=file.path('models', 'CygAjcd'))
 
 path <- paths$hl.diff
 hl.diff <- list(name='MESA Diffusion', short='hlD',
@@ -104,11 +105,22 @@ CygBwball <- list(name='16CygB wball', short='CygBwball',
                      fgong.path=file.path(path, 'sample_0298-freqs', 
                                                 'sample_0298.FGONG.dat'))
 
+path <- paths$CygAjcd
+CygAjcd <- list(name='16CygA JCD', short='CygAJCD',
+                     kerns.dir=file.path(path, 'CygA_JCD'),
+                     freq.path=file.path(path, 'CygA_JCD-freqs.dat'), 
+                     freq.col.names=c('l', 'n', 'nu', 'E'),
+                     #profile.path=file.path(path, 'CygA_JCD.data'),
+                     fgong.path=file.path(path, 'CygA_JCD', 
+                                                'CygA_JCD.FGONG.dat'))
+
 path <- paths$modmix
 modmix <- list(name='Modmix', short='Mm',
                freq.path=file.path(path, 'modmix-freqs.dat'), 
                freq.col.names=c('l', 'n', 'nu', 'E'), 
-               fgong.path=file.path(path, 'modmix.dat'))
+               fgong.path=file.path(path, 'modmix.dat'),
+               M=1.989 * 10**30 / solar_mass,
+               R=695.98*10**8 / solar_radius)
 
 path <- paths$CygAbasu1 # matched to CygAwball
 CygAbasu1 <- list(name='16 Cyg A Basu 1', short='CygAbasu1',
@@ -147,7 +159,8 @@ get_model_list <- function() {
         'CygAbasu1'=CygAbasu1,
         'CygAbasu2'=CygAbasu2,
         'CygAbasu3'=CygAbasu3,
-        'CygAbasu4'=CygAbasu4)
+        'CygAbasu4'=CygAbasu4,
+        'CygAjcd'=CygAjcd)
     
     perturbed.model.names <<- c()
     for (R in c(0.98, 1, 1.02)) {
@@ -217,7 +230,7 @@ get_model_list <- function() {
             model.name <- if (length(model.name.R) < 1 && 
                               length(model.name.M) < 1)
                 'Diffusion' else paste0(model.name.R, model.name.M)
-            model.name <- paste0('CygA', model.name)
+            model.name <- paste0('CygB', model.name)
             perturbed.CygB.names <<- c(perturbed.CygB.names, model.name)
             
             model <- list(name=model.name, short=model.name,
@@ -243,7 +256,8 @@ parse_freqs <- function(path, col.names=F) {
 
 get_model <- function(freqs, model.name="diffusion", target.name=NULL, 
                       k.pair=u_Y, x0=NULL, square.Ks=F, 
-                      fake.dnu=10**-6, match.nl=T) { 
+                      fake.dnu=10**-6, match.nl=T, subtract.mean=F,
+                      trim.ks=T) { 
     #model <- get(model.name) 
     model <- models[[model.name]]
     model$target.name <- target.name
@@ -273,31 +287,38 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
         }, ell=unique(freqs$l)))
     }
     
+    missing.nus <- which(! freqs$nu %in% nus$nu.y)
+    for (ii in missing.nus) 
+        cat(paste0("missing mode n=", freqs[ii,]$n, ", l=", freqs[ii,]$l, '\n'))
+    
     #nus <- merge(nus, freqs, by=c('l', 'n')) 
     diffs <- nus$nu.x - nus$nu.y 
-    r.diff <- diffs / nus$nu.x
-    d.r.diff <- (nus$dnu / abs(diffs) * abs(r.diff))
-    weights <- 1/d.r.diff / sum(1/d.r.diff)
+    r.diff <- diffs / nus$nu.x 
+    #d.r.diff <- (nus$dnu / abs(diffs) * abs(r.diff))
+    d.r.diff <- nus$dnu / abs(nus$nu.y) * abs(r.diff) 
+    weights <- 1/d.r.diff / sum(1/d.r.diff) 
     w.mean <- weighted.mean(r.diff, weights) 
-    w.std <- sqrt(sum( weights**2 * d.r.diff**2 ))
+    w.std <- sqrt(sum( weights**2 * d.r.diff**2 )) 
     nus <- cbind(nus, data.frame(
-        #r.diff = r.diff, 
-        #d.r.diff = d.r.diff
-        r.diff = r.diff - w.mean, 
-        d.r.diff = sqrt( d.r.diff**2 + w.std**2 )
+        r.diff = if (subtract.mean) 
+            r.diff - w.mean else r.diff, 
+        d.r.diff = if (subtract.mean) 
+            sqrt( d.r.diff**2 + w.std**2 ) else d.r.diff
+        #r.diff = r.diff - w.mean, 
+        #d.r.diff = sqrt( d.r.diff**2 + w.std**2 )
     ))
     nus <- nus[order(nus$l, nus$n),]
     
     # parse model structure 
-    model$fgong <- read.table(model$fgong.path, header=1) 
-    model$fgong <- model$fgong[order(model$fgong$x),] 
-    r <- model$fgong$x 
+    fgong <- read.table(model$fgong.path, header=1) 
+    fgong <- fgong[order(fgong$x),] 
+    r <- fgong$x 
     model$r <- r 
     
-    model$cs.spl <- splinefun(r, sqrt(model$fgong[['c2']])) 
-    model$mass <- max(model$fgong$m)
+    model$cs.spl <- splinefun(r, sqrt(fgong[['c2']])) 
+    model$mass <- max(fgong$m)
     model$M <- model$mass / solar.mass # 1.9892e+33
-    model$radius <- model$fgong$r[which.max(model$fgong$m)]
+    model$radius <- fgong$r[which.max(fgong$m)]
     model$R <- model$radius / solar.radius # 6.9598e+10
     model$Teff <- if ('profile.path' %in% names(model)) {
         read.table(model$profile.path, header=1, skip=1, nrow=1)$Teff
@@ -306,8 +327,8 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     model$nu_max <- model$M*model$R**-2*(model$Teff/5777)**(-1/2)*3090 
     
     if (!is.null(k.pair)) {
-        f1 <- model$fgong[[k.pair$f1]]
-        f2 <- model$fgong[[k.pair$f2]]
+        f1 <- fgong[[k.pair$f1]]
+        f2 <- fgong[[k.pair$f2]]
         model$f1 <- f1
         model$f2 <- f2
         model$f1.spl <- splinefun(r, model$f1)
@@ -341,6 +362,18 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
             m2.f2.spl <- splinefun(m.2$x, m.2[[k.pair$f2]])
             m2.f2 <- m2.f2.spl(r) 
             
+            if ('m' %in% names(m.2)) {
+                model$m2.mass <- max(m.2$m)
+                model$m2.M <- model$m2.mass / solar.mass # 1.9892e+33
+            } else model$m2.M <- target$M
+            if ('r' %in% names(m.2)) {
+                model$m2.radius <- m.2$r[which.max(m.2$m)]
+                model$m2.R <- model$m2.radius / solar.radius # 6.9598e+10
+            } else model$m2.R <- target$R
+            
+            model$dR <- (model$R-model$m2.R)/model$R
+            model$dM <- (model$M-model$m2.M)/model$M
+            
             model$m2.f1 <- m2.f1
             model$m2.f2 <- m2.f2
             model$m2.f1.spl <- m2.f1.spl
@@ -349,6 +382,13 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
             # calculate relative structural differences 
             model$d.f1.true <- (f1 - m2.f1) / (if (k.pair$f1 == 'Y') 1 else f1)
             model$d.f2.true <- (f2 - m2.f2) / (if (k.pair$f2 == 'Y') 1 else f2)
+            
+            if (k.pair$f1 == 'u') {
+                model$d.f1.nondim <- model$d.f1.true + model$dR - model$dM
+            }
+            if (k.pair$f2 == 'u') {
+                model$d.f2.nondim <- model$d.f2.true + model$dR - model$dM
+            }
             
             model$d.f1.spl <- splinefun(r, model$d.f1.true)
             
@@ -389,8 +429,10 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     model$nus <- nus
     
     if (!is.null(k.pair)) {
-        model$k1 <- k1
-        model$k2 <- k2
+        include.k1 <- if (trim.ks) names(k1) %in% model$modes else T
+        include.k2 <- if (trim.ks) names(k2) %in% model$modes else T
+        model$k1 <- cbind(data.frame(x=k1$x), k1[,include.k1])
+        model$k2 <- cbind(data.frame(x=k2$x), k2[,include.k2])
         
         # get square K matrices for OLA inversions
         if (square.Ks) {

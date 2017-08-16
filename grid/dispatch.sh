@@ -17,6 +17,8 @@ continue=1
 M0=1
 Y0=0.27202387
 Z0=0.01830403
+solar_alpha=1.84663590
+solar_overshoot=0.09104194
 
 sigmoida=$(echo "scale=10; (1+e(-6))/(1-e(-6))" | bc -l)
 sigmoidb=$(echo "scale=10; 1/(e(6)-1)" | bc -l)
@@ -40,6 +42,9 @@ while [ "$#" -gt 0 ]; do
     -M) M="$2"; shift 2;;
     -Y) Y="$2"; shift 2;;
     -Z) Z="$2"; shift 2;;
+    -a) alpha="$2"; shift 2;;
+    -o) overshoot="$2"; shift 2;;
+    -D) diffusion="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
     -L) light=1; shift 1;;
     -r) remove=1; shift 1;;
@@ -54,20 +59,23 @@ if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${M+x} ]; then M=$M0; fi
 if [ -z ${Y+x} ]; then Y=$Y0; fi
 if [ -z ${Z+x} ]; then Z=$Z0; fi
+if [ -z ${alpha+x} ]; then alpha=$solar_alpha; fi
+if [ -z ${o+x} ]; then overshoot=$solar_overshoot; fi
 if [ -z ${directory+x} ]; then directory=simulations; fi
 if [ -z ${light+x} ]; then light=0; fi
 if [ -z ${remove+x} ]; then remove=0; fi
 if [ -z ${suppress+x} ]; then suppress=0; fi
 
-if (( $(echo "$M <= 1.2" | bc -l ) )); then 
-    diffusion=1
-elif (( $(echo "$M >= 1.3" | bc -l ) )); then 
-    diffusion=0
-else
-    #diffusion=$(echo "( 1.3 - $M )*10" | bc -l)
-    x=$(echo "scale=10; 1 - ( 1.3 - $M )*10" | bc -l)
-    diffusion=$(sigmoid $x)
-fi
+if [ -z ${diffusion} ]; then
+    if (( $(echo "$M <= 1.2" | bc -l ) )); then 
+        diffusion=1
+    elif (( $(echo "$M >= 1.3" | bc -l ) )); then 
+        diffusion=0
+    else
+        x=$(echo "scale=10; 1 - ( 1.3 - $M )*10" | bc -l)
+        diffusion=$(sigmoid $x)
+    fi
+fi 
 
 if [ $HELP -gt 0 ]; then
     echo
@@ -105,15 +113,15 @@ fi
 ################################################################################
 ### HELPER FUNCTIONS ###########################################################
 ################################################################################
-change_param() { 
+change() { 
     # Modifies a parameter in the current inlist. 
     # args: ($1) name of parameter 
     #       ($2) new value 
     #       ($3) filename of inlist where change should occur 
     # Additionally changes the 'inlist_0all' inlist. 
-    # example command: change_param initial_mass 1.3 
-    # example command: change_param log_directory 'LOGS_MS' 
-    # example command: change_param do_element_diffusion .true. 
+    # example command: change initial_mass 1.3 
+    # example command: change log_directory 'LOGS_MS' 
+    # example command: change do_element_diffusion .true. 
     param=$1 
     newval=$2 
     filename=$3 
@@ -122,7 +130,7 @@ change_param() {
     replace="      $param = $newval" 
     sed -r -i.bak -e "s/$search/$replace/g" $filename 
     if [ ! "$filename" == 'inlist_0all' ]; then 
-        change_param $param $newval 'inlist_0all'
+        change $param $newval 'inlist_0all'
     fi 
 } 
 
@@ -132,8 +140,8 @@ set_inlist() {
     # example command: change_inlists inlist_2ms 
     newinlist=$1 
     echo "Changing to $newinlist" 
-    change_param "extra_star_job_inlist2_name" "'$newinlist'" "inlist" 
-    change_param "extra_controls_inlist2_name" "'$newinlist'" "inlist" 
+    change "extra_star_job_inlist2_name" "'$newinlist'" "inlist" 
+    change "extra_controls_inlist2_name" "'$newinlist'" "inlist" 
     inlist=$newinlist
 }
 
@@ -145,28 +153,52 @@ cleanup() {
 }
 
 set_params() {
-    change_param 'initial_mass' "$M" "$inlist"
-    change_param 'initial_y' "$Y" "$inlist"
-    change_param 'initial_z' "$Z" "$inlist"
-    change_param 'new_Y' "$Y" "$inlist"
-    change_param 'new_Z' "$Z" "$inlist"
-    change_param 'Zbase' "$Z" "$inlist"
+    change 'initial_mass' "$M" "$inlist"
+    change 'initial_y' "$Y" "$inlist"
+    change 'initial_z' "$Z" "$inlist"
+    change 'new_Y' "$Y" "$inlist"
+    change 'new_Z' "$Z" "$inlist"
+    change 'Zbase' "$Z" "$inlist"
+    change 'mixing_length_alpha' "$alpha" "$inlist"
     
     if [[ suppress -eq 1 ]]; then
-        change_param 'write_profiles_flag' '.false.' "$inlist"
+        change 'write_profiles_flag' '.false.' "$inlist"
     fi
+    
+    set_overshoot
 }
 
 set_diffusion() {
     if (( $(echo "$diffusion > 0" | bc -l) )); then
-        change_param 'do_element_diffusion' '.true.' "$inlist"
-        change_param 'diffusion_class_factor(1)' "$diffusion" "$inlist"
-        change_param 'diffusion_class_factor(2)' "$diffusion" "$inlist"
-        change_param 'diffusion_class_factor(3)' "$diffusion" "$inlist"
-        change_param 'diffusion_class_factor(4)' "$diffusion" "$inlist"
-        change_param 'diffusion_class_factor(5)' "$diffusion" "$inlist"
-        decrease=$(echo "scale=8; $diffusion / 100" | bc -l)
-        change_param 'x_ctrl(2)' "$decrease" "$inlist"
+        change 'do_element_diffusion' '.true.' "$inlist"
+        change 'diffusion_class_factor(1)' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(2)' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(3)' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(4)' "$diffusion" "$inlist"
+        change 'diffusion_class_factor(5)' "$diffusion" "$inlist"
+        if [[ taper -eq 1 ]]; then
+            decrease=$(echo "scale=8; $diffusion / 100" | bc -l)
+            change 'x_ctrl(2)' "$decrease" "$inlist"
+        fi
+    fi
+}
+
+set_overshoot() {
+    if (( $(echo "$overshoot > 0" | bc -l) )); then
+        change 'step_overshoot_f_above_nonburn_core' "$overshoot" "$inlist"
+        change 'step_overshoot_f_above_nonburn_shell' "$overshoot" "$inlist"
+        change 'step_overshoot_f_below_nonburn_shell' "$overshoot" "$inlist"
+        change 'step_overshoot_f_above_burn_h_core' "$overshoot" "$inlist"
+        change 'step_overshoot_f_above_burn_h_shell' "$overshoot" "$inlist"
+        change 'step_overshoot_f_below_burn_h_shell' "$overshoot" "$inlist"
+        
+        f0=$(echo "scale=8; $overshoot / 5" | bc -l)
+        change 'overshoot_f0_above_nonburn_core' "$f0" "$inlist"
+        change 'overshoot_f0_above_nonburn_shell' "$f0" "$inlist"
+        change 'overshoot_f0_below_nonburn_shell' "$f0" "$inlist"
+        change 'overshoot_f0_above_burn_h_core' "$f0" "$inlist"
+        change 'overshoot_f0_above_burn_h_shell' "$f0" "$inlist"
+        change 'overshoot_f0_below_burn_h_shell' "$f0" "$inlist"
     fi
 }
 
@@ -199,8 +231,8 @@ run() { # logs_dir  final_mod
             if [ $interval -lt 1 ]; then 
                 interval=1
             fi
-            change_param 'profile_interval' $interval $inlist
-            change_param 'history_interval' $interval $inlist
+            change 'profile_interval' $interval $inlist
+            change 'history_interval' $interval $inlist
         fi
         
         if egrep -q "history_interval = 1\s*$" $inlist; then
@@ -213,7 +245,7 @@ run() { # logs_dir  final_mod
                 echo "Too small timesteps"
                 exit 1
             fi
-            change_param 'max_years_for_timestep' "$timestep" $inlist
+            change 'max_years_for_timestep' "$timestep" $inlist
         fi
         
         rm -rf "$logs_dir"
@@ -227,7 +259,8 @@ run() { # logs_dir  final_mod
     if [[ suppress -eq 0 ]]; then
         Rscript $scriptdir/model_select.R $num_process $logs_dir | 
             xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-                "echo start {}; gyre-Dnu.sh {}; echo end {}"
+                "echo start {}; gyre-l0.sh {}; echo end {}"
+                #"echo start {}; gyre-Dnu.sh {}; echo end {}"
     fi
     
     if grep -q "termination code: max_age" output; then 
@@ -280,3 +313,4 @@ Rscript summarize.R "$dirname"
 cleanup
 
 # fin.
+
