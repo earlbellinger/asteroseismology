@@ -7,35 +7,35 @@
       write_profile_when_terminate = .false.
       pgstar_flag = .false.
       
-      change_net = .true. 
-      change_initial_net = .true. 
-      new_net_name = 'o18_and_ne22.net' 
+      !change_net = .true. 
+      !change_initial_net = .true. 
+      !new_net_name = 'o18_and_ne22.net' 
       
 / ! end of star_job namelist
 
 
 &controls
       
-      initial_mass = 0.862254
+      initial_mass = 0.5
       Zbase = 0.01654506
-      mixing_length_alpha = 2.033491
+      mixing_length_alpha = 0.5
       
       !use_Type2_opacities = .true.
       !cubic_interpolation_in_Z = .true.
       
-      step_overshoot_f_above_nonburn_core = 0.453296
-      step_overshoot_f_above_nonburn_shell = 0.453296
-      step_overshoot_f_below_nonburn_shell = 0.453296
-      step_overshoot_f_above_burn_h_core = 0.453296
-      step_overshoot_f_above_burn_h_shell = 0.453296
-      step_overshoot_f_below_burn_h_shell = 0.453296
+      step_overshoot_f_above_nonburn_core = 0
+      step_overshoot_f_above_nonburn_shell = 0
+      step_overshoot_f_below_nonburn_shell = 0
+      step_overshoot_f_above_burn_h_core = 0
+      step_overshoot_f_above_burn_h_shell = 0
+      step_overshoot_f_below_burn_h_shell = 0
       
-      overshoot_f0_above_nonburn_core = .09065920
-      overshoot_f0_above_nonburn_shell = .09065920
-      overshoot_f0_below_nonburn_shell = .09065920
-      overshoot_f0_above_burn_h_core = .09065920
-      overshoot_f0_above_burn_h_shell = .09065920
-      overshoot_f0_below_burn_h_shell = .09065920
+      overshoot_f0_above_nonburn_core = 0
+      overshoot_f0_above_nonburn_shell = 0
+      overshoot_f0_below_nonburn_shell = 0
+      overshoot_f0_above_burn_h_core = 0
+      overshoot_f0_above_burn_h_shell = 0
+      overshoot_f0_below_burn_h_shell = 0
       
       diffusion_dt_limit = 3d12
       diffusion_calculates_ionization = .false.
@@ -64,7 +64,7 @@
       
       convective_bdy_weight = 1
       convective_bdy_min_dt_yrs = 1d4 ! default is 1d-3
-      T_mix_limit = 2d4
+      !T_mix_limit = 2d4
       skip_rotation_in_convection_zones = .true.
       
       photo_interval = 100000

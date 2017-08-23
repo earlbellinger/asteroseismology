@@ -192,7 +192,7 @@ get_model_list <- function() {
     Ms <- c(1.064, 1.08, 1.096)
     for (logR in logRs) {
         for (M in Ms) {
-            path <- file.path('..', 'calibration', 'calibrate2', 
+            path <- file.path('..', 'calibration', 'old', 'calibrate2', 
                 paste0('M=', M, '_logR=', logR, '_age=6900000000'), 'LOGS_MS')
             
             model.name.R <- if (logR==logRs[1]) 'lowR' else 
@@ -221,7 +221,7 @@ get_model_list <- function() {
     Ms <- c(1.015, 1.03, 1.045)
     for (logR in logRs) {
         for (M in Ms) {
-            path <- file.path('..', 'calibration', 'calibrate2', 
+            path <- file.path('..', 'calibration', 'old', 'calibrate2', 
                 paste0('M=', M, '_logR=', logR, '_age=6800000000'), 'LOGS_MS')
             
             model.name.R <- if (logR==logRs[1]) 'lowR' else 
@@ -346,7 +346,7 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
         model$f2.name <- k.pair$f2.name
     }
     
-    if (target.name %in% names(models)) {
+    if (!is.null(target.name) && target.name %in% names(models)) {
         target <- models[[target.name]]
         #get(target.name)
         

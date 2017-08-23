@@ -40,13 +40,24 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     
     obs.DF <- NULL
     
-    obs.DF["age"] <- pro_header$star_age/10**9
-    obs.DF["X_c"] <- hstry$center_h1
+    obs.DF["age"] <- hstry$star_age / 10**9 #pro_header$star_age/10**9
+    obs.DF["M_current"] <- hstry$star_mass
+    
     obs.DF["mass_cc"] <- hstry$mass_conv_core/pro_header$star_mass
+    
+    obs.DF["X_c"] <- hstry$center_h1
+    obs.DF["Y_c"] <- hstry$center_he3 + hstry$center_he4 
+    
+    obs.DF["log_center_T"] <- hstry$log_center_T
+    obs.DF["log_center_Rho"] <- hstry$log_center_Rho
+    obs.DF["log_center_P"] <- hstry$log_center_P
+    obs.DF["center_mu"] <- hstry$center_mu
+    obs.DF["center_degeneracy"] <- hstry$center_degeneracy
     
     obs.DF["mass_X"] <- pro_header$star_mass_h1/pro_header$star_mass
     obs.DF["mass_Y"] <- (pro_header$star_mass_he3 + 
             pro_header$star_mass_he4)/pro_header$star_mass
+    
     obs.DF["X_surf"] <- hstry$surface_h1
     obs.DF["Y_surf"] <- hstry$surface_he4 + hstry$surface_he3
     obs.DF["C_surf"] <- hstry$surface_c12
@@ -58,25 +69,28 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     
     obs.DF["radius"] <- pro_header$photosphere_r
     obs.DF["L"] <- pro_header$photosphere_L
-    obs.DF["log_g"] <- hstry$log_g
     obs.DF["Teff"] <- pro_header$Teff
+    obs.DF["log_Teff"] <- hstry$log_Teff
+    obs.DF["log_L"] <- hstry$log_L
+    obs.DF["log_R"] <- hstry$log_R
+    obs.DF["log_g"] <- hstry$log_g
+    
     obs.DF["Fe/H"] <- log10(10**hstry$log_surf_cell_z / 
             hstry$surface_h1 / Z_div_X_solar)
     
     obs.DF["cz_base"] <- hstry$cz_bot_radius
+    obs.DF["acoustic_cutoff"] <- hstry$acoustic_cutoff
     obs.DF["acoustic_radius"] <- hstry$acoustic_radius
-    obs.DF["center_mu"] <- hstry$center_mu
+    
     obs.DF["surface_mu"] <- pro_body$mu
-    
     obs.DF["delta_Pg_asym"] <- hstry$delta_Pg
-    
     obs.DF["nu_max_classic"] <- scaling_nu_max(R=obs.DF[["radius"]], 
         M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]])
     obs.DF["nu_max"] <- scaling_nu_max_Viani(R=obs.DF[["radius"]], 
         M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]], 
         mu=obs.DF[["surface_mu"]]) 
-    
     obs.DF["delta_nu_asym"] <- hstry$delta_nu
+    
     freqs <- parse_freqs(freqs_file, gyre=T)
     obs.DF["Dnu0_classic"] <- seismology(freqs, 
         nu_max=obs.DF[["nu_max_classic"]])[["Dnu0"]]
@@ -97,11 +111,18 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
     
     ## obtain history
     dir_files <- list.files(directory)
+    log_dirs <- dir_files[grep('LOGS_', dir_files)]
+    if (length(log_dirs) == 0) {
+        #print("No logs found!")
+        #return(data.frame())
+        stop("No logs found!")
+    }
+    
     track <- data.frame()
-    for (log_dir in file.path(directory, dir_files[grep('LOGS_', dir_files)])) {
+    for (log_dir in file.path(directory, log_dirs)) {
         logs <- list.files(log_dir)
         if (length(logs) <= 1) {
-            print(paste(directory, "No logs found!"))
+            print(paste(log_dir, "No logs found!"))
             next 
         }
         ev.DF <- read.table(file.path(log_dir, 'history.data'), 
@@ -137,15 +158,15 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations') {
         DF <- merge(rbind(params.DF), obs.DF[order(obs.DF$age),])
         
         ## if main sequence, crop PMS
-        if (grepl('LOGS_MS', log_dir)) {
-            decreasing_L <- which(diff(DF$L) < 0 & DF$center_h1[-1] > 0.55)
-            if (any(decreasing_L)) {
-                goes_back_up <- diff(decreasing_L) > 1
-                pms <- max(decreasing_L)
-                print(paste(fgong.dir, "Clipping", pms, "points"))
-                DF <- DF[-1:-pms,]
-            }
-        }
+        #if (grepl('LOGS_MS', log_dir)) {
+        #    decreasing_L <- which(diff(DF$L) < 0 & DF$center_h1[-1] > 0.55)
+        #    if (any(decreasing_L)) {
+        #        goes_back_up <- diff(decreasing_L) > 1
+        #        pms <- max(decreasing_L)
+        #        print(paste(fgong.dir, "Clipping", pms, "points"))
+        #        DF <- DF[-1:-pms,]
+        #    }
+        #}
         
         ## solve linear transport problem to get equally-spaced points 
         space_var <- ifelse(grepl('LOGS_MS', log_dir), 'X_c', 'age')
@@ -240,6 +261,9 @@ if (length(args)>0) {
     print(directory)
     dname <- dirname(directory)
     parsed_dir <- parse_dir(directory, dname=dname)
+    
+    
+    
     DF <- unique(parsed_dir)
     DF <- DF[order(DF$age),]
     

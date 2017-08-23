@@ -20,8 +20,10 @@ mgp <- c(2, 0.25, 0)
 ## Constants
 solar_Teff = log10(5777)
 solar_age = 4.57e9
-solar_radius = 6.955*10**10 # cm 
-solar_mass = 1.9891*10**30 # kg 
+#solar_radius = 6.955*10**10 # cm 
+solar_radius = 6.9598e10 # cm
+solar_mass = 1.9892e33 # g
+#solar_mass = 1.9891*10**30 # kg 
 solar_scale = sqrt(solar_mass/solar_radius^3)
 FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
 

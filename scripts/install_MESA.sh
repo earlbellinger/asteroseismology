@@ -9,7 +9,7 @@
 ### Variables ###
 #################
 # Adjust these if you want a different version 
-MESA_VER=9575 
+MESA_VER=9793
 SDK_VER=20170802
 
 # Adjust this if you want to use more than one processor

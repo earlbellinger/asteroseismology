@@ -166,15 +166,21 @@ fi
 
 # pre-main sequence
 set_params
-./rn
-fix_mod "zams.mod"
+timeout 3600 ./rn
+if [ -e "zams.mod" ]; then
+    fix_mod "zams.mod"
+else
+    exit 1
+fi
 
 # main sequence
 #change_inlists "inlist_2ms"
 set_inlist "inlist_2ms"
 set_params
 set_diffusion
-./rn
+timeout 3600 ./rn
+
+rm -f zams.mod
 
 # fin.
 

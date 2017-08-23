@@ -11,6 +11,8 @@ library(pracma)
 library(akima)
 library(Bolstad)
 library(RColorBrewer)
+source(file.path('/', 'scratch', 'seismo', 'bellinger',
+    'asteroseismology', 'scripts', 'utils.R'))
 source(file.path('..', 'inversion', 'kernels.R'))
 source(file.path('..', 'inversion', 'OLA_invert.R'))
 source(file.path('..', 'inversion', 'models.R'))
@@ -18,8 +20,6 @@ source(file.path('..', 'inversion', 'OLA_plots.R'))
 #source(file.path('..', 'inversion', 'frequencies.R'))
 #source(file.path('/', 'scratch', 'seismo', 'bellinger',
 #    'asteroseismology', 'scripts', 'seismology.R'))
-source(file.path('/', 'scratch', 'seismo', 'bellinger',
-    'asteroseismology', 'scripts', 'utils.R'))
 
 parallelStartMulticore(16)
 
@@ -135,10 +135,9 @@ for (model_number in mdls) {
     
     gemma.freqs <- make.df(freqs.)
     
-    freqs.0 <- track_freqs[model_number-1,]
-    freqs.0 <- freqs.0[,!is.na(freqs.0)]
-    
     proxy_mdl <- model_number-1
+    freqs.0 <- track_freqs[proxy_mdl,]
+    freqs.0 <- freqs.0[,!is.na(freqs.0)]
     proxy_freqs <- freqs.0
     gemma0.freqs <- make.df(proxy_freqs)
     
@@ -286,7 +285,8 @@ for (model_number in mdls) {
     m1.inversion <- minimize_dist(model=m1, rs=rs, 
         initial_params=c(100, 100, 0.01))
     
-    plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, log='x', ylim=c(-0.25, 0.2)); dev.off()
+    plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, log='x', 
+        ylim=c(-0.25, 0.2)); dev.off()
     
     make_plots(plot_inversion, paste0('inversion', k.str),#paste0(model_number),
         model=m1, inversion=m1.inversion, legend.spot='bottomleft', 

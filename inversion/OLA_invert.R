@@ -237,8 +237,11 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         
         if (perturb) nus$nu.y <- rnorm(length(nus2$nu.y), nus2$nu.y, nus2$dnu) 
         
-        nux <- nus$nu.x / sqrt(6.67428*10**-8 * model$M / model$R**3)
-        nuy <- nus$nu.y / sqrt(6.67428*10**-8 * (model$M+dM) / (model$R+dR)**3)
+        nux <- nus$nu.x / sqrt(6.67428*10**-8 * 
+            solar_mass * model$M / (solar_radius * model$R)**3)
+        nuy <- nus$nu.y / sqrt(6.67428*10**-8 * 
+            solar_mass * (model$M + dM) / 
+            (solar_radius * (model$R + dR))**3)
         nus$r.diff <- (nux - nuy) / nux
         
         if (subtract.mean) {
@@ -275,7 +278,8 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     
     inv.coefs <- avg_across_cols(realizations, 'inv.coefs', length(rs))
     c.vecs <- avg_across_cols(realizations, 'c.vecs', length(rs))
-    df_drs <- sapply(realizations, function(r) r$df_dr) -dR/model$R+dM/model$M 
+    df_drs <- sapply(realizations, function(r) r$df_dr) -
+        dR/model$R+dM/model$M 
     #- 3/2*dR/model$R + 1/2*dM/model$M
     df_dr <- apply(df_drs, 1, median)
     df_dr.mean <- apply(df_drs, 1, mean)

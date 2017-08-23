@@ -15,11 +15,11 @@ from sobol_lib import i4_sobol
 
 def main(arguments):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-M', default=[0.7, 1.6], nargs=2, type=float,
+    parser.add_argument('-M', default=[0.7, 3.0], nargs=2, type=float,
                         help='range of masses')
     parser.add_argument('-Y', default=[0.22, 0.34], nargs=2, type=float, 
                         help='range of helium values')
-    parser.add_argument('-Z', default=[10**-4, 0.06], nargs=2, type=float,
+    parser.add_argument('-Z', default=[10**-4, 0.04], nargs=2, type=float,
                         help='range of metallicity values')
     parser.add_argument('-a', '--alpha', default=[1.5, 2.5], nargs=2,type=float,
                         help='range of mixing length parameter values')

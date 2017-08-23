@@ -2513,7 +2513,7 @@ plot_one_Qnl <- function(model, k.pair, ...,
 }
 
 
-plot_kernel_diffs <- function(model, k.pair, ...,
+plot_kernel_diffs <- function(model, k.pair, dM=0, dR=0, ...,
         text.cex=1, mgp=utils.mgp, mar=utils.mar, font=utils.font,
         legend.spot='left') {
     real.modes <- model$nus$nu.x > 0

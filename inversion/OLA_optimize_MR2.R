@@ -30,6 +30,7 @@ sigma.M         <- if (length(args)>9)  as.numeric(args[10]) else 0.016
 sigma.R         <- if (length(args)>10) as.numeric(args[11]) else 0.02
 #'perturbed.model.names'
 
+perturb <- F #T#
 half <- F
 k.pair <- u_Y
 rs <- seq(0.08, 0.3, 0.02)
@@ -38,7 +39,7 @@ targ.mode <- paste0('-p_', target.name, '-m_', mode.set, '-e_', error.set,
     if (MOLA) "-MOLA" else paste0("-", targ.kern.type))
 
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, 
-    error.set=error.set, perturb=F) #T) 
+    error.set=error.set, perturb=perturb) 
 
 inv.lists <- list()
 avg.kerns.lists <- list()

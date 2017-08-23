@@ -308,6 +308,43 @@ sigma()
 dev.off()
 
 
+
+
+
+sigma <- function(stars, col.pal, ...,
+                  text.cex=1, mgp=utils.mgp, mar=utils.mar, 
+                  font=utils.font) {
+    par(mar=mar+c(0, 0.1, 0, 0))
+    MC.sigma <- abs(stars$P - stars$P.corr) / stars$dP
+    plot(NA, axes=F, pch=20, cex=0.75, 
+         xlab=expression("Period"~P/"days"), 
+         ylab="", 
+         #xaxs='i', 
+         yaxs='i', 
+         xlim=c(0.000001, log10(50)),
+         ylim=c(1, 4))
+    points(log10(stars$P), log10(MC.sigma), pch=20, cex=0.2, col=col.pal)
+    #legend("topright", col=c('#b36200', 'black'), pch=c(4,3), 
+    #       inset=c(0.04, 0.04), legend=c("SMC", "LMC"), cex=text.cex)
+    #magaxis(side=3:4, family=font, tcl=-0.25, labels=F,
+    #    mgp=mgp+c(0, 0.2, 0), las=1, cex.axis=text.cex, unlog='xy')
+    
+    magaxis(side=1, family=font, tcl=-0.25, labels=T, mgp=mgp, #-c(0, 0.2, 0), 
+        las=1, cex.axis=text.cex, unlog='xy')
+    
+    magaxis(side=2, family=font, tcl=-0.25, labels=T, mgp=mgp+c(0, 0.2, 0), 
+        las=1, cex.axis=text.cex, unlog='xy')
+        
+    mtext(expression("Sigma distance"~"|"*P["o"]-P["s"]*"|"/sigma["o"]),
+        side=2, line=2.25, cex=text.cex)
+}
+make_plots(sigma, 'sigma-LMC', stars=LMC, col.pal='black', wide=F, tall=F)
+make_plots(sigma, 'sigma-SMC', stars=SMC, col.pal='black', wide=F, tall=F)
+
+
+
+
+
 plot(LMC$P.corr, 100*(LMC$P - LMC$P.corr)/LMC$P, pch=20, cex=0.75, 
      xlab="Period (days)", ylab="New Period - Old Period (minutes)", 
      xaxs='i', yaxs='i', xlim=c(0, 15))

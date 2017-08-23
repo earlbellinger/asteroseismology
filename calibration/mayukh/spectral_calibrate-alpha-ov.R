@@ -32,8 +32,9 @@ param_init <- c(M, log10(tau), alpha_MLT, alpha_ov) # initial parameter values
 objective <- function() { 
     ## minimize sum(log(model values / solar values)**2) 
     # searches in LOGS_MS subdirectory of the global 'directory' variable 
-    hstry <- read.table(file.path(directory, 'LOGS_MS', 'history.data'), 
-        header=1, skip=5)
+    hstry_file <- file.path(directory, 'LOGS_MS', 'history.data')
+    if (!file.exists(hstry_file)) return(Inf)
+    hstry <- read.table(hstry_file, header=1, skip=5)
     mdl <- hstry[nrow(hstry),]
     
     # [Fe/H] = log10 ( Z / X / (Z/X)_Sun )
@@ -79,8 +80,8 @@ run <- function(params) {
     cat(paste("** iter:", iteration, "\n"))
     
     # check if parameters are reasonable 
-    if (M < 0.05 || M > 2 || tau > log10(13.8*10**9) || 
-            alpha_MLT < 0.5 || alpha_MLT > 3 || 
+    if (M < 0.01 || M > 2 || tau > log10(13.8*10**9) || 
+            alpha_MLT < 0.1 || alpha_MLT > 3 || 
             alpha_ov < 0 || alpha_ov > 1 ) {
         cat("Input parameters out of bounds; skipping\n")
         return(Inf)

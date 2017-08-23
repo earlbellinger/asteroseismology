@@ -11,14 +11,8 @@
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 num_process=128 # try to get at least this many profile files 
 min_years_for_timestep=0.0000001
-inlist='inlist_1pms'
+inlist='inlist_1relax'
 continue=1
-
-M0=1
-Y0=0.27202387
-Z0=0.01830403
-solar_alpha=1.84663590
-solar_overshoot=0.09104194
 
 sigmoida=$(echo "scale=10; (1+e(-6))/(1-e(-6))" | bc -l)
 sigmoidb=$(echo "scale=10; 1/(e(6)-1)" | bc -l)
@@ -36,6 +30,26 @@ sigmoid() {
 ## -d is the directory where the simulations should be put 
 ## -r means delete the calculations afterwards and leave only the product 
 ## -s means suppress frequency calculations 
+M=1
+Y=0.27202387
+Z=0.01830403
+alpha=1.84663590
+overshoot=0.09104194
+if (( $(echo "$M <= 1.2" | bc -l ) )); then 
+    diffusion=1
+elif (( $(echo "$M >= 1.3" | bc -l ) )); then 
+    diffusion=0
+else
+    x=$(echo "scale=10; 1 - ( 1.3 - $M )*10" | bc -l)
+    diffusion=$(sigmoid $x)
+fi
+HELP=0
+directory=simulations
+light=0
+taper=0
+remove=0
+suppress=0
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -h) HELP=1; break;;
@@ -47,35 +61,13 @@ while [ "$#" -gt 0 ]; do
     -D) diffusion="$2"; shift 2;;
     -d) directory="$2"; shift 2;;
     -L) light=1; shift 1;;
+    -t) taper=1; shift 1;;
     -r) remove=1; shift 1;;
     -s) suppress=1; shift 1;;
     
     *) echo "unknown option: $1" >&2; exit 1;;
   esac
 done
-
-## Set defaults if they weren't supplied
-if [ -z ${HELP+x} ]; then HELP=0; fi
-if [ -z ${M+x} ]; then M=$M0; fi
-if [ -z ${Y+x} ]; then Y=$Y0; fi
-if [ -z ${Z+x} ]; then Z=$Z0; fi
-if [ -z ${alpha+x} ]; then alpha=$solar_alpha; fi
-if [ -z ${o+x} ]; then overshoot=$solar_overshoot; fi
-if [ -z ${directory+x} ]; then directory=simulations; fi
-if [ -z ${light+x} ]; then light=0; fi
-if [ -z ${remove+x} ]; then remove=0; fi
-if [ -z ${suppress+x} ]; then suppress=0; fi
-
-if [ -z ${diffusion} ]; then
-    if (( $(echo "$M <= 1.2" | bc -l ) )); then 
-        diffusion=1
-    elif (( $(echo "$M >= 1.3" | bc -l ) )); then 
-        diffusion=0
-    else
-        x=$(echo "scale=10; 1 - ( 1.3 - $M )*10" | bc -l)
-        diffusion=$(sigmoid $x)
-    fi
-fi 
 
 if [ $HELP -gt 0 ]; then
     echo
@@ -88,8 +80,8 @@ if [ $HELP -gt 0 ]; then
     echo "                                             | |                        ";
     echo "                                             |_|                        ";
     echo
-    echo "  dispatch.sh: evolve an asteroseismic evolutionary track until the "
-    echo "               base of the RGB with MESA & GYRE"
+    echo "  dispatch.sh: evolve an asteroseismic evolutionary track through to "
+    echo "               the red clump with MESA & GYRE"
     echo
     echo "example:"
     echo "  dispatch.sh -d my_directory -M 1.2 -Z 0.001"
@@ -164,8 +156,6 @@ set_params() {
     if [[ suppress -eq 1 ]]; then
         change 'write_profiles_flag' '.false.' "$inlist"
     fi
-    
-    set_overshoot
 }
 
 set_diffusion() {
@@ -191,6 +181,9 @@ set_overshoot() {
         change 'step_overshoot_f_above_burn_h_core' "$overshoot" "$inlist"
         change 'step_overshoot_f_above_burn_h_shell' "$overshoot" "$inlist"
         change 'step_overshoot_f_below_burn_h_shell' "$overshoot" "$inlist"
+        change 'step_overshoot_f_above_burn_he_core' "$overshoot" "$inlist"
+        change 'step_overshoot_f_above_burn_he_shell' "$overshoot" "$inlist"
+        change 'step_overshoot_f_below_burn_he_shell' "$overshoot" "$inlist"
         
         f0=$(echo "scale=8; $overshoot / 5" | bc -l)
         change 'overshoot_f0_above_nonburn_core' "$f0" "$inlist"
@@ -199,29 +192,44 @@ set_overshoot() {
         change 'overshoot_f0_above_burn_h_core' "$f0" "$inlist"
         change 'overshoot_f0_above_burn_h_shell' "$f0" "$inlist"
         change 'overshoot_f0_below_burn_h_shell' "$f0" "$inlist"
+        change 'overshoot_f0_above_burn_he_core' "$f0" "$inlist"
+        change 'overshoot_f0_above_burn_he_shell' "$f0" "$inlist"
+        change 'overshoot_f0_below_burn_he_shell' "$f0" "$inlist"
     fi
 }
 
 fix_mod() { # final_mod
-    final_mod=$1
+    mod=$1
+    check_mod $mod
     # MESA has a bug that makes it print numbers of the form *.***### 
     # (i.e. no letter for the exponent, and all the numbers are asterisks) 
     # This sed command replaces those with zeros. 
-    sed -i.bak "s/\*\.\**-[0-9]*/0.0000000000000000D+00/g" $final_mod
+    if [[ continue -eq 1 ]]; then
+        sed -i.bak "s/\*\.\**-[0-9]*/0.0000000000000000D+00/g" $mod
+    fi
+}
+
+check_mod() {
+    mod=$1
+    # check that mod file got written
+    if [[ ! -e $mod ]]; then 
+        continue=0
+    fi 
 }
 
 run() { # logs_dir  final_mod
+    logs_dir=$1
+    final_mod=$2
+    
     if [[ continue -eq 0 ]]; then 
         return 0
     fi
     
-    logs_dir=$1
-    final_mod=$2
-    
     ./rn | tee output
+    check_mod $final_mod
     num_logs=$(cat $logs_dir/history.data | wc -l)
     num_logs=$(echo "$num_logs - 7" | bc -l)
-    while [ $num_logs -lt $num_process ]; do
+    while [[ $num_logs -lt $num_process && continue -eq 1 ]]; do
         
         if ! egrep -q "history_interval = 1\s*$" $inlist; then
             hist_int=$(grep "history_interval" $inlist |
@@ -250,13 +258,14 @@ run() { # logs_dir  final_mod
         
         rm -rf "$logs_dir"
         ./rn | tee output
+        check_mod $final_mod
         num_logs=$(cat $logs_dir/history.data | wc -l)
         num_logs=$(echo "$num_logs - 7" | bc -l)
     done
     
     fix_mod $final_mod
     
-    if [[ suppress -eq 0 ]]; then
+    if [[ suppress -eq 0 && continue -eq 1 ]]; then
         Rscript $scriptdir/model_select.R $num_process $logs_dir | 
             xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
                 "echo start {}; gyre-l0.sh {}; echo end {}"
@@ -272,40 +281,45 @@ run() { # logs_dir  final_mod
 ### INITIALIZATION AND EVOLUTION ###############################################
 ################################################################################
 ## Make directory and copy over simulation files 
-expname="M=$M""_""Y=$Y""_""Z=$Z"
-dirname="$directory/$expname"
+expname=M="$M"_Y="$Y"_Z="$Z"_alpha="$alpha"\
+_overshoot="$overshoot"_diffusion="$diffusion"
+dirname="$directory"/"$expname"
 
-mkdir -p "$dirname"
-cd "$dirname"
+mkdir -p $dirname
+cd $dirname
 cp -r $scriptdir/mesa/* .
 rm -rf LOGS/*
 
 # pre-main sequence
 set_params
 ./rn
+fix_mod "pms.mod"
+
+set_inlist "inlist_2pms"
+set_overshoot
+set_diffusion
+./rn
 fix_mod "zams.mod"
 
 # main sequence
-set_inlist "inlist_2ms"
-set_diffusion
+set_inlist "inlist_3ms"
 run "LOGS_MS" "tams.mod"
 
 # sub-giant
-set_inlist "inlist_3sg"
-set_diffusion
+set_inlist "inlist_4sg"
 run "LOGS_SG" "brgb.mod"
 
 # red giant
-set_inlist "inlist_4rgb"
+set_inlist "inlist_5rgb"
 run "LOGS_RGB" "bump.mod"
 
 # bump to tip
-set_inlist "inlist_5bump"
+set_inlist "inlist_6bump"
 run "LOGS_BUMP" "flash.mod"
 
 # helium burning
-set_inlist "inlist_6heb"
-run "LOGS_HEB" "heb.mod"
+set_inlist "inlist_7heb"
+run "LOGS_HEB" "hexh.mod"
 
 # summarize and be done 
 cd ../..
