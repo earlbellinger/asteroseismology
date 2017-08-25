@@ -12,6 +12,7 @@ source('models.R')
 source('frequencies.R')
 source('kernels.R')
 source('OLA_invert.R')
+source('OLA_plots.R')
 parallelStartMulticore(16)#max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
 
 models <- get_model_list()
@@ -21,6 +22,10 @@ target.name <- 'CygAwball'#'CygAwball'#'hl.no_d'#'CygAbasu3'#'no_diffusion'#'Cyg
 ref.mod <- 'CygAlowRhighM'#'CygAno_diff'#'CygAdiff'#'diffusion'#'hl.diff'#'CygAwball'#
 mode.set <- 'CygA'#'BiSON'#'BiSON.MDI'#
 perturb <- F#T
+
+target.name <- 'CygBlowRlowM'
+ref.mod <- 'highRhighM'
+
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, perturb=perturb) 
 m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
                 k.pair=k.pair, square.Ks=T, subtract.mean=F)# T) 
@@ -60,7 +65,7 @@ plot_inversion_all2(model=m1, inversion=m1.inversion2,
 
 m1.inversion3 <- invert.OLA(model=m1, rs=rs, 
     cross.term=866.94, error.sup=1951.9366, width=0.035, dM=m1$dM, dR=m1$dR, 
-    subtract.mean=F, num_realizations=1, perturb=F)#256) 
+    subtract.mean=T, num_realizations=1, perturb=F)#256) 
 
 m1.inversion4 <- invert.OLA(model=m1, rs=rs, 
     cross.term=866.94, error.sup=1951.9366, width=0.035, 
@@ -69,7 +74,8 @@ m1.inversion4 <- invert.OLA(model=m1, rs=rs,
 plot_inversion_all2(model=m1, inversion=m1.inversion3, 
                     k.pair=k.pair, k.str=k.str, mode.set=mode.set, 
                     legend.spot=NULL, cross.inset="topright",
-                    xlim=c(0, 0.45), ylim=c(-0.1, 0.1), plot_nondim=F) 
+                    xlim=c(0, 0.45), #ylim=c(-0.1, 0.1), 
+                    plot_nondim=T) 
 
 plot_inversion_all2(model=m1, inversion=m1.inversion4, 
                     k.pair=k.pair, k.str=paste0(k.str, 2), mode.set=mode.set,

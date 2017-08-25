@@ -23,6 +23,7 @@ solar_age = 4.57e9
 #solar_radius = 6.955*10**10 # cm 
 solar_radius = 6.9598e10 # cm
 solar_mass = 1.9892e33 # g
+cgrav = 6.67428*10**-8 # cm^3 * g^-1 * s^-2
 #solar_mass = 1.9891*10**30 # kg 
 solar_scale = sqrt(solar_mass/solar_radius^3)
 FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
@@ -88,7 +89,7 @@ make_plots <- function(plot_f, filename,
     slides_png_width <- slides_pdf_width * latex_pt_per_in
     slides_png_height <- slides_pdf_height * latex_pt_per_in
 
-    args <- c(as.list(environment()), list(...))
+    args. <- c(as.list(environment()), list(...))
 
     if (slides) {
         do.call(widethin, c(list(
@@ -99,10 +100,10 @@ make_plots <- function(plot_f, filename,
                 slides_png_height,
                 text.cex=cex.slides,
                 mgp=mgp.slides),
-            args))
+            args.))
     }
     if (paper) {
-        if (all(args$mar == utils.mar)) args$mar <- mar.paper
+        if (all(args.$mar == utils.mar)) args.$mar <- mar.paper
         do.call(widethin, c(list(
                 directory=file.path(filepath, 'paper'),
                 pdf_width=paper_pdf_width,
@@ -112,7 +113,7 @@ make_plots <- function(plot_f, filename,
                 mgp=mgp.paper,
                 #mar=mar.paper,
                 text.cex=cex.paper),
-            args))
+            args.))
     }
 }
 

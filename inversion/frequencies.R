@@ -30,7 +30,14 @@ subgiant <- list(freq.path=file.path('data', '16CygA-freqs.dat'),
 
 get_freqs <- function(target.name="BiSON", mode.set=NA, error.set=NA, 
         perturb=F, half=F) {
-    target <- get(target.name)
+    if (exists(target.name)) {
+        target <- get(target.name)
+    } else if (exists('models') && target.name %in% names(models)) {
+        target <- models[[target.name]]
+    } else {
+        cat(paste("Error: can't find target", target.name, '\n'))
+        return(NULL)
+    }
     freqs <- parse_freqs(path=target$freq.path, col.names=target$freq.col.names)
     
     if (!is.na(mode.set)) {

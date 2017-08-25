@@ -129,196 +129,51 @@ make.df <- function(freqs) {
         dnu=dnus) 
 }
 
-for (model_number in mdls) {
-    freqs <- track_freqs[model_number,]
-    freqs. <- freqs[,!is.na(freqs)]
-    
-    gemma.freqs <- make.df(freqs.)
-    
-    proxy_mdl <- model_number-1
-    freqs.0 <- track_freqs[proxy_mdl,]
-    freqs.0 <- freqs.0[,!is.na(freqs.0)]
-    proxy_freqs <- freqs.0
-    gemma0.freqs <- make.df(proxy_freqs)
+for (mdl_num in mdls) {
+    proxy_freqs <- track_freqs[mdl_num,]
+    proxy_freqs <- make.df(proxy_freqs[,!is.na(proxy_freqs)])
+    ref_mdl_num <- mdl_num - 1 
     
     path <- tracks[['gemma']]$path
-    Gemma0 <- list(name='Gemma0', short='Gemma0', 
-        kerns.dir=file.path(path, paste0('profile', proxy_mdl, '-freqs')), 
-        freq.path=file.path(path, paste0('profile', proxy_mdl, '-freqs.dat')), 
+    ref_mod <- list(name='Gemma0', short='Gemma0', 
+        kerns.dir=file.path(path, paste0('profile', ref_mdl_num, '-freqs')), 
+        freq.path=file.path(path, paste0('profile', ref_mdl_num, '-freqs.dat')), 
         freq.col.names=c('l', 'n', 'nu', 'E'), 
-        profile.path=file.path(path, paste0('profile', proxy_mdl, '.data')), 
-        fgong.path=file.path(path, paste0('profile', proxy_mdl, '-freqs'), 
-            paste0('profile', proxy_mdl, '.data.FGONG.dat')))
-    
-    
-    
-    
-    if (F) {
-    
-    
-    #gemma0.freqs$nu <- with(gemma0.freqs, rnorm(nrow(gemma0.freqs), nu, dnu))
-    
-    path <- tracks[['gemma0']]$path
-    Gemma0 <- list(name='Gemma0', short='Gemma0', 
-        kerns.dir=file.path(path, paste0('profile', proxy_mdl, '-freqs')), 
-        freq.path=file.path(path, paste0('profile', proxy_mdl, '-freqs.dat')), 
-        freq.col.names=c('l', 'n', 'nu', 'E'), 
-        profile.path=file.path(path, paste0('profile', proxy_mdl, '.data')), 
-        fgong.path=file.path(path, paste0('profile', proxy_mdl, '-freqs'), 
-            paste0('profile', proxy_mdl, '.data.FGONG.dat')))
-    
-    
-    gemma0.freqs <- data.frame(
-        l=as.numeric(sapply(names(proxy_freqs), 
-          function(mode) strsplit(strsplit(mode, '\\.')[[1]][1], 'l')[[1]][2])),
-        n=as.numeric(sapply(names(proxy_freqs), 
-          function(mode) strsplit(strsplit(mode, '\\.')[[1]][2], 'n')[[1]][2])),
-        nu=as.numeric(proxy_freqs),
-        dnu=dnus)
-    #gemma0.freqs$nu <- with(gemma0.freqs, rnorm(nrow(gemma0.freqs), nu, dnu))
-    
-    path <- tracks[['gemma0']]$path
-    Gemma0 <- list(name='Gemma0', short='Gemma0', 
-        kerns.dir=file.path(path, paste0('profile', proxy_mdl, '-freqs')), 
-        freq.path=file.path(path, paste0('profile', proxy_mdl, '-freqs.dat')), 
-        freq.col.names=c('l', 'n', 'nu', 'E'), 
-        profile.path=file.path(path, paste0('profile', proxy_mdl, '.data')), 
-        fgong.path=file.path(path, paste0('profile', proxy_mdl, '-freqs'), 
-            paste0('profile', proxy_mdl, '.data.FGONG.dat')))
-    
-    
-    freqs.0 <- tracks$gemma0$all_freqs
-    freqs.0 <- freqs.0[,names(freqs.)]
-    freqs.0 <- freqs.0[complete.cases(freqs.0),]
-    
-    chi2s <- parallelMap(function(ii) {
-        gemma0.freqs <- freqs.0[ii,]
-        
-        # remove surf term 
-        ##nu <- freqs. - gemma0.freqs
-        #r.diff <- as.numeric(freqs. - gemma0.freqs)
-        #inertia <- m1$nus$Q_norm #m1$nu_ac * #* m1$nus$d.r.diff
-        #Xpinv <- ginv( matrix(c(freqs.**-1, freqs.**3) / inertia, ncol=2) )
-        
-        #a.r.1 <- Xpinv %*% ( r.diff )#/ m1$nus$d.r.diff )
-        #F_surf <- ( a.r.1[[1]]*freqs.**-1 + a.r.1[[2]]*freqs.**3 ) / inertia
-        
-        ##K.diffs.surf <- k.diffs + F_surf #r.diff - 
-        sum( ((freqs. - gemma0.freqs)/dnus)**2 )
-        #sum( ((freqs. + F_surf - gemma0.freqs)/dnus)**2 )
-    }, ii=1:nrow(freqs.0))
-    
-    proxy_freqs <- freqs.0[order(as.numeric(chi2s))[1],]
-    #freqs.0[which.min(chi2s),]
-    proxy_mdl <- as.numeric(rownames(proxy_freqs))
-    
-    gemma0.freqs <- data.frame(
-        l=as.numeric(sapply(names(proxy_freqs), 
-          function(mode) strsplit(strsplit(mode, '\\.')[[1]][1], 'l')[[1]][2])),
-        n=as.numeric(sapply(names(proxy_freqs), 
-          function(mode) strsplit(strsplit(mode, '\\.')[[1]][2], 'n')[[1]][2])),
-        nu=as.numeric(proxy_freqs),
-        dnu=dnus)
-    gemma0.freqs$nu <- with(gemma0.freqs, rnorm(nrow(gemma0.freqs), nu, dnu))
-    
-    path <- tracks[['gemma0']]$path
-    Gemma0 <- list(name='Gemma0', short='Gemma0', 
-        kerns.dir=file.path(path, paste0('profile', proxy_mdl, '-freqs')), 
-        freq.path=file.path(path, paste0('profile', proxy_mdl, '-freqs.dat')), 
-        freq.col.names=c('l', 'n', 'nu', 'E'), 
-        profile.path=file.path(path, paste0('profile', proxy_mdl, '.data')), 
-        fgong.path=file.path(path, paste0('profile', proxy_mdl, '-freqs'), 
-            paste0('profile', proxy_mdl, '.data.FGONG.dat')))
-      
-    }
-    
-    
-    
-    
-    path <- tracks[['gemma']]$path
-    Gemma <- list(name='Gemma', short='Gemma',
-        kerns.dir=file.path(path, paste0('profile', model_number, '-freqs')),
-        freq.path=file.path(path, paste0('profile', model_number, '-freqs.dat')), 
+        profile.path=file.path(path, paste0('profile', ref_mdl_num, '.data')), 
+        fgong.path=file.path(path, paste0('profile', ref_mdl_num, '-freqs'), 
+            paste0('profile', ref_mdl_num, '.data.FGONG.dat')))
+    proxy_star <- list(name='Gemma', short='Gemma',
+        kerns.dir=file.path(path, paste0('profile', mdl_num, '-freqs')),
+        freq.path=file.path(path, paste0('profile', mdl_num, '-freqs.dat')), 
         freq.col.names=c('l', 'n', 'nu', 'E'),
-        profile.path=file.path(path, paste0('profile', model_number, '.data')),
-        fgong.path=file.path(path, paste0('profile', model_number, '-freqs'), 
-            paste0('profile', model_number, '.data.FGONG.dat')))
+        profile.path=file.path(path, paste0('profile', mdl_num, '.data')),
+        fgong.path=file.path(path, paste0('profile', mdl_num, '-freqs'), 
+            paste0('profile', mdl_num, '.data.FGONG.dat')))
     
-    models <- list(Gemma=Gemma, Gemma0=Gemma0)
+    models <- list(proxy_star=proxy_star, ref_mod=ref_mod)
     
-    m1 <- get_model(freqs=gemma0.freqs, model.name='Gemma', 
-        target.name='Gemma0', k.pair=k.pair, square.Ks=T) 
+    rs <- c(0.1)
+    m1 <- get_model(freqs=proxy_freqs, model.name='ref_mod', 
+        target.name='proxy_star', k.pair=k.pair, square.Ks=T, x0=rs) 
     
-    m1 <- get_model(freqs=gemma.freqs, model.name='Gemma0', 
-        target.name='Gemma', k.pair=k.pair, square.Ks=T) 
+    #k.str <- paste0('-k_', k.pair$f1, k.pair$f2,
+    #    '_r-', m1$short, mdl_num)
+    #rs <- seq(0.15, 0.25, 0.025)
     
-    k.str <- paste0('-k_', k.pair$f1, k.pair$f2,
-        '_r-', m1$short, model_number)
+    m1.inversion <- minimize_dist(model=m1, rs=rs, initial_params=c(10e-10, 10))
     
-    make_plots(plot_one_surfless, paste0('kernel-comp', k.str),
-        model=m1, k.pair=k.pair, legend.spot='topright')
-    make_plots(plot_kernel_diffs, paste0('kernel-diffs', k.str),
-        model=m1, k.pair=k.pair, legend.spot='left')
-    make_plots(plot_kernel_diffs_surf, paste0('kernel-diffs-surf', k.str),
-        model=m1, k.pair=k.pair, legend.spot='left')
+    m1.inversion <- invert.OLA(model=m1, rs=rs, cross.term=0, 
+        error.sup=10e2, use.BG=T, dM=m1$dM, dR=m1$dR, 
+        subtract.mean=F, num_realizations=1, perturb=F) 
+    make_plots_inversion_all(inversion=m1.inversion, model=m1, xlim=c(0, 0.45),
+        plot_nondim=F, log='x', avg_kern_ylim=NULL, use.cairo=F, font='Times') 
     
-    #rs <- c(0.25) #c(0.1, 0.2, 0.3)
-    #rs <- c(0.05)#
-    #rs <- c(0.001, 0.01, 0.1)
-    #rs <- seq(0.001, 0.3, 0.001)
-    #rs <- c(0.002, seq(0.01, 0.3, 0.01))
-    #rs <- 10**seq(-4, log10(0.4), 0.1)
-    rs <- seq(0.05, 0.25, 0.02)
+    #make_plots_inversion_all(inversion=m1.inversion, model=m1, k.str=k.str, 
+    #    xlim=c(0, 0.45), k.pair=k.pair, mode.set='Gemma', plot_nondim=F, 
+    #    log='x', avg_kern_ylim=NULL)
     
-    #m1.inversion <- invert.OLA(model=m1, rs=rs, cross.term=1, error.sup=0,
-    #    width=0.01, use.BG=T)
-    #m1.inversion <- invert.OLA(model=m1, rs=rs, cross.term=10**5, error.sup=1)#0.001)
-    
-    #m1.inversion <- minimize_dist(model=m1, rs=rs, initial_params=c(10, 1))#, 0.01))
-    #    targ.kern.type='mod_sinc')
-    #plot_inversion(m1, m1.inversion, log='x', xlim=c(min(rs)/2, 1))
-    
-    
-    m1.inversion <- minimize_dist_individual(model=m1, rs=rs, 
-        initial_params=c(100, 100, 0.01, 10))#, targ.kern.type='mod_sinc')
-    
-    m1.inversion <- minimize_dist(model=m1, rs=rs, 
-        initial_params=c(100, 100, 0.01))
-    
-    plot_inversion(model=m1, inversion=m1.inversion, k.pair=k.pair, log='x', 
-        ylim=c(-0.25, 0.2)); dev.off()
-    
-    make_plots(plot_inversion, paste0('inversion', k.str),#paste0(model_number),
-        model=m1, inversion=m1.inversion, legend.spot='bottomleft', 
-        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
-    make_plots(plot_kernels, paste0('ker-avg', k.str),#paste0(model_number),
-        model=m1, inversion=m1.inversion, cross=F, #legend.spot='bottomleft', 
-        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
-    make_plots(plot_kernels, paste0('ker-cross', k.str),#paste0(model_number),
-        model=m1, inversion=m1.inversion, cross=T, #legend.spot='bottomleft', 
-        k.pair=k.pair, should.cull=F) #xlim=c(0.05, 0.3), 
-    
-    
-    #make_plots(plot_inversion, paste0(model_number, 'log'),
-    #    model=m1, inversion=m1.inversion, legend.spot='topright',
-    #    log='x', xlim=c(min(rs)/1.5, min(1, max(rs+.1))))#1))
-    
-    #par(mfrow=c(2,1))
-    #plot_inversion(m1, m1.inversion, log='x', xlim=c(min(rs)/2, 1))
-    #plot_kernels(m1, m1.inversion$avg_kerns, rs, log='x', xlim=c(min(rs)/2, 1))
-    #dev.off()
-    ##make_plots(plot_one_surfless, paste0(model_number, '-forward'),
-    ##    model=m1, k.pair=k.pair)
-    sidebyside <- function(model, k.pair, ...,
-            text.cex=1, mgp=utils.mgp, mar=utils.mar, font=utils.font) {
-        par(mfrow=c(1,2))
-        plot_one_surfless(model=model, k.pair=k.pair, text.cex=text.cex, 
-            mgp=mgp, mar=mar, font=font, legend.spot='center')
-        plot_kernel_diffs(model=model, k.pair=k.pair, text.cex=text.cex, 
-            mgp=mgp, mar=mar, font=font, legend.spot='topright')
-    }
-    make_plots(sidebyside, paste0("sidebyside-", model_number),
-        model=m1, k.pair=k.pair)
+    #m1.inversion <- minimize_dist(model=m1, rs=rs, 
+    #    initial_params=c(100, 100, 0.01), dM=m1$dM, dR=m1$dR)
 }
 
 

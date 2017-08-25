@@ -6,12 +6,13 @@
 
 #source('kernels.R')
 #source('invert_OLA.R')
+source(file.path('..', 'scripts', 'utils.R'))
 library(parallel)
 library(parallelMap)
 library(Bolstad)
 
-solar.mass <- 1.9892e+33
-solar.radius <- 6.9598e+10
+#solar.mass <- 1.9892e+33
+#solar.radius <- 6.9598e+10
 
 ### MODELS
 paths <- list(diffusion=file.path('models', 'diffusion', 'LOGS_MS'),
@@ -259,7 +260,12 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
                       fake.dnu=10**-6, match.nl=T, subtract.mean=F,
                       trim.ks=T) { 
     #model <- get(model.name) 
-    model <- models[[model.name]]
+    if (exists('models') && model.name %in% names(models)) {
+        model <- models[[model.name]]
+    } else {
+        cat(paste("Error: can't find target", target.name, '\n'))
+        return(NULL)
+    }
     model$target.name <- target.name
     
     # parse model frequencies 
@@ -317,9 +323,9 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     
     model$cs.spl <- splinefun(r, sqrt(fgong[['c2']])) 
     model$mass <- max(fgong$m)
-    model$M <- model$mass / solar.mass # 1.9892e+33
+    model$M <- model$mass / solar_mass # 1.9892e+33
     model$radius <- fgong$r[which.max(fgong$m)]
-    model$R <- model$radius / solar.radius # 6.9598e+10
+    model$R <- model$radius / solar_radius # 6.9598e+10
     model$Teff <- if ('profile.path' %in% names(model)) {
         read.table(model$profile.path, header=1, skip=1, nrow=1)$Teff
     } else 5777
@@ -327,6 +333,8 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     model$nu_max <- model$M*model$R**-2*(model$Teff/5777)**(-1/2)*3090 
     
     if (!is.null(k.pair)) {
+        model$k.pair <- k.pair 
+        
         f1 <- fgong[[k.pair$f1]]
         f2 <- fgong[[k.pair$f2]]
         model$f1 <- f1
@@ -364,15 +372,15 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
             
             if ('m' %in% names(m.2)) {
                 model$m2.mass <- max(m.2$m)
-                model$m2.M <- model$m2.mass / solar.mass # 1.9892e+33
+                model$m2.M <- model$m2.mass / solar_mass # 1.9892e+33
             } else model$m2.M <- target$M
             if ('r' %in% names(m.2)) {
                 model$m2.radius <- m.2$r[which.max(m.2$m)]
-                model$m2.R <- model$m2.radius / solar.radius # 6.9598e+10
+                model$m2.R <- model$m2.radius / solar_radius # 6.9598e+10
             } else model$m2.R <- target$R
             
-            model$dR <- (model$R-model$m2.R)/model$R
-            model$dM <- (model$M-model$m2.M)/model$M
+            model$dR <- (model$R-model$m2.R)#/model$R
+            model$dM <- (model$M-model$m2.M)#/model$M
             
             model$m2.f1 <- m2.f1
             model$m2.f2 <- m2.f2
@@ -384,10 +392,12 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
             model$d.f2.true <- (f2 - m2.f2) / (if (k.pair$f2 == 'Y') 1 else f2)
             
             if (k.pair$f1 == 'u') {
-                model$d.f1.nondim <- model$d.f1.true + model$dR - model$dM
+                model$d.f1.nondim <- model$d.f1.true + 
+                    model$dR/model$R - model$dM/model$M
             }
             if (k.pair$f2 == 'u') {
-                model$d.f2.nondim <- model$d.f2.true + model$dR - model$dM
+                model$d.f2.nondim <- model$d.f2.true + 
+                    model$dR/model$R - model$dM/model$M
             }
             
             model$d.f1.spl <- splinefun(r, model$d.f1.true)
@@ -436,9 +446,17 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
         
         # get square K matrices for OLA inversions
         if (square.Ks) {
-            model$K_ijs <- get_square_Ks(modes=model$modes, K=k1, x0=x0)
-            model$C_ijs <- get_square_Ks(modes=model$modes, K=k2, x0=x0)
             model$K.ints <- get_K.ints(modes=model$modes, K=k1)
+            model$K_ijs <- get_square_Ks(modes=model$modes, K=k1, x0=NULL)
+            model$C_ijs <- get_square_Ks(modes=model$modes, K=k2, x0=NULL)
+            if (!is.null(x0)) {
+                model$MOLA.K_ijs <- parallelMap(function(r)
+                        get_square_Ks(modes=model$modes, K=k1, x0=r), r=x0)
+                model$MOLA.C_ijs <- parallelMap(function(r)
+                        get_square_Ks(modes=model$modes, K=k2, x0=r), r=x0)
+                names(model$MOLA.K_ijs) <- x0
+                names(model$MOLA.C_ijs) <- x0
+            }
         }
     }
     

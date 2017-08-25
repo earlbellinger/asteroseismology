@@ -27,14 +27,12 @@ diffusion <- if (length(args)>0) 1 else 0
 if (diffusion) {
     directory <- file.path('sun', 'diffusion') 
     param_names <- c("Y", "alpha", "overshoot", "Z")
-    #param_init <- c(0.27202387, 1.84663590, 0.09104194, 0.01830403)
-    param_init <- c(0.270358535458691, 1.84558481281388, 0.275013159208911,
-        0.0183612145337711) 
+    param_init <- c(0.270303087498135, 1.8452097780554, 0.276191587521939, 
+        0.0183545123346819)
 } else {
     directory <- file.path('sun', 'no_diffusion')
     param_names <- c("Y", "alpha", "overshoot")
-    #param_init <- c(0.2648378, 1.6974652, 0.2345875)
-    param_init <- c(0.263516871525844, 1.66190971802267, 0.42924061407894)
+    param_init <- c(0.263608790582373, 1.66086916009315, 0.433637018173722)
 }
 #dir.create(directory, showWarnings = FALSE)
 print(directory)

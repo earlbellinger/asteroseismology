@@ -155,8 +155,9 @@ get_target_kernels <- function(rs, width, f.spl, K.x, r_f,
 }
 
 avg_across_cols <- function(mat.list, var.name, num.cols) {
-    do.call(cbind, parallelMap(function(ii) {
-        apply(sapply(mat.list, function(r) r[[var.name]][,ii]), 1, mean)
+    do.call(cbind, Map(function(ii) {
+        col. <- sapply(mat.list, function(mat) mat[[var.name]][,ii])
+        apply(col., 1, mean)
     }, ii=1:num.cols))
 }
 
@@ -190,7 +191,7 @@ invert.MOLA <- function(rs, cross.term, error.sup, modes, nus, K, C,
 
 invert.SOLA <- function(rs, cross.term, error.sup, modes, nus, K, C, 
         K.ints, K_ijs, C_ijs, F_surf, r_f, targ.kern.type='mod_Gauss',
-        targ_kerns=NULL, verbose=F) {
+        targ_kerns=NULL, verbose=F, ...) {
     if (verbose) cat("SOLA inversion\n")
     A.mat <- get_A.mat(cross.term=cross.term, error.sup=error.sup, 
                        modes=modes, nus=nus, K=K, C=C, 
@@ -215,33 +216,49 @@ invert.SOLA <- function(rs, cross.term, error.sup, modes, nus, K, C,
 invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         use.BG=T, num.knots=0, MOLA.K_ijs=NULL, MOLA.C_ijs=NULL, 
         targ.kern.type='mod_Gauss', targ_kerns=NULL,
-        num_realizations=50, r_f=0.2, perturb=T, F_surf=NULL,
+        num_realizations=1, r_f=0.2, perturb=T, F_surf=NULL,
         dM=0, dR=0, subtract.mean=T, kern.interp=NULL,
-        get_avg_kerns=T, get_cross_kerns=T, verbose=F) {
-    #K <- model$k1
-    #C <- model$k2
-    nus <- model$nus
+        get_avg_kerns=T, get_cross_kerns=T, verbose=F, ...) {
     modes <- model$modes
-    
-    nus2 <- nus
+    nus <- model$nus
+    nus.copy <- nus
     
     if (!is.null(width)) { # SOLA
         targ_kerns <- get_target_kernels(rs=rs, 
             width=width, f.spl=model$cs.spl, K.x=model$k1$x, r_f=r_f, 
             targ.kern.type=targ.kern.type)
     } else { # MOLA, calculate new K_ij matrices for each target radius 
-        #MOLA.K_ijs <-
+        MOLA.K_ijs <- parallelMap(function(r) {
+                if (r %in% names(MOLA.K_ijs)) {
+                    MOLA.K_ijs[[r]]
+                } else if (r %in% names(model$MOLA.K_ijs)) {
+                    model$MOLA.K_ijs[[r]]
+                } else {
+                    get_square_Ks(modes=model$modes, K=model$k1, x0=r)
+                }
+            }, r=rs)
+        MOLA.C_ijs <- parallelMap(function(r) {
+                if (r %in% names(MOLA.C_ijs)) {
+                    MOLA.C_ijs[[r]]
+                } else if (r %in% names(model$MOLA.C_ijs)) {
+                    model$MOLA.C_ijs[[r]]
+                } else {
+                    get_square_Ks(modes=model$modes, K=model$k2, x0=r)
+                }
+            }, r=rs)
+        names(MOLA.K_ijs) <- rs
+        names(MOLA.C_ijs) <- rs
     }
     
     realizations <- parallelMap(function(ii) {
         
-        if (perturb) nus$nu.y <- rnorm(length(nus2$nu.y), nus2$nu.y, nus2$dnu) 
+        if (ii > 1 && perturb) {
+            nus$nu.y <- rnorm(length(nus.copy$nu.y), 
+                nus.copy$nu.y, nus.copy$dnu) 
+        }
         
-        nux <- nus$nu.x / sqrt(6.67428*10**-8 * 
-            solar_mass * model$M / (solar_radius * model$R)**3)
-        nuy <- nus$nu.y / sqrt(6.67428*10**-8 * 
-            solar_mass * (model$M + dM) / 
-            (solar_radius * (model$R + dR))**3)
+        nux <- nus$nu.x * sqrt( model$R**3       /  model$M)
+        nuy <- nus$nu.y * sqrt((model$R - dR)**3 / (model$M - dM))
         nus$r.diff <- (nux - nuy) / nux
         
         if (subtract.mean) {
@@ -254,16 +271,18 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         c.vecs <- if (is.null(width)) { 
             invert.MOLA(rs=rs, 
                 cross.term=cross.term, error.sup=error.sup, 
-                modes=modes, nus=nus, K=model$k1, C=model$k2, 
-                K.ints=model$K.ints, F_surf=F_surf, 
-                MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs, verbose=verbose)
+                modes=modes, nus=nus, F_surf=F_surf, 
+                K=model$k1, C=model$k2, K.ints=model$K.ints, 
+                MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs, 
+                verbose=verbose)
         } else {
             invert.SOLA(rs=rs, 
                 cross.term=cross.term, error.sup=error.sup, 
-                modes=modes, nus=nus, K=model$k1, C=model$k2, 
-                K.ints=model$K.ints, K_ijs=model$K_ijs, C_ijs=model$C_ijs,
-                F_surf=F_surf, r_f=r_f, targ.kern.type=targ.kern.type,
-                targ_kerns=targ_kerns, verbose=verbose)
+                modes=modes, nus=nus, F_surf=F_surf, r_f=r_f, 
+                K=model$k1, C=model$k2, K.ints=model$K.ints, 
+                K_ijs=model$K_ijs, C_ijs=model$C_ijs,
+                targ.kern.type=targ.kern.type, targ_kerns=targ_kerns, 
+                verbose=verbose)
         }
         #checksum <- sum(model$K.ints * c.vecs[1:length(modes)]) == 1
         
@@ -279,13 +298,12 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     inv.coefs <- avg_across_cols(realizations, 'inv.coefs', length(rs))
     c.vecs <- avg_across_cols(realizations, 'c.vecs', length(rs))
     df_drs <- sapply(realizations, function(r) r$df_dr) -
-        dR/model$R+dM/model$M 
-    #- 3/2*dR/model$R + 1/2*dM/model$M
-    df_dr <- apply(df_drs, 1, median)
-    df_dr.mean <- apply(df_drs, 1, mean)
+        dR/model$R + dM/model$M 
+    df_dr <- apply(matrix(df_drs), 1, median)
+    df_dr.mean <- apply(matrix(df_drs), 1, mean)
     #df_dr.16 <- apply(df_drs, 1, function(x) quantile(x, 84))
     #df_dr.84 <- apply(df_drs, 1, function(x) quantile(x, 16))
-    err <- if (num_realizations > 1) apply(df_drs, 1, sd) else {
+    err <- if (num_realizations > 1) apply(matrix(df_drs), 1, sd) else {
         sqrt(colSums(sweep(inv.coefs**2, MARGIN=1, 
             (nus$dnu/nus$nu.y)**2, `*`)))
     }
@@ -394,6 +412,7 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
     }
     
     list(params=params,
+         k.pair=model$k.pair, 
          c.vecs=c.vecs, 
          inv.coefs=inv.coefs, 
          avg_kerns=avg_kerns, 
@@ -403,25 +422,38 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
          result=result)
 }
 
-minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
-                          initial_params=c(100, 100, 0.01), 
-                          width.bounds=c(0.001, 0.1),
-                          #max.width=0.2,
-                          num_realizations=16,
-                          dM=0, dR=0,
-                          d.f1.true=T,
-                          targ.kern.type='mod_Gauss', max.err=0.1) {
+#minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
+#        initial_params=c(100, 100, 0.01), width.bounds=c(0.001, 0.1),
+#        dM=0, dR=0, d.f1.true=T, subtract.mean=F, 
+#        num_realizations=1, perturb=F, targ.kern.type='mod_Gauss') {
+minimize_dist <- function(model, rs, 
+        initial_params=c(100, 100, 0.01), width.bounds=c(0.001, 0.1), 
+        abstol=1e-5, reltol=1e-5, ...) {
+    
+    args. <- c(as.list(environment()), list(...))
+    
     if (length(initial_params) < 3) { # MOLA
-        MOLA.K_ijs <- parallelMap(function(r) 
-            get_square_Ks(model$modes, model$k1, r), r=rs)
-        MOLA.C_ijs <- parallelMap(function(r) 
-            get_square_Ks(model$modes, model$k2, r), r=rs)
+        MOLA.K_ijs <- parallelMap(function(r) {
+                if (r %in% names(model$MOLA.K_ijs)) {
+                    model$MOLA.K_ijs[[r]]
+                } else {
+                    get_square_Ks(modes=model$modes, K=model$k1, x0=r)
+                }
+            }, r=rs)
+        MOLA.C_ijs <- parallelMap(function(r) {
+                if (r %in% names(model$MOLA.C_ijs)) {
+                    model$MOLA.C_ijs[[r]]
+                } else {
+                    get_square_Ks(modes=model$modes, K=model$k2, x0=r)
+                }
+            }, r=rs)
         names(MOLA.K_ijs) <- rs
         names(MOLA.C_ijs) <- rs
     } else {
         MOLA.K_ijs <- NULL
         MOLA.C_ijs <- NULL
     }
+    
     d.f1.spl <- splinefun(model$r, 
         if (d.f1.true) model$d.f1.true else model$d.f1.nondim)
     optim_result <- optim(log10(initial_params), fn=function(params) {
@@ -435,75 +467,93 @@ minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
         num.knots <- if (length(params) > 3) ceil(params[4]) else 0
         if (num.knots < 0) num.knots <- 0
         if (!is.null(width) && 
-                width > width.bounds[2] || width < width.bounds[1]) {
+                (width > width.bounds[2] || width < width.bounds[1])) {
             cat(paste("Width out of bounds:", width, '\n'))
             return(Inf) 
         }
-        inversion <- tryCatch({
-            invert.OLA(model=model, rs=rs, 
-                cross.term=cross.term, error.sup=error.sup, 
-                width=width, use.BG=use.BG, num.knots=num.knots,
-                targ.kern.type=targ.kern.type,
-                num_realizations=num_realizations, 
-                dM=dM, dR=dR,
-                MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs)
-            }, error = function(e) 
-                list(result=data.frame(fwhm.mid=0, df_dr=Inf)))
+        inversion <- do.call(invert.OLA, c(args., list(
+            cross.term=cross.term, 
+            error.sup=error.sup,
+            width=width,
+            num.knots=num.knots,
+            MOLA.K_ijs=MOLA.K_ijs,
+            MOLA.C_ijs=MOLA.C_ijs)))
+        #inversion <- tryCatch({
+            #invert.OLA(model=model, rs=rs, 
+            #    cross.term=cross.term, error.sup=error.sup, 
+            #    width=width, use.BG=use.BG, num.knots=num.knots,
+            #    get_avg_kerns=T, get_cross_kerns=F, 
+            #    targ.kern.type=targ.kern.type,
+            #    num_realizations=num_realizations, 
+            #    perturb=perturb, subtract.mean=subtract.mean, 
+            #    dM=dM, dR=dR,
+            #    MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs)
+        #    }, error = function(e) 
+        #        list(result=data.frame(fwhm.mid=0, df_dr=Inf)))
         
-        if (any(inversion$result$err > max.err)) {
-            cat("Errors out of bound:\n")
-            cat(inversion$result$err)
-            cat('\n')
-            return(Inf)
-        }
+        #if (any(inversion$result$err > max.err)) {
+        #    cat("Errors out of bound:\n")
+        #    cat(inversion$result$err)
+        #    cat('\n')
+        #    return(Inf)
+        #}
         
-        beta.max <- apply(inversion$cross_kerns, 2, function(x) max(abs(x)))
+        #beta.max <- apply(inversion$cross_kerns, 2, function(x) max(abs(x)))
         #cat("Cross term kernel maxs:\n")
         #cat(fivenum(beta.max))
         #cat("\n")
         
-        in.max <- sapply(1:length(rs), function(r_i) {
-            avg.kern <- inversion$avg_kerns[,r_i]
-            inside <- model$k1$x >= (rs[r_i] - inversion$params$width) &
-                       model$k1$x <= (rs[r_i] + inversion$params$width)
-            max(abs(avg.kern[inside]))
-        })
-        surf.max <- sapply(1:length(rs), function(r_i) {
-            avg.kern <- inversion$avg_kerns[,r_i]
-            surf <- model$k1$x > 0.9
-            max(abs(avg.kern[surf]))
-        })
-        cat("Averaging kernel in per out:\n")
-        cat(fivenum(in.max / beta.max))
-        cat("\n")
-        cat(fivenum(in.max / surf.max))
-        cat("\n")
+        #in.max <- sapply(1:length(rs), function(r_i) {
+        #    avg.kern <- inversion$avg_kerns[,r_i]
+        #    inside <- model$k1$x >= (rs[r_i] - inversion$params$width) &
+        #               model$k1$x <= (rs[r_i] + inversion$params$width)
+        #    max(abs(avg.kern[inside]))
+        #})
+        #surf.max <- sapply(1:length(rs), function(r_i) {
+        #    avg.kern <- inversion$avg_kerns[,r_i]
+        #    surf <- model$k1$x > 0.9
+        #    max(abs(avg.kern[surf]))
+        #})
+        #cat("Averaging kernel in per out:\n")
+        #cat(fivenum(in.max / beta.max))
+        #cat("\n")
+        #cat(fivenum(in.max / surf.max))
+        #cat("\n")
         
         result <- inversion$result 
         
         chi2 <- with(result, 
             sum( ( (d.f1.spl(fwhm.mid) - df_dr)**2 ) )
+            #sum( ( (d.f1.spl(rs) - df_dr)**2 ) )
         )
         
         #chi2 <- sum((beta.max + surf.max) / in.max + inversion$result$err)
         
         cat(paste("Result:", chi2, '\n'))
         chi2
-    }, control=list(abstol=0.001, reltol=0.00001))
+    }, control=list(abstol=abstol, reltol=reltol))
     cat("Optimization complete\n")
     #, control=list(trace=999, parscale=c(1000, 0.1, 100)))
     best_params <- 10**optim_result$par
-    inversion <- invert.OLA(model=model, rs=rs, 
-               cross.term=best_params[1], 
-               error.sup=best_params[2], 
-               width=if (length(best_params) >= 3) 
-                   best_params[3] else NULL, 
-               use.BG=use.BG, 
-               num.knots=if (length(best_params)>=4) 
-                   best_params[4] else num.knots, 
-               targ.kern.type=targ.kern.type,
-               dM=dM, dR=dR,
-               MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs) 
+    if (length(best_params)>=4) args.$num.knots=best_params[4]
+    inversion <- do.call(invert.OLA, c(args., list(
+            cross.term=best_params[1],
+            error.sup=best_params[2],
+            width=if (length(best_params) >= 3) best_params[3] else NULL,
+            MOLA.K_ijs=MOLA.K_ijs,
+            MOLA.C_ijs=MOLA.C_ijs
+        )))
+    #inversion <- invert.OLA(model=model, rs=rs, 
+    #           cross.term=best_params[1], 
+    #           error.sup=best_params[2], 
+    #           width=if (length(best_params) >= 3) 
+    #               best_params[3] else NULL, 
+    #           use.BG=use.BG, 
+    #           num.knots=if (length(best_params)>=4) 
+    #               best_params[4] else num.knots, 
+    #           targ.kern.type=targ.kern.type,
+    #           dM=dM, dR=dR,
+    #           MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs) 
     inversion$score <- optim_result$value
     inversion
 }

@@ -43,7 +43,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["age"] <- hstry$star_age / 10**9 #pro_header$star_age/10**9
     obs.DF["M_current"] <- hstry$star_mass
     
-    obs.DF["mass_cc"] <- hstry$mass_conv_core/pro_header$star_mass
+    obs.DF["mass_cc"] <- hstry$mass_conv_core/hstry$star_mass
     
     obs.DF["X_c"] <- hstry$center_h1
     obs.DF["Y_c"] <- hstry$center_he3 + hstry$center_he4 

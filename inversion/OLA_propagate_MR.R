@@ -17,26 +17,26 @@ num_procs <- max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']]))
 parallelStartMulticore(num_procs)
 
 args <- commandArgs(TRUE)
-MOLA            <- if (length(args)>0) as.logical(as.numeric(args[1])) else F
-mode.set        <- if (length(args)>1)   args[2] else 'CygA'
-error.set       <- if (length(args)>2)   args[3] else 'CygA'
-target.name     <- if (length(args)>3)   args[4] else 'modmix'
-targ.kern.type  <- if (length(args)>4)   args[5] else 'mod_Gauss'
-n_trials        <- if (length(args)>5)   as.numeric(args[6]) else 128
-model.list.name <- if (length(args)>6)   args[7] else 'perturbed.model.names'
-initial.M       <- if (length(args)>7)   as.numeric(args[8]) else 1
-initial.R       <- if (length(args)>8)   as.numeric(args[9]) else 1
-sigma.M         <- if (length(args)>9)  as.numeric(args[10]) else 0.016
-sigma.R         <- if (length(args)>10) as.numeric(args[11]) else 0.02
-#'perturbed.model.names'
+MOLA            <- if (length(args)>0)  as.logical(as.numeric(args[1])) else F
+mode.set        <- if (length(args)>1)  args[2] else 'CygA'
+error.set       <- if (length(args)>2)  args[3] else 'CygA'
+ref.mod.name    <- if (length(args)>3)  args[4] else 'CygADiffusion'
+target.name     <- if (length(args)>4)  args[5] else 'CygAlowRhighM'
+targ.kern.type  <- if (length(args)>5)  args[6] else 'mod_Gauss'
+n_trials        <- if (length(args)>6)  as.numeric( args[7]) else 128
+model.list.name <- if (length(args)>7)  args[8] else 'perturbed.model.names'
+initial.M       <- if (length(args)>8)  as.numeric( args[9]) else 1
+initial.R       <- if (length(args)>9)  as.numeric(args[10]) else 1
+sigma.M         <- if (length(args)>10) as.numeric(args[11]) else 0.016
+sigma.R         <- if (length(args)>11) as.numeric(args[12]) else 0.02
 
-perturb <- F #T#
-half <- F
-k.pair <- u_Y
-rs <- seq(0.08, 0.3, 0.02)
-sampler <- T
-targ.mode <- paste0('-p_', target.name, '-m_', mode.set, '-e_', error.set,
-    if (MOLA) "-MOLA" else paste0("-", targ.kern.type))
+perturb <- F 
+half <- F 
+k.pair <- u_Y 
+rs <- seq(0.05, 0.3, 0.05)
+sampler <- T 
+targ.mode <- paste0('-p_', target.name, '-m_', mode.set, '-e_', error.set, 
+    if (MOLA) "-MOLA" else paste0("-", targ.kern.type)) 
 
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, 
     error.set=error.set, perturb=perturb) 
@@ -57,8 +57,6 @@ for (perturbed.model.name in model.names) {
         model.name=perturbed.model.name, 
         target.name=target.name, 
         k.pair=k.pair, square.Ks=T) 
-    #model$F_surf <- get_F_surf(model$nus, num.knots=0, use.BG=T, 
-    #    nu_ac=model$nu_ac)
     model.list[[perturbed.model.name]] <- model
 }
 
@@ -122,10 +120,10 @@ for (trial_i in 1:n_trials) {
         names(inv.list) <- model.names
         
         f.means <- sapply(inv.list, function(inversion) inversion$f) 
-        result <- sum(apply(f.means, 1, var)) 
-        result <- log(result) #- 
-            #dnorm(star.M, initial.M, sigma.M, log=T) - 
-            #dnorm(star.R, initial.R, sigma.R, log=T) 
+        result <- sum(apply(f.means, 1, sd)) 
+        result <- log(result) - 
+            dnorm(star.M, initial.M, sigma.M, log=T) - 
+            dnorm(star.R, initial.R, sigma.R, log=T) 
             #dnorm(star.M, initial.M, sigma.M, log=T) - 
             #dnorm(star.R, initial.R, sigma.R, log=T) 
         cat(paste("Result:", format(result, digits=8), '\n')) 

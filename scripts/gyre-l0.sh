@@ -70,9 +70,9 @@ echo "&model
     grid_type = 'LINEAR'
     freq_min_units = 'UHZ'
     freq_max_units = 'ACOUSTIC_CUTOFF'
-    freq_min = 0.001
+    freq_min = 0.01
     freq_max = 1
-    n_freq = 10000
+    n_freq = 1000
 /
 
 &grid
