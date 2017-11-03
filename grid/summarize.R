@@ -92,9 +92,11 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["delta_nu_asym"] <- hstry$delta_nu
     
     freqs <- parse_freqs(freqs_file, gyre=T)
-    obs.DF["Dnu0_classic"] <- seismology(freqs, 
-        nu_max=obs.DF[["nu_max_classic"]])[["Dnu0"]]
-    seis.DF <- seismology(freqs, nu_max=obs.DF[["nu_max"]])
+    seis <- seismology(freqs, nu_max=obs.DF[["nu_max_classic"]],
+        min_points=2, check_nu_max=F)
+    if ("Dnu0" %in% names(seis)) obs.DF["Dnu0_classic"] <- seis[["Dnu0"]]
+    seis.DF <- seismology(freqs, nu_max=obs.DF[["nu_max"]],
+        min_points=2, check_nu_max=F)
     
     #as.data.frame(cbind(obs.DF, seis.DF))
     merge(rbind(obs.DF), rbind(seis.DF))
@@ -291,9 +293,9 @@ if (length(args)>0) {
                 read.table(file.path(log_dir, 'history.data'), 
                     header=TRUE, skip=5))
             ev.DF <- ev.DF[order(ev.DF$star_age),]
-            make_plots(plot_HR, paste0(basename(directory), "-HR"), 
-                filepath=file.path('plots', dirname(directory), 'HR'), 
-                mar=c(3, 4, 1, 7), DF=DF, ev.DF=ev.DF)
+            #make_plots(plot_HR, paste0(basename(directory), "-HR"), 
+            #    filepath=file.path('plots', dirname(directory), 'HR'), 
+            #    mar=c(3, 4, 1, 7), DF=DF, ev.DF=ev.DF)
         }
     }
     

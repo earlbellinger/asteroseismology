@@ -79,7 +79,8 @@ echo "
 
 &scan
     grid_type = 'LINEAR'
-    freq_units = 'ACOUSTIC_CUTOFF'
+    freq_max_units = 'ACOUSTIC_CUTOFF'
+    freq_min_units = 'UHZ'
     freq_min = 0.01
     freq_max = 1
     n_freq = 1000
@@ -100,10 +101,10 @@ echo "
 &recon_grid
 /
 
-&ad_output
+&nad_output
 /
 
-&nad_output
+&ad_output
     summary_file = '$fname.dat'
     summary_file_format = 'TXT'
     summary_item_list = 'l,n_pg,n_p,n_g,freq,E_norm'

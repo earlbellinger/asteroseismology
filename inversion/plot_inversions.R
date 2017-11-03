@@ -25,7 +25,7 @@ perturb <- T
 # add non-dimensional u
 
 target.name <- 'CygAwball'
-ref.mod <- 'CygAno_diff'
+ref.mod <- 'CygADiffusion'
 mode.set <- 'BiSON'
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, perturb=perturb) 
 m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 

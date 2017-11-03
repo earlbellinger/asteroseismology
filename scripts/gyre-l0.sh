@@ -72,7 +72,7 @@ echo "&model
     freq_max_units = 'ACOUSTIC_CUTOFF'
     freq_min = 0.01
     freq_max = 1
-    n_freq = 1000
+    n_freq = 100
 /
 
 &grid

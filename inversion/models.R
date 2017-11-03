@@ -22,6 +22,7 @@ paths <- list(diffusion=file.path('models', 'diffusion', 'LOGS_MS'),
               hl.no_d=file.path('..', 'misc', 'solar_calibration',
                                 'high_ell', 'no_diffusion'),
               modmix=file.path('models', 'BPB2000'),
+              ModelS=file.path('models', 'ModelS'),
               CygAdiff=file.path('models', 'CygAdiff', 'LOGS_MS'),
               CygAno_diff=file.path('models', 'CygAno_diff', 'LOGS_MS'),
               CygAwball=file.path('models', 'wball', 'sample_0327'),
@@ -30,7 +31,11 @@ paths <- list(diffusion=file.path('models', 'diffusion', 'LOGS_MS'),
               CygAbasu2=file.path('models', 'CygAbasu'),
               CygAbasu3=file.path('models', 'CygAbasu'),
               CygAbasu4=file.path('models', 'CygAbasu'),
-              CygAjcd=file.path('models', 'CygAjcd'))
+              CygAjcd=file.path('models', 'CygAjcd'),
+              CygAyoung=file.path('..', 'calibration', 'old', 'calibrate2',
+                'M=1.08_logR=0.08635983_age=6000000000', 'LOGS_MS'),
+              CygAyounger=file.path('..', 'calibration', 'old', 'calibrate2',
+                'M=1.08_logR=0.08635983_age=5000000000', 'LOGS_MS'))
 
 path <- paths$hl.diff
 hl.diff <- list(name='MESA Diffusion', short='hlD',
@@ -69,6 +74,15 @@ no_diffusion <- list(name='No Diffusion', short='noD',
                      profile.path=file.path(path, 'profile1.data'),
                      fgong.path=file.path(path, 'profile1-freqs', 
                                                 'profile1.data.FGONG.dat'))
+
+path <- paths$ModelS
+ModelS <- list(name='Model S', short='ModelS',
+                     kerns.dir=file.path(path, 'ModelS-freqs'),
+                     freq.path=file.path(path, 'ModelS-freqs.dat'), 
+                     freq.col.names=c('l', 'n', 'nu', 'E'),
+                     profile.path=file.path(path, 'ModelS.data'),
+                     fgong.path=file.path(path, 'ModelS-freqs', 
+                                                'ModelS.data.FGONG.dat'))
 
 path <- paths$CygAdiff
 CygAdiff <- list(name='16CygA Diffusion', short='CygAD',
@@ -147,12 +161,32 @@ CygAbasu4 <- list(name='16 Cyg A Basu 4', short='CygAbasu4',
                freq.col.names=FALSE, 
                fgong.path=file.path(path, '16Cyg_4.dat'))
 
+path <- paths$CygAyoung
+CygAyoung <- list(name='16CygA low age', short='CygAyoung',
+                     kerns.dir=file.path(path, 'profile1-freqs'),
+                     freq.path=file.path(path, 'profile1-freqs.dat'), 
+                     freq.col.names=c('l', 'n', 'nu', 'E'),
+                     profile.path=file.path(path, 'profile1.data'),
+                     fgong.path=file.path(path, 'profile1-freqs', 
+                                                'profile1.data.FGONG.dat'))
+
+path <- paths$CygAyounger
+CygAyounger <- list(name='16CygA lower age', short='CygAyounger',
+                     kerns.dir=file.path(path, 'profile1-freqs'),
+                     freq.path=file.path(path, 'profile1-freqs.dat'), 
+                     freq.col.names=c('l', 'n', 'nu', 'E'),
+                     profile.path=file.path(path, 'profile1.data'),
+                     fgong.path=file.path(path, 'profile1-freqs', 
+                                                'profile1.data.FGONG.dat'))
+
+
 get_model_list <- function() {
     models <- list('hl.diff'=hl.diff,
         'hl.no_d'=hl.no_d,
         'diffusion'=diffusion,
         'no_diffusion'=no_diffusion,
         'modmix'=modmix,
+        'ModelS'=ModelS, 
         'CygAdiff'=CygAdiff,
         'CygAno_diff'=CygAno_diff,
         'CygAwball'=CygAwball,
@@ -161,7 +195,9 @@ get_model_list <- function() {
         'CygAbasu2'=CygAbasu2,
         'CygAbasu3'=CygAbasu3,
         'CygAbasu4'=CygAbasu4,
-        'CygAjcd'=CygAjcd)
+        'CygAjcd'=CygAjcd,
+        'CygAyoung'=CygAyoung,
+        'CygAyounger'=CygAyounger)
     
     perturbed.model.names <<- c()
     for (R in c(0.98, 1, 1.02)) {
@@ -255,15 +291,15 @@ parse_freqs <- function(path, col.names=F) {
     } else read.table(path, header=1, stringsAsFactors=F) 
 }
 
-get_model <- function(freqs, model.name="diffusion", target.name=NULL, 
-                      k.pair=u_Y, x0=NULL, square.Ks=F, 
+get_model <- function(model.name, freqs=NULL, target.name=NULL, 
+                      k.pair=NULL, x0=NULL, square.Ks=F, 
                       fake.dnu=10**-6, match.nl=T, subtract.mean=F,
                       trim.ks=T) { 
     #model <- get(model.name) 
     if (exists('models') && model.name %in% names(models)) {
         model <- models[[model.name]]
     } else {
-        cat(paste("Error: can't find target", target.name, '\n'))
+        cat(paste("Error: can't find model", model.name, '\n'))
         return(NULL)
     }
     model$target.name <- target.name
@@ -279,41 +315,44 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     
     # find relative differences with provided frequencies 
     #for (ell in unique(freqs$l)) {
-    nus <- if (match.nl) merge(nus, freqs, by=c('l', 'n')) else {
-        nus <- do.call(rbind, Map(function(ell) {
-            ell.proxy <- freqs[freqs$l == ell,]
-            ell.model <- nus[nus$l == ell,]
-            closest <- find_closest(ell.proxy$nu, ell.model$nu)
-            ell.nu <- ell.model[closest$y,]
-            merge(ell.nu, 
-                data.frame(n=ell.nu$n, l=ell.nu$l,
-                    nu=ell.proxy$nu[closest$x], 
-                    dnu=ell.proxy$dnu[closest$x]),
-                by=c('l', 'n'))
-        }, ell=unique(freqs$l)))
+    if (!is.null(freqs)) {
+        nus <- if (match.nl) merge(nus, freqs, by=c('l', 'n')) else {
+            nus <- do.call(rbind, Map(function(ell) {
+                ell.proxy <- freqs[freqs$l == ell,]
+                ell.model <- nus[nus$l == ell,]
+                closest <- find_closest(ell.proxy$nu, ell.model$nu)
+                ell.nu <- ell.model[closest$y,]
+                merge(ell.nu, 
+                    data.frame(n=ell.nu$n, l=ell.nu$l,
+                        nu=ell.proxy$nu[closest$x], 
+                        dnu=ell.proxy$dnu[closest$x]),
+                    by=c('l', 'n'))
+            }, ell=unique(freqs$l)))
+        }
+        
+        missing.nus <- which(! freqs$nu %in% nus$nu.y)
+        for (ii in missing.nus) 
+            cat(paste0("missing mode n=", freqs[ii,]$n, 
+                                  ", l=", freqs[ii,]$l, '\n'))
+        
+        #nus <- merge(nus, freqs, by=c('l', 'n')) 
+        diffs <- nus$nu.x - nus$nu.y 
+        r.diff <- diffs / nus$nu.x 
+        #d.r.diff <- (nus$dnu / abs(diffs) * abs(r.diff))
+        d.r.diff <- nus$dnu / abs(nus$nu.y) * abs(r.diff) 
+        weights <- 1/d.r.diff / sum(1/d.r.diff) 
+        w.mean <- weighted.mean(r.diff, weights) 
+        w.std <- sqrt(sum( weights**2 * d.r.diff**2 )) 
+        nus <- cbind(nus, data.frame(
+            r.diff = if (subtract.mean) 
+                r.diff - w.mean else r.diff, 
+            d.r.diff = if (subtract.mean) 
+                sqrt( d.r.diff**2 + w.std**2 ) else d.r.diff
+            #r.diff = r.diff - w.mean, 
+            #d.r.diff = sqrt( d.r.diff**2 + w.std**2 )
+        ))
+        nus <- nus[order(nus$l, nus$n),]
     }
-    
-    missing.nus <- which(! freqs$nu %in% nus$nu.y)
-    for (ii in missing.nus) 
-        cat(paste0("missing mode n=", freqs[ii,]$n, ", l=", freqs[ii,]$l, '\n'))
-    
-    #nus <- merge(nus, freqs, by=c('l', 'n')) 
-    diffs <- nus$nu.x - nus$nu.y 
-    r.diff <- diffs / nus$nu.x 
-    #d.r.diff <- (nus$dnu / abs(diffs) * abs(r.diff))
-    d.r.diff <- nus$dnu / abs(nus$nu.y) * abs(r.diff) 
-    weights <- 1/d.r.diff / sum(1/d.r.diff) 
-    w.mean <- weighted.mean(r.diff, weights) 
-    w.std <- sqrt(sum( weights**2 * d.r.diff**2 )) 
-    nus <- cbind(nus, data.frame(
-        r.diff = if (subtract.mean) 
-            r.diff - w.mean else r.diff, 
-        d.r.diff = if (subtract.mean) 
-            sqrt( d.r.diff**2 + w.std**2 ) else d.r.diff
-        #r.diff = r.diff - w.mean, 
-        #d.r.diff = sqrt( d.r.diff**2 + w.std**2 )
-    ))
-    nus <- nus[order(nus$l, nus$n),]
     
     # parse model structure 
     fgong <- read.table(model$fgong.path, header=1) 
@@ -321,6 +360,7 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     r <- fgong$x 
     model$r <- r 
     
+    #model$c2.spl <- splinefun(r, fgong[['c2']]) 
     model$cs.spl <- splinefun(r, sqrt(fgong[['c2']])) 
     model$mass <- max(fgong$m)
     model$M <- model$mass / solar_mass # 1.9892e+33
@@ -412,7 +452,7 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
             }, mode=paste0('l.', nus$l, '_', 'n.', nus$n)))
             nus <- cbind(nus, k.diffs) 
         }
-    } else {
+    } else if (!is.null(target.name)) {
         cat(paste0("Target is real star ", target.name, "\n"))
     }
     
@@ -461,14 +501,16 @@ get_model <- function(freqs, model.name="diffusion", target.name=NULL,
     }
     
     # calculate lower turning points 
-    rs <- seq(0, 1, 0.0001)
+    #rs <- seq(0.0001, 1, 0.0001)
+    rs <- model$r * model$R * solar_radius
     model$r_ts <- sapply(model$modes, function(mode) {
         ell <- as.numeric(strsplit(strsplit(mode, '_')[[1]][1], '\\.')[[1]][2])
         nn <- as.numeric(strsplit(strsplit(mode, '_')[[1]][2], '\\.')[[1]][2])
         nu <- model$nus[with(model$nus, l==ell&n==nn),]$nu.x
         if (ell == 0) return(0)
-        rs[which.min((
-                model$cs.spl(rs)/(rs) - (2*pi*nu)**2/(ell*(ell+1))
+        model$r[which.min((
+                model$cs.spl(rs / (model$R * solar_radius))**2 / (rs**2) 
+                - (10**-6*nu*(2*pi))**2/(ell*(ell+1))
             )**2)]
     })
     

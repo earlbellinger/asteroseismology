@@ -62,19 +62,7 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     
     # remove mixed modes
     mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
-    #mixed.2 <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 2,]
     freqs <- freqs[freqs$n_g == 0,]
-    #ell.0 <- freqs[freqs$l==0,]
-    #e.0 <- splinefun(ell.0$nu, ell.0$E)
-    #for (ell in ells) {
-    #    l.ell <- freqs[freqs$l == ell,]
-    #    mixed <- l.ell$E / e.0(l.ell$nu) > 10
-    #    if (any(mixed)) {
-    #        print(paste("Removing", length(mixed), "l =", ell, "mixed modes"))
-    #        freqs <- freqs[-which(freqs$nu == l.ell[mixed,]$nu),]
-    #    }
-    #}
-    
     # get l=0
     seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, ...)
     
@@ -101,28 +89,14 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         }
     }
     
-    ## interpolate echelle diagram
     ell.0 <- freqs[freqs$l == 0,]
-    #central.nu <- ell.0$nu[find_closest(ell.0$nu, nu_max)$x]
-    #echelle.center <- seis.DF$Dnu0 / 2
-    #modded.nu <- central.nu %% seis.DF$Dnu0
-    #central.offset <- (modded.nu - echelle.center)
-    #centered.nus <- if (central.offset > 0) ell.0$nu - central.offset
-    #else ell.0$nu + abs(central.offset)
-    #echelle <- splinefun(centered.nus, centered.nus %% seis.DF$Dnu0)
-    
     
     # calculate epsilon_p
-    #central <- find_closest(ell.0$nu, rep(3090, 3))$x[1:3]
-    #epsilon_p <- mean(ell.0$nu[central] / seis.DF[['Dnu0']] - ell.0$n[central])
-    epsilon_p <- weighted.mean(ell.0$nu / seis.DF[['Dnu0']] - ell.0$n,
-        dnorm(ell.0$nu, nu_max, (0.66*nu_max**0.88)/fwhm_conversion))
-    #epsilon_p <- mean((ell.0$nu[central] / (ell.0$nu[central] - ell.0$nu[central-1])) %% 1)
-    #epsilon_p <- mean((ell.0$nu[central] / mean(ell.0$nu[central] - ell.0$nu[central-1])) %% 1)
-    #epsilon_p <- mean((ell.0$nu[central] / seis.DF[['Dnu0']]) %% 1)
-    #if (epsilon_p < 0.5 && seis.DF[['Dnu0']] > 3) epsilon_p <- epsilon_p + 1
-    #nu_c.0 <- seis.DF[['Dnu']]
-    seis.DF <- cbind(seis.DF, data.frame(epsilon_p=epsilon_p))
+    if ('Dnu0' %in% names(seis.DF)) {
+        epsilon_p <- weighted.mean(ell.0$nu / seis.DF[['Dnu0']] - ell.0$n,
+            dnorm(ell.0$nu, nu_max, (0.66*nu_max**0.88)/fwhm_conversion))
+        seis.DF <- cbind(seis.DF, data.frame(epsilon_p=epsilon_p))
+    }
     
     # find frequencies of mixed modes 
     if (nrow(mixed) <= 0) return(seis.DF)
@@ -140,7 +114,8 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     }
     
     if (length(nus) <= 0) return(seis.DF)
-
+    
+    # mixed mode calculations 
     dist_to_nu_max <- abs(nus - nu_max)
     closest <- order(dist_to_nu_max)[1:min(length(nus), 3)]
     
@@ -172,19 +147,11 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         seis.DF <- cbind(seis.DF, mixed)
     }
     
-    ## interpolate within echelle diagram and save distance
-    #mixed.offset <- if (central.offset > 0) mixed - central.offset
-    #else mixed + abs(central.offset)
-    #echelle.dist <- mixed.offset %% seis.DF$Dnu0 - echelle(mixed.offset)
-    #names(echelle.dist) <- paste0('echelle.', mm.ell, '.', 
-    #    1:ncol(echelle.dist))
-    #seis.DF <- cbind(seis.DF, echelle.dist)
-    
-    
     return(seis.DF)
 }
 
-get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
+get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, 
+        min_points=3, check_nu_max=T, ...) {
     
     result <- NULL
     
@@ -193,19 +160,12 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     nus <- vals$nus
     seps <- vals$separations
     
-    #if (sep_name == "dnu") {
-    #    if (is.na(Dnu)) Dnu <- get_average("Dnu", freqs, 0)$Dnu0
-    #    keep <- abs(seps) < Dnu/2
-    #    nus <- nus[keep]
-    #    seps <- seps[keep]
-    #}
-    
     if (is.null(nus) | is.null(freqs)) return(NULL)
     not.na <- complete.cases(nus) & complete.cases(seps)
     nus <- nus[not.na]
     seps <- seps[not.na]
     
-    if (length(seps)<3) {
+    if (length(seps) < min_points) {
         print(paste("Too few points for", sep_name))
         return(NULL)
     }
@@ -218,28 +178,16 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, ...) {
     if (!is.na(nu_max)) {
         fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
         gaussian_env <- dnorm(nus, nu_max, fwhm)
-        #ratios <- dnorm(nus, nu_max, fwhm)/dnorm(nu_max, nu_max, fwhm)
-        #if (any(ratios < 0.05))
-        if (length(nus[nus>nu_max-fwhm & nus<nu_max+fwhm]))
-            w.median <- weightedMedian(seps, gaussian_env)
-        else {
-            #cat("Ratios: ")
-            #cat(ratios)
-            #cat('\n')
+        if (check_nu_max && length(nus[nus<nu_max-fwhm | nus>nu_max+fwhm])==0) {
             print(paste("All points too far from nu_max for", sep_name))
             return(NULL)
         }
-        #int.weights <- floor(gaussian_env*10000)
-        #new.nus <- rep(nus, int.weights)
-        #new.seps <- rep(seps, int.weights)
-        #fit <- mblm(new.seps~new.nus)
-        #fit <- lm(seps~nus, weights=gaussian_env)
-        result <- data.frame(w.median)#, coef(fit)[[2]])
+        w.median <- weightedMedian(seps, gaussian_env)
+        result <- data.frame(w.median)
     } else {
-        #fit <- lm(seps~nus)
-        result <- data.frame(median(seps))#, coef(fit)[[2]])
+        result <- data.frame(median(seps))
     }
-    colnames(result) <- sep_name #c(sep_name, paste0(sep_name, "_slope"))
+    colnames(result) <- sep_name 
     
     if (outf != FALSE && !is.na(result)) make_plots(seismology_plot, 
         paste0(outf, '-', sep_name), ...,
@@ -349,7 +297,8 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
 # nu_max is the center of the gaussian
 # make a plot with filename 'outf' if outf != FALSE
 avg <- function(separator, freqs, 
-        l_degs=0, DF=NULL, nu_max=NA, acoustic_cutoff=Inf, outf=FALSE, ...) {
+        l_degs=0, DF=NULL, nu_max=NA, acoustic_cutoff=Inf, outf=FALSE, 
+        min_points=3, ...) {
     sep_name <- deparse(substitute(separator))
     #print(sep_name)
     seps <- c() # contains the computed quantity (e.g. large freq separations)
@@ -375,7 +324,7 @@ avg <- function(separator, freqs,
     }
     
     # need 3 points to make something reasonable 
-    if (length(seps)<=2) {
+    if (length(seps) < min_points) {
         print(paste("Too few points for", sep_name))
         print(seps)
         #DF[paste0(sep_name, "_median")] <- NA

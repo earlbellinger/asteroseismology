@@ -27,12 +27,13 @@ diffusion <- if (length(args)>0) 1 else 0
 if (diffusion) {
     directory <- file.path('sun', 'diffusion') 
     param_names <- c("Y", "alpha", "overshoot", "Z")
-    param_init <- c(0.270303087498135, 1.8452097780554, 0.276191587521939, 
-        0.0183545123346819)
+    param_init <- c(0.271590725692611, 1.84492755106897,
+        0, #0.27864590637999, 
+        0.018284098684172)
 } else {
     directory <- file.path('sun', 'no_diffusion')
     param_names <- c("Y", "alpha", "overshoot")
-    param_init <- c(0.263608790582373, 1.66086916009315, 0.433637018173722)
+    param_init <- c(0.265556396144154, 1.68773902272151, 0) # 0.415336135905785)
 }
 #dir.create(directory, showWarnings = FALSE)
 print(directory)
@@ -64,24 +65,45 @@ best_val <<- Inf
 best_param <<- param_init
 
 run <- function(params) {
-    cat(paste(param_names, params, "\n"))
-    
     Y <- params[1]
     alpha <- params[2]
     overshoot <- params[3]
     Z <- if (diffusion) params[4] else get_Z(Y)
     
+    if (Y < 0.2463) Y <- 0.2463
+    if (Y > 0.33) Y <- 0.33
+    if (Z < 0.016) Z <- 0.016
+    if (Z > 0.024) Z <- 0.024
+    if (overshoot < 0) overshoot <- 0
+    if (overshoot > 1) overshoot <- 1
+    if (alpha < 1) alpha <- 0.5
+    if (alpha > 3) alpha <- 3
+    
+    cat(paste(param_names, c(Y, alpha, overshoot, Z), '\n'))
+    
+    #if (Y < 0.2463  || Y > 0.33  || 
+    #    Z < 0.016   || Z > 0.024 || 
+    #    overshoot < 0 || overshoot > 0.5 || 
+    #    alpha < 1 || alpha > 3) {
+    #    
+    #    cat("Input parameters out of bounds; skipping\n")
+    #    return(Inf)
+    #}
+    
+    
+    #cat(paste(param_names, params, "\n"))
+    
     iteration <<- iteration + 1
     cat(paste("**** iter:", iteration, "\n"))
     
-    if (Y < 0.2463  || Y > 0.33  || 
-        Z < 0.016   || Z > 0.024 || 
-        overshoot <= 0 || overshoot > 0.5 || 
-        alpha < 1 || alpha > 3) {
-        
-        cat("Input parameters out of bounds; skipping\n")
-        return(Inf)
-    }
+    #if (Y < 0.2463  || Y > 0.33  || 
+    #    Z < 0.016   || Z > 0.024 || 
+    #    overshoot <= 0 || overshoot > 0.5 || 
+    #    alpha < 1 || alpha > 3) {
+    #    
+    #    cat("Input parameters out of bounds; skipping\n")
+    #    return(Inf)
+    #}
     
     ran <<- ran + 1 
     cat(paste("**** ran:", ran, "\n"))
@@ -128,5 +150,6 @@ command <- paste("./dispatch.sh",
     '-s') 
 print(command) 
 system(command) 
+print(result)
 if (result$convergence == 0) cat("Optimization successful.\n") 
 

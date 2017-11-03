@@ -90,7 +90,8 @@ process_star <- function(star, star_dir, out_dir="perturb") {
 
 ## Perturb every star 10k times and save the results
 parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
-process_dir(file.path("data", "legacyRox2"))
+#process_dir(file.path("data", "legacyRox2"))
+process_dir(file.path("data", "benard"))
 stop()
 process_dir(file.path("data", "legacyRox"))
 process_dir(file.path("data", "sg-hares-mesa"))

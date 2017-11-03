@@ -10,6 +10,9 @@ library(plyr)
 Sun.MDI <- list(freq.path=file.path('data', 'SolarFreq_MDI.txt'),
                 freq.col.names=c('l', 'n', 'nu', 'dnu'))
 
+MDI <- list(freq.path=file.path('data', 'Rhodes-MDI.dat'),
+                freq.col.names=F)
+
 BiSON <- list(freq.path=file.path('data', 'Sun-freqs.dat'),
               freq.col.names=F)
               

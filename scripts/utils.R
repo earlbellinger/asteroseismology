@@ -6,12 +6,14 @@
 invisible(library(magicaxis))
 invisible(library(extrafont))
 
+Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21/bin/gswin64.exe")
+
 ## Plotting values
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
-utils.font <<- "CM Roman" #"Helvetica" #"Times" #"Palatino"
-font <- "CM Roman" #"Helvetica" #"Palatino"
+utils.font <<- "Palatino Linotype" #"CM Roman" #"Helvetica" #"Times" #
+font <- "Palatino Linotype" #"CM Roman" #"Helvetica" #"Palatino"
 text.cex <- 1
 mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
@@ -69,6 +71,7 @@ make_plots <- function(plot_f, filename,
         mar.paper=c(2.5, 3, 1, 1),
         mgp.slides=utils.mgp,
         mgp.paper=c(1.5, 0.15, 0),
+        oma=c(0,0,0,0),
         hack.mgp=c(2, 0.5, 0), thin.hack=FALSE,
         cex.paper=0.77, cex.slides=1.3, cex.hack=1.4,
         wide=TRUE, thin=TRUE,
@@ -166,15 +169,15 @@ pdfpng <- function(plot_f, filename, directory,
         pdf_width, pdf_height, png_width, png_height,
         text.cex, png_res, use.cairo, ..., 
         font=utils.font, mar=utils.mar, thin.hack=F,
-        make_png=T, make_pdf=T, make_tikz=T, mgp=utils.mgp) {
-
+        make_png=T, make_pdf=T, make_tikz=T, mgp=utils.mgp, oma=c(0,0,0,0)) {
     if (make_png) {
+        png_font <- if (font == "CM Roman") "Times" else font 
         png(file.path(directory, paste0(filename, '.png')),
             width=png_width, height=png_height,
-            family=utils.font, res=png_res, type='cairo')
-        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+            family=png_font, res=png_res, type='cairo')
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=png_font, oma=oma)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex,
-               font=font,
+               font=png_font,
                mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
     }
@@ -182,7 +185,7 @@ pdfpng <- function(plot_f, filename, directory,
         cairornot <- if (use.cairo) cairo_pdf else pdf
         cairornot(file.path(directory, paste0(filename, '.pdf')),
             width=pdf_width, height=pdf_height, family=font)
-        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font, oma=oma)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex,
                font=font, mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
@@ -194,7 +197,7 @@ pdfpng <- function(plot_f, filename, directory,
     if (make_tikz) {
         tikz(file.path(directory, paste0(filename, '.tex')),
             width=pdf_width, height=pdf_height)
-        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font)
+        par(mar=mar, mgp=mgp, cex.lab=text.cex, family=font, oma=oma)
         plot_f(text.cex=if (thin.hack) cex.hack else text.cex,
                font=font, mgp=if (thin.hack) hack.mgp else mgp, ...)
         dev.off()
@@ -393,14 +396,12 @@ seis.labs <- list(
 )
 
 seis.units <- list(
-  M               = bquote("/"*M["☉"]),
   Y               = bquote(),
   Z               = bquote(),
   alpha           = bquote(),
   diffusion       = bquote(),
   overshoot       = bquote(),
   age             = bquote("/Gyr"),
-  radius          = bquote("/"*R["☉"]),
   mass_X          = bquote("/"*M["*"]),
   mass_Y          = bquote("/"*M["*"]),
   mass_Y          = bquote("/"*M["*"]),
@@ -408,7 +409,6 @@ seis.units <- list(
   Y_surf          = bquote(),
   X_c             = bquote(),
   log_g           = bquote(" (cgs)"),
-  L               = bquote("/"*L["☉"]),
   Teff            = bquote("/"*K),
   Fe.H            = bquote(),
   Dnu_median      = bquote("/"*mu*Hz),
@@ -483,29 +483,6 @@ seis.latex <- list(
   nu_max          = "$\\nu_{\\max}$"
 )
 
-unicode.labs <- list(
-  radius         = "R",
-  log_g          = "log g",
-  L              = "L",
-  Teff           = "Teff",
-  Fe.H           = "Fe/H",
-  Dnu_median     = "<Δν>",
-  Dnu            = "<Δν>",
-  Dnu0_median    = "<Δν₀>",
-  Dnu0           = "<Δν₀>",
-  dnu02_median   = "<δν₀₂>",
-  dnu02          = "<δν₀₂>",
-  r_sep02_median = "<r₀₂>",
-  r02            = "<r₀₂>",
-  r_avg01_median = "<r₀₁>",
-  r01            = "<r₀₁>",
-  dnu13_median   = "<δν₁₃>",
-  dnu13          = "<δν₁₃>",
-  r_sep13_median = "<r₁₃>",
-  r13            = "<r₁₃>",
-  r_avg10_median = "<r₁₀>",
-  r10            = "<r₁₀>"
-)
 
 Z_levels <- list(
   M      = seq(0.7, 1.3, 0.1),
@@ -711,17 +688,6 @@ plot_lamb_brunt <- function(DF, ...,
     for (ell in 1:3) lines(DF$radius/max(DF$radius), lambs[[ell]], lty=ell+1)
     legend("topright", lty=c(1,2), #pch=c(1, NA),
         legend=c("Brunt", "Lamb"), bty='n')
-}
-
-plot_HR <- function(DF, ...,
-        text.cex=1, mgp=utils.mgp, font=utils.font) {
-    plot(DF$log_Teff, DF$log_L,
-        type='l', axes=F, tcl=0,
-        xlim=rev(range(DF$log_Teff)),
-        xlab=expression("Temperature"~log(T["eff"]/K)),
-        ylab=expression("Luminosity"~log(L/L["☉"])))
-    magaxis(side=1:4, family=font, tcl=0.25, labels=c(1,1,0,0), las=1,
-        mgp=mgp, cex.axis=text.cex)
 }
 
 

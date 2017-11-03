@@ -26,7 +26,7 @@ get_square_Ks <- function(modes, K, x0=NULL) {
         data.frame(do.call(cbind, Map(function(mode_j) {
             if (mode_i > mode_j) return(0)
             K_ij.integrand <- K[[modes[mode_i]]] * K[[modes[mode_j]]]
-            MOLA <- if (!is.null(x0)) (K$x - x0)**2 else 1
+            MOLA <- if (!is.null(x0)) 12*(K$x - x0)**2 else 1
             sintegral(K$x, K_ij.integrand * MOLA)$value
         }, mode_j=1:length(modes))))
     }, mode_i=1:length(modes)))
@@ -49,7 +49,8 @@ get_knots <- function(x, num.knots, degree=4) {
       rep(max(x), degree))
 }
 
-get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
+get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4,
+        BG_pows=c(-2, 2)) {
     if (num.knots > 0) nu.knots <- get_knots(nus$nu.x, num.knots, degree=nu.deg)
     do.call(plyr:::rbind.fill, with(nus, Map(function(ell, nn, nu, E, Q_norm) {
         mode <- paste0('l.', ell, '_', 'n.', nn)
@@ -57,7 +58,7 @@ get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
         if (use.BG) {
             BG_surfs <- data.frame(do.call(cbind, Map(function(pow) 
                 ifelse(nu != 0, (nu/nu_ac)**pow / E, 0), # Q_norm, 0), #
-                pow=c(-2, 2))))
+                pow=BG_pows)))
             names(BG_surfs) <- paste0('a_', 1:length(BG_surfs)) 
         } else BG_surfs <- NULL 
         
@@ -83,13 +84,14 @@ get_F_surf <- function(nus, use.BG=T, num.knots=0, nu_ac=5000, nu.deg=4) {
 }
 
 get_A.mat <- function(cross.term, error.sup, modes, nus, F_surf, 
-        K=NULL, C=NULL, K_ijs=NULL, C_ijs=NULL, K.ints=NULL, x0=NULL) {
+        K=NULL, C=NULL, K_ijs=NULL, C_ijs=NULL, K.ints=NULL, x0=NULL,
+        verbose=T) {
     if (length(K.ints) <= 1) {
-        cat("Calculating integrals\n")
+        if (verbose) cat("Calculating integrals\n")
         K.ints <- get_K.ints(modes, K)
     }
     if (length(K_ijs) <= 1 || length(C_ijs) <= 1) {
-        cat("Calculating square matrices\n")
+        if (verbose) cat("Calculating square matrices\n")
         K_ijs <- get_square_Ks(modes, K, x0)
         C_ijs <- get_square_Ks(modes, C, x0)
     }
@@ -161,6 +163,44 @@ avg_across_cols <- function(mat.list, var.name, num.cols) {
     }, ii=1:num.cols))
 }
 
+get_errbar <- function(avg_kern, K.x) {
+    cumulative <- cumtrapz(K.x, avg_kern)
+    hm <- max(avg_kern)/2 # half maximum
+    fwhm.mid <- K.x[which.max(avg_kern)]
+    
+    to.left <- K.x < fwhm.mid
+    negs.left <- which(avg_kern[to.left] < 0)
+    if (length(negs.left)==0) negs.left <- 1
+    left <- K.x[to.left][max(negs.left)]
+    if (is.na(left)) left <- 0
+    
+    to.right <- K.x > fwhm.mid
+    negs.right <- which(avg_kern[to.right] < 0)
+    if (length(negs.right)==0) negs.right <- length(to.right)
+    right <- K.x[to.right][min(negs.right)]
+    if (is.na(right)) right <- 1
+    
+    inside <- K.x > left & K.x < right
+    inside.left <- inside & to.left
+    inside.right <- inside & to.right
+    fwhm.left <- if (!any(inside.left)) 0 else
+        K.x[inside.left][which.min((avg_kern[inside.left]-hm)**2)]
+    fwhm.right <- if (!any(inside.right)) 1 else 
+        K.x[inside.right][which.min((avg_kern[inside.right]-hm)**2)]
+    
+    data.frame(r.first_q=K.x[which.min(cumulative<=0.25)], 
+               r.median=K.x[which.min(cumulative<=0.5)], 
+               r.third_q=K.x[which.min(cumulative<=0.75)],
+               fwhm.left=fwhm.left, 
+               fwhm.mid=fwhm.mid, 
+               fwhm.right=fwhm.right)
+}
+
+get_errbars <- function(avg_kerns, K.x) {
+    do.call(rbind, apply(avg_kerns, 2, function(avg_kern) 
+        get_errbar(avg_kern=avg_kern, K.x=K.x)))
+}
+
 invert.MOLA <- function(rs, cross.term, error.sup, modes, nus, K, C, 
         K.ints, F_surf, MOLA.K_ijs=NULL, MOLA.C_ijs=NULL, verbose=F) {
     if (verbose) cat("MOLA inversion\n")
@@ -214,10 +254,11 @@ invert.SOLA <- function(rs, cross.term, error.sup, modes, nus, K, C,
 }
 
 invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
-        use.BG=T, num.knots=0, MOLA.K_ijs=NULL, MOLA.C_ijs=NULL, 
+        use.BG=T, BG_pows=c(-2, 2), num.knots=0, 
+        MOLA.K_ijs=NULL, MOLA.C_ijs=NULL, 
         targ.kern.type='mod_Gauss', targ_kerns=NULL,
         num_realizations=1, r_f=0.2, perturb=T, F_surf=NULL,
-        dM=0, dR=0, subtract.mean=T, kern.interp=NULL,
+        dM=0, dR=0, subtract.mean=T, kern.interp.xs=NULL,
         get_avg_kerns=T, get_cross_kerns=T, verbose=F, ...) {
     modes <- model$modes
     nus <- model$nus
@@ -257,16 +298,23 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
                 nus.copy$nu.y, nus.copy$dnu) 
         }
         
-        nux <- nus$nu.x * sqrt( model$R**3       /  model$M)
-        nuy <- nus$nu.y * sqrt((model$R - dR)**3 / (model$M - dM))
+        nondim   <- sqrt( model$R**3       / (cgrav *  model$M) )
+        nondim.y <- sqrt((model$R - dR)**3 / (cgrav * (model$M - dM)))
+        nux <- nus$nu.x * nondim
+        nuy <- nus$nu.y * nondim.y
         nus$r.diff <- (nux - nuy) / nux
+        nus$nu.x <- nux
+        nus$nu.y <- nuy
+        nus$dnu  <- nus$dnu * nondim.y
         
         if (subtract.mean) {
             nus$r.diff <- nus$r.diff - weighted.mean(nus$r.diff, 1/nus$dnu) 
         }
         
         if (is.null(F_surf)) F_surf <- get_F_surf(nus, 
-            num.knots=num.knots, use.BG=use.BG, nu_ac=model$nu_ac)
+            num.knots=num.knots, use.BG=use.BG, 
+            nu_ac=1, #model$nu_ac * nondim, 
+            BG_pows=BG_pows)
         
         c.vecs <- if (is.null(width)) { 
             invert.MOLA(rs=rs, 
@@ -289,6 +337,10 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         inv.coefs <- as.matrix(c.vecs[1:nrow(nus),]) 
         df_dr <- colSums(sweep(inv.coefs, MARGIN=1, nus$r.diff, `*`))
         
+        #print(inv.coefs %*% F_surf)
+        
+        nus <- nus.copy
+        
         list(c.vecs=c.vecs,
              inv.coefs=inv.coefs,
              df_dr=df_dr)
@@ -308,21 +360,12 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
             (nus$dnu/nus$nu.y)**2, `*`)))
     }
     
-    #result <- cbind(rs, df_dr, df_dr.mean, err)
-    
-    #avg_kerns <- avg_across_cols(realizations, 'avg_kerns', length(rs))
-    #cross_kerns <- avg_across_cols(realizations, 'cross_kerns', length(rs))
-    #d.avg_kerns <- do.call(cbind, parallelMap(function(ii) {
-    #    sd(sapply(realizations, function(r) max(r$avg_kerns[,ii])))
-    #}, ii=1:length(rs)))
-    
-    #avg_kerns <- if (get_avg_kerns)
     cross_kerns <- if (get_cross_kerns) {
         do.call(cbind, parallelMap(function(coefs_j) {
             kern <- get_averaging_kernel(coefs=inv.coefs[,coefs_j], modes=modes,
                 K=model$k2)
-            if (!is.null(kern.interp)) {
-                kern <- splinefun(model$k2$x, kern)(kern.interp)
+            if (!is.null(kern.interp.xs)) {
+                kern <- splinefun(model$k2$x, kern)(kern.interp.xs)
             }
             kern
         }, coefs_j=1:ncol(inv.coefs))) 
@@ -335,46 +378,15 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
                 K=model$k1)
         }, coefs_j=1:ncol(inv.coefs))) #else NULL
         
-        errbars <- do.call(rbind, apply(avg_kerns, 2, function(avg_kern) {
-            K.x <- model$k1$x
-            cumulative <- cumtrapz(K.x, avg_kern)
-            hm <- max(avg_kern)/2 # half maximum
-            fwhm.mid <- K.x[which.max(avg_kern)]
-            
-            to.left <- K.x < fwhm.mid
-            negs.left <- which(avg_kern[to.left] < 0)
-            if (length(negs.left)==0) negs.left <- 1
-            left <- K.x[to.left][max(negs.left)]
-            if (is.na(left)) left <- 0
-            
-            to.right <- K.x > fwhm.mid
-            negs.right <- which(avg_kern[to.right] < 0)
-            if (length(negs.right)==0) negs.right <- length(to.right)
-            right <- K.x[to.right][min(negs.right)]
-            if (is.na(right)) right <- 1
-            
-            inside <- K.x > left & K.x < right
-            inside.left <- inside & to.left
-            inside.right <- inside & to.right
-            fwhm.left <- if (!any(inside.left)) 0 else
-                K.x[inside.left][which.min((avg_kern[inside.left]-hm)**2)]
-            fwhm.right <- if (!any(inside.right)) 1 else 
-                K.x[inside.right][which.min((avg_kern[inside.right]-hm)**2)]
-            data.frame(r.first_q=K.x[which.min(cumulative<=0.25)], 
-                       r.median=K.x[which.min(cumulative<=0.5)], 
-                       r.third_q=K.x[which.min(cumulative<=0.75)],
-                       fwhm.left=fwhm.left, 
-                       fwhm.mid=fwhm.mid, 
-                       fwhm.right=fwhm.right)
-        }))
+        errbars <- get_errbars(avg_kerns=avg_kerns, K.x=model$k1$x)
         
         m.f1 <- model$f1.spl(errbars$fwhm.mid)
         
-        if (!is.null(kern.interp)) {
+        if (!is.null(kern.interp.xs)) {
             avg_kerns <- do.call(cbind, parallelMap(function(coefs_j) {
                 kern <- get_averaging_kernel(coefs=inv.coefs[,coefs_j], 
                     modes=modes, K=model$k1)
-                splinefun(model$k1$x, kern)(kern.interp)
+                splinefun(model$k1$x, kern)(kern.interp.xs)
             }, coefs_j=1:ncol(inv.coefs))) #else NULL
         }
         
@@ -383,12 +395,6 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
         errbars <- NULL
         m.f1 <- model$f1.spl(rs)
     }
-    #
-    #} else {
-    #    avg_kerns <- NULL
-    #    errbars <- NULL
-    #    m.f1 <- model$f1.spl(rs)    
-    #}
     
     f <- m.f1 - df_dr * m.f1
     f.err <- err * abs(m.f1)
@@ -419,13 +425,68 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
          cross_kerns=cross_kerns, 
          targ_kerns=if (!is.null(width)) targ_kerns else NULL, 
          targ.kern.type=targ.kern.type, 
+         result=as.data.frame(result))
+}
+
+
+get_lists_mean <- function(quantity_name, lists) {
+    sapply(lists, function(inversion.list) {
+        results <- sapply(inversion.list, function(result) 
+            result[[quantity_name]])
+        apply(results, 1, mean)
+    })
+}
+
+get_kernel_lists_mean <- function(kernel.lists) {
+    get_radius <- function(radius_i) {
+        get_kerns <- function(trial_j) {
+            trial. <- kernel.lists[[trial_j]]
+            get_kern <- function(ref_mod_k) trial.[[ref_mod_k]][,radius_i]
+            do.call(cbind, Map(get_kern, ref_mod_k=1:length(trial.)))
+        }
+        kerns <- do.call(cbind, Map(get_kerns, trial_j=1:length(kernel.lists)))
+        apply(kerns, 1, mean)
+    }
+    num_targ_rs <- ncol(kernel.lists[[1]][[1]])
+    do.call(cbind, Map(get_radius, radius_i=1:num_targ_rs))
+}
+
+lists_to_inversion <- function(model, rs, 
+        inv.lists, avg.kerns.lists, cross.lists, 
+        inv.params=NULL, kern.interp.xs=NULL) {
+    
+    avg_kerns <- get_kernel_lists_mean(avg.kerns.lists)
+    cross_kerns <- get_kernel_lists_mean(cross.lists)
+    errbars <- get_errbars(avg_kerns=avg_kerns, 
+        K.x=if (!is.null(kern.interp.xs)) kern.interp.xs else model$k1$xs)
+    
+    m.f <- model$f1.spl(errbars$fwhm.mid)
+    
+    f.means <- get_lists_mean('f', lists=inv.lists)
+    f.err <- apply(f.means, 1, sd)
+    f.err[is.na(f.err)] <- 0
+    f <- apply(f.means, 1, mean)
+    
+    df_dr <- (m.f - f) / m.f
+    err <- abs(df_dr) * f.err / abs(m.f-f)
+    
+    result <- cbind(rs, df_dr, err, f, f.err, errbars)
+    
+    if ('d.f1.spl' %in% names(model)) {
+        result <- cbind(result, data.frame(true_df_dr=model$d.f1.spl(rs)))
+    }
+    
+    list(params=sapply(inv.params, mean),
+         k.pair=model$k.pair, 
+         #c.vecs=c.vecs, 
+         #inv.coefs=inv.coefs, 
+         avg_kerns=avg_kerns, 
+         cross_kerns=cross_kerns, 
+         #targ_kerns=if (!is.null(width)) targ_kerns else NULL, 
+         #targ.kern.type=targ.kern.type, 
          result=result)
 }
 
-#minimize_dist <- function(model, rs, use.BG=T, num.knots=0,
-#        initial_params=c(100, 100, 0.01), width.bounds=c(0.001, 0.1),
-#        dM=0, dR=0, d.f1.true=T, subtract.mean=F, 
-#        num_realizations=1, perturb=F, targ.kern.type='mod_Gauss') {
 minimize_dist <- function(model, rs, 
         initial_params=c(100, 100, 0.01), width.bounds=c(0.001, 0.1), 
         abstol=1e-5, reltol=1e-5, ...) {
@@ -478,62 +539,17 @@ minimize_dist <- function(model, rs,
             num.knots=num.knots,
             MOLA.K_ijs=MOLA.K_ijs,
             MOLA.C_ijs=MOLA.C_ijs)))
-        #inversion <- tryCatch({
-            #invert.OLA(model=model, rs=rs, 
-            #    cross.term=cross.term, error.sup=error.sup, 
-            #    width=width, use.BG=use.BG, num.knots=num.knots,
-            #    get_avg_kerns=T, get_cross_kerns=F, 
-            #    targ.kern.type=targ.kern.type,
-            #    num_realizations=num_realizations, 
-            #    perturb=perturb, subtract.mean=subtract.mean, 
-            #    dM=dM, dR=dR,
-            #    MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs)
-        #    }, error = function(e) 
-        #        list(result=data.frame(fwhm.mid=0, df_dr=Inf)))
-        
-        #if (any(inversion$result$err > max.err)) {
-        #    cat("Errors out of bound:\n")
-        #    cat(inversion$result$err)
-        #    cat('\n')
-        #    return(Inf)
-        #}
-        
-        #beta.max <- apply(inversion$cross_kerns, 2, function(x) max(abs(x)))
-        #cat("Cross term kernel maxs:\n")
-        #cat(fivenum(beta.max))
-        #cat("\n")
-        
-        #in.max <- sapply(1:length(rs), function(r_i) {
-        #    avg.kern <- inversion$avg_kerns[,r_i]
-        #    inside <- model$k1$x >= (rs[r_i] - inversion$params$width) &
-        #               model$k1$x <= (rs[r_i] + inversion$params$width)
-        #    max(abs(avg.kern[inside]))
-        #})
-        #surf.max <- sapply(1:length(rs), function(r_i) {
-        #    avg.kern <- inversion$avg_kerns[,r_i]
-        #    surf <- model$k1$x > 0.9
-        #    max(abs(avg.kern[surf]))
-        #})
-        #cat("Averaging kernel in per out:\n")
-        #cat(fivenum(in.max / beta.max))
-        #cat("\n")
-        #cat(fivenum(in.max / surf.max))
-        #cat("\n")
         
         result <- inversion$result 
         
         chi2 <- with(result, 
             sum( ( (d.f1.spl(fwhm.mid) - df_dr)**2 ) )
-            #sum( ( (d.f1.spl(rs) - df_dr)**2 ) )
         )
-        
-        #chi2 <- sum((beta.max + surf.max) / in.max + inversion$result$err)
         
         cat(paste("Result:", chi2, '\n'))
         chi2
-    }, control=list(abstol=abstol, reltol=reltol))
+    }, control=list(trace=999, abstol=abstol, reltol=reltol))
     cat("Optimization complete\n")
-    #, control=list(trace=999, parscale=c(1000, 0.1, 100)))
     best_params <- 10**optim_result$par
     if (length(best_params)>=4) args.$num.knots=best_params[4]
     inversion <- do.call(invert.OLA, c(args., list(
@@ -543,17 +559,6 @@ minimize_dist <- function(model, rs,
             MOLA.K_ijs=MOLA.K_ijs,
             MOLA.C_ijs=MOLA.C_ijs
         )))
-    #inversion <- invert.OLA(model=model, rs=rs, 
-    #           cross.term=best_params[1], 
-    #           error.sup=best_params[2], 
-    #           width=if (length(best_params) >= 3) 
-    #               best_params[3] else NULL, 
-    #           use.BG=use.BG, 
-    #           num.knots=if (length(best_params)>=4) 
-    #               best_params[4] else num.knots, 
-    #           targ.kern.type=targ.kern.type,
-    #           dM=dM, dR=dR,
-    #           MOLA.K_ijs=MOLA.K_ijs, MOLA.C_ijs=MOLA.C_ijs) 
     inversion$score <- optim_result$value
     inversion
 }
@@ -575,3 +580,15 @@ minimize_dist_individual <- function(model, rs, use.BG=T, num.knots=0,
     }, name=names(inversion.results[[1]]))
 }
 
+print_latex_table <- function(inversion) {
+    result <- inversion$result
+    for (ii in 1:nrow(result)) {
+        with(result[ii,], cat(paste(paste(
+                rs, fwhm.mid, 
+                signif((fwhm.right-fwhm.left)/2, 5),
+                signif(df_dr, 5), signif(err, 5),
+                signif(f/10**15, 5), 
+                signif(f.err/10**15, 5),
+            sep=' & '), "\\\\ \n")))
+    }
+}

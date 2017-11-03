@@ -18,7 +18,13 @@ if (dir.exists(filename)) {
     DF <- read.table(filename, header=1, skip=5)
 }
 
+solar_Teff <- if (length(args)>1) as.numeric(args[2]) else 5777
+
 # clip PMS
+if (!('log_L' %in% names(DF))) {
+    DF$log_L <- log10(DF$luminosity)
+}
+
 decreasing_L <- which(diff(DF$log_L) < 0 & DF$center_h1[-1] > 0.6)
 if (any(decreasing_L)) {
     pms <- max(decreasing_L)
@@ -38,8 +44,8 @@ magaxis(side=1:4, family='Palatino', tcl=-0.25, labels=c(1,1,0,0), las=1,
     logpretty=F)#, unlog='xy')
 axis(3, at=log10(c(41000, 31000, 9500, 7240, 5920, 5300, 3850)),
     labels=c("O", "B", "A", "F", "G", "K", "M"))
-points(log10(5777), 0)
-points(log10(5777), 0, pch=20, cex=0.1)
+points(log10(solar_Teff), 0)
+points(log10(solar_Teff), 0, pch=20, cex=0.1)
 
 points(DF$log_Teff[1], DF$log_L[1], pch=20, cex=0.5)
 ZAMS <- which(10**DF$log_LH / 10**DF$log_L > 0.9)[1]

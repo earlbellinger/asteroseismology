@@ -30,9 +30,9 @@ else:
     simulations_filename = os.path.join('..', 'forward', 'simulations.dat')
 
 bname = os.path.basename(simulations_filename).split('.')[0]
-plot_dir = os.path.join('learn-rox', 'plots-'+bname)
-cov_dir = os.path.join('learn-rox', 'covs-'+bname)
-table_dir = os.path.join('learn-rox', 'tables-'+bname)
+plot_dir = os.path.join('learn-benard', 'plots-'+bname)
+cov_dir = os.path.join('learn-benard', 'covs-'+bname)
+table_dir = os.path.join('learn-benard', 'tables-'+bname)
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
 
@@ -100,7 +100,7 @@ y_latex_short = {
     "mass_cc": r"M$_{\mathrm{cc}}$"
 }
 
-y_init = ['M', 'Y', 'Z']#, 'alpha', 'overshoot', 'diffusion']
+y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
 y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'Teff']
 
 def train_regressor(data, X_columns, y_show=y_init+y_curr):
@@ -401,7 +401,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 ################################################################################
 ### Start ######################################################################
 ################################################################################
-process_dir()
+#process_dir()
+process_dir('benard')
 #process_dir('legacyRox2')
 #for directory in [f for f in os.listdir(perturb_dir) 
 #                  if not re.match(perturb_pattern, f)]:

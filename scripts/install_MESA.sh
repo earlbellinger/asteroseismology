@@ -9,8 +9,8 @@
 ### Variables ###
 #################
 # Adjust these if you want a different version 
-MESA_VER=9793
-SDK_VER=20170802
+MESA_VER=10000
+SDK_VER=20170921
 
 # Adjust this if you want to use more than one processor
 export OMP_NUM_THREADS=1 

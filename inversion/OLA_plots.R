@@ -11,75 +11,86 @@ library(RColorBrewer)
 param.names <- c(bquote(beta), bquote(mu), bquote(Delta[f]))
 param.strs <- c("beta", "mu", "deltaf")
 
-plot_inversion_all <- function(model, inversion, k.pair, should.cull=F,
-        legend.spot='topright', mode.set=mode.set, ylim=NULL, xlim=NULL,
-        normalize=F, sampler=T, plot_nondim=T,
-        ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
-    par(mfrow=c(3,1))
-    plot_inversion(model=model, inversion=inversion, k.pair=k.pair, 
-        should.cull=should.cull, legend.spot=legend.spot, mode.set=mode.set,
-        normalize=normalize, sampler=sampler, plot_nondim=plot_nondim,
-        ylim=ylim, xlim=xlim, text.cex=text.cex, mgp=mgp, mar=mar, font=font)
-    plot_kernels(model=model, inversion=inversion, cross=F, 
-        should.cull=should.cull, legend.spot=legend.spot, normalize=normalize,
-        xlim=xlim, make.inset=F, sampler=sampler,
-        text.cex=text.cex, mgp=mgp, mar=mar, font=font)
-    plot_kernels(model=model, inversion=inversion, cross=T, 
-        xlim=xlim, make.inset=F, sampler=sampler,
-        should.cull=should.cull, legend.spot=legend.spot, normalize=normalize,
-        text.cex=text.cex, mgp=mgp, mar=mar, font=font)
+# plot_inversion_all <- function(model, inversion, k.pair, should.cull=F,
+#         legend.spot='topright', mode.set=mode.set, ylim=NULL, xlim=NULL,
+#         normalize=F, sampler=T, plot_nondim=T,
+#         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
+#     par(mfrow=c(3,1))
+#     plot_inversion(model=model, inversion=inversion, k.pair=k.pair, 
+#         should.cull=should.cull, legend.spot=legend.spot, mode.set=mode.set,
+#         normalize=normalize, sampler=sampler, plot_nondim=plot_nondim,
+#         ylim=ylim, xlim=xlim, text.cex=text.cex, mgp=mgp, mar=mar, font=font)
+#     plot_kernels(model=model, inversion=inversion, cross=F, 
+#         should.cull=should.cull, legend.spot=legend.spot, normalize=normalize,
+#         xlim=xlim, make.inset=F, sampler=sampler,
+#         text.cex=text.cex, mgp=mgp, mar=mar, font=font)
+#     plot_kernels(model=model, inversion=inversion, cross=T, 
+#         xlim=xlim, make.inset=F, sampler=sampler,
+#         should.cull=should.cull, legend.spot=legend.spot, normalize=normalize,
+#         text.cex=text.cex, mgp=mgp, mar=mar, font=font)
+# }
+
+plot_inversion_all <- function(model, inversion, 
+        wide=F, tall=F, xlim=c(0, 0.45), 
+        kern.interp.xs=NULL,
+        inversion_ylim=NULL, 
+        avg_kern_ylim=c(-5, 18), 
+        make_xlabs=c(T,T,T),
+        make_ylabs=c(T,T,T),
+        cross_kern_ylim=NULL, ...) {
+    args. <- c(as.list(environment()), list(...))
+    par(mfcol=c(1,3), oma=c(4,3,0,0), mar=c(0,0,0,0))
+    do.call(plot_inversion, c(args., list(
+            ylim=inversion_ylim,
+            make_xlab=make_xlabs[1],
+            make_ylab=make_ylabs[1])))
+    do.call(plot_kernels, c(args., list(
+            cross=F, 
+            ylim=avg_kern_ylim,
+            make_xlab=make_xlabs[2],
+            make_ylab=make_ylabs[2])))
+    do.call(plot_kernels, c(args., list(cross=T, 
+            ylim=cross_kern_ylim,
+            make_xlab=make_xlabs[3],
+            make_ylab=make_ylabs[3])))
 }
 
 
 make_plots_inversion_all <- function(model, inversion, k.str=NULL, 
-        wide=F, tall=F, avg_kern_ylim=c(-7, 25), xlim=c(0, 0.45), ...) {
+        wide=F, tall=F, avg_kern_ylim=c(-5, 18), xlim=c(0, 0.45),  
+        make_xlabs=c(T,T,T),
+        make_ylabs=c(T,T,T),
+        cross_kern_ylim=NULL, inversion_ylim=NULL, ...) {
     args. <- c(as.list(environment()), list(...))
     if (is.null(k.str)) {
-        k.str <- paste0('-k_', model$k.pair$short, 
+        k.str <- paste0(
+            '-k_', model$k.pair$short, 
             '_r-', model$name,
             '_t-', model$target.name)
     }
     do.call(make_plots, c(args., list(plot_f=plot_inversion, 
+            ylim=inversion_ylim,
+            make_xlab=make_xlabs[1],
+            make_ylab=make_ylabs[1], 
             filename=paste0('inversion', k.str))))
     do.call(make_plots, c(args., list(plot_f=plot_kernels, cross=F, 
-            ylim=avg_kern_ylim, 
+            ylim=avg_kern_ylim,
+            make_xlab=make_xlabs[2],
+            make_ylab=make_ylabs[2], 
             filename=paste0('inversion-avg', k.str))))
     do.call(make_plots, c(args., list(plot_f=plot_kernels, cross=T, 
+            ylim=cross_kern_ylim,
+            make_xlab=make_xlabs[3],
+            make_ylab=make_ylabs[3], 
             filename=paste0('inversion-cross', k.str))))
 }
 
-if (F) {
-make_plots_inversion_all <- function(model, inversion, k.pair, k.str, mode.set, 
-        ylim=NULL, xlim=NULL, should.cull=F, legend.spot='topright', 
-        cross.inset=NULL, sampler=T, normalize=F, plot_nondim=T, log='', 
-        avg_kern_ylim=c(-7, 25), 
-        use.cairo=F, font="CM Roman") {
-    make_plots(plot_inversion, paste0('inversion', k.str),
-               model=model, inversion=inversion, k.pair=k.pair, 
-               mode.set=mode.set, ylim=ylim, xlim=xlim, normalize=normalize,
-               should.cull=should.cull, legend.spot=legend.spot, 
-               sampler=sampler, log=log, 
-               wide=F, tall=F, plot_nondim=plot_nondim,
-               font=font, use.cairo=use.cairo)
-    make_plots(plot_kernels, paste0('inversion-avg', k.str),
-               model=model, inversion=inversion, cross=F, normalize=normalize,
-               xlim=xlim, ylim=avg_kern_ylim,
-               should.cull=should.cull, legend.spot=legend.spot,
-               sampler=sampler, log=log, 
-               wide=F, tall=F, font=font, use.cairo=use.cairo)
-    make_plots(plot_kernels, paste0('inversion-cross', k.str),
-               model=model, inversion=inversion, cross=T, normalize=normalize,
-               xlim=xlim, ylim=c(-0.2, 1),
-               should.cull=should.cull, legend.spot=legend.spot, 
-               cross.inset=cross.inset,
-               sampler=sampler, log=log, 
-               wide=F, tall=F, font=font, use.cairo=use.cairo)
-}
-}
 
 plot_inversion <- function(model, inversion, 
         plot_nondim=F, sampler=T, should.cull=F, 
         xlim=NULL, ylim=NULL, legend.spot=NULL, log='', 
+        col.pal=NULL, caption=NULL, 
+        make_xlab=T, make_ylab=T,
         log.xlim.0=10e-5, 
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
     
@@ -107,7 +118,7 @@ plot_inversion <- function(model, inversion,
       result$df_dr+result$err, result$df_dr-result$err)
       #c(-0.15, 0.07),#
     
-    plot(NA, axes=F, log=log, xaxs='i',
+    plot(NA, axes=F, log=log, xaxs='i', yaxs='i',
          xlim=xlim, #c(0, 0.4),c(0.05, 0.35),#
          ylim=ylim,
          xlab="",
@@ -123,13 +134,15 @@ plot_inversion <- function(model, inversion,
     }
     
     abline(h=0, lty=2, col='black')
-    col.pal <- c(blue)
+    #col.pal <- c(blue)
     #col.pal <- adjustcolor(c('#f97100', blue, 'black', red, "#ffe599"), 
     #    alpha.f=0.8)
     #col.pal <- c('#f97100', blue, 'black', red, "#33a02c")
-    col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
-    if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
-    col.pal <- adjustcolor(col.pal, alpha.f=0.95)
+    if (is.null(col.pal)) {
+        col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
+        if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
+        col.pal <- adjustcolor(col.pal, alpha.f=0.95)
+    }
     lty <- c(1,2,3,4)
     
     with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
@@ -140,15 +153,19 @@ plot_inversion <- function(model, inversion,
         col=col.pal))
     with(result, points(fwhm.mid, df_dr, col=1, pch=20, cex=1))
     
-    title(xlab=expression("Radius"~r/R))
-    par(mgp=mgp+c(0.5, 0, 0))
+    par(mgp=mgp-c(0.2, 0, 0))
+    if (make_xlab) title(xlab=expression("Radius"~r/R))
+    par(mgp=mgp+c(0.4, 0, 0))
     f1.exp <- inversion$k.pair$f1.exp
-    title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
+    if (make_ylab) title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
     
-    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
+    if (!is.null(caption)) legend('bottomleft', bty='n', cex=text.cex,
+        legend=caption, inset=c(-0.04, 0.02))
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
             las=1, mgp=mgp-c(0.5,0.15,0), 
             family=font, cex.axis=text.cex)
-    magaxis(side=2, tcl=0.25, labels=1, 
+    magaxis(side=2, tcl=0.25, labels=make_ylab, 
             las=1, mgp=mgp+c(1,0,0),
             family=font, cex.axis=text.cex)
 }
@@ -223,6 +240,175 @@ plot_inversions <- function(model, inversions, k.pair,
     title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
 }
 
+
+plot_ref_mods <- function(model.list, inversion, ref.mod=NULL, 
+        sampler=T, xlim=NULL, ylim=NULL, legend.spot=NULL, log='', 
+        col.pal=NULL, log.xlim.0=10e-5, c.factor=10**15, 
+        make_ylab=T, caption=NULL,
+        ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, 
+        font="Palatino Linotype") {
+    
+    par(mar=mar+c(-0.3,-0.2,0,0))
+    
+    result <- inversion$result[sampler,]
+    
+    if (is.null(xlim)) xlim <- range(result$fwhm.left, result$fwhm.right)
+    if (grepl('x', log, ignore.case=T) && xlim[1]==0) xlim[1] <- log.xlim.0
+    if (is.null(ylim)) ylim <- range(
+      result$f+result$f.err, 
+      result$f-result$f.err) / c.factor
+    
+    plot(NA, axes=F, log=log, xaxs='i', yaxs='i',
+         xlim=xlim, 
+         ylim=ylim,
+         xlab="",
+         ylab="")
+    
+    abline(h=0, lty=2, col='black')
+    #col.pal <- c(blue)
+    #col.pal <- adjustcolor(c('#f97100', blue, 'black', red, "#ffe599"), 
+    #    alpha.f=0.8)
+    #col.pal <- c('#f97100', blue, 'black', red, "#33a02c")
+    if (is.null(col.pal)) {
+        col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
+        if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
+        col.pal <- adjustcolor(col.pal, alpha.f=0.95)
+    }
+    lty <- c(1,2,3,4)
+    
+    for (model in model.list) {
+        lines(model$r, model$f1 / c.factor, lwd=1, col='darkgray')
+    }
+    
+    
+    if (!is.null(ref.mod)) {
+        lines(ref.mod$r, ref.mod$f1 / c.factor, lwd=1, col=1)
+    }
+    
+    
+    with(result, arrows(fwhm.left, f / c.factor, fwhm.right, f / c.factor, 
+        code=3, angle=90, length=0.02, lwd=2, lty=1,
+        col=col.pal))
+    with(result, arrows(fwhm.mid, (f+f.err) / c.factor, 
+                        fwhm.mid, (f-f.err) / c.factor, 
+        code=3, angle=90, length=0.02, lwd=2, lty=1,
+        col=col.pal))
+    with(result, points(fwhm.mid, f / c.factor, col=col.pal, pch=20, cex=1.25))
+    with(result, points(fwhm.mid, f / c.factor, col=1, pch=20, cex=1))
+    
+    par(mgp=mgp+c(-0.2, 0, 0))
+    title(xlab=expression("Radius"~r/R))
+    par(mgp=mgp+c(-0.2, 0, 0))
+    if (make_ylab) {
+        f1.exp <- inversion$k.pair$f1.exp
+        title(ylab=bquote(atop(.(inversion$k.pair$f1.name), 
+            .(inversion$k.pair$f1.exp) / 
+            (10^15 ~ .(inversion$k.pair$f1.units)))))
+    }
+    #bquote(delta*.(f1.exp)/.(f1.exp)))
+    
+    if (!is.null(caption)) legend('bottomleft', bty='n', cex=text.cex,
+        legend=caption, inset=c(-0.04, 0.02))
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
+            las=1, mgp=mgp-c(0.5,0.15,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=0.25, labels=make_ylab, 
+            las=1, mgp=mgp+c(1,0,0),
+            family=font, cex.axis=text.cex)
+}
+
+
+
+plot_ref_rel_diffs <- function(model.list, 
+        xlim, ylim, col.pal, 
+        rs, inv.lists, avg.kerns.lists, 
+        cross.lists, inv.params, kern.interp.xs, 
+        make_ylab=T, caption=NULL,
+        ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, 
+        font="Palatino Linotype") {
+    
+    #text.cex <- text.cex*1.25
+    #par(cex.lab=text.cex, mar=mar+c(-0.5, -0.5, 0, 0))
+    
+    #result <- inversion$result[sampler,]
+    
+    #if (is.null(xlim)) xlim <- range(result$fwhm.left, result$fwhm.right)
+    #if (grepl('x', log, ignore.case=T) && xlim[1]==0) xlim[1] <- log.xlim.0
+    #if (is.null(ylim)) ylim <- range(
+    #  result$f+result$f.err, 
+    #  result$f-result$f.err) / c.factor
+    
+    plot(NA, axes=F, xaxs='i', yaxs='i',
+         xlim=xlim, 
+         ylim=ylim,
+         xlab="",
+         ylab="")
+    
+    abline(h=0, lty=2, col='black')
+    #col.pal <- c(blue)
+    #col.pal <- adjustcolor(c('#f97100', blue, 'black', red, "#ffe599"), 
+    #    alpha.f=0.8)
+    #col.pal <- c('#f97100', blue, 'black', red, "#33a02c")
+    if (is.null(col.pal)) {
+        col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
+        if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
+        col.pal <- adjustcolor(col.pal, alpha.f=0.95)
+    }
+    lty <- c(1,2,3,4)
+    
+    
+    
+    for (model_i in 1:length(model.list)) {
+        model <- model.list[[model_i]]
+        
+        inversion <- lists_to_inversion(model=model, rs=rs, 
+            inv.lists=inv.lists, avg.kerns.lists=avg.kerns.lists, 
+            cross.lists=cross.lists, inv.params=inv.params, 
+            kern.interp.xs=kern.interp.xs)
+        result <- inversion$result
+        
+        with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+            code=3, angle=90, length=0.02, lwd=2, lty=1,
+            col=adjustcolor(col.pal[model_i], alpha.f=0.75)))
+        with(result, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+            code=3, angle=90, length=0.02, lwd=2, lty=1,
+            col=adjustcolor(col.pal[model_i], alpha.f=0.75)))
+    }
+    
+    for (model_i in 1:length(model.list)) {
+        model <- model.list[[model_i]]
+        
+        inversion <- lists_to_inversion(model=model, rs=rs, 
+            inv.lists=inv.lists, avg.kerns.lists=avg.kerns.lists, 
+            cross.lists=cross.lists, inv.params=inv.params, 
+            kern.interp.xs=kern.interp.xs)
+        result <- inversion$result
+        with(result, points(fwhm.mid, df_dr, col=1, pch=20, cex=1))
+        with(result, points(fwhm.mid, df_dr, col=col.pal[model_i], 
+            pch=20, cex=0.5))
+    }
+    
+    par(mgp=mgp-c(0.2, 0, 0))
+    title(xlab=expression("Radius"~r/R))
+    par(mgp=mgp+c(0.5, 0, 0))
+    f1.exp <- inversion$k.pair$f1.exp
+    if (make_ylab) title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
+    
+    if (!is.null(caption)) legend('bottomleft', bty='n', cex=text.cex,
+        legend=caption, inset=c(-0.04, 0.02))
+    
+    magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0), 
+            las=1, mgp=mgp-c(0.5,0.15,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=0.25, labels=make_ylab, 
+            las=1, mgp=mgp+c(1,0,0),
+            family=font, cex.axis=text.cex)
+}
+
+
+
+
 plot_inversion_mean <- function(model, inversion.list,
                            ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
                            font="Times") {
@@ -288,19 +474,35 @@ plot_inversion_mean <- function(model, inversion.list,
 }
 
 plot_inversion_lists_mean <- function(model, inversion.lists, log='',
-        k.pair=NULL, xlim=NULL, ylim=NULL, sampler=T, legend.spot="topleft",
+        xlim=NULL, ylim=NULL, sampler=T, legend.spot="topleft",
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar,
         font="Times") {
-    #text.cex <- text.cex*1.25
-    #par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
+    
     par(mgp=mgp-c(0.5,0,0))
+    
+    #get_values <- function(row_i, value_name) {
+    #    c(sapply(inversion.lists, function(list.) {
+    #        sapply(list., function(model.) model.[row_i,][[value_name]])
+    #    }))
+    #}
+    
+    #num_rs <- nrow(inv.lists[[1]][[1]])
+    #rows <- 1:num_rs[sampler]
+    #w.f.means <- sapply(rows, function(row_i) {
+    #        fs <- get_values(row_i, 'f')
+    #        f.errs <- get_values(row_i, 'f.err')
+    #        weighted.mean(fs, 1/f.errs)
+    #    })
+    
+    #fs <- sapply(rows, function(row_i) get_values(row_i, 'f'))
+    #f.errs <- sapply(rows, function(row_i) get_values(row_i, 'f.err'))
+    #fs <- weighted.mean(fs, 1/f.errs)
     
     d.f1.true <- if ('d.f1.true' %in% names(model)) model$d.f1.true else NULL
     
     get_q <- function(q_name, lists=inversion.lists) {
         sapply(lists, function(inversion.list) {
             results <- sapply(inversion.list, function(result) result[[q_name]])
-            #mean(results)
             apply(results, 1, mean)
         })
     }
@@ -310,32 +512,21 @@ plot_inversion_lists_mean <- function(model, inversion.lists, log='',
     fwhm.mid <- get_q('fwhm.mid')
     fwhm.right <- get_q('fwhm.right')
     
-    w.f.stds <- sapply(inversion.lists, function(inversion.list) {
-        results <- sapply(inversion.list, function(result) result$f)
-        #sd(results)
-        apply(results, 1, sd)
-    })
+    #w.f.stds <- sapply(inversion.lists, function(inversion.list) {
+    #    results <- sapply(inversion.list, function(result) result$f)
+    #    apply(results, 1, sd)
+    #})
     
+    w.f.stds <- apply(w.f.means, 1, sd)[sampler]
+    w.f.stds[is.na(w.f.stds)] <- 0
     w.f.means <- apply(w.f.means, 1, mean)[sampler]
-    w.f.stds <- apply(w.f.stds, 1, mean)[sampler]
+    #w.f.stds <- apply(w.f.stds, 1, mean)[sampler]
+    #w.f.stds <- apply(w.f.stds, 1, mean)[sampler]
     fwhm.left <- apply(fwhm.left, 1, mean)[sampler]
     fwhm.mid <- apply(fwhm.mid, 1, mean)[sampler]
     fwhm.right <- apply(fwhm.right, 1, mean)[sampler]
     
-    m.f <- model$f1.spl(fwhm.mid)#[sampler]
-    
-    #for (r_i in length(inversion.lists[[1]][[1]]$rs)) {
-    #    fs <- sapply(inversion.lists, function(inversion.list) 
-    #        sapply(inversion.list, function(result) result$f[r_i]))
-    #    errs <- sapply(inversion.lists, function(inversion.list) 
-    #        sapply(inversion.list, function(result) result$f.err[r_i]))
-    #}
-    
-    #if (is.null(xlim)) xlim <- range(fwhm.left, fwhm.right)
-    
-    #if (is.null(ylim)) ylim <- range(
-    #    (m.f - w.f.means + w.f.stds) / m.f, 
-    #    (m.f - w.f.means - w.f.stds) / m.f) + c(-0.01, 0.01)
+    m.f <- model$f1.spl(fwhm.mid)
     
     if (is.null(xlim)) xlim <- range(fwhm.left, fwhm.right)
     if (is.null(ylim)) ylim <- range(if (!is.null(d.f1.true)) {
@@ -344,10 +535,9 @@ plot_inversion_lists_mean <- function(model, inversion.lists, log='',
                 } else 0, 
         (m.f - w.f.means + w.f.stds) / m.f, 
         (m.f - w.f.means - w.f.stds) / m.f) + c(-0.01, 0.01)
-      #c(-0.15, 0.07),#
     
     plot(NA, axes=F, log=log, xaxs='i',
-         xlim=xlim, #c(0, 0.4),c(0.05, 0.35),#
+         xlim=xlim, 
          ylim=ylim,
          xlab="",
          ylab="")
@@ -365,36 +555,6 @@ plot_inversion_lists_mean <- function(model, inversion.lists, log='',
         alpha.f=0.8)
     lty <- c(1,2,3,4)
     
-    if (F) {
-    d.f1.true <- if ('d.f1.true' %in% names(model)) model$d.f1.true else NULL
-    if (!is.null(d.f1.true)) { 
-        lines(model$r, d.f1.true, type='l', lty=2, col="#969696", lwd=3)
-        
-        legend(legend.spot, lty=c(NA, 2), bty='n', pch=c(20, NA), cex=text.cex, 
-           col=c('#214E34', '#969696'), lwd=2.5, 
-           inset=c(0.05, 0.015),
-           legend=as.expression(c(
-               bquote((.(k.pair$f1.exp)*','*.(k.pair$f2.exp))~"inversion"),
-               "Actual")))
-    } else {
-        legend(legend.spot, lty=c(NA), bty='n', pch=c(20), cex=text.cex, 
-           col=c('#214E34'), lwd=2.5, 
-           inset=c(0.05, 0.015),
-           legend=as.expression(c(
-               bquote((.(k.pair$f1.exp)*','*.(k.pair$f2.exp))~"inversion"))))
-    }
-    }
-    
-    #if (!is.null(k.pair) & !is.null(legend.spot)) {
-    #    legend("bottomright", lty=NULL, inset=c(0.01, 0.015), bty='n',
-    #        cex=text.cex,
-    #        legend=bquote(K^(.(k.pair$f1.exp)*','~.(k.pair$f2.exp))))
-    #}
-    
-    #legend(legend.spot, bty='n', pch=c(NA, 3), cex=text.cex,
-    #    legend=c(" ", " "), inset=c(0.01, 0.015), col=c(1,1))
-    
-    #color <- adjustcolor('darkred', alpha.f=0.75)
     arrows(fwhm.left, (m.f - w.f.means) / m.f, 
           fwhm.right, (m.f - w.f.means) / m.f, 
         code=3, angle=90, length=0.02,
@@ -422,15 +582,10 @@ plot_inversion_lists_mean <- function(model, inversion.lists, log='',
             las=1, mgp=mgp+c(1,0,0),
             family=font, cex.axis=text.cex)
     
-    #legend(legend.spot, lty=c(2, 1), col=c('darkgray', 'darkred'), lwd=2, 
-    #       inset=c(0.01, 0.015),
-    #       pch=c(NA, 20), legend=c("Actual", "Inverted"))
-    
     title(xlab=expression("Radius"~r/R))
     par(mgp=mgp+c(0.5, 0, 0))
-    f1.exp <- k.pair$f1.exp
-    title(ylab=bquote(#'Relative difference' ~ 
-        delta*.(f1.exp)/.(f1.exp)))
+    f1.exp <- model$k.pair$f1.exp
+    title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
 }
 
 plot_inversion_lists_mean_points <- function(model, inversion.lists,
@@ -501,7 +656,7 @@ plot_inversion_lists_mean_points <- function(model, inversion.lists,
     
     par(mgp=mgp+c(1.5, 0, 0))
     f1.exp <- model$f1.exp
-    title(ylab=bquote('Relative difference' ~ d*.(f1.exp)/.(f1.exp)))
+    title(ylab=bquote(d*.(f1.exp)/.(f1.exp)))
 }
 
 plot_results_lists_mean_points <- function(model, results.lists,
@@ -712,7 +867,9 @@ plot_kernels <- function(model, inversion, cross=F,
         sampler=T, should.cull=F, normalize=F, 
         inset.plot=F, make.inset=T, cross.inset=NULL, 
         legend.spot=NULL, xlim=c(0, 0.45), ylim=NULL, log='', 
-        log.xlim.0=10e-5, 
+        log.xlim.0=10e-5, kern.interp.xs=NULL,
+        make_xlab=T, make_ylab=T, 
+        col.pal=NULL, 
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
     
     keep <- if (should.cull) which(with(inversion$result, 
@@ -722,8 +879,14 @@ plot_kernels <- function(model, inversion, cross=F,
         fwhm.right - fwhm.left < 0.15)) else T
     
     kernels <- if (cross) inversion$cross_kerns else inversion$avg_kerns
-    kernels <- matrix(kernels[,sampler])
-    xs <- if (cross) model$k2$x else model$k1$x
+    if (class(kernels) != "matrix") kernels <- matrix(kernels)
+    #kernels <- matrix(kernels[,sampler])
+    
+    if (is.null(kern.interp.xs)) {
+        xs <- if (cross) model$k2$x else model$k1$x
+    } else {
+        xs <- kern.interp.xs
+    }
     
     if (should.cull) kernels <- kernels[,keep]
     if (normalize) {
@@ -736,15 +899,18 @@ plot_kernels <- function(model, inversion, cross=F,
     if (is.null(ylim)) {
         ylim <- if (!cross) range(Map(function(ii) 
                 kernels[,ii][xs >= xlim[1] & xs <= xlim[2]], 
-            ii=1:ncol(kernels))) else range(kernels)
+            ii=1:ncol(kernels))) else {
+                max. <- max(abs(range(kernels)))
+                c(-max., max.)
+            }
     }
     if (inset.plot & make.inset) {
         if ((!cross || cross && ((abs(ylim[2]) > abs(ylim[1])) 
             || !is.null(legend.spot) && legend.spot=='topright'))
             || (!is.null(cross.inset) && cross.inset!='bottomright'))
-            par(fig=c(0.6, 0.97, 0.3, 0.96), new=T) 
+            par(fig=c(0.6, 0.97, 0.4, 0.96), new=T) 
         else
-            par(fig=c(0.6, 0.97, 0.11, 0.77), new=T)
+            par(fig=c(0.6, 0.97, 0.11, 0.67), new=T)
     } else if (make.inset) {
         par(fig=c(0, 1, 0, 1))
     }
@@ -754,31 +920,42 @@ plot_kernels <- function(model, inversion, cross=F,
          ylim=ylim, ylab="", xlim=xlim, xlab="")
     abline(h=0, lty=2)
     
-    col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
-    if (ncol(kernels) == 6) col.pal <- col.pal[c(1:4, 7:8)]
-    col.pal <- adjustcolor(col.pal, alpha.f=ifelse(inset.plot, 0.5, 0.9))
+    if (is.null(col.pal)) {
+        col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
+        if (ncol(kernels) == 6) col.pal <- col.pal[c(1:4, 7:8)]
+        col.pal <- adjustcolor(col.pal, alpha.f=ifelse(inset.plot, 0.5, 0.9))
+    }
     lty <- c(1)
-    for (kern_i in 1:ncol(kernels)) lines(xs, kernels[,kern_i], 
-        lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
-        col=col.pal[((kern_i-1) %% length(col.pal))+1])
     
     rs <- inversion$result$rs[keep]
     if (!inset.plot) {
         
-        title(xlab=expression("Radius"~r/R))
-        par(mgp=mgp+c(0.5, 0, 0))
-        if (cross) {
-            title(ylab=bquote('Cross-Term Kernel'~
-                                  kappa^(.(model$f2.exp)*','~.(model$f1.exp))))
-        } else {
-            title(ylab=bquote('Averaging Kernel'~
-                                  kappa^(.(model$f1.exp)*','~.(model$f2.exp))))
+        for (kern_i in 1:ncol(kernels)) {
+            if (length(sampler) < kern_i || sampler[kern_i]) {
+                lines(xs, kernels[,kern_i], 
+                    lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
+                    col=col.pal[((kern_i-1) %% length(col.pal))+1])
+            }
         }
         
-        magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0),
-            las=1, mgp=mgp-c(0.5,0.15,0), family=font, cex.axis=text.cex)
-        magaxis(side=2, tcl=0.25, labels=1, 
-                las=1, mgp=mgp+c(1,0,0), family=font, cex.axis=text.cex)
+        par(mgp=mgp-c(0.2, 0, 0))
+        if (make_xlab) title(xlab=expression("Radius"~r/R))
+        par(mgp=mgp+c(0.3 + ifelse(cross, 0.15, 0), 0, 0))
+        if (make_ylab) {
+            if (cross) {
+                title(ylab=bquote('Cross-Term Kernel'~
+                    kappa^(.(model$f2.exp)*','~.(model$f1.exp))))
+            } else {
+                title(ylab=bquote('Averaging Kernel'~
+                    kappa^(.(model$f1.exp)*','~.(model$f2.exp))))
+            }
+        }
+        magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
+            las=1, mgp=mgp-c(0.5,0.15,0), family=font, 
+            cex.axis=text.cex)
+        magaxis(side=2, tcl=0.25, labels=make_ylab, 
+            las=1, mgp=mgp+c(1,0,0), family=font, 
+            cex.axis=text.cex)
         
         
         if (make.inset) {
@@ -797,25 +974,61 @@ plot_kernels <- function(model, inversion, cross=F,
         } 
     
     } else {
-        magaxis(side=c(1,3), tcl=0.125, labels=c(1,0),
-            las=1, mgp=mgp-c(1,0.3,0), majorn=1, minorn=2,
-            family=font, cex.axis=text.cex)
-        magaxis(side=c(2,4), tcl=0.125, labels=c(1,0), 
-            las=1, mgp=mgp+c(1,0,0), majorn=3, minorn=2,
-            family=font, cex.axis=text.cex)
+        
+        ordering <- rev(order(sapply(1:ncol(kernels), function(kern_i) {
+                kern <- kernels[,kern_i]
+                kern <- kern[xs > xlim[1]]
+                max(abs(kern))
+            })))
+        
+        for (kern_i in ordering) {
+            if (length(sampler) < kern_i || sampler[kern_i]) {
+                lines(xs, kernels[,kern_i], 
+                    lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
+                    col=col.pal[((kern_i-1) %% length(col.pal))+1])
+            }
+        }
+        
+    
+        #if (cross) {
+            magaxis(side=1:4, tcl=0, labels=F)
+            yaxislabs <- pretty(axis(2, labels=F, tick=F))
+            yaxismin <- yaxislabs
+            axis(2, at=yaxismin, las=1, 
+                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125/2)
+            axis(4, at=yaxismin, las=1, 
+                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125/2)
+            while (length(yaxislabs) > 3) yaxislabs <- yaxislabs[c(T, F)]
+            axis(2, at=yaxislabs, las=1, 
+                labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
+            axis(4, at=yaxislabs, las=1, 
+                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
+            par(mgp=mgp-c(1, 0.2, 0))
+            axis(1, at=c(0.5, 1), las=1, 
+                labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
+            axis(3, at=c(0.5, 1), las=1, 
+                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
+        #} else {
+        #    magaxis(side=c(2,4), tcl=0.125, labels=c(1, 0), 
+        #        las=1, mgp=mgp+c(1,0,0), majorn=3, minorn=2,
+        #        family=font, cex.axis=text.cex)
+        #    magaxis(side=c(1,3), tcl=0.125, labels=c(1,0),
+        #        las=1, mgp=mgp-c(1,0.15,0), majorn=1, minorn=2,
+        #        family=font, cex.axis=text.cex)
+        #}
     }
 }
 
 
 plot_kernel_lists <- function(model, kernel.lists, cross=F, log='', 
-        xlim=NULL, ylim=NULL, normalize=F, inset.plot=F, 
+        xs=NULL, xlim=c(0, 0.45), ylim=NULL, normalize=F, inset.plot=F, 
         make.inset=T, legend.spot='topright', 
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
     #text.cex <- text.cex*1.25
     #par(cex.lab=text.cex, mar=mar+c(-0.5, 0.5, 0, 0))
     #par(mgp=mgp-c(0.5,0,0))
     
-    xs <- if (cross) model$k2$x else model$k1$x
+    if (is.null(xs)) xs <- if (cross) model$k2$x else model$k1$x
     
     #xs <- seq(0, 1, 0.001)
     kernels <- do.call(cbind, Map(function(radius_i) {
@@ -829,11 +1042,11 @@ plot_kernel_lists <- function(model, kernel.lists, cross=F, log='',
         }, ii=1:length(kernel.lists))), 1, mean)
     }, radius_i=1:ncol(kernel.lists[[1]][[1]])))[,sampler]
     
-    if (normalize) 
-        for (ii in 1:ncol(kernels)) 
+    if (normalize) {
+        for (ii in 1:ncol(kernels)) {
             kernels[,ii] <- kernels[,ii] / max(abs(inversion$avg_kerns[,ii]))
-    
-    if (is.null(xlim)) xlim <- c(0, 1)
+        }
+    }
     
     if (is.null(ylim)) {
         ylim <- if (!cross) range(Map(function(ii) 
@@ -860,7 +1073,7 @@ plot_kernel_lists <- function(model, kernel.lists, cross=F, log='',
     
     abline(h=0, lty=2)
     col.pal <- adjustcolor(c('#f97100', blue, 'black', red, "#ffe599"), 
-        alpha.f=0.8)
+        alpha.f=1)#0.8)
     lty <- c(1,2,3,4)
     for (kern_i in 1:ncol(kernels)) lines(xs, kernels[,kern_i], 
         lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
@@ -2594,5 +2807,91 @@ plot_kernel_diffs_surf <- function(model, k.pair, ...,
             #integral(bold(K)%.%bold(frac(d*f, f)),0,R)~dr, 
         #")") / mu*Hz ))
     #title(xlab=expression('Frequency'~nu/mu*Hz))
+}
+
+plot_param_hist <- function(param, xlab, use_fivenum=F, log='x', 
+        majorn=5, minorn='auto', ...,
+        text.cex=1, mgp=utils.mgp, mar=utils.mar, font=utils.font) {
+    text.cex <- 1.5*text.cex
+    par(cex.lab=text.cex, mar=mar+c(0.1, -0.2, 0, -0.2), mgp=mgp+c(0.4, 0, 0))
+    if (log == 'x') param <- log10(param)
+    if (use_fivenum) {
+        fnum <- fivenum(param)
+        param <- param[param>fnum[2] & param<fnum[4]]
+    }
+    hgram <- hist(param, plot=F)
+    #xlim <- if (use_fivenum) {
+    #    fnum <- fivenum(log10(param))
+    #    c(ceil(fnum[2])-1, ceil(fnum[4])+1)
+    #} else {
+    xlim <- if (log=='x') {
+        c(floor(min(hgram$mids))-1, ceil(max(hgram$mids))+1)
+    } else c(0, 0.1)
+    #}
+    plot(hgram, main="", #hgram$mids, hgram$counts, type='S', 
+        axes=F, xaxs='i', yaxs='i', col="#bfdbf7", 
+        xlab=xlab,
+        ylab="Count",
+        xlim=xlim,
+        ylim=c(0, max(hgram$counts))+1)
+    #magaxis(1:4, labels=c(1,1,0,0), unlog='x')
+    magaxis(side=1, tcl=-0.25, labels=T, unlog=log, mgp=mgp+c(0, 0.2, 0), 
+        majorn=majorn, minorn=minorn, 
+        las=1, family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=-0.25, labels=T, unlog=log, mgp=mgp+c(0, 0.25, 0), 
+        las=1, family=font, cex.axis=text.cex)
+    #magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0), unlog='x', 
+    #    las=1, mgp=mgp-c(0.5,0.15,0), family=font, cex.axis=text.cex)
+    #magaxis(side=2, tcl=0.25, labels=1, 
+    #    las=1, mgp=mgp+c(1,0,0), family=font, cex.axis=text.cex)
+}
+
+plot_widths_hist <- function(widths, ...,
+        text.cex=1, mgp=utils.mgp, mar=utils.mar, font=utils.font) {
+    text.cex <- 1.5*text.cex
+    par(cex.lab=text.cex, mar=mar+c(0.1, -0.2, 0, -0.2), mgp=mgp+c(0.4, 0, 0))
+    hgram <- hist(widths, plot=F)
+    plot(hgram, main="", #hgram$mids, hgram$counts, type='S', 
+        axes=F, xaxs='i', yaxs='i', col="#bfdbf7",
+        xlab=bquote("Kernel width"~Delta),
+        ylab="Count",
+        xlim=c(0, 0.1),
+        ylim=c(0, max(hgram$counts))+2)
+    magaxis(side=1, tcl=-0.25, labels=T, mgp=mgp+c(0, 0.2, 0), 
+        las=1, family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=-0.25, labels=T, mgp=mgp+c(0, 0.25, 0), 
+        las=1, family=font, cex.axis=text.cex)
+    #magaxis(side=c(1,3,4), tcl=0.25, labels=c(1,0,0), 
+    #    las=1, mgp=mgp-c(0.5,0.15,0), family=font, cex.axis=text.cex)
+    #magaxis(side=2, tcl=0.25, labels=1, 
+    #    las=1, mgp=mgp+c(1,0,0), family=font, cex.axis=text.cex)
+}
+
+plot_inversion_parameters <- function(inv.params, k.str=NULL, 
+        wide=F, tall=F, ...) {
+    make_plots(plot_param_hist, paste0('hist-mu', k.str),
+        param=inv.params$error.sups, 
+        xlab=bquote("Error suppression parameter"~mu), ...)
+    make_plots(plot_param_hist, paste0('hist-beta', k.str),
+        param=inv.params$cross.terms, use_fivenum=T, 
+        xlab=bquote("Cross-term parameter"~beta), ...)
+    make_plots(plot_widths_hist, paste0('hist-Delta', k.str),
+        widths=inv.params$widths, ...)
+}
+
+
+plot_inversion_parameters_together <- function(inv.params, k.str=NULL, ...) {
+    plot_all_params <- function(...) {
+        par(mfrow=c(1,3))
+        plot_param_hist(param=inv.params$error.sups, log='x', 
+            xlab=bquote("Error suppression parameter"~mu), ...)
+        plot_param_hist(param=inv.params$cross.terms, log='x', 
+            use_fivenum=T, majorn=3, minorn=10,
+            xlab=bquote("Cross-term parameter"~beta), ...)
+        plot_param_hist(param=inv.params$widths, log='', 
+            xlab=bquote("Kernel width"~Delta), ...)
+        #plot_widths_hist(widths=inv.params$widths, ...)
+    }
+    make_plots(plot_all_params, paste0("hists", k.str), thin=F, tall=F)
 }
 

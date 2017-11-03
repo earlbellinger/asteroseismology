@@ -1,0 +1,35 @@
+&star_job
+      
+      save_model_filename = 'tams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'zams.mod'
+      
+      set_initial_age = .true.
+      initial_age = 0
+      
+      write_profile_when_terminate = .false.
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_MS'
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      delta_lgTeff_limit = 0.001
+      delta_lgL_phot_limit = 0.01
+      
+      profile_interval = 9999999
+      history_interval = 9999999
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+
