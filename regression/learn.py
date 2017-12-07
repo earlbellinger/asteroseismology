@@ -402,7 +402,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 ### Start ######################################################################
 ################################################################################
 #process_dir()
-process_dir('benard')
+process_dir('inversions')
+#process_dir('benard')
 #process_dir('legacyRox2')
 #for directory in [f for f in os.listdir(perturb_dir) 
 #                  if not re.match(perturb_pattern, f)]:
