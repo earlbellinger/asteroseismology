@@ -9,11 +9,13 @@ maybe_sub() {
     cmd=$*
     
     ## Check if job should be run in parallel
+    environment="environment  = PYTHONUNBUFFERED=TRUE"
     threads=""
     if [ "$OMP_NUM_THREADS" -gt 1 ]; then
-        threads="environment  = OMP_NUM_THREADS=$OMP_NUM_THREADS
+        threads="OMP_NUM_THREADS=$OMP_NUM_THREADS
 request_cpus = $OMP_NUM_THREADS
 "
+        environment="$environment;$threads"
     fi
     
     ## Set memory consumption
@@ -60,7 +62,7 @@ Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
-$threads$image_size$nice$machine
+$environment$image_size$nice$machine
 queue
 " > "condor.job"
         condor_submit "condor.job"
