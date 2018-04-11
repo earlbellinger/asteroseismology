@@ -5,7 +5,7 @@
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
 
-cgrav=6.67428 # 6.67408 # 6.67232 #
+cgrav=6.67408 #6.67428 #6.67408 #  #6.67232 #
 
 ### Parse command line tokens 
 ## -h and --help will display help instructions 
@@ -69,6 +69,10 @@ if [ -z ${5+x} ]; then
     #iorwn2=${iorwn[1]}
 fi
 
+#if [ -z {$6+x} ]; then
+#    cgrav=$6
+#fi
+
 ## Create a directory for the results and go there
 mkdir -p "$path"
 cp "$1" "$path" 
@@ -95,7 +99,8 @@ echo "
 3 '$fname.model'   @
 -1 ''        @
 nn  ,icnmsh
-4800,      ,,  @
+4800,      ,,  
+4000,      ,,  @
 10000,      ,,  
 icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
 211  ,      ,     ,0.013,      ,5.    ,      , 
@@ -197,7 +202,7 @@ int:
 
 out:
   istdpr,nout,nprcen,irsord,iekinr,
-       9,    ,      ,    20,      , @
+       9,    ,      ,    20,     1, @
        9,  10,      ,    20,      , 
        9,    ,      ,      ,      , 
   iper,ivarf,kvarf,npvarf,nfmode,

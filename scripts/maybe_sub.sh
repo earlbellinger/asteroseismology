@@ -3,20 +3,20 @@
 #### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
 #### Stellar Ages & Galactic Evolution Group 
 #### Max-Planck-Institut fur Sonnensystemforschung 
-#### Updated: February 9, 2016
+#### Updated: March 20, 2018
 
 maybe_sub() {
     cmd=$*
     
     ## Check if job should be run in parallel
-    environment="environment  = PYTHONUNBUFFERED=TRUE"
-    threads=""
-    if [ "$OMP_NUM_THREADS" -gt 1 ]; then
-        threads="OMP_NUM_THREADS=$OMP_NUM_THREADS
+    environment="environment  = OMP_NUM_THREADS=$OMP_NUM_THREADS;PYTHONUNBUFFERED=1
 request_cpus = $OMP_NUM_THREADS
 "
-        environment="$environment;$threads"
-    fi
+    #threads=""
+    #if [ "$OMP_NUM_THREADS" -gt 1 ]; then
+    #threads=""
+    #fi
+    #environment="$environment;$threads"
     
     ## Set memory consumption
     image_size=""
@@ -32,6 +32,13 @@ request_cpus = $OMP_NUM_THREADS
 "
     fi
     
+    requirements=""
+    if [ $EXCLUDE -gt 0 ]; then
+        requirements="Requirements = (Machine != \"seismo18.mps.mpg.de\" "\
+"&& Machine != \"seismo19.mps.mpg.de\")
+"
+    fi
+    
     ## Set machine
     machine=""
     if [ ! -z ${MACHINE+x} ]; then
@@ -39,7 +46,9 @@ request_cpus = $OMP_NUM_THREADS
 "
     fi
     
-    name=${cmd// /_}
+    #name=${cmd// /_}
+    name=${cmd//[-. \/]/_}
+    #name=${name//[-._\/]/}
     #name=${name//./_}
     if command -v condor_submit >/dev/null 2>&1
       then
@@ -62,7 +71,7 @@ Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
-$environment$image_size$nice$machine
+$environment$image_size$nice$machine$requirements
 queue
 " > "condor.job"
         condor_submit "condor.job"
@@ -78,6 +87,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     -h) HELP=1; break;;
     -n) NICE=1; shift 1;;
+    -e) EXCLUDE=1; shift 1;;
     -p) OMP_NUM_THREADS="$2"; shift 2;;
     -m) MEMORY="$2"; shift 2;;
     -c) MACHINE="$2"; shift 2;;
@@ -90,6 +100,7 @@ if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${OMP_NUM_THREADS+x} ]; then OMP_NUM_THREADS=1; fi
 if [ -z ${NICE+x} ]; then NICE=0; fi
 if [ -z ${MEMORY+x} ]; then MEMORY=0; fi
+if [ -z ${EXCLUDE+x} ]; then EXCLUDE=0; fi
 
 if [ $HELP -gt 0 ]; then
     echo "                        _                      _     ";
@@ -108,6 +119,7 @@ if [ $HELP -gt 0 ]; then
     echo "flags:"
     echo "  -h   : show this helpful message and quit"
     echo "  -n   : run as nice job"
+    echo "  -e   : exclude two cores (a.k.a., a 'really' nice job)"
     echo "  -p # : set the number of threads to run in parallel"
     echo "  -m # : set the memory consumption of the job"
     echo "  -c s : set the machine that this job will run on"

@@ -1,0 +1,7 @@
+name value uncertainty
+Fe_H -0.37 0.09
+nu_max 1760 10 
+Teff 6770 116
+radius 1.42 0.04
+diffusion .01 0.002
+L 3.58 0.1

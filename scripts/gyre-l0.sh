@@ -52,6 +52,10 @@ echo "&model
 /
 
 &constants
+    G_GRAVITY = 6.67408d-8
+    M_SUN = 1.988475d33
+    R_SUN = 6.957d10
+    L_SUN = 3.828d33
 /
 
 &mode

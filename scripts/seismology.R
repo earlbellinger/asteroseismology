@@ -10,7 +10,7 @@ invisible(library(magicaxis))
 invisible(library(RColorBrewer))
 #invisible(library(mblm))
 
-fwhm_conversion <- (2*sqrt(2*log(2)))
+fwhm_conversion <- 2*sqrt(2*log(2))
 
 dnu.cl <- c("#ca0020", "#f4a582", "#0571b0", "#800080")
 
@@ -64,6 +64,7 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
     freqs <- freqs[freqs$n_g == 0,]
     # get l=0
+    #seis.DF <- NULL
     seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, ...)
     
     # make echelle
@@ -74,18 +75,23 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     for (l_deg in 0:1) {
         if (l_deg %in% ells && (l_deg+2) %in% ells) { 
             dnu_median <- get_average("dnu", freqs, l_deg, nu_max, outf, ...)
-            if (!is.null(dnu_median)) seis.DF <- cbind(seis.DF, dnu_median)
+            if (!is.null(dnu_median)) 
+                seis.DF <- if (is.null(seis.DF)) dnu_median else 
+                    cbind(seis.DF, dnu_median)
             
             if ((1-l_deg) %in% ells) {
                 rsep_median <- get_average("r_sep", freqs, l_deg, nu_max, 
                     outf, ...)
                 if (!is.null(rsep_median)) 
-                    seis.DF <- cbind(seis.DF, rsep_median)
+                    seis.DF <- if (is.null(seis.DF)) rsep_median else 
+                        cbind(seis.DF, rsep_median)
             }
         }
         if (0 %in% ells && 1 %in% ells) {
             ravg_median <- get_average("r_avg", freqs, l_deg, nu_max, outf, ...)
-            if (!is.null(ravg_median)) seis.DF <- cbind(seis.DF, ravg_median)
+            if (!is.null(ravg_median)) 
+                seis.DF <- if (is.null(seis.DF)) ravg_median else 
+                    cbind(seis.DF, ravg_median)
         }
     }
     
@@ -95,12 +101,62 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     if ('Dnu0' %in% names(seis.DF)) {
         epsilon_p <- weighted.mean(ell.0$nu / seis.DF[['Dnu0']] - ell.0$n,
             dnorm(ell.0$nu, nu_max, (0.66*nu_max**0.88)/fwhm_conversion))
-        seis.DF <- cbind(seis.DF, data.frame(epsilon_p=epsilon_p))
+        epsilon.DF <- data.frame(epsilon_p=epsilon_p)
+        seis.DF <- if (is.null(seis.DF)) epsilon.DF else 
+            cbind(seis.DF, epsilon.DF)
     }
     
+    
+    # include all ratios 
+    for (l_deg in 0:1) {
+        if (l_deg %in% ells && (l_deg+2) %in% ells) { 
+            if ((1-l_deg) %in% ells) {
+                rseps <- get_separations("r_sep", freqs, l_deg, nu_max)
+                if (!is.null(rseps) & length(rseps$nus)>0) {
+                    r.DF <- t(data.frame(rseps$separations))
+                    colnames(r.DF) <- paste0('r', l_deg, l_deg+2, '_', rseps$n)
+                    rownames(r.DF) <- NULL
+                    seis.DF <- if (is.null(seis.DF)) r.DF else 
+                        cbind(seis.DF, r.DF)
+                }
+            }
+        }
+        if (0 %in% ells && 1 %in% ells) {
+            ravgs <- get_separations("r_avg", freqs, l_deg, nu_max)
+            if (!is.null(ravgs) & length(ravgs$nus)>0) {
+                r.DF <- t(data.frame(ravgs$separations))
+                colnames(r.DF) <- paste0('r', l_deg, 1-l_deg, '_', ravgs$n)
+                rownames(r.DF) <- NULL
+                seis.DF <- if (is.null(seis.DF)) r.DF else 
+                    cbind(seis.DF, r.DF)
+            }
+        }
+    }
+    
+    # get periods for classical pulsators 
+    classical <- ell.0[ell.0$n <= 4,]
+    if (nrow(classical) > 0) {
+        classical.DF <- NULL
+        if (1 %in% classical$n)
+            classical.DF$FF <- 1 / (classical[classical$n == 1,]$nu * 10**-6) /
+                (60 * 60 * 24)
+        if (2 %in% classical$n)
+            classical.DF$O1 <- 1 / (classical[classical$n == 2,]$nu * 10**-6) /
+                (60 * 60 * 24)
+        if (3 %in% classical$n)
+            classical.DF$O2 <- 1 / (classical[classical$n == 3,]$nu * 10**-6) /
+                (60 * 60 * 24)
+        if (4 %in% classical$n)
+            classical.DF$O3 <- 1 / (classical[classical$n == 4,]$nu * 10**-6) /
+                (60 * 60 * 24)
+        classical.DF <- data.frame(classical.DF)
+        seis.DF <- if (is.null(seis.DF)) classical.DF else 
+            cbind(seis.DF, data.frame(classical.DF))
+    }
+    
+    if (F) {
     # find frequencies of mixed modes 
     if (nrow(mixed) <= 0) return(seis.DF)
-    
     #print("nrow mixed > 0")
     
     # only accept one mode between adjacent l=0s
@@ -146,7 +202,7 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         names(mixed) <- paste0('mm_dist.upper.', mm.ell, '.', 1:ncol(mixed))
         seis.DF <- cbind(seis.DF, mixed)
     }
-    
+    }
     return(seis.DF)
 }
 
@@ -202,23 +258,28 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F,
 }
 
 get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
+    freqs.ell <- freqs[freqs$l==l_deg,]
+    freqs.ell <- freqs.ell[order(freqs.ell$nu),]
+    nus <- freqs.ell$nu
+    
     if (sep_name == 'Dnu') {
         # Dnu(n, l) = nu_[n, l] - nu_[n-1, l]
-        nus <- sort(freqs[freqs$l==l_deg,]$nu)
         Dnus <- diff(nus)
-        list(nus=nus[-1], separations=Dnus)
+        list(nus=nus[-1], separations=Dnus, n=freqs.ell$n[-1])
     
     } else if (sep_name == 'dnu') {
         # dnu(n, l) = nu_[n, l] - nu_[n-1, l+2]
-        x <- freqs[freqs$l==l_deg,]$nu
-        y <- freqs[freqs$l==l_deg+2,]$nu
-        indices <- find_closest(x, y)
-        nus <- x[indices$x]
-        separations <- x[indices$x]-y[indices$y]
+        #x <- freqs[freqs$l==l_deg,]$nu
+        #x <- nus
+        y <- sort(freqs[freqs$l==l_deg+2,]$nu)
+        indices <- find_closest(nus, y)
+        separations <- nus[indices$x]-y[indices$y]
         Dnu <- get_average("Dnu", freqs, 0, nu_max)$Dnu0
         rem <- abs(separations) > Dnu / 1.5
         separations[rem] <- NA
-        list(nus=nus, separations=separations)
+        n <- freqs.ell$n[indices$x]
+        list(nus=nus[indices$x][order(n)], separations=separations[order(n)], 
+            n=n[order(n)])
     
     } else if (sep_name == 'r_sep') { 
         # r(l, n) = dnu(n, l) / Dnu(n+l, 1-l)
@@ -226,12 +287,13 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         # Dnu(n, l) = nu_[n, l] - nu_[n-1, l]
         dnus <- get_separations("dnu", freqs, l_deg)
         Dnus <- get_separations("Dnu", freqs, 1-l_deg)
-        x <- dnus$nu
-        y <- Dnus$nu
-        indices <- find_closest(x, y)
-        dnus <- dnus$separations[indices$x]
-        Dnus <- Dnus$separations[indices$y]
-        list(nus=x[indices$x], separations=dnus/Dnus)
+        indices <- find_closest(dnus$nu, Dnus$nu)
+        matched.dnus <- dnus$separations[indices$x]
+        matched.Dnus <- Dnus$separations[indices$y]
+        n <- dnus$n[indices$x]
+        list(nus=dnus$nus[indices$x][order(n)], 
+             separations=c(matched.dnus/matched.Dnus)[order(n)], 
+             n=n[order(n)])
     
     } else if (sep_name == 'r_avg') {
         # r_[l, 1-l](n) = dd_[l, 1-l](n) / Dnu(n+l, 1-l)
@@ -239,10 +301,16 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         #                 6*nu_[n,  0] - 4*nu_[n,  1] + nu_[n+1, 0] )
         # dd_10(n) = -1/8 ( nu_[n-1,1] - 4*nu_[n,  0] + 
         #                 6*nu_[n,  1] - 4*nu_[n+1,0] + nu_[n+1, 1] )
-        nus.0 <- sort(freqs[freqs$l==0,]$nu)
-        nus.1 <- sort(freqs[freqs$l==1,]$nu)
+        freqs.0 <- freqs[freqs$l==0,]
+        freqs.0 <- freqs.0[order(freqs.0$nu),]
+        freqs.1 <- freqs[freqs$l==1,]
+        freqs.1 <- freqs.1[order(freqs.1$nu),]
+        nus.0 <- freqs.0$nu
+        nus.1 <- freqs.1$nu #sort(freqs[freqs$l==1,]$nu)
+        #if (length(nus.1) <= 0) 
         x <- if (l_deg == 0) nus.0 else nus.1 # x are freqs of the same l 
         y <- if (l_deg == 0) nus.1 else nus.0 # y are freqs of the other l 
+        rad.ord <- if (l_deg == 0) freqs.0$n else freqs.1$n
         Dnus.x <- if (l_deg == 0) diff(nus.0) else diff(nus.1)
         Dnus.factor <- if (l_deg == 0) 8 else -8
         large_sep <- median(Dnus.x, na.rm=1)
@@ -250,6 +318,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         separations <- c()
         nus <- c()
         Dnus <- c()
+        rad.ords <- c()
         for (n in 1:length(x)) {
             # nu_[n-1] of the same l
             xs <- x[x<x[n]]
@@ -283,9 +352,14 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
                 x.smaller - 4*y.smaller + 6*x[n] - 4*y.bigger + x.bigger)
             nus <- c(nus, x[n])
             Dnus <- c(Dnus, Dnus.factor * (y.bigger - y.smaller))
-            
+            rad.ords <- c(rad.ords, rad.ord[n])
         }
-        list(nus=nus, separations=separations/Dnus)
+        if (is.null(rad.ords)) {
+            list(nus=NULL, separations=NULL, n=NULL)
+        } else 
+            list(nus=nus[order(rad.ords)], 
+                 separations=c(separations/Dnus)[order(rad.ords)],
+                 n=rad.ords[order(rad.ords)])
     }
 }
 

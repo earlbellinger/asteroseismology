@@ -243,3 +243,178 @@ make_plots(plot_kernels_diffs, paste0('kernel-diffs-', model.list.name),
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### LIBRARIES 
+source(file.path('..', 'scripts', 'utils.R'))
+source('models.R')
+source('frequencies.R')
+source('kernels.R')
+#parallelStartMulticore(9)
+
+models <- get_model_list()
+
+for (k.pair in list(c2_rho, u_Y, u_Gamma1, rho_Y, Gamma1_rho, c2_Gamma1)) {
+
+#k.pair <- u_Y#rho_Gamma1#rho_c2#rho_c2#rho_c2#c2_rho # 
+target.name <- 'diffusion'
+ref.mod <- 'no_diffusion'
+mode.set <- 'BiSON'
+perturb <- F
+freqs <- get_freqs(target.name=target.name, mode.set=mode.set, perturb=perturb) 
+m1 <- get_model(freqs=freqs, model.name=ref.mod, target.name=target.name, 
+                k.pair=k.pair, square.Ks=F, trim.ks=F) 
+
+plot_kernels <- function(k, ells=1:3, ns=c(5,5,5), ylim=NULL,
+        legend.spot=NULL, make_xlab=T, k.pair=k.pair, swap=F, 
+        ..., mar=utils.mar, 
+        text.cex=1, mgp=utils.mgp, font="Palatino Linotype", short=F) {
+    
+    par(mar=mar+c(0.1, -0.2, -0.1, -0.1))
+    
+    modes <- paste0('l.', ells, '_n.', ns)
+    
+    if (is.null(ylim)) {
+        ylim <- range(sapply(modes, function(mode) k[[mode]]))
+        if (ylim[1] >= 0) ylim[1] <- -0.05
+    }
+    #ylim[2] <- ceil(ylim[2])
+    
+    xmin <- round(min(do.call(c, 
+            sapply(modes, function(mode) k$x[ abs(k[[mode]]) > 0.005 ] ))), 1)
+    xlim <- c(xmin, 1)
+    xlim <- c(0, 1)
+    
+    plot(k$x, k[[modes[1]]], xaxs='i', yaxs='i',
+        xlim=xlim,
+        ylim=ylim,
+        axes=F, type='l', lwd=1.5, 
+        xlab="",
+        ylab="")
+    par(xpd=NA)
+    lines(k$x[k$x>=xmin], k[[modes[2]]][k$x>=xmin], lty=2, col=blue, lwd=1.5)
+    lines(k$x[k$x>=xmin], k[[modes[3]]][k$x>=xmin], lty=3, col=orange, lwd=2)
+    par(xpd=F)
+    abline(h=0, lty=2)
+    #pdf.options(encoding='ISOLatin2.enc')
+    if (!is.null(legend.spot)) {
+        legend(legend.spot, lty=1:3, col=c('black', blue, "#F97100"), 
+            cex=text.cex, bty='n', lwd=c(1.5,1.5,2), inset=c(0.04, 0.04),
+            legend=as.expression(do.call(c, Map(function(ell, nn) 
+                    bquote('\u2113' == .(ell)*','~ n == .(nn)),
+                ell=ells, nn=ns))))
+              #c("\u2113 = 1, n = 5", 
+              #  "\u2113 = 2, n = 5", 
+              #  "\u2113 = 3, n = 5"))
+    }
+    legend('topleft', bty='n', inset=c(-0.04, -0.04), cex=text.cex, 
+        legend=if (swap) k.pair$f2.name else k.pair$f1.name)
+    magaxis(side=1, tcl=-0.25, labels=make_xlab,
+            las=short, mgp=mgp+c(0,0.35,0), 
+            family=font, cex.axis=text.cex)
+    magaxis(side=2, tcl=-0.25, labels=1, majorn=4, #usepar=1,
+            las=short, mgp=mgp+c(0,0.35,0),#+c(1,0.2,0), 
+            family=font, cex.axis=text.cex)
+    
+    if (make_xlab) {
+        par(mgp=mgp+c(0.6, 0, 0))
+        title(xlab=expression('Radius'~r/R))
+    }
+    par(mgp=mgp+c(0.7, 0, 0))
+    title(ylab=if (swap) {
+            bquote( K^( .(k.pair$f2.exp) * ',' ~ .(k.pair$f1.exp)) )
+         } else {
+            bquote( K^( .(k.pair$f1.exp) * ',' ~ .(k.pair$f2.exp)) )
+    })
+}
+#plot_kernels(m1$k1, k.pair);dev.off()
+
+ylim <- if (k.pair$name == c2_rho$name || k.pair$name == Gamma1_rho$name) {
+    c(-1, 6)
+#} else if (k.pair$name == u_Y$name) {
+#    c(-4, 4)
+} else if (k.pair$name == rho_Y$name || k.pair$name == u_Gamma1$name || k.pair$name == c2_Gamma1$name || k.pair$name == u_Y$name) {
+    c(-4, 4)
+} else NULL
+
+make_xlab <- k.pair$name == u_Y$name
+legend.spot <- if (k.pair$name == u_Y$name) 'bottomleft' else NULL
+
+make_plots(plot_kernels, 
+    paste0('kernel-ell-', k.pair$f1, '_', k.pair$f2, '-', target.name), 
+    filepath=file.path('plots', 'kernels2'), k=m1$k1, k.pair=k.pair, swap=F, 
+    ylim=ylim, make_xlab=make_xlab, 
+    wide=F, tall=F, use.cairo=T, cex.paper=1.2)
+
+make_plots(plot_kernels, 
+    paste0('kernel-n-', k.pair$f1, '_', k.pair$f2, '-', target.name), 
+    filepath=file.path('plots', 'kernels2'), k=m1$k1, k.pair=k.pair, swap=F, 
+    ells=c(2,2,2), ns=c(4,5,6), 
+    ylim=ylim, make_xlab=make_xlab, 
+    wide=F, tall=F, use.cairo=T, cex.paper=1.2)
+
+ylim <- if (k.pair$name == c2_rho$name) {
+    c(-5, 5)
+} else if (k.pair$name == u_Y$name || k.pair$name == rho_Y$name) {
+    c(0, 1.6)
+} else if (k.pair$name == c2_Gamma1$name) {
+    c(-3, 9)
+} else if (k.pair$name == Gamma1_rho$name) {
+    c(-4, 4)
+} else if (k.pair$name == u_Gamma1$name) {
+    c(-1, 6)
+} else NULL
+
+make_plots(plot_kernels, 
+    paste0('kernel-ell-', k.pair$f2, '_', k.pair$f1, '-', target.name), 
+    filepath=file.path('plots', 'kernels2'), k=m1$k2, k.pair=k.pair, swap=T, 
+    wide=F, tall=F, use.cairo=T, cex.paper=1.2, make_xlab=make_xlab, 
+    legend.spot=legend.spot, 
+    ylim=ylim)#,
+    #legend.spot='topleft')
+
+make_plots(plot_kernels, 
+    paste0('kernel-n-', k.pair$f2, '_', k.pair$f1, '-', target.name), 
+    filepath=file.path('plots', 'kernels2'), k=m1$k2, k.pair=k.pair, swap=T, 
+    wide=F, tall=F, use.cairo=T, cex.paper=1.2, make_xlab=make_xlab, 
+    ells=c(2,2,2), ns=c(4,5,6), legend.spot=legend.spot, 
+    ylim=ylim)#,
+    #legend.spot='topleft')
+
+
+}
+
+

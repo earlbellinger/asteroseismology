@@ -1,0 +1,11 @@
+name value uncertainty
+Mode 0 0
+logP -0.123 0
+I_A 0.454 0
+I_Sk 3.219 0
+I_Ac 0.721 0
+I_mean_mag 17.481 0.001
+I_R21 0.467 0.013
+I_R31 0.256 0.011
+I_P21 3.316 0.033
+I_P31 0.48 0.057

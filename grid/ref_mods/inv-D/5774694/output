@@ -1,0 +1,51 @@
+DATE: 2018-03-13
+TIME: 20:26:39
+                                         version_number       10108
+ read inlist_0all
+ read inlist_3ms
+load saved model zams.mod
+
+                                        set_initial_age    0.0000000000000000D+00
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        594   7.125590   5594.554  -0.205913  -0.205913   0.948197   0.948197   0.713043   0.000900   0.270753   0.713481  -1.651617   1510      0
+   3.772481   1.917569  -0.075850 -47.749561  -1.752087 -99.000000   0.000000   0.271250   0.007315   0.015672   0.270845   0.082064      3      0
+ 5.9222E+03  17.177519  -0.205945 -10.183705   5.085918  -6.471010   0.000000   0.002322   0.001522  1.571E-02  1.567E-02 -0.194E-10              
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 594
+
+stop because star_age >= max_age
+    0.4910400609E+10    0.4910400609E+10
+
+        666   7.175004   5674.677  -0.080347  -0.080347   0.948197   0.948197   0.369263   0.004056   0.244130   0.677529  -1.438350   1477      0
+   8.394941   2.176174  -0.025483 -43.856426  -1.713209 -99.000000   0.000000   0.613984   0.007334   0.014299   0.306699   0.111259      6      0
+ 4.9104E+09  17.354891  -0.080509  -8.988543   5.039577  -6.535988   0.000000   0.000015   0.001594  1.675E-02  1.577E-02  0.765E-13    varcontrol
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 666
+ saved to tams.mod
+termination code: max_age
+        666   7.175004   5674.677  -0.080347  -0.080347   0.948197   0.948197   0.369263   0.004056   0.244130   0.677529  -1.438350   1477      0
+   8.394941   2.176174  -0.025483 -43.856426  -1.713209 -99.000000   0.000000   0.613984   0.007334   0.014299   0.306699   0.111259      6      0
+ 4.9104E+09  17.354891  -0.080509  -8.988543   5.039577  -6.535988   0.000000   0.000015   0.001594  1.675E-02  1.577E-02  0.765E-13    varcontrol
+
+DATE: 2018-03-13
+TIME: 20:31:57

@@ -1,0 +1,64 @@
+&model
+    model_type = 'EVOL'
+    file = 'MESA.FGONG'
+    file_format = 'FGONG'
+    data_format = '(1P5E16.9,x)'
+/
+
+&constants
+    G_GRAVITY = 6.67408d-8
+    M_SUN = 1.988475d33
+    R_SUN = 6.957d10
+    L_SUN = 3.828d33
+/
+
+
+&mode
+    l=0
+/
+&mode
+    l=1
+/
+&mode
+    l=2
+/
+&mode
+    l=3
+/
+
+
+&osc
+    outer_bound = 'JCD'
+    variables_set = 'JCD'
+    inertia_norm = 'BOTH'
+/
+
+&num
+/
+
+&scan
+    grid_type = 'LINEAR'
+    freq_min_units = 'UHZ'
+    freq_max_units = 'ACOUSTIC_CUTOFF'
+    freq_min = 0.0001
+    freq_max = 1.1
+    n_freq = 100000
+/
+
+&grid
+/
+
+&ad_output
+    summary_file = 'MESA.freqs'
+    summary_file_format = 'TXT'
+    summary_item_list = 'l,n_pg,n_p,n_g,freq,E_norm'
+    freq_units = 'UHZ'
+    mode_file_format = 'TXT'
+    mode_template = '%J-%L_%N'
+    mode_item_list = 'M_star,R_star,l,n_pg,n_p,n_g,freq,E,E_p,E_g,E_norm,M_r,x,xi_r,xi_h'
+/
+
+&nad_output
+/
+
+

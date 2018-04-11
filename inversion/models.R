@@ -179,7 +179,7 @@ CygAyounger <- list(name='16CygA lower age', short='CygAyounger',
                      fgong.path=file.path(path, 'profile1-freqs', 
                                                 'profile1.data.FGONG.dat'))
 
-
+names.list <<- list()
 get_model_list <- function() {
     models <- list('hl.diff'=hl.diff,
         'hl.no_d'=hl.no_d,
@@ -223,6 +223,7 @@ get_model_list <- function() {
             models[[model.name]] <- model
         }
     }
+    names.list[['Sun']] <<- perturbed.model.names
     
     perturbed.CygA.names <<- c()
     logRs <- c(0.07918125, 0.08635983, 0.09342169)
@@ -252,6 +253,7 @@ get_model_list <- function() {
             models[[model.name]] <- model
         }
     }
+    names.list[['CygA']] <<- perturbed.CygA.names
     
     perturbed.CygB.names <<- c()
     logRs <- c(0.04139269, 0.04921802, 0.05690485)
@@ -281,6 +283,79 @@ get_model_list <- function() {
             models[[model.name]] <- model
         }
     }
+    names.list[['CygB']] <<- perturbed.CygB.names
+    
+    add_models <- function(star.name, models) {
+        #name.list <- paste0('perturbed.', star.name, '.names')
+        model.names <- c()
+        lmh <- c('low', 'mean', 'high')
+        for (R in lmh) {
+            for (M in lmh) {
+                model.type <- paste0(R, 'R', M, 'M')
+                model.name <- paste0(star.name, '_', model.type)
+                model.names <- c(model.names, model.name)
+                
+                #path <- file.path('models', star.name, model.type, 'LOGS_MS')
+                path <- file.path('..', 'grid', 'models', star.name, model.type, 'LOGS_MS')
+                model <- list(name=model.name, short=model.name,
+                          kerns.dir=file.path(path, 'profile1-freqs'),
+                          freq.path=file.path(path, 'profile1-freqs.dat'),
+                          freq.col.names=c('l', 'n', 'nu', 'E'),
+                          fgong.path=file.path(path, 'profile1-freqs',
+                                               'profile1.data.FGONG.dat'),
+                          profile.path=file.path(path, 'profile1.data'))
+                
+                models[[model.name]] <- model
+            }
+        }
+        
+        names.list[[paste0(star.name)]] <<- model.names
+        models 
+    }
+    
+    model.dir <- file.path('..', 'grid', 'models')
+    for (filename in list.files(model.dir)) {
+        models <- add_models(filename, models)
+    }
+    if (F) {
+    models <- add_models('8006161', models)
+    models <- add_models('6106415', models)
+    models <- add_models('12258514', models)
+    models <- add_models('6225718', models)
+    models <- add_models('10068307', models)
+    models <- add_models('6116048', models)
+    models <- add_models('6106415', models)
+    models <- add_models('3632418', models)
+    models <- add_models('7510397', models)
+    models <- add_models('8938364', models)
+    models <- add_models('5774694', models)
+    models <- add_models('8760414', models)
+    models <- add_models('7970740', models)
+    models <- add_models('5184732', models)
+    models <- add_models('7940546', models)
+    models <- add_models('10162436', models)
+    models <- add_models('8379927', models)
+    models <- add_models('8228742', models)
+    models <- add_models('8694723', models)
+    #models <- add_models('6933899', models)
+    #models <- add_models('3656476', models)
+    models <- add_models('9414417', models)
+    models <- add_models('4914923', models)
+    models <- add_models('12317678', models)
+    models <- add_models('10454113', models)
+    models <- add_models('9139163', models)
+    models <- add_models('7680114', models)
+    models <- add_models('10516096', models)
+    models <- add_models('10963065', models)
+    models <- add_models('12009504', models)
+    models <- add_models('9098294', models)
+    models <- add_models('5773345', models)
+    models <- add_models('8394589', models)
+    models <- add_models('6679371', models)
+    models <- add_models('7103006', models)
+    models <- add_models('12069449', models)
+    models <- add_models('12069424', models)
+    }
     
     models
 }
@@ -306,6 +381,7 @@ get_model <- function(model.name, freqs=NULL, target.name=NULL,
     
     # parse model frequencies 
     nus <- parse_freqs(path=model$freq.path, col.names=model$freq.col.names)
+    nus <- nus[as.integer(rownames(unique(nus[,c(1,2)]))),]
     
     # calculate mode inertias
     ell_0 <- nus[nus$l==0,]
@@ -441,6 +517,7 @@ get_model <- function(model.name, freqs=NULL, target.name=NULL,
             }
             
             model$d.f1.spl <- splinefun(r, model$d.f1.true)
+            model$d.f2.spl <- splinefun(r, model$d.f2.true)
             
             k.diffs <- do.call(c, parallelMap(function(mode) {
                 if (!mode %in% names(k1) | !mode %in% names(k2)) 

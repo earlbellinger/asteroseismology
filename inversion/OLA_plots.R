@@ -37,6 +37,8 @@ plot_inversion_all <- function(model, inversion,
         avg_kern_ylim=c(-5, 18), 
         make_xlabs=c(T,T,T),
         make_ylabs=c(T,T,T),
+        suppress_cross=F,
+        suppress_avg=F, 
         cross_kern_ylim=NULL, ...) {
     args. <- c(as.list(environment()), list(...))
     par(mfcol=c(1,3), oma=c(4,3,0,0), mar=c(0,0,0,0))
@@ -44,12 +46,12 @@ plot_inversion_all <- function(model, inversion,
             ylim=inversion_ylim,
             make_xlab=make_xlabs[1],
             make_ylab=make_ylabs[1])))
-    do.call(plot_kernels, c(args., list(
+    if (!suppress_avg) do.call(plot_kernels, c(args., list(
             cross=F, 
             ylim=avg_kern_ylim,
             make_xlab=make_xlabs[2],
             make_ylab=make_ylabs[2])))
-    do.call(plot_kernels, c(args., list(cross=T, 
+    if (!suppress_cross) do.call(plot_kernels, c(args., list(cross=T, 
             ylim=cross_kern_ylim,
             make_xlab=make_xlabs[3],
             make_ylab=make_ylabs[3])))
@@ -60,6 +62,9 @@ make_plots_inversion_all <- function(model, inversion, k.str=NULL,
         wide=F, tall=F, avg_kern_ylim=c(-5, 18), xlim=c(0, 0.45),  
         make_xlabs=c(T,T,T),
         make_ylabs=c(T,T,T),
+        core.bound=NULL, 
+        suppress_cross=F, 
+        suppress_avg=F, 
         cross_kern_ylim=NULL, inversion_ylim=NULL, ...) {
     args. <- c(as.list(environment()), list(...))
     if (is.null(k.str)) {
@@ -73,12 +78,14 @@ make_plots_inversion_all <- function(model, inversion, k.str=NULL,
             make_xlab=make_xlabs[1],
             make_ylab=make_ylabs[1], 
             filename=paste0('inversion', k.str))))
-    do.call(make_plots, c(args., list(plot_f=plot_kernels, cross=F, 
+    if (!suppress_avg) do.call(make_plots, 
+        c(args., list(plot_f=plot_kernels, cross=F, 
             ylim=avg_kern_ylim,
             make_xlab=make_xlabs[2],
             make_ylab=make_ylabs[2], 
             filename=paste0('inversion-avg', k.str))))
-    do.call(make_plots, c(args., list(plot_f=plot_kernels, cross=T, 
+    if (!suppress_avg) do.call(make_plots, 
+        c(args., list(plot_f=plot_kernels, cross=T, 
             ylim=cross_kern_ylim,
             make_xlab=make_xlabs[3],
             make_ylab=make_ylabs[3], 
@@ -89,9 +96,9 @@ make_plots_inversion_all <- function(model, inversion, k.str=NULL,
 plot_inversion <- function(model, inversion, 
         plot_nondim=F, sampler=T, should.cull=F, 
         xlim=NULL, ylim=NULL, legend.spot=NULL, log='', 
-        col.pal=NULL, caption=NULL, 
+        col.pal=NULL, caption=NULL, caption2=NULL, 
         make_xlab=T, make_ylab=T,
-        log.xlim.0=10e-5, 
+        log.xlim.0=10e-5, core.bound=NULL, 
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
     
     d.f1.true <- if ('d.f1.true' %in% names(model)) model$d.f1.true else NULL
@@ -133,6 +140,10 @@ plot_inversion <- function(model, inversion,
             type='l', lty=3, lwd=2, col=blue)
     }
     
+    if (!is.null(core.bound)) {
+        abline(v=core.bound, lty=2, col='black')
+    }
+    
     abline(h=0, lty=2, col='black')
     #col.pal <- c(blue)
     #col.pal <- adjustcolor(c('#f97100', blue, 'black', red, "#ffe599"), 
@@ -143,15 +154,41 @@ plot_inversion <- function(model, inversion,
         if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
         col.pal <- adjustcolor(col.pal, alpha.f=0.95)
     }
-    lty <- c(1,2,3,4)
+    #lty <- c(1,2,3,4)
     
-    with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
-        code=3, angle=90, length=0.02, lwd=2, lty=1,
-        col=col.pal))
-    with(result, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
-        code=3, angle=90, length=0.02, lwd=2, lty=1,
-        col=col.pal))
-    with(result, points(fwhm.mid, df_dr, col=1, pch=20, cex=1))
+    for (res_i in 1:nrow(result)) {
+        res <- result[res_i,]
+        with(res, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+            code=3, angle=90, length=0.01, lwd=2.66, lty=1, col=1))
+        with(res, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+            code=3, angle=90, length=0.01, lwd=2.66, lty=1, col=1))
+        with(res, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+            code=3, angle=90, length=0.01, lwd=2, lty=1, col=col.pal))
+        with(res, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+            code=3, angle=90, length=0.01, lwd=2, lty=1, col=col.pal))
+        #detach(res)
+    }
+    
+    #with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+    #    code=3, angle=90, length=0.01, lwd=2.5, lty=1,
+    #    col=1))
+    #with(result, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+    #    code=3, angle=90, length=0.01, lwd=2.5, lty=1,
+    #    col=1))
+    #with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+    #    code=3, angle=90, length=0.01, lwd=2, lty=1,
+    #    col=col.pal))
+    #with(result, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+    #    code=3, angle=90, length=0.01, lwd=2, lty=1,
+    #    col=col.pal))
+    with(result, points(fwhm.mid, df_dr, col=1, pch=20, cex=0.6))
+    #with(result, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+    #    code=3, angle=90, length=0.02, lwd=2, lty=1,
+    #    col=col.pal))
+    #with(result, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+    #    code=3, angle=90, length=0.02, lwd=2, lty=1,
+    #    col=col.pal))
+    #with(result, points(fwhm.mid, df_dr, col=1, pch=20, cex=1))
     
     par(mgp=mgp-c(0.2, 0, 0))
     if (make_xlab) title(xlab=expression("Radius"~r/R))
@@ -159,15 +196,139 @@ plot_inversion <- function(model, inversion,
     f1.exp <- inversion$k.pair$f1.exp
     if (make_ylab) title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
     
-    if (!is.null(caption)) legend('bottomleft', bty='n', cex=text.cex,
+    if (!is.null(caption)) legend('topleft', bty='n', cex=text.cex,
         legend=caption, inset=c(-0.04, 0.02))
+    
+    if (!is.null(caption2)) legend('topright', bty='n', cex=text.cex, 
+        legend=caption2, inset=c(0.02, 0.02))
     
     magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
             las=1, mgp=mgp-c(0.5,0.15,0), 
+            #majorn=3,
             family=font, cex.axis=text.cex)
     magaxis(side=2, tcl=0.25, labels=make_ylab, 
             las=1, mgp=mgp+c(1,0,0),
             family=font, cex.axis=text.cex)
+}
+
+plot_inversion_multi <- function(inversion.list, 
+        plot_nondim=F, sampler=T, should.cull=F, 
+        xlim=NULL, ylim=NULL, legend.spot=NULL, log='', 
+        col.pal=NULL, caption=NULL, caption2=NULL, 
+        make_xlab=T, make_ylab=T,
+        log.xlim.0=10e-5, core.bound=NULL, 
+        ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, font="Times") {
+    
+    par(mar=mar+c(0.2,-0.2,-0.4,-0.5), mgp=mgp+c(0, 0.4, 0))
+    plot(NA, axes=F, log=log, 
+         xaxs='i', yaxs='i',
+         xlim=xlim, 
+         ylim=ylim,
+         xlab="",
+         ylab="")
+    
+    abline(h=0, lty=2, col='black')
+    if (is.null(col.pal)) {
+        col.pal <- brewer.pal(11, "Spectral")[c(1:4,8:11)]
+        if (nrow(result) == 6) col.pal <- col.pal[c(1:4, 7:8)]
+        col.pal <- adjustcolor(col.pal, alpha.f=0.95)
+    }
+    
+    min.err <- min(sapply(inversion.list, function(inv.res) 
+        min(inv.res$df_dr - inv.res$err)))
+    
+    result <- inversion.list[[1]]
+    for (res_i in 1:nrow(result)) {
+        df_dr <- -0.2+(res_i%%2)*0.03 #0.39 - min.err #mean(sapply(inversion.list, function(x) x[res_i,]$df_dr))
+        res <- result[res_i,]
+        fwhm.left <- res$fwhm.left#[res_i]
+        fwhm.right <- res$fwhm.right#[res_i]
+        fwhm.mid <- res$fwhm.mid#[res_i]
+        err <- res$err#[res_i]
+        arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+            code=3, angle=90, length=0.01, lwd=1, lty=1, col=1)
+        arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+            code=3, angle=90, length=0.01, lwd=1, lty=1, col=1)
+        #with(res, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+        #    code=3, angle=90, length=0.01, lwd=1, lty=1, col=1))
+        #with(res, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+        #    code=3, angle=90, length=0.01, lwd=1, lty=1, col=1))
+        #with(res, arrows(fwhm.left, df_dr, fwhm.right, df_dr, 
+        #    code=3, angle=90, length=0.01, lwd=2, lty=1, col=col.pal))
+        #with(res, arrows(fwhm.mid, df_dr-err, fwhm.mid, df_dr+err, 
+        #    code=3, angle=90, length=0.01, lwd=2, lty=1, col=col.pal))
+        #detach(res)
+    }
+    
+    for (result_i in 1:length(inversion.list)) {
+        result <- inversion.list[[result_i]]
+        xseq <- with(result, seq(min(fwhm.mid), max(fwhm.mid), 0.001))
+        if (nrow(result) > 1) {
+            with(result, 
+                lines(xseq, splinefun(fwhm.mid, df_dr)(xseq),
+                #smooth.spline(fwhm.mid, df_dr),
+                lwd=3, 
+                col=adjustcolor(c(blue, blue, orange, orange)[result_i], 
+                    alpha.f=0.3),
+                lty=c(1,2,1,2)[result_i]))
+        } #else if (nrow(result) > 1) {
+          #  with(result, 
+          #      lines(fwhm.mid, df_dr,
+          #      lwd=1.5, 
+          #      col=adjustcolor(c(blue, blue, orange, orange)[result_i], alpha.f=0.25),
+          #      lty=c(1,2,1,2)[result_i]))
+        
+        #}
+        #with(result, points(fwhm.mid, df_dr, 
+        #    col=c(1,1,red,red)[result_i], #col.pal[result_i], 
+        #    pch=c(1, 20, 1, 20)[result_i],
+        #    cex=c(0.33, 0.5, 0.33, 0.5)[result_i]))#result_i, cex=0.5))
+    }
+    
+    for (result_i in 1:length(inversion.list)) {
+        result <- inversion.list[[result_i]]
+        with(result, points(fwhm.mid, df_dr, 
+            col=adjustcolor(c(blue,blue,orange,orange)[result_i], alpha.f=1),
+            pch=c(1, 20, 1, 20)[result_i],
+            lwd=1.5,
+            cex=c(0.8, 1.2, 0.8, 1.2)[result_i]))#result_i, cex=0.5))
+    }
+    
+    if (!is.null(caption)) legend('topleft', bty='n', cex=0.9*text.cex,
+        legend=caption, inset=c(-0.1, -0.05))
+    
+    #if (!is.null(caption2)) legend('topleft', bty='n', inset=c(0.02, 0.14),
+    if (!is.null(caption2)) legend('topright', #inset=c(0.02, 0.14),
+        cex=0.5*text.cex, x.intersp=0.8,
+        col=c(blue, blue, orange, orange),
+        lty=c(1,2,1,2),
+        pch=c(1, 20, 1, 20),
+        legend=caption2)
+    
+    magaxis(1:4, tcl=0, labels=F)
+    magaxis(1, tcl=-0.25, mgp=mgp+c(0, 0.4, 0), cex.axis=text.cex, 
+        family=font, majorn=3, labels=make_xlab)
+    magaxis(2, tcl=-0.25, mgp=mgp+c(0, 0.4, 0), cex.axis=text.cex, 
+        family=font, las=1, majorn=3, labels=F)
+    axis(2, at=c(-0.2, 0.2), labels=T, tick=F, las=1, cex.axis=text.cex)
+    
+    par(mgp=mgp+c(0.6, 0, 0))
+    if (make_xlab) title(xlab=expression("Radius"~r/R))
+    par(mgp=mgp+c(0.8, 0, 0))
+    f1.exp <- inversion$k.pair$f1.exp
+    if (make_ylab) title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
+    #magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
+    #        las=1, mgp=mgp+c(0, 0.1, 0),#-c(0.5,0.15,0), 
+    #        family=font, cex.axis=text.cex, majorn=3)
+    #magaxis(side=2, tcl=0.25, labels=make_ylab, 
+    #        las=1, mgp=mgp+c(0, 0.1, 0), majorn=3, 
+    #        family=font, cex.axis=text.cex)
+    
+    #par(mgp=mgp+c(0.1, 0, 0))
+    #if (make_xlab) title(xlab=expression("Radius"~r/R))
+    #par(mgp=mgp+c(0.3, 0, 0))
+    #f1.exp <- inversion$k.pair$f1.exp
+    #if (make_ylab) title(ylab=bquote(delta*.(f1.exp)/.(f1.exp)))
 }
 
 plot_inversions <- function(model, inversions, k.pair,
@@ -201,7 +362,7 @@ plot_inversions <- function(model, inversions, k.pair,
             } else 0
         )))) 
     
-    plot(NA, axes=F, log=log,
+    plot(NA, axes=F, log=log, yaxs='i', 
          xlim=xlim, 
          ylim=ylim, 
          xlab="Radius r/R",
@@ -246,7 +407,7 @@ plot_ref_mods <- function(model.list, inversion, ref.mod=NULL,
         col.pal=NULL, log.xlim.0=10e-5, c.factor=10**15, 
         make_ylab=T, caption=NULL,
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, 
-        font="Palatino Linotype") {
+        font="Times") {
     
     par(mar=mar+c(-0.3,-0.2,0,0))
     
@@ -326,7 +487,7 @@ plot_ref_rel_diffs <- function(model.list,
         cross.lists, inv.params, kern.interp.xs, 
         make_ylab=T, caption=NULL,
         ..., text.cex=1, mgp=utils.mgp, mar=utils.mar, 
-        font="Palatino Linotype") {
+        font="Times") {
     
     #text.cex <- text.cex*1.25
     #par(cex.lab=text.cex, mar=mar+c(-0.5, -0.5, 0, 0))
@@ -908,11 +1069,12 @@ plot_kernels <- function(model, inversion, cross=F,
         if ((!cross || cross && ((abs(ylim[2]) > abs(ylim[1])) 
             || !is.null(legend.spot) && legend.spot=='topright'))
             || (!is.null(cross.inset) && cross.inset!='bottomright'))
-            par(fig=c(0.6, 0.97, 0.4, 0.96), new=T) 
+            #par(fig=c(0.6, 0.97, 0.4, 0.96), new=T)
+            par(fig=c(0.6, 0.99, 0.6, 0.98), new=T)  
         else
             par(fig=c(0.6, 0.97, 0.11, 0.67), new=T)
     } else if (make.inset) {
-        par(fig=c(0, 1, 0, 1))
+        par(fig=c(0, 1, 0, 1), mar=mar+c(-0.7, -0.8, -0.6, -0.3))
     }
     
     plot(NA, axes=F, log=log, xaxs='i',
@@ -933,12 +1095,15 @@ plot_kernels <- function(model, inversion, cross=F,
         for (kern_i in 1:ncol(kernels)) {
             if (length(sampler) < kern_i || sampler[kern_i]) {
                 lines(xs, kernels[,kern_i], 
+                    lwd=2.6, lty=lty[((kern_i-1) %% length(lty))+ 1], 
+                    col=1)
+                lines(xs, kernels[,kern_i], 
                     lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
                     col=col.pal[((kern_i-1) %% length(col.pal))+1])
             }
         }
         
-        par(mgp=mgp-c(0.2, 0, 0))
+        par(mgp=mgp-c(0.1, 0, 0))
         if (make_xlab) title(xlab=expression("Radius"~r/R))
         par(mgp=mgp+c(0.3 + ifelse(cross, 0.15, 0), 0, 0))
         if (make_ylab) {
@@ -950,11 +1115,21 @@ plot_kernels <- function(model, inversion, cross=F,
                     kappa^(.(model$f1.exp)*','~.(model$f2.exp))))
             }
         }
-        magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
-            las=1, mgp=mgp-c(0.5,0.15,0), family=font, 
+        
+        #magaxis(side=c(1,3,4), tcl=0.25, labels=c(make_xlab,0,0),
+        #    las=1, mgp=mgp-c(0.5,0.15,0), family=font, 
+        #    cex.axis=text.cex)
+        #magaxis(side=2, tcl=0.25, labels=make_ylab, 
+        #    las=1, mgp=mgp+c(1,0,0), family=font, 
+        #    cex.axis=text.cex)
+        magaxis(side=c(1:4), tcl=0, labels=F, #c(make_xlab,0,0),
+            las=1, mgp=mgp, family=font, 
             cex.axis=text.cex)
-        magaxis(side=2, tcl=0.25, labels=make_ylab, 
-            las=1, mgp=mgp+c(1,0,0), family=font, 
+        magaxis(side=1, tcl=-0.25, labels=make_xlab, 
+            las=1, mgp=mgp+c(0,0.1,0), family=font, 
+            cex.axis=text.cex)
+        magaxis(side=2, tcl=-0.25, labels=make_ylab, 
+            las=1, mgp=mgp+c(0,0.4,0), family=font, 
             cex.axis=text.cex)
         
         
@@ -974,6 +1149,8 @@ plot_kernels <- function(model, inversion, cross=F,
         } 
     
     } else {
+    
+        rect(0, -10, 1, 10, col='white')
         
         ordering <- rev(order(sapply(1:ncol(kernels), function(kern_i) {
                 kern <- kernels[,kern_i]
@@ -984,38 +1161,34 @@ plot_kernels <- function(model, inversion, cross=F,
         for (kern_i in ordering) {
             if (length(sampler) < kern_i || sampler[kern_i]) {
                 lines(xs, kernels[,kern_i], 
+                    lwd=2.66, lty=lty[((kern_i-1) %% length(lty))+ 1], 
+                    col=1)
+                lines(xs, kernels[,kern_i], 
                     lwd=2, lty=lty[((kern_i-1) %% length(lty))+ 1], 
                     col=col.pal[((kern_i-1) %% length(col.pal))+1])
             }
         }
         
-    
-        #if (cross) {
-            magaxis(side=1:4, tcl=0, labels=F)
-            yaxislabs <- pretty(axis(2, labels=F, tick=F))
-            yaxismin <- yaxislabs
-            axis(2, at=yaxismin, las=1, 
-                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125/2)
-            axis(4, at=yaxismin, las=1, 
-                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125/2)
-            while (length(yaxislabs) > 3) yaxislabs <- yaxislabs[c(T, F)]
-            axis(2, at=yaxislabs, las=1, 
-                labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
-            axis(4, at=yaxislabs, las=1, 
-                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
-            par(mgp=mgp-c(1, 0.2, 0))
-            axis(1, at=c(0.5, 1), las=1, 
-                labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
-            axis(3, at=c(0.5, 1), las=1, 
-                labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
-        #} else {
-        #    magaxis(side=c(2,4), tcl=0.125, labels=c(1, 0), 
-        #        las=1, mgp=mgp+c(1,0,0), majorn=3, minorn=2,
-        #        family=font, cex.axis=text.cex)
-        #    magaxis(side=c(1,3), tcl=0.125, labels=c(1,0),
-        #        las=1, mgp=mgp-c(1,0.15,0), majorn=1, minorn=2,
-        #        family=font, cex.axis=text.cex)
-        #}
+        magaxis(side=1:4, tcl=0, labels=F)
+        yaxislabs <- pretty(axis(2, labels=F, tick=F))
+        yaxismin <- yaxislabs
+        axis(2, at=yaxismin, las=1, 
+            labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=-0.125/2)
+        #axis(4, at=yaxismin, las=1, 
+        #    labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125/2)
+        while (length(yaxislabs) > 3) yaxislabs <- yaxislabs[c(T, F)]
+        axis(2, at=yaxislabs, las=1, 
+            labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=-0.125,
+            mgp=mgp+c(0, 0.1, 0))
+        #axis(4, at=yaxislabs, las=1, 
+        #    labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
+        par(mgp=mgp-c(1, 0.3, 0))
+        axis(1, at=c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0), las=1, 
+            labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=-0.125/2)
+        axis(1, at=c(0.6, 0.9), las=1, 
+            labels=T, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=-0.125)
+        #axis(3, at=c(0.5, 1), las=1, 
+        #    labels=F, tick=T, cex.axis=0.8*text.cex, lwd=1, tcl=0.125)
     }
 }
 

@@ -1,0 +1,31 @@
+&star_job
+      
+      save_model_filename = 'hexh.mod'
+      load_saved_model = .true.
+      saved_model_name = 'flash.mod'
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_HEB'
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      profile_interval = 15
+      history_interval = 15
+      
+      xa_central_lower_limit_species(1) = 'he4'
+      xa_central_lower_limit(1) = 1d-2
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

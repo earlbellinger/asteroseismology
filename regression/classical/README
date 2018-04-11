@@ -1,0 +1,44 @@
+"Table_models.dat" has the following format:-
+
+Z	: Mass fraction of heavy metals
+Y	: Mass fraction of helium
+Band	: Filter (UBVRIJKL)
+M/Msolar	: Ratio of mass of the star to solar mass
+Mode	: Fundamental/First overtone pulsation mode
+Temp	: Temperature(in K)
+log(L/Lsolar)	: log of ratio of luminosity of the star to solar luminosity
+logP	: log of period(in days)
+A	: Amplitude (difference of maximum and minimum light)
+Sk	: Skewness
+Ac	: Acuteness
+mmag	: Mean magnitude
+R21	: Fourier parameter
+R31	: Fourier parameter
+P21	: Fourier parameter
+P31	: Fourier parameter
+log(R/Rsolar): log of ratio of radius of the star to solar luminosity
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+"Table_RRL.dat" and "Table_T2C.dat" have the following format (with the exception that "Table_T2C.dat" does not have the "Mode" column):-
+
+Galaxy	: Bulge/LMC/SMC/M4
+Band	: Filter(VI for Bulge,LMC,SMC/ LM for M4)
+Mode	: FU/FO
+StarID	
+logP	: log of period
+order	: order of Fourier fit using Baart's criterion
+A	: Amplitude
+Sk	: Skewness
+Ac	: Acuteness
+mean_mag	: mean magnitude
+mean_magErr	: error in mean magnitude
+The following columns are the Fourier parameters and their associated errors.
+R21	
+R21Err	
+R31	
+R31Err	
+P21	
+P21Err	
+P31	
+P31Err
+----------------------------------------------------------------------------------------------------------------------------------------------

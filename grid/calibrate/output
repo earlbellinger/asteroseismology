@@ -1,0 +1,51 @@
+DATE: 2018-02-06
+TIME: 03:21:46
+                                         version_number       10108
+ read inlist_0all
+ read inlist_3ms
+load saved model zams.mod
+
+                                        set_initial_age    0.0000000000000000D+00
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ do_element_diffusion T
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS          16
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        596   7.137242   5692.246  -0.129108  -0.129108   1.000000   1.000000   0.707922   0.001164   0.272957   0.708371  -1.736027   1519      0
+   3.697179   1.902005  -0.052498 -47.159543  -1.648608 -99.000000   0.000000   0.273433   0.008674   0.018583   0.273042   0.079212      3      0
+ 4.9794E+03  17.171499  -0.129169  -9.816118   5.033057  -6.528026   0.000000   0.002605   0.001805  1.864E-02  1.859E-02 -0.290E-10              
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.GYRE for model 596
+
+stop because star_age >= max_age
+    0.4572000000E+10    0.4572000000E+10
+
+        668   7.194083   5773.285   0.000218   0.000218   1.000000   1.000000   0.341270   0.004823   0.246008   0.670462  -1.505183   1468      0
+   8.278880   2.186349  -0.000175 -42.859186  -1.613020 -99.000000   0.000000   0.638902   0.008374   0.016984   0.310824   0.110446      6      0
+ 4.5720E+09  17.371050   0.000036  -8.471118   4.983649  -6.596630   0.000000   0.000019   0.001881  1.983E-02  1.871E-02  0.964E-13    varcontrol
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.GYRE for model 668
+ saved to tams.mod
+termination code: max_age
+        668   7.194083   5773.285   0.000218   0.000218   1.000000   1.000000   0.341270   0.004823   0.246008   0.670462  -1.505183   1468      0
+   8.278880   2.186349  -0.000175 -42.859186  -1.613020 -99.000000   0.000000   0.638902   0.008374   0.016984   0.310824   0.110446      6      0
+ 4.5720E+09  17.371050   0.000036  -8.471118   4.983649  -6.596630   0.000000   0.000019   0.001881  1.983E-02  1.871E-02  0.964E-13    varcontrol
+
+DATE: 2018-02-06
+TIME: 03:22:27

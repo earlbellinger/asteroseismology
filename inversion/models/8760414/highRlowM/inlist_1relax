@@ -1,0 +1,35 @@
+&star_job
+      
+      create_pre_main_sequence_model = .true.
+      save_model_filename = 'pms.mod'
+      
+      steps_to_take_before_terminate = 1 ! 50
+      pre_ms_relax_num_steps = 100
+      pre_ms_T_c = 9e5
+      
+      relax_initial_Y = .true.
+      relax_initial_Z = .true.
+      new_Y = 0.243104109436917
+      new_Z = 0.00208086827802697
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      which_atm_option = 'simple_photosphere'
+      do_element_diffusion = .false.
+      
+      write_profiles_flag = .false.
+      do_history_file = .false.
+      
+      stop_near_zams = .true.
+      ! x_logical_ctrl(1) = .true. ! stop at ZAMS 
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

@@ -1,0 +1,27 @@
+&star_job
+      
+      save_model_filename = 'zams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'pms.mod'
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      write_profiles_flag = .false.
+      do_history_file = .false.
+      
+      which_atm_option = 'simple_photosphere'
+      do_element_diffusion = .false.
+      
+      stop_near_zams = .true.
+      ! x_logical_ctrl(1) = .true. ! stop at ZAMS 
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

@@ -1,0 +1,39 @@
+&star_job
+      
+      save_model_filename = 'tams.mod'
+      load_saved_model = .true.
+      saved_model_name = 'zams.mod'
+      
+      set_initial_age = .true.
+      initial_age = 0
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_MS'
+      
+      max_years_for_timestep = 11556087
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      delta_lgTeff_limit = 0.0005
+      !delta_lgL_phot_limit = 0.005
+      
+      delta_lg_XC_cntr_hard_limit = 0.07
+      
+      profile_interval = 1
+      history_interval = 1
+      
+      xa_central_lower_limit_species(1) = 'h1'
+      xa_central_lower_limit(1) = 1d-5
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

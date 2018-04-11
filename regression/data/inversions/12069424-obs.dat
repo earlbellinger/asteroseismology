@@ -1,0 +1,8 @@
+name value uncertainty
+nu_max 2197 22
+Teff 5825 50
+L 1.56 0.05
+log_g 4.33 0.07
+Fe/H 0.096 0.026
+radius 1.22 0.02
+radial_velocity -27.61 0.08

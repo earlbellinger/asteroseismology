@@ -137,7 +137,7 @@
          ierr = 0
          call star_ptr(id, s, ierr)
          if (ierr /= 0) return
-         how_many_extra_history_columns = 1
+         how_many_extra_history_columns = 3
       end function how_many_extra_history_columns
 
 
@@ -148,6 +148,9 @@
          
          real(dp) :: d_log_L_dT, d_log_L_dT_cutoff, d_log_L_dT_tol
          real(dp) :: log_L, log_L_old, log_Teff, log_Teff_old
+         
+         real(dp) :: h_exh_core_mass, h_exh_core_radius
+         integer :: k
          
          integer, intent(out) :: ierr
          type (star_info), pointer :: s
@@ -168,6 +171,27 @@
          
          names(1) = "d_log_L_dT"
          vals(1) = d_log_L_dT
+         
+         
+         h_exh_core_mass = 0
+         h_exh_core_radius = 0
+         if (s% center_h1 < s% xa_central_lower_limit(1)) then
+             do k = 1, s% nz
+                ! write(*,*) "xa1k", s% xa(1,k)
+                if (s% xa(1,k) <= s% xa_central_lower_limit(1)) then
+                    ! write(*,*) "h_exh_core_mass = ", s% m(k) / ( s% star_mass * msol )
+                    ! write(*,*) "h_exh_core_radius = ", s% r(k) / ( s% photosphere_r * rsol )
+                    h_exh_core_mass = s% m(k) / ( s% star_mass * msol )
+                    h_exh_core_radius = s% r(k) / ( s% photosphere_r * rsol )
+                    exit
+                end if
+             end do
+         end if
+         
+         names(2) = "h_exh_core_mass"
+         vals(2) = h_exh_core_mass 
+         names(3) = "h_exh_core_radius"
+         vals(3) = h_exh_core_radius
          
       end subroutine data_for_extra_history_columns
 

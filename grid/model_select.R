@@ -22,7 +22,14 @@ DF <- read.table(file.path(log_dir, 'history.data'), header=1, skip=5)[-1,]
 #}
 
 ## solve linear transport problem to get equally-spaced points 
-space_var <- ifelse(grepl('LOGS_MS', log_dir), 'center_h1', 'star_age')
+DF$lg_X_c <- log10(DF$center_h1)
+DF$lg_Y_c <- log10(DF$center_he3 + DF$center_he4)
+## solve linear transport problem to get equally-spaced points 
+space_var <- ifelse(grepl('LOGS_MS', log_dir), 'lg_X_c', 
+             ifelse(grepl('LOGS_HEB', log_dir), 'lg_Y_c', 
+             #ifelse(grepl('LOGS_BUMP', log_dir), 'center_degeneracy', 
+                'star_age'))
+#space_var <- ifelse(grepl('LOGS_MS', log_dir), 'center_h1', 'star_age')
 x <- DF[[space_var]]
 nrow.DF <- length(x)
 ideal <- seq(max(x), min(x), length=num_points)
@@ -34,6 +41,10 @@ col.rhs   <- rep(1, nrow.DF)
 sol <- lp.transport(cost.mat, "min", row.signs, row.rhs,
     col.signs, col.rhs)$solution
 new.DF <- DF[apply(sol, 1, which.max),]
+
+if (grepl('LOGS_BUMP', log_dir)) {
+    new.DF <- rbind(new.DF, DF[which.max(DF$log_L),])#[-1,])
+}
 
 model_nums <- new.DF$model_number
 

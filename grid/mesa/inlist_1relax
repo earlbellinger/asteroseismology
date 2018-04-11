@@ -4,8 +4,8 @@
       save_model_filename = 'pms.mod'
       
       steps_to_take_before_terminate = 1
-      pre_ms_relax_num_steps = 100
-      !pre_ms_T_c = 9e5
+      pre_ms_relax_num_steps = 50
+      pre_ms_T_c = 9e5
       
       !relax_initial_Y = .true.
       !relax_initial_Z = .true.

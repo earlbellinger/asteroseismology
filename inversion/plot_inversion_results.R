@@ -299,3 +299,125 @@ make_plots(plot_ref_rel_diffs, paste0('ref_mods_rel', targ.mode),
         use.cairo=T, font="Palatino Linotype") 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+star.names <- c(8006161, 6106415, 5774694, 5184732) 
+initial.Ms <- c(1.014, 1.118, 1.000, 1.271) 
+sigma.Ms <- c(0.031, 0.052, 0.0357, 0.047) 
+
+for (ii in 1:length(star.names)) {
+
+star.name <- star.names[ii]
+initial.M <- initial.Ms[ii]#1.014
+sigma.M <- sigma.Ms[ii]#0.031
+target.name <- paste0('KIC_', star.name)
+mode.set <- target.name
+error.set <- target.name
+ref.mod.name <- paste0(star.name, '_meanRmeanM')
+#model.list.name <- '8006161'
+targ.mode <- paste0(
+    '-p_', target.name, 
+    '-m_', mode.set, 
+    '-e_', error.set, 
+    '-r_', ref.mod.name, 
+    paste0("-", targ.kern.type))
+#model.names <- names.list[[star.name]]
+#model.names <- get(model.list.name) 
+#model.list <- parallelMap(function(model.name) 
+#        get_model(freqs=NULL, model.name=model.name, 
+#            target.name=target.name, k.pair=k.pair, square.Ks=F), 
+#    model.name=model.names)
+#names(model.list) <- model.names
+
+load(file.path('save', paste0('ref.mod',         targ.mode)))
+load(file.path('save', paste0('inv.lists',       targ.mode)))
+load(file.path('save', paste0('avg.kerns.lists', targ.mode)))
+load(file.path('save', paste0('cross.lists',     targ.mode)))
+load(file.path('save', paste0('MRs',             targ.mode)))
+load(file.path('save', paste0('inv.params',      targ.mode)))
+inversion <- lists_to_inversion(model=ref.mod, rs=rs, 
+    inv.lists=inv.lists, avg.kerns.lists=avg.kerns.lists, 
+    cross.lists=cross.lists, inv.params=inv.params,
+    kern.interp.xs=kern.interp.xs)
+inversion$k.pair$f1.units <- bquote(cm^2~s^-2)
+print_latex_table(inversion)
+
+targ_kerns <- get_target_kernels(inversion$result$rs, 
+    inversion$params[['widths']], 
+    kern.interp.xs, r_f=0.2, 
+    f.spl=ref.mod$cs.spl)
+
+penalties <- sapply(1:nrow(inversion$result), function(ii) {
+    avg_kern <- inversion$avg_kerns[,ii]
+    targ_kern <- targ_kerns[,ii]
+    sintegral(kern.interp.xs, (avg_kern-targ_kern)**2)$value
+})
+
+penalties2 <- sapply(1:nrow(inversion$result), function(ii) {
+    avg_kern <- inversion$avg_kerns[,ii]
+    #targ_kern <- targ_kerns[,ii]
+    mid <- inversion$result[ii,]$fwhm.mid
+    FWHM <- with(inversion$result[ii,], fwhm.right - fwhm.left)
+    a <- max(mid - FWHM, 0)
+    b <- min(mid + FWHM, 1)
+    first <- if (a>0) sintegral(kern.interp.xs[kern.interp.xs<a], 
+        avg_kern[kern.interp.xs<a]**2)$value else 0
+    second <- if (b<1) sintegral(kern.interp.xs[kern.interp.xs>b], 
+        avg_kern[kern.interp.xs>b]**2)$value else 0
+    first + second 
+})
+
+#print(penalties)
+
+make_plots_inversion_all(ref.mod, inversion, kern.interp.xs=kern.interp.xs, 
+    k.str=targ.mode, cross.inset="bottomright", 
+    inversion_ylim=c(-0.2, 0.1), 
+    #col.pal="#F46D43", sampler=c(F,F,T,F,F,F),
+    #inversion_ylim=c(0, 0.15), 
+    caption=star.name, 
+    caption2=as.expression(bquote('M' == .(signif(initial.M,3)) %+-% .(signif(sigma.M,2)))),
+    sampler=penalties<6,
+    cross_kern_ylim=c(-0.8, 0.3))
+
+}
+#make_plots_inversion_all(ref.mod, inversion, kern.interp.xs=kern.interp.xs,
+#    k.str=targ.mode, cross.inset="bottomright", use.cairo=T, 
+#    font="Palatino Linotype",
+#    make_xlabs=c(T,T,T), 
+#    make_ylabs=c(F,T,T), 
+#    caption="16 Cyg B",
+#    #inversion_ylim=c(-0.02, 0.2),
+#    inversion_ylim=c(-0.2, 0.1),
+#    #col.pal="#F46D43", sampler=c(F,F,T,F,F,F),
+#    #inversion_ylim=c(0, 0.15),
+#    cross_kern_ylim=c(-0.8, 0.3))
+#make_plots(plot_ref_mods, paste0('ref_mods', targ.mode),
+#    model.list=model.list, inversion=inversion, 
+#    make_ylab=F, caption="16 Cyg B", 
+#    xlim=c(0, 0.35), ylim=c(0.7, 1.7), use.cairo=T, font="Palatino Linotype") 
+#
+#make_plots(plot_ref_rel_diffs, paste0('ref_mods_rel', targ.mode),
+#    model.list=list(#CygB=model.list[['CygBDiffusion']],
+#                    CygBhighRlowM=model.list[['CygBhighRlowM']],
+#                    CygBlowRhighM=model.list[['CygBlowRhighM']]), 
+#        xlim=c(0, 0.45), ylim=c(-0.2, 0.1), col.pal=c(1, red),
+#        #c(1, blue, orange), 
+#        rs=rs, inv.lists=inv.lists, avg.kerns.lists=avg.kerns.lists, 
+#        cross.lists=cross.lists, inv.params=inv.params, 
+#        kern.interp.xs=kern.interp.xs, make_ylab=F, 
+#        caption="16 Cyg B", wide=F, tall=F, make_png=F, slides=F, 
+#        #xlim=c(0, 0.35), ylim=c(0.7, 1.7), 
+#        use.cairo=T, font="Palatino Linotype") 
+
+

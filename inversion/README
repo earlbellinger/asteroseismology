@@ -1,0 +1,12 @@
+first, run python3 ../regression/learn.py on some data 
+
+Rscript make_models.R KIC# [covs.directory] [obs.directory] 
+
+./check_cal.sh (should be all nearly 0) 
+
+./make_kernels.sh KIC# 
+
+add info to models.R and frequencies.R 
+
+maybe_sub.sh -m 6000000 -p 9 Rscript OLA_optimize_MR2.R KIC_KIC# KIC_KIC# KIC_KIC# KIC#_meanRmeanM KIC# mod_Gauss M R dM dR 128 F 
+

@@ -1,0 +1,102 @@
+&star_job
+      
+      save_model_when_terminate = .true.
+      
+      kappa_file_prefix = 'gs98'
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag = .true.
+      
+      show_log_description_at_start = .false.
+      save_photo_when_terminate = .false.
+      pgstar_flag = .false.
+      
+      change_net = .true. 
+      change_initial_net = .true. 
+      new_net_name = 'o18_and_ne22.net' 
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      initial_mass = 1.0364926400853
+      mixing_length_alpha = 1.93942467496726
+      
+      initial_y = 0.285667421283175
+      initial_z = 0.0290516205166215
+      Zbase = 0.0290516205166215
+      
+      !mesh_delta_coeff = 0.8
+      !varcontrol_target = 1d-5 ! default is 1d-4
+      
+      do_element_diffusion = .false.
+      diffusion_use_cgs_solver = .true.
+      diffusion_dt_limit = 3d12
+      
+      diffusion_calculates_ionization = .false.
+      diffusion_use_isolve = .true.
+      diffusion_use_cgs_solver = .true.
+      
+      diffusion_num_classes = 5
+      diffusion_class_factor(1) = 1
+      diffusion_class_factor(2) = 1
+      diffusion_class_factor(3) = 1
+      diffusion_class_factor(4) = 1
+      diffusion_class_factor(5) = 1
+      
+      diffusion_class_representative(1) = 'h1'
+      diffusion_class_representative(2) = 'he3'
+      diffusion_class_representative(3) = 'he4'
+      diffusion_class_representative(4) = 'o16'
+      diffusion_class_representative(5) = 'fe56'
+      
+      diffusion_class_A_max(1) = 2
+      diffusion_class_A_max(2) = 3
+      diffusion_class_A_max(3) = 4
+      diffusion_class_A_max(4) = 16
+      diffusion_class_A_max(5) = 10000
+      
+      conv_bdy_mix_softening_f0 = 0.0001
+      conv_bdy_mix_softening_f = 0.0005
+      
+      smooth_outer_xa_big = 1d-4
+      smooth_outer_xa_small = 1d-8
+      
+      num_cells_for_smooth_brunt_B = 0 ! changed from 2
+      num_cells_for_smooth_gradL_composition_term = 5 ! changed from 3
+      
+      calculate_Brunt_N2 = .true.
+      write_pulse_info_with_profile = .true.
+      pulse_info_format = 'FGONG'
+      format_for_FGONG_data = '(1P5E16.9,x)'
+      
+      write_pulsation_plot_data = .false.
+      add_center_point_to_pulse_info = .false.
+      keep_surface_point_for_pulse_info = .false.
+      add_double_points_to_pulse_info = .false.
+      add_atmosphere_to_pulse_info = .true.
+      
+      skip_rotation_in_convection_zones = .true.
+      
+      photostep = 0
+      terminal_interval = 10000000
+      write_header_frequency = 10000000
+      max_num_profile_zones = 2
+      min_timestep_limit = 1d-12
+      
+      !which_atm_option = 'Eddington_grey'
+      
+      max_age = 4624853187
+      
+      max_model_number = 1000000
+      max_num_profile_models = 1
+      
+      Lnuc_div_L_zams_limit = 0.999
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

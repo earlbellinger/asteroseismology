@@ -1,0 +1,31 @@
+&star_job
+      
+      save_model_filename = 'bump.mod'
+      load_saved_model = .true.
+      saved_model_name = 'brgb.mod'
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      log_directory = 'LOGS_RGB'
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      profile_interval = 5
+      history_interval = 5
+      
+      x_logical_ctrl(1) = .true. ! stop when effective temperature increases 
+      x_integer_ctrl(1) = 6 ! stop when He flash is over 
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

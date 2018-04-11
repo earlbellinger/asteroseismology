@@ -1,0 +1,327 @@
+DATE: 2018-03-20
+TIME: 19:19:32
+                                         version_number       10108
+ read inlist_0all
+ read inlist_4sg
+load saved model tams.mod
+
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+save LOGS_SG/profile1.data LOGS_SG/profile1.data.GYRE for model 1077
+save LOGS_SG/profile2.data LOGS_SG/profile2.data.GYRE for model 1078
+save LOGS_SG/profile3.data LOGS_SG/profile3.data.GYRE for model 1079
+save LOGS_SG/profile4.data LOGS_SG/profile4.data.GYRE for model 1080
+save LOGS_SG/profile5.data LOGS_SG/profile5.data.GYRE for model 1081
+save LOGS_SG/profile6.data LOGS_SG/profile6.data.GYRE for model 1082
+save LOGS_SG/profile7.data LOGS_SG/profile7.data.GYRE for model 1083
+save LOGS_SG/profile8.data LOGS_SG/profile8.data.GYRE for model 1084
+save LOGS_SG/profile9.data LOGS_SG/profile9.data.GYRE for model 1085
+save LOGS_SG/profile10.data LOGS_SG/profile10.data.GYRE for model 1086
+save LOGS_SG/profile11.data LOGS_SG/profile11.data.GYRE for model 1087
+save LOGS_SG/profile12.data LOGS_SG/profile12.data.GYRE for model 1088
+save LOGS_SG/profile13.data LOGS_SG/profile13.data.GYRE for model 1089
+save LOGS_SG/profile14.data LOGS_SG/profile14.data.GYRE for model 1090
+save LOGS_SG/profile15.data LOGS_SG/profile15.data.GYRE for model 1091
+save LOGS_SG/profile16.data LOGS_SG/profile16.data.GYRE for model 1092
+save LOGS_SG/profile17.data LOGS_SG/profile17.data.GYRE for model 1093
+save LOGS_SG/profile18.data LOGS_SG/profile18.data.GYRE for model 1094
+save LOGS_SG/profile19.data LOGS_SG/profile19.data.GYRE for model 1095
+save LOGS_SG/profile20.data LOGS_SG/profile20.data.GYRE for model 1096
+save LOGS_SG/profile21.data LOGS_SG/profile21.data.GYRE for model 1097
+save LOGS_SG/profile22.data LOGS_SG/profile22.data.GYRE for model 1098
+save LOGS_SG/profile23.data LOGS_SG/profile23.data.GYRE for model 1099
+save LOGS_SG/profile24.data LOGS_SG/profile24.data.GYRE for model 1100
+save LOGS_SG/profile25.data LOGS_SG/profile25.data.GYRE for model 1101
+save LOGS_SG/profile26.data LOGS_SG/profile26.data.GYRE for model 1102
+save LOGS_SG/profile27.data LOGS_SG/profile27.data.GYRE for model 1103
+save LOGS_SG/profile28.data LOGS_SG/profile28.data.GYRE for model 1104
+save LOGS_SG/profile29.data LOGS_SG/profile29.data.GYRE for model 1105
+save LOGS_SG/profile30.data LOGS_SG/profile30.data.GYRE for model 1106
+save LOGS_SG/profile31.data LOGS_SG/profile31.data.GYRE for model 1107
+save LOGS_SG/profile32.data LOGS_SG/profile32.data.GYRE for model 1108
+save LOGS_SG/profile33.data LOGS_SG/profile33.data.GYRE for model 1109
+save LOGS_SG/profile34.data LOGS_SG/profile34.data.GYRE for model 1110
+save LOGS_SG/profile35.data LOGS_SG/profile35.data.GYRE for model 1111
+save LOGS_SG/profile36.data LOGS_SG/profile36.data.GYRE for model 1112
+save LOGS_SG/profile37.data LOGS_SG/profile37.data.GYRE for model 1113
+save LOGS_SG/profile38.data LOGS_SG/profile38.data.GYRE for model 1114
+save LOGS_SG/profile39.data LOGS_SG/profile39.data.GYRE for model 1115
+save LOGS_SG/profile40.data LOGS_SG/profile40.data.GYRE for model 1116
+save LOGS_SG/profile41.data LOGS_SG/profile41.data.GYRE for model 1117
+save LOGS_SG/profile42.data LOGS_SG/profile42.data.GYRE for model 1118
+save LOGS_SG/profile43.data LOGS_SG/profile43.data.GYRE for model 1119
+save LOGS_SG/profile44.data LOGS_SG/profile44.data.GYRE for model 1120
+save LOGS_SG/profile45.data LOGS_SG/profile45.data.GYRE for model 1121
+save LOGS_SG/profile46.data LOGS_SG/profile46.data.GYRE for model 1122
+save LOGS_SG/profile47.data LOGS_SG/profile47.data.GYRE for model 1123
+save LOGS_SG/profile48.data LOGS_SG/profile48.data.GYRE for model 1124
+save LOGS_SG/profile49.data LOGS_SG/profile49.data.GYRE for model 1125
+save LOGS_SG/profile50.data LOGS_SG/profile50.data.GYRE for model 1126
+save LOGS_SG/profile51.data LOGS_SG/profile51.data.GYRE for model 1127
+save LOGS_SG/profile52.data LOGS_SG/profile52.data.GYRE for model 1128
+save LOGS_SG/profile53.data LOGS_SG/profile53.data.GYRE for model 1129
+save LOGS_SG/profile54.data LOGS_SG/profile54.data.GYRE for model 1130
+save LOGS_SG/profile55.data LOGS_SG/profile55.data.GYRE for model 1131
+save LOGS_SG/profile56.data LOGS_SG/profile56.data.GYRE for model 1132
+save LOGS_SG/profile57.data LOGS_SG/profile57.data.GYRE for model 1133
+save LOGS_SG/profile58.data LOGS_SG/profile58.data.GYRE for model 1134
+save LOGS_SG/profile59.data LOGS_SG/profile59.data.GYRE for model 1135
+save LOGS_SG/profile60.data LOGS_SG/profile60.data.GYRE for model 1136
+save LOGS_SG/profile61.data LOGS_SG/profile61.data.GYRE for model 1137
+save LOGS_SG/profile62.data LOGS_SG/profile62.data.GYRE for model 1138
+save LOGS_SG/profile63.data LOGS_SG/profile63.data.GYRE for model 1139
+save LOGS_SG/profile64.data LOGS_SG/profile64.data.GYRE for model 1140
+save LOGS_SG/profile65.data LOGS_SG/profile65.data.GYRE for model 1141
+save LOGS_SG/profile66.data LOGS_SG/profile66.data.GYRE for model 1142
+save LOGS_SG/profile67.data LOGS_SG/profile67.data.GYRE for model 1143
+save LOGS_SG/profile68.data LOGS_SG/profile68.data.GYRE for model 1144
+save LOGS_SG/profile69.data LOGS_SG/profile69.data.GYRE for model 1145
+save LOGS_SG/profile70.data LOGS_SG/profile70.data.GYRE for model 1146
+save LOGS_SG/profile71.data LOGS_SG/profile71.data.GYRE for model 1147
+save LOGS_SG/profile72.data LOGS_SG/profile72.data.GYRE for model 1148
+save LOGS_SG/profile73.data LOGS_SG/profile73.data.GYRE for model 1149
+save LOGS_SG/profile74.data LOGS_SG/profile74.data.GYRE for model 1150
+save LOGS_SG/profile75.data LOGS_SG/profile75.data.GYRE for model 1151
+save LOGS_SG/profile76.data LOGS_SG/profile76.data.GYRE for model 1152
+save LOGS_SG/profile77.data LOGS_SG/profile77.data.GYRE for model 1153
+save LOGS_SG/profile78.data LOGS_SG/profile78.data.GYRE for model 1154
+save LOGS_SG/profile79.data LOGS_SG/profile79.data.GYRE for model 1155
+save LOGS_SG/profile80.data LOGS_SG/profile80.data.GYRE for model 1156
+save LOGS_SG/profile81.data LOGS_SG/profile81.data.GYRE for model 1157
+save LOGS_SG/profile82.data LOGS_SG/profile82.data.GYRE for model 1158
+save LOGS_SG/profile83.data LOGS_SG/profile83.data.GYRE for model 1159
+save LOGS_SG/profile84.data LOGS_SG/profile84.data.GYRE for model 1160
+save LOGS_SG/profile85.data LOGS_SG/profile85.data.GYRE for model 1161
+save LOGS_SG/profile86.data LOGS_SG/profile86.data.GYRE for model 1162
+save LOGS_SG/profile87.data LOGS_SG/profile87.data.GYRE for model 1163
+save LOGS_SG/profile88.data LOGS_SG/profile88.data.GYRE for model 1164
+save LOGS_SG/profile89.data LOGS_SG/profile89.data.GYRE for model 1165
+save LOGS_SG/profile90.data LOGS_SG/profile90.data.GYRE for model 1166
+save LOGS_SG/profile91.data LOGS_SG/profile91.data.GYRE for model 1167
+save LOGS_SG/profile92.data LOGS_SG/profile92.data.GYRE for model 1168
+save LOGS_SG/profile93.data LOGS_SG/profile93.data.GYRE for model 1169
+save LOGS_SG/profile94.data LOGS_SG/profile94.data.GYRE for model 1170
+save LOGS_SG/profile95.data LOGS_SG/profile95.data.GYRE for model 1171
+save LOGS_SG/profile96.data LOGS_SG/profile96.data.GYRE for model 1172
+save LOGS_SG/profile97.data LOGS_SG/profile97.data.GYRE for model 1173
+save LOGS_SG/profile98.data LOGS_SG/profile98.data.GYRE for model 1174
+save LOGS_SG/profile99.data LOGS_SG/profile99.data.GYRE for model 1175
+save LOGS_SG/profile100.data LOGS_SG/profile100.data.GYRE for model 1176
+save LOGS_SG/profile101.data LOGS_SG/profile101.data.GYRE for model 1177
+save LOGS_SG/profile102.data LOGS_SG/profile102.data.GYRE for model 1178
+save LOGS_SG/profile103.data LOGS_SG/profile103.data.GYRE for model 1179
+save LOGS_SG/profile104.data LOGS_SG/profile104.data.GYRE for model 1180
+save LOGS_SG/profile105.data LOGS_SG/profile105.data.GYRE for model 1181
+save LOGS_SG/profile106.data LOGS_SG/profile106.data.GYRE for model 1182
+save LOGS_SG/profile107.data LOGS_SG/profile107.data.GYRE for model 1183
+save LOGS_SG/profile108.data LOGS_SG/profile108.data.GYRE for model 1184
+save LOGS_SG/profile109.data LOGS_SG/profile109.data.GYRE for model 1185
+save LOGS_SG/profile110.data LOGS_SG/profile110.data.GYRE for model 1186
+save LOGS_SG/profile111.data LOGS_SG/profile111.data.GYRE for model 1187
+save LOGS_SG/profile112.data LOGS_SG/profile112.data.GYRE for model 1188
+save LOGS_SG/profile113.data LOGS_SG/profile113.data.GYRE for model 1189
+save LOGS_SG/profile114.data LOGS_SG/profile114.data.GYRE for model 1190
+save LOGS_SG/profile115.data LOGS_SG/profile115.data.GYRE for model 1191
+save LOGS_SG/profile116.data LOGS_SG/profile116.data.GYRE for model 1192
+save LOGS_SG/profile117.data LOGS_SG/profile117.data.GYRE for model 1193
+save LOGS_SG/profile118.data LOGS_SG/profile118.data.GYRE for model 1194
+save LOGS_SG/profile119.data LOGS_SG/profile119.data.GYRE for model 1195
+save LOGS_SG/profile120.data LOGS_SG/profile120.data.GYRE for model 1196
+save LOGS_SG/profile121.data LOGS_SG/profile121.data.GYRE for model 1197
+save LOGS_SG/profile122.data LOGS_SG/profile122.data.GYRE for model 1198
+save LOGS_SG/profile123.data LOGS_SG/profile123.data.GYRE for model 1199
+save LOGS_SG/profile124.data LOGS_SG/profile124.data.GYRE for model 1200
+save LOGS_SG/profile125.data LOGS_SG/profile125.data.GYRE for model 1201
+save LOGS_SG/profile126.data LOGS_SG/profile126.data.GYRE for model 1202
+save LOGS_SG/profile127.data LOGS_SG/profile127.data.GYRE for model 1203
+save LOGS_SG/profile128.data LOGS_SG/profile128.data.GYRE for model 1204
+save LOGS_SG/profile129.data LOGS_SG/profile129.data.GYRE for model 1205
+save LOGS_SG/profile130.data LOGS_SG/profile130.data.GYRE for model 1206
+save LOGS_SG/profile131.data LOGS_SG/profile131.data.GYRE for model 1207
+save LOGS_SG/profile132.data LOGS_SG/profile132.data.GYRE for model 1208
+save LOGS_SG/profile133.data LOGS_SG/profile133.data.GYRE for model 1209
+save LOGS_SG/profile134.data LOGS_SG/profile134.data.GYRE for model 1210
+save LOGS_SG/profile135.data LOGS_SG/profile135.data.GYRE for model 1211
+save LOGS_SG/profile136.data LOGS_SG/profile136.data.GYRE for model 1212
+save LOGS_SG/profile137.data LOGS_SG/profile137.data.GYRE for model 1213
+save LOGS_SG/profile138.data LOGS_SG/profile138.data.GYRE for model 1214
+save LOGS_SG/profile139.data LOGS_SG/profile139.data.GYRE for model 1215
+save LOGS_SG/profile140.data LOGS_SG/profile140.data.GYRE for model 1216
+save LOGS_SG/profile141.data LOGS_SG/profile141.data.GYRE for model 1217
+save LOGS_SG/profile142.data LOGS_SG/profile142.data.GYRE for model 1218
+save LOGS_SG/profile143.data LOGS_SG/profile143.data.GYRE for model 1219
+save LOGS_SG/profile144.data LOGS_SG/profile144.data.GYRE for model 1220
+save LOGS_SG/profile145.data LOGS_SG/profile145.data.GYRE for model 1221
+save LOGS_SG/profile146.data LOGS_SG/profile146.data.GYRE for model 1222
+save LOGS_SG/profile147.data LOGS_SG/profile147.data.GYRE for model 1223
+save LOGS_SG/profile148.data LOGS_SG/profile148.data.GYRE for model 1224
+save LOGS_SG/profile149.data LOGS_SG/profile149.data.GYRE for model 1225
+save LOGS_SG/profile150.data LOGS_SG/profile150.data.GYRE for model 1226
+save LOGS_SG/profile151.data LOGS_SG/profile151.data.GYRE for model 1227
+save LOGS_SG/profile152.data LOGS_SG/profile152.data.GYRE for model 1228
+save LOGS_SG/profile153.data LOGS_SG/profile153.data.GYRE for model 1229
+save LOGS_SG/profile154.data LOGS_SG/profile154.data.GYRE for model 1230
+save LOGS_SG/profile155.data LOGS_SG/profile155.data.GYRE for model 1231
+save LOGS_SG/profile156.data LOGS_SG/profile156.data.GYRE for model 1232
+save LOGS_SG/profile157.data LOGS_SG/profile157.data.GYRE for model 1233
+save LOGS_SG/profile158.data LOGS_SG/profile158.data.GYRE for model 1234
+save LOGS_SG/profile159.data LOGS_SG/profile159.data.GYRE for model 1235
+save LOGS_SG/profile160.data LOGS_SG/profile160.data.GYRE for model 1236
+save LOGS_SG/profile161.data LOGS_SG/profile161.data.GYRE for model 1237
+save LOGS_SG/profile162.data LOGS_SG/profile162.data.GYRE for model 1238
+save LOGS_SG/profile163.data LOGS_SG/profile163.data.GYRE for model 1239
+save LOGS_SG/profile164.data LOGS_SG/profile164.data.GYRE for model 1240
+save LOGS_SG/profile165.data LOGS_SG/profile165.data.GYRE for model 1241
+save LOGS_SG/profile166.data LOGS_SG/profile166.data.GYRE for model 1242
+save LOGS_SG/profile167.data LOGS_SG/profile167.data.GYRE for model 1243
+save LOGS_SG/profile168.data LOGS_SG/profile168.data.GYRE for model 1244
+save LOGS_SG/profile169.data LOGS_SG/profile169.data.GYRE for model 1245
+save LOGS_SG/profile170.data LOGS_SG/profile170.data.GYRE for model 1246
+save LOGS_SG/profile171.data LOGS_SG/profile171.data.GYRE for model 1247
+save LOGS_SG/profile172.data LOGS_SG/profile172.data.GYRE for model 1248
+save LOGS_SG/profile173.data LOGS_SG/profile173.data.GYRE for model 1249
+save LOGS_SG/profile174.data LOGS_SG/profile174.data.GYRE for model 1250
+save LOGS_SG/profile175.data LOGS_SG/profile175.data.GYRE for model 1251
+save LOGS_SG/profile176.data LOGS_SG/profile176.data.GYRE for model 1252
+save LOGS_SG/profile177.data LOGS_SG/profile177.data.GYRE for model 1253
+save LOGS_SG/profile178.data LOGS_SG/profile178.data.GYRE for model 1254
+save LOGS_SG/profile179.data LOGS_SG/profile179.data.GYRE for model 1255
+save LOGS_SG/profile180.data LOGS_SG/profile180.data.GYRE for model 1256
+save LOGS_SG/profile181.data LOGS_SG/profile181.data.GYRE for model 1257
+save LOGS_SG/profile182.data LOGS_SG/profile182.data.GYRE for model 1258
+save LOGS_SG/profile183.data LOGS_SG/profile183.data.GYRE for model 1259
+save LOGS_SG/profile184.data LOGS_SG/profile184.data.GYRE for model 1260
+save LOGS_SG/profile185.data LOGS_SG/profile185.data.GYRE for model 1261
+save LOGS_SG/profile186.data LOGS_SG/profile186.data.GYRE for model 1262
+save LOGS_SG/profile187.data LOGS_SG/profile187.data.GYRE for model 1263
+save LOGS_SG/profile188.data LOGS_SG/profile188.data.GYRE for model 1264
+save LOGS_SG/profile189.data LOGS_SG/profile189.data.GYRE for model 1265
+save LOGS_SG/profile190.data LOGS_SG/profile190.data.GYRE for model 1266
+save LOGS_SG/profile191.data LOGS_SG/profile191.data.GYRE for model 1267
+save LOGS_SG/profile192.data LOGS_SG/profile192.data.GYRE for model 1268
+save LOGS_SG/profile193.data LOGS_SG/profile193.data.GYRE for model 1269
+save LOGS_SG/profile194.data LOGS_SG/profile194.data.GYRE for model 1270
+save LOGS_SG/profile195.data LOGS_SG/profile195.data.GYRE for model 1271
+save LOGS_SG/profile196.data LOGS_SG/profile196.data.GYRE for model 1272
+save LOGS_SG/profile197.data LOGS_SG/profile197.data.GYRE for model 1273
+save LOGS_SG/profile198.data LOGS_SG/profile198.data.GYRE for model 1274
+save LOGS_SG/profile199.data LOGS_SG/profile199.data.GYRE for model 1275
+save LOGS_SG/profile200.data LOGS_SG/profile200.data.GYRE for model 1276
+save LOGS_SG/profile201.data LOGS_SG/profile201.data.GYRE for model 1277
+save LOGS_SG/profile202.data LOGS_SG/profile202.data.GYRE for model 1278
+save LOGS_SG/profile203.data LOGS_SG/profile203.data.GYRE for model 1279
+save LOGS_SG/profile204.data LOGS_SG/profile204.data.GYRE for model 1280
+save LOGS_SG/profile205.data LOGS_SG/profile205.data.GYRE for model 1281
+save LOGS_SG/profile206.data LOGS_SG/profile206.data.GYRE for model 1282
+save LOGS_SG/profile207.data LOGS_SG/profile207.data.GYRE for model 1283
+save LOGS_SG/profile208.data LOGS_SG/profile208.data.GYRE for model 1284
+save LOGS_SG/profile209.data LOGS_SG/profile209.data.GYRE for model 1285
+save LOGS_SG/profile210.data LOGS_SG/profile210.data.GYRE for model 1286
+save LOGS_SG/profile211.data LOGS_SG/profile211.data.GYRE for model 1287
+save LOGS_SG/profile212.data LOGS_SG/profile212.data.GYRE for model 1288
+save LOGS_SG/profile213.data LOGS_SG/profile213.data.GYRE for model 1289
+save LOGS_SG/profile214.data LOGS_SG/profile214.data.GYRE for model 1290
+save LOGS_SG/profile215.data LOGS_SG/profile215.data.GYRE for model 1291
+save LOGS_SG/profile216.data LOGS_SG/profile216.data.GYRE for model 1292
+save LOGS_SG/profile217.data LOGS_SG/profile217.data.GYRE for model 1293
+save LOGS_SG/profile218.data LOGS_SG/profile218.data.GYRE for model 1294
+save LOGS_SG/profile219.data LOGS_SG/profile219.data.GYRE for model 1295
+save LOGS_SG/profile220.data LOGS_SG/profile220.data.GYRE for model 1296
+save LOGS_SG/profile221.data LOGS_SG/profile221.data.GYRE for model 1297
+save LOGS_SG/profile222.data LOGS_SG/profile222.data.GYRE for model 1298
+save LOGS_SG/profile223.data LOGS_SG/profile223.data.GYRE for model 1299
+save LOGS_SG/profile224.data LOGS_SG/profile224.data.GYRE for model 1300
+save LOGS_SG/profile225.data LOGS_SG/profile225.data.GYRE for model 1301
+save LOGS_SG/profile226.data LOGS_SG/profile226.data.GYRE for model 1302
+save LOGS_SG/profile227.data LOGS_SG/profile227.data.GYRE for model 1303
+save LOGS_SG/profile228.data LOGS_SG/profile228.data.GYRE for model 1304
+save LOGS_SG/profile229.data LOGS_SG/profile229.data.GYRE for model 1305
+save LOGS_SG/profile230.data LOGS_SG/profile230.data.GYRE for model 1306
+save LOGS_SG/profile231.data LOGS_SG/profile231.data.GYRE for model 1307
+save LOGS_SG/profile232.data LOGS_SG/profile232.data.GYRE for model 1308
+save LOGS_SG/profile233.data LOGS_SG/profile233.data.GYRE for model 1309
+save LOGS_SG/profile234.data LOGS_SG/profile234.data.GYRE for model 1310
+save LOGS_SG/profile235.data LOGS_SG/profile235.data.GYRE for model 1311
+save LOGS_SG/profile236.data LOGS_SG/profile236.data.GYRE for model 1312
+save LOGS_SG/profile237.data LOGS_SG/profile237.data.GYRE for model 1313
+save LOGS_SG/profile238.data LOGS_SG/profile238.data.GYRE for model 1314
+save LOGS_SG/profile239.data LOGS_SG/profile239.data.GYRE for model 1315
+save LOGS_SG/profile240.data LOGS_SG/profile240.data.GYRE for model 1316
+save LOGS_SG/profile241.data LOGS_SG/profile241.data.GYRE for model 1317
+save LOGS_SG/profile242.data LOGS_SG/profile242.data.GYRE for model 1318
+save LOGS_SG/profile243.data LOGS_SG/profile243.data.GYRE for model 1319
+save LOGS_SG/profile244.data LOGS_SG/profile244.data.GYRE for model 1320
+save LOGS_SG/profile245.data LOGS_SG/profile245.data.GYRE for model 1321
+save LOGS_SG/profile246.data LOGS_SG/profile246.data.GYRE for model 1322
+save LOGS_SG/profile247.data LOGS_SG/profile247.data.GYRE for model 1323
+save LOGS_SG/profile248.data LOGS_SG/profile248.data.GYRE for model 1324
+save LOGS_SG/profile249.data LOGS_SG/profile249.data.GYRE for model 1325
+save LOGS_SG/profile250.data LOGS_SG/profile250.data.GYRE for model 1326
+save LOGS_SG/profile251.data LOGS_SG/profile251.data.GYRE for model 1327
+save LOGS_SG/profile252.data LOGS_SG/profile252.data.GYRE for model 1328
+save LOGS_SG/profile253.data LOGS_SG/profile253.data.GYRE for model 1329
+save LOGS_SG/profile254.data LOGS_SG/profile254.data.GYRE for model 1330
+save LOGS_SG/profile255.data LOGS_SG/profile255.data.GYRE for model 1331
+save LOGS_SG/profile256.data LOGS_SG/profile256.data.GYRE for model 1332
+save LOGS_SG/profile257.data LOGS_SG/profile257.data.GYRE for model 1333
+save LOGS_SG/profile258.data LOGS_SG/profile258.data.GYRE for model 1334
+save LOGS_SG/profile259.data LOGS_SG/profile259.data.GYRE for model 1335
+save LOGS_SG/profile260.data LOGS_SG/profile260.data.GYRE for model 1336
+save LOGS_SG/profile261.data LOGS_SG/profile261.data.GYRE for model 1337
+save LOGS_SG/profile262.data LOGS_SG/profile262.data.GYRE for model 1338
+save LOGS_SG/profile263.data LOGS_SG/profile263.data.GYRE for model 1339
+save LOGS_SG/profile264.data LOGS_SG/profile264.data.GYRE for model 1340
+save LOGS_SG/profile265.data LOGS_SG/profile265.data.GYRE for model 1341
+save LOGS_SG/profile266.data LOGS_SG/profile266.data.GYRE for model 1342
+save LOGS_SG/profile267.data LOGS_SG/profile267.data.GYRE for model 1343
+save LOGS_SG/profile268.data LOGS_SG/profile268.data.GYRE for model 1344
+save LOGS_SG/profile269.data LOGS_SG/profile269.data.GYRE for model 1345
+save LOGS_SG/profile270.data LOGS_SG/profile270.data.GYRE for model 1346
+save LOGS_SG/profile271.data LOGS_SG/profile271.data.GYRE for model 1347
+save LOGS_SG/profile272.data LOGS_SG/profile272.data.GYRE for model 1348
+save LOGS_SG/profile273.data LOGS_SG/profile273.data.GYRE for model 1349
+save LOGS_SG/profile274.data LOGS_SG/profile274.data.GYRE for model 1350
+save LOGS_SG/profile275.data LOGS_SG/profile275.data.GYRE for model 1351
+save LOGS_SG/profile276.data LOGS_SG/profile276.data.GYRE for model 1352
+save LOGS_SG/profile277.data LOGS_SG/profile277.data.GYRE for model 1353
+save LOGS_SG/profile278.data LOGS_SG/profile278.data.GYRE for model 1354
+save LOGS_SG/profile279.data LOGS_SG/profile279.data.GYRE for model 1355
+save LOGS_SG/profile280.data LOGS_SG/profile280.data.GYRE for model 1356
+save LOGS_SG/profile281.data LOGS_SG/profile281.data.GYRE for model 1357
+save LOGS_SG/profile282.data LOGS_SG/profile282.data.GYRE for model 1358
+save LOGS_SG/profile283.data LOGS_SG/profile283.data.GYRE for model 1359
+save LOGS_SG/profile284.data LOGS_SG/profile284.data.GYRE for model 1360
+save LOGS_SG/profile285.data LOGS_SG/profile285.data.GYRE for model 1361
+save LOGS_SG/profile286.data LOGS_SG/profile286.data.GYRE for model 1362
+save LOGS_SG/profile287.data LOGS_SG/profile287.data.GYRE for model 1363
+save LOGS_SG/profile288.data LOGS_SG/profile288.data.GYRE for model 1364
+save LOGS_SG/profile289.data LOGS_SG/profile289.data.GYRE for model 1365
+save LOGS_SG/profile290.data LOGS_SG/profile290.data.GYRE for model 1366
+ stopping: d_log_L_dT > x_ctrl(1)
+save LOGS_SG/profile291.data LOGS_SG/profile291.data.GYRE for model 1367
+ saved to brgb.mod
+termination code: extras_finish_step
+       1367   7.672895   5493.754   1.503769   1.503770   1.963077   1.745839   0.000000   0.003494   0.254313   0.631156   2.478082   2167      0
+   4.694147   4.277480   0.772011 -14.623709   0.337284 -99.000000   0.217238   0.994562   0.000171   0.005586   0.363229   0.326725      6      0
+ 7.9340E+08  19.883985   1.458193  -4.428884   4.505476  -7.056463   0.000000   0.000033   0.000535  5.438E-03  5.615E-03  0.333E-10    varcontrol
+
+DATE: 2018-03-20
+TIME: 19:41:03

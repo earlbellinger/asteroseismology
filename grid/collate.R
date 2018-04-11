@@ -17,9 +17,9 @@ simulations <- simulations[grep('.dat', simulations)]
 
 load_data <- function(filename) {
     DF <- read.table(filename, header=1, check.names=0)
-    cat(paste0('[Fe/H]: ', fivenum(DF[['Fe/H']]), '\n'))
-    if (any(DF['Fe/H'] < -7.5)) DF[DF['Fe/H'] < -7.5,]['Fe/H'] <- -7.5
-    DF[DF < 10e-20 & DF > -10e-20 & !is.na(DF)] <- 0
+    cat(paste0('[Fe/H]: ', fivenum(DF[['Fe_H']]), '\n'))
+    #if (any(DF['Fe/H'] < -7.5)) DF[DF['Fe/H'] < -7.5,]['Fe/H'] <- -7.5
+    #DF[DF < 10e-20 & DF > -10e-20 & !is.na(DF)] <- 0
     return(DF)
 }
 

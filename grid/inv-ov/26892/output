@@ -1,0 +1,317 @@
+DATE: 2018-03-13
+TIME: 12:04:52
+                                         version_number       10108
+ read inlist_0all
+ read inlist_3ms
+load saved model zams.mod
+
+                                        set_initial_age    0.0000000000000000D+00
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+       5163   7.266666   7980.806   0.748937   0.748937   1.434262   1.434262   0.743645   0.001480   0.249037   0.744764  -2.010683   1671      0
+  -2.432822   1.972477   0.092941 -40.667729  -0.811654 -99.000000   0.000000   0.250269   0.002759   0.005920   0.249282   0.060842      3      0
+ 3.6913E-03  17.383503   0.748761  -6.936643   4.256341  -7.474887   0.000000   0.000007   0.000575  6.086E-03  5.954E-03  0.812E-09              
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.GYRE for model 5163
+save LOGS_MS/profile2.data LOGS_MS/profile2.data.GYRE for model 5164
+save LOGS_MS/profile3.data LOGS_MS/profile3.data.GYRE for model 5165
+save LOGS_MS/profile4.data LOGS_MS/profile4.data.GYRE for model 5166
+save LOGS_MS/profile5.data LOGS_MS/profile5.data.GYRE for model 5167
+save LOGS_MS/profile6.data LOGS_MS/profile6.data.GYRE for model 5168
+save LOGS_MS/profile7.data LOGS_MS/profile7.data.GYRE for model 5169
+save LOGS_MS/profile8.data LOGS_MS/profile8.data.GYRE for model 5170
+save LOGS_MS/profile9.data LOGS_MS/profile9.data.GYRE for model 5171
+save LOGS_MS/profile10.data LOGS_MS/profile10.data.GYRE for model 5172
+save LOGS_MS/profile11.data LOGS_MS/profile11.data.GYRE for model 5173
+save LOGS_MS/profile12.data LOGS_MS/profile12.data.GYRE for model 5174
+save LOGS_MS/profile13.data LOGS_MS/profile13.data.GYRE for model 5175
+save LOGS_MS/profile14.data LOGS_MS/profile14.data.GYRE for model 5176
+save LOGS_MS/profile15.data LOGS_MS/profile15.data.GYRE for model 5177
+save LOGS_MS/profile16.data LOGS_MS/profile16.data.GYRE for model 5178
+save LOGS_MS/profile17.data LOGS_MS/profile17.data.GYRE for model 5179
+save LOGS_MS/profile18.data LOGS_MS/profile18.data.GYRE for model 5180
+save LOGS_MS/profile19.data LOGS_MS/profile19.data.GYRE for model 5181
+save LOGS_MS/profile20.data LOGS_MS/profile20.data.GYRE for model 5182
+save LOGS_MS/profile21.data LOGS_MS/profile21.data.GYRE for model 5183
+save LOGS_MS/profile22.data LOGS_MS/profile22.data.GYRE for model 5184
+save LOGS_MS/profile23.data LOGS_MS/profile23.data.GYRE for model 5185
+save LOGS_MS/profile24.data LOGS_MS/profile24.data.GYRE for model 5186
+save LOGS_MS/profile25.data LOGS_MS/profile25.data.GYRE for model 5187
+save LOGS_MS/profile26.data LOGS_MS/profile26.data.GYRE for model 5188
+save LOGS_MS/profile27.data LOGS_MS/profile27.data.GYRE for model 5189
+save LOGS_MS/profile28.data LOGS_MS/profile28.data.GYRE for model 5190
+save LOGS_MS/profile29.data LOGS_MS/profile29.data.GYRE for model 5191
+save LOGS_MS/profile30.data LOGS_MS/profile30.data.GYRE for model 5192
+save LOGS_MS/profile31.data LOGS_MS/profile31.data.GYRE for model 5193
+save LOGS_MS/profile32.data LOGS_MS/profile32.data.GYRE for model 5194
+save LOGS_MS/profile33.data LOGS_MS/profile33.data.GYRE for model 5195
+save LOGS_MS/profile34.data LOGS_MS/profile34.data.GYRE for model 5196
+save LOGS_MS/profile35.data LOGS_MS/profile35.data.GYRE for model 5197
+save LOGS_MS/profile36.data LOGS_MS/profile36.data.GYRE for model 5198
+save LOGS_MS/profile37.data LOGS_MS/profile37.data.GYRE for model 5199
+save LOGS_MS/profile38.data LOGS_MS/profile38.data.GYRE for model 5200
+save LOGS_MS/profile39.data LOGS_MS/profile39.data.GYRE for model 5201
+save LOGS_MS/profile40.data LOGS_MS/profile40.data.GYRE for model 5202
+save LOGS_MS/profile41.data LOGS_MS/profile41.data.GYRE for model 5203
+save LOGS_MS/profile42.data LOGS_MS/profile42.data.GYRE for model 5204
+save LOGS_MS/profile43.data LOGS_MS/profile43.data.GYRE for model 5205
+save LOGS_MS/profile44.data LOGS_MS/profile44.data.GYRE for model 5206
+save LOGS_MS/profile45.data LOGS_MS/profile45.data.GYRE for model 5207
+save LOGS_MS/profile46.data LOGS_MS/profile46.data.GYRE for model 5208
+save LOGS_MS/profile47.data LOGS_MS/profile47.data.GYRE for model 5209
+save LOGS_MS/profile48.data LOGS_MS/profile48.data.GYRE for model 5210
+save LOGS_MS/profile49.data LOGS_MS/profile49.data.GYRE for model 5211
+save LOGS_MS/profile50.data LOGS_MS/profile50.data.GYRE for model 5212
+save LOGS_MS/profile51.data LOGS_MS/profile51.data.GYRE for model 5213
+save LOGS_MS/profile52.data LOGS_MS/profile52.data.GYRE for model 5214
+save LOGS_MS/profile53.data LOGS_MS/profile53.data.GYRE for model 5215
+save LOGS_MS/profile54.data LOGS_MS/profile54.data.GYRE for model 5216
+save LOGS_MS/profile55.data LOGS_MS/profile55.data.GYRE for model 5217
+save LOGS_MS/profile56.data LOGS_MS/profile56.data.GYRE for model 5218
+save LOGS_MS/profile57.data LOGS_MS/profile57.data.GYRE for model 5219
+save LOGS_MS/profile58.data LOGS_MS/profile58.data.GYRE for model 5220
+save LOGS_MS/profile59.data LOGS_MS/profile59.data.GYRE for model 5221
+save LOGS_MS/profile60.data LOGS_MS/profile60.data.GYRE for model 5222
+save LOGS_MS/profile61.data LOGS_MS/profile61.data.GYRE for model 5223
+save LOGS_MS/profile62.data LOGS_MS/profile62.data.GYRE for model 5224
+save LOGS_MS/profile63.data LOGS_MS/profile63.data.GYRE for model 5225
+save LOGS_MS/profile64.data LOGS_MS/profile64.data.GYRE for model 5226
+save LOGS_MS/profile65.data LOGS_MS/profile65.data.GYRE for model 5227
+save LOGS_MS/profile66.data LOGS_MS/profile66.data.GYRE for model 5228
+save LOGS_MS/profile67.data LOGS_MS/profile67.data.GYRE for model 5229
+save LOGS_MS/profile68.data LOGS_MS/profile68.data.GYRE for model 5230
+save LOGS_MS/profile69.data LOGS_MS/profile69.data.GYRE for model 5231
+save LOGS_MS/profile70.data LOGS_MS/profile70.data.GYRE for model 5232
+save LOGS_MS/profile71.data LOGS_MS/profile71.data.GYRE for model 5233
+save LOGS_MS/profile72.data LOGS_MS/profile72.data.GYRE for model 5234
+save LOGS_MS/profile73.data LOGS_MS/profile73.data.GYRE for model 5235
+save LOGS_MS/profile74.data LOGS_MS/profile74.data.GYRE for model 5236
+save LOGS_MS/profile75.data LOGS_MS/profile75.data.GYRE for model 5237
+save LOGS_MS/profile76.data LOGS_MS/profile76.data.GYRE for model 5238
+save LOGS_MS/profile77.data LOGS_MS/profile77.data.GYRE for model 5239
+save LOGS_MS/profile78.data LOGS_MS/profile78.data.GYRE for model 5240
+save LOGS_MS/profile79.data LOGS_MS/profile79.data.GYRE for model 5241
+save LOGS_MS/profile80.data LOGS_MS/profile80.data.GYRE for model 5242
+save LOGS_MS/profile81.data LOGS_MS/profile81.data.GYRE for model 5243
+save LOGS_MS/profile82.data LOGS_MS/profile82.data.GYRE for model 5244
+save LOGS_MS/profile83.data LOGS_MS/profile83.data.GYRE for model 5245
+save LOGS_MS/profile84.data LOGS_MS/profile84.data.GYRE for model 5246
+save LOGS_MS/profile85.data LOGS_MS/profile85.data.GYRE for model 5247
+save LOGS_MS/profile86.data LOGS_MS/profile86.data.GYRE for model 5248
+save LOGS_MS/profile87.data LOGS_MS/profile87.data.GYRE for model 5249
+save LOGS_MS/profile88.data LOGS_MS/profile88.data.GYRE for model 5250
+save LOGS_MS/profile89.data LOGS_MS/profile89.data.GYRE for model 5251
+save LOGS_MS/profile90.data LOGS_MS/profile90.data.GYRE for model 5252
+save LOGS_MS/profile91.data LOGS_MS/profile91.data.GYRE for model 5253
+save LOGS_MS/profile92.data LOGS_MS/profile92.data.GYRE for model 5254
+save LOGS_MS/profile93.data LOGS_MS/profile93.data.GYRE for model 5255
+save LOGS_MS/profile94.data LOGS_MS/profile94.data.GYRE for model 5256
+save LOGS_MS/profile95.data LOGS_MS/profile95.data.GYRE for model 5257
+save LOGS_MS/profile96.data LOGS_MS/profile96.data.GYRE for model 5258
+save LOGS_MS/profile97.data LOGS_MS/profile97.data.GYRE for model 5259
+save LOGS_MS/profile98.data LOGS_MS/profile98.data.GYRE for model 5260
+save LOGS_MS/profile99.data LOGS_MS/profile99.data.GYRE for model 5261
+save LOGS_MS/profile100.data LOGS_MS/profile100.data.GYRE for model 5262
+save LOGS_MS/profile101.data LOGS_MS/profile101.data.GYRE for model 5263
+save LOGS_MS/profile102.data LOGS_MS/profile102.data.GYRE for model 5264
+save LOGS_MS/profile103.data LOGS_MS/profile103.data.GYRE for model 5265
+save LOGS_MS/profile104.data LOGS_MS/profile104.data.GYRE for model 5266
+save LOGS_MS/profile105.data LOGS_MS/profile105.data.GYRE for model 5267
+save LOGS_MS/profile106.data LOGS_MS/profile106.data.GYRE for model 5268
+save LOGS_MS/profile107.data LOGS_MS/profile107.data.GYRE for model 5269
+save LOGS_MS/profile108.data LOGS_MS/profile108.data.GYRE for model 5270
+save LOGS_MS/profile109.data LOGS_MS/profile109.data.GYRE for model 5271
+save LOGS_MS/profile110.data LOGS_MS/profile110.data.GYRE for model 5272
+save LOGS_MS/profile111.data LOGS_MS/profile111.data.GYRE for model 5273
+save LOGS_MS/profile112.data LOGS_MS/profile112.data.GYRE for model 5274
+save LOGS_MS/profile113.data LOGS_MS/profile113.data.GYRE for model 5275
+save LOGS_MS/profile114.data LOGS_MS/profile114.data.GYRE for model 5276
+save LOGS_MS/profile115.data LOGS_MS/profile115.data.GYRE for model 5277
+save LOGS_MS/profile116.data LOGS_MS/profile116.data.GYRE for model 5278
+save LOGS_MS/profile117.data LOGS_MS/profile117.data.GYRE for model 5279
+save LOGS_MS/profile118.data LOGS_MS/profile118.data.GYRE for model 5280
+save LOGS_MS/profile119.data LOGS_MS/profile119.data.GYRE for model 5281
+save LOGS_MS/profile120.data LOGS_MS/profile120.data.GYRE for model 5282
+save LOGS_MS/profile121.data LOGS_MS/profile121.data.GYRE for model 5283
+save LOGS_MS/profile122.data LOGS_MS/profile122.data.GYRE for model 5284
+save LOGS_MS/profile123.data LOGS_MS/profile123.data.GYRE for model 5285
+save LOGS_MS/profile124.data LOGS_MS/profile124.data.GYRE for model 5286
+save LOGS_MS/profile125.data LOGS_MS/profile125.data.GYRE for model 5287
+save LOGS_MS/profile126.data LOGS_MS/profile126.data.GYRE for model 5288
+save LOGS_MS/profile127.data LOGS_MS/profile127.data.GYRE for model 5289
+save LOGS_MS/profile128.data LOGS_MS/profile128.data.GYRE for model 5290
+save LOGS_MS/profile129.data LOGS_MS/profile129.data.GYRE for model 5291
+save LOGS_MS/profile130.data LOGS_MS/profile130.data.GYRE for model 5292
+save LOGS_MS/profile131.data LOGS_MS/profile131.data.GYRE for model 5293
+save LOGS_MS/profile132.data LOGS_MS/profile132.data.GYRE for model 5294
+save LOGS_MS/profile133.data LOGS_MS/profile133.data.GYRE for model 5295
+save LOGS_MS/profile134.data LOGS_MS/profile134.data.GYRE for model 5296
+save LOGS_MS/profile135.data LOGS_MS/profile135.data.GYRE for model 5297
+save LOGS_MS/profile136.data LOGS_MS/profile136.data.GYRE for model 5298
+save LOGS_MS/profile137.data LOGS_MS/profile137.data.GYRE for model 5299
+save LOGS_MS/profile138.data LOGS_MS/profile138.data.GYRE for model 5300
+save LOGS_MS/profile139.data LOGS_MS/profile139.data.GYRE for model 5301
+save LOGS_MS/profile140.data LOGS_MS/profile140.data.GYRE for model 5302
+save LOGS_MS/profile141.data LOGS_MS/profile141.data.GYRE for model 5303
+save LOGS_MS/profile142.data LOGS_MS/profile142.data.GYRE for model 5304
+save LOGS_MS/profile143.data LOGS_MS/profile143.data.GYRE for model 5305
+save LOGS_MS/profile144.data LOGS_MS/profile144.data.GYRE for model 5306
+save LOGS_MS/profile145.data LOGS_MS/profile145.data.GYRE for model 5307
+save LOGS_MS/profile146.data LOGS_MS/profile146.data.GYRE for model 5308
+save LOGS_MS/profile147.data LOGS_MS/profile147.data.GYRE for model 5309
+save LOGS_MS/profile148.data LOGS_MS/profile148.data.GYRE for model 5310
+save LOGS_MS/profile149.data LOGS_MS/profile149.data.GYRE for model 5311
+save LOGS_MS/profile150.data LOGS_MS/profile150.data.GYRE for model 5312
+save LOGS_MS/profile151.data LOGS_MS/profile151.data.GYRE for model 5313
+save LOGS_MS/profile152.data LOGS_MS/profile152.data.GYRE for model 5314
+save LOGS_MS/profile153.data LOGS_MS/profile153.data.GYRE for model 5315
+save LOGS_MS/profile154.data LOGS_MS/profile154.data.GYRE for model 5316
+save LOGS_MS/profile155.data LOGS_MS/profile155.data.GYRE for model 5317
+save LOGS_MS/profile156.data LOGS_MS/profile156.data.GYRE for model 5318
+save LOGS_MS/profile157.data LOGS_MS/profile157.data.GYRE for model 5319
+save LOGS_MS/profile158.data LOGS_MS/profile158.data.GYRE for model 5320
+save LOGS_MS/profile159.data LOGS_MS/profile159.data.GYRE for model 5321
+save LOGS_MS/profile160.data LOGS_MS/profile160.data.GYRE for model 5322
+save LOGS_MS/profile161.data LOGS_MS/profile161.data.GYRE for model 5323
+save LOGS_MS/profile162.data LOGS_MS/profile162.data.GYRE for model 5324
+save LOGS_MS/profile163.data LOGS_MS/profile163.data.GYRE for model 5325
+save LOGS_MS/profile164.data LOGS_MS/profile164.data.GYRE for model 5326
+save LOGS_MS/profile165.data LOGS_MS/profile165.data.GYRE for model 5327
+save LOGS_MS/profile166.data LOGS_MS/profile166.data.GYRE for model 5328
+save LOGS_MS/profile167.data LOGS_MS/profile167.data.GYRE for model 5329
+save LOGS_MS/profile168.data LOGS_MS/profile168.data.GYRE for model 5330
+save LOGS_MS/profile169.data LOGS_MS/profile169.data.GYRE for model 5331
+save LOGS_MS/profile170.data LOGS_MS/profile170.data.GYRE for model 5332
+save LOGS_MS/profile171.data LOGS_MS/profile171.data.GYRE for model 5333
+       5334   7.340075   7645.674   0.900758   0.900758   1.434262   1.434262   0.329133   0.003335   0.249037   0.679350  -2.182148   1710      0
+   7.017443   2.129679   0.205852 -35.940098  -0.373299 -99.000000   0.000000   0.665045   0.000529   0.005920   0.314686   0.075806      6      0
+ 1.4125E+09  17.454528   0.900060  -5.698290   4.240481  -7.470660   0.000000   0.000021   0.000574  5.821E-03  5.964E-03  0.151E-11        lgTeff
+
+save LOGS_MS/profile172.data LOGS_MS/profile172.data.GYRE for model 5334
+save LOGS_MS/profile173.data LOGS_MS/profile173.data.GYRE for model 5335
+save LOGS_MS/profile174.data LOGS_MS/profile174.data.GYRE for model 5336
+save LOGS_MS/profile175.data LOGS_MS/profile175.data.GYRE for model 5337
+save LOGS_MS/profile176.data LOGS_MS/profile176.data.GYRE for model 5338
+save LOGS_MS/profile177.data LOGS_MS/profile177.data.GYRE for model 5339
+save LOGS_MS/profile178.data LOGS_MS/profile178.data.GYRE for model 5340
+save LOGS_MS/profile179.data LOGS_MS/profile179.data.GYRE for model 5341
+save LOGS_MS/profile180.data LOGS_MS/profile180.data.GYRE for model 5342
+save LOGS_MS/profile181.data LOGS_MS/profile181.data.GYRE for model 5343
+save LOGS_MS/profile182.data LOGS_MS/profile182.data.GYRE for model 5344
+save LOGS_MS/profile183.data LOGS_MS/profile183.data.GYRE for model 5345
+save LOGS_MS/profile184.data LOGS_MS/profile184.data.GYRE for model 5346
+save LOGS_MS/profile185.data LOGS_MS/profile185.data.GYRE for model 5347
+save LOGS_MS/profile186.data LOGS_MS/profile186.data.GYRE for model 5348
+save LOGS_MS/profile187.data LOGS_MS/profile187.data.GYRE for model 5349
+save LOGS_MS/profile188.data LOGS_MS/profile188.data.GYRE for model 5350
+save LOGS_MS/profile189.data LOGS_MS/profile189.data.GYRE for model 5351
+save LOGS_MS/profile190.data LOGS_MS/profile190.data.GYRE for model 5352
+save LOGS_MS/profile191.data LOGS_MS/profile191.data.GYRE for model 5353
+save LOGS_MS/profile192.data LOGS_MS/profile192.data.GYRE for model 5354
+save LOGS_MS/profile193.data LOGS_MS/profile193.data.GYRE for model 5355
+save LOGS_MS/profile194.data LOGS_MS/profile194.data.GYRE for model 5356
+save LOGS_MS/profile195.data LOGS_MS/profile195.data.GYRE for model 5357
+save LOGS_MS/profile196.data LOGS_MS/profile196.data.GYRE for model 5358
+save LOGS_MS/profile197.data LOGS_MS/profile197.data.GYRE for model 5359
+save LOGS_MS/profile198.data LOGS_MS/profile198.data.GYRE for model 5360
+save LOGS_MS/profile199.data LOGS_MS/profile199.data.GYRE for model 5361
+save LOGS_MS/profile200.data LOGS_MS/profile200.data.GYRE for model 5362
+save LOGS_MS/profile201.data LOGS_MS/profile201.data.GYRE for model 5363
+save LOGS_MS/profile202.data LOGS_MS/profile202.data.GYRE for model 5364
+save LOGS_MS/profile203.data LOGS_MS/profile203.data.GYRE for model 5365
+save LOGS_MS/profile204.data LOGS_MS/profile204.data.GYRE for model 5366
+save LOGS_MS/profile205.data LOGS_MS/profile205.data.GYRE for model 5367
+save LOGS_MS/profile206.data LOGS_MS/profile206.data.GYRE for model 5368
+save LOGS_MS/profile207.data LOGS_MS/profile207.data.GYRE for model 5369
+save LOGS_MS/profile208.data LOGS_MS/profile208.data.GYRE for model 5370
+save LOGS_MS/profile209.data LOGS_MS/profile209.data.GYRE for model 5371
+save LOGS_MS/profile210.data LOGS_MS/profile210.data.GYRE for model 5372
+save LOGS_MS/profile211.data LOGS_MS/profile211.data.GYRE for model 5373
+save LOGS_MS/profile212.data LOGS_MS/profile212.data.GYRE for model 5374
+save LOGS_MS/profile213.data LOGS_MS/profile213.data.GYRE for model 5375
+save LOGS_MS/profile214.data LOGS_MS/profile214.data.GYRE for model 5376
+save LOGS_MS/profile215.data LOGS_MS/profile215.data.GYRE for model 5377
+save LOGS_MS/profile216.data LOGS_MS/profile216.data.GYRE for model 5378
+save LOGS_MS/profile217.data LOGS_MS/profile217.data.GYRE for model 5379
+save LOGS_MS/profile218.data LOGS_MS/profile218.data.GYRE for model 5380
+save LOGS_MS/profile219.data LOGS_MS/profile219.data.GYRE for model 5381
+save LOGS_MS/profile220.data LOGS_MS/profile220.data.GYRE for model 5382
+save LOGS_MS/profile221.data LOGS_MS/profile221.data.GYRE for model 5383
+save LOGS_MS/profile222.data LOGS_MS/profile222.data.GYRE for model 5384
+save LOGS_MS/profile223.data LOGS_MS/profile223.data.GYRE for model 5385
+save LOGS_MS/profile224.data LOGS_MS/profile224.data.GYRE for model 5386
+save LOGS_MS/profile225.data LOGS_MS/profile225.data.GYRE for model 5387
+save LOGS_MS/profile226.data LOGS_MS/profile226.data.GYRE for model 5388
+save LOGS_MS/profile227.data LOGS_MS/profile227.data.GYRE for model 5389
+save LOGS_MS/profile228.data LOGS_MS/profile228.data.GYRE for model 5390
+save LOGS_MS/profile229.data LOGS_MS/profile229.data.GYRE for model 5391
+save LOGS_MS/profile230.data LOGS_MS/profile230.data.GYRE for model 5392
+save LOGS_MS/profile231.data LOGS_MS/profile231.data.GYRE for model 5393
+save LOGS_MS/profile232.data LOGS_MS/profile232.data.GYRE for model 5394
+save LOGS_MS/profile233.data LOGS_MS/profile233.data.GYRE for model 5395
+save LOGS_MS/profile234.data LOGS_MS/profile234.data.GYRE for model 5396
+save LOGS_MS/profile235.data LOGS_MS/profile235.data.GYRE for model 5397
+save LOGS_MS/profile236.data LOGS_MS/profile236.data.GYRE for model 5398
+save LOGS_MS/profile237.data LOGS_MS/profile237.data.GYRE for model 5399
+save LOGS_MS/profile238.data LOGS_MS/profile238.data.GYRE for model 5400
+save LOGS_MS/profile239.data LOGS_MS/profile239.data.GYRE for model 5401
+save LOGS_MS/profile240.data LOGS_MS/profile240.data.GYRE for model 5402
+save LOGS_MS/profile241.data LOGS_MS/profile241.data.GYRE for model 5403
+save LOGS_MS/profile242.data LOGS_MS/profile242.data.GYRE for model 5404
+save LOGS_MS/profile243.data LOGS_MS/profile243.data.GYRE for model 5405
+save LOGS_MS/profile244.data LOGS_MS/profile244.data.GYRE for model 5406
+save LOGS_MS/profile245.data LOGS_MS/profile245.data.GYRE for model 5407
+save LOGS_MS/profile246.data LOGS_MS/profile246.data.GYRE for model 5408
+save LOGS_MS/profile247.data LOGS_MS/profile247.data.GYRE for model 5409
+save LOGS_MS/profile248.data LOGS_MS/profile248.data.GYRE for model 5410
+save LOGS_MS/profile249.data LOGS_MS/profile249.data.GYRE for model 5411
+save LOGS_MS/profile250.data LOGS_MS/profile250.data.GYRE for model 5412
+save LOGS_MS/profile251.data LOGS_MS/profile251.data.GYRE for model 5413
+save LOGS_MS/profile252.data LOGS_MS/profile252.data.GYRE for model 5414
+save LOGS_MS/profile253.data LOGS_MS/profile253.data.GYRE for model 5415
+save LOGS_MS/profile254.data LOGS_MS/profile254.data.GYRE for model 5416
+save LOGS_MS/profile255.data LOGS_MS/profile255.data.GYRE for model 5417
+save LOGS_MS/profile256.data LOGS_MS/profile256.data.GYRE for model 5418
+save LOGS_MS/profile257.data LOGS_MS/profile257.data.GYRE for model 5419
+       retry log10(dt/yr), log10(dt), retry_factor     1  5420        6.174094       13.673206        0.500000
+save LOGS_MS/profile258.data LOGS_MS/profile258.data.GYRE for model 5420
+save LOGS_MS/profile259.data LOGS_MS/profile259.data.GYRE for model 5421
+save LOGS_MS/profile260.data LOGS_MS/profile260.data.GYRE for model 5422
+save LOGS_MS/profile261.data LOGS_MS/profile261.data.GYRE for model 5423
+save LOGS_MS/profile262.data LOGS_MS/profile262.data.GYRE for model 5424
+save LOGS_MS/profile263.data LOGS_MS/profile263.data.GYRE for model 5425
+
+stop because have dropped below central lower limit for h1
+    0.9458808531E-05    0.1000000000E-04
+
+       5426   7.405713   7513.444   1.088728   1.088728   1.434262   1.328335   0.000009   0.003670   0.249037   0.641926  -0.198828   1902      1
+   5.893664   3.129833   0.310431 -30.355797  -0.145629 -99.000000   0.105927   0.994228   0.000213   0.005920   0.352116   0.250600      5      0
+ 2.0351E+09  18.353801   1.078911  -5.247565   4.149478  -7.554148   0.000000   0.000035   0.000571  5.762E-03  5.958E-03  0.880E-10    lg_XH_cntr
+
+save LOGS_MS/profile264.data LOGS_MS/profile264.data.GYRE for model 5426
+ saved to tams.mod
+termination code: xa_central_lower_limit
+       5426   7.405713   7513.444   1.088728   1.088728   1.434262   1.328335   0.000009   0.003670   0.249037   0.641926  -0.198828   1902      1
+   5.893664   3.129833   0.310431 -30.355797  -0.145629 -99.000000   0.105927   0.994228   0.000213   0.005920   0.352116   0.250600      5      0
+ 2.0351E+09  18.353801   1.078911  -5.247565   4.149478  -7.554148   0.000000   0.000035   0.000571  5.762E-03  5.958E-03  0.880E-10    lg_XH_cntr
+
+DATE: 2018-03-13
+TIME: 12:20:47

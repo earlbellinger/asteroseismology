@@ -10,6 +10,12 @@ from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
+#import pickle 
+from sklearn.externals import joblib
+import hashlib
+
+from sklearn.cluster import MeanShift
+from scipy.stats import gaussian_kde
 
 import matplotlib as mpl 
 mpl.use("agg")
@@ -24,15 +30,33 @@ import corner
 
 np.random.seed(seed=0) # for reproducibility
 
+drop_oob = True 
+enforce_bounds = False 
+always_retrain = True 
+use_pickle = True 
+make_plots = True 
+write_covs = True 
+find_mode = True#False#
+
+print(argv)
+
 if len(argv) > 1:
     simulations_filename = argv[1]
 else:
     simulations_filename = os.path.join('..', 'forward', 'simulations.dat')
+    #simulations_filename = os.path.join('..', 'grid', 'simulations.dat')
+    #simulations_filename = os.path.join('classical', 'models.dat')
+
+if len(argv) > 2:
+    allname = argv[2]
+else:
+    allname = 'inversion' #'kages' #
 
 bname = os.path.basename(simulations_filename).split('.')[0]
-plot_dir = os.path.join('learn-benard', 'plots-'+bname)
-cov_dir = os.path.join('learn-benard', 'covs-'+bname)
-table_dir = os.path.join('learn-benard', 'tables-'+bname)
+plot_dir = os.path.join('learn-'+allname, 'plots-'+bname)
+cov_dir = os.path.join('learn-'+allname, 'covs-'+bname)
+table_dir = os.path.join('learn-'+allname, 'tables-'+bname)
+pickle_dir = os.path.join('learn-'+allname, 'pickles-'+bname)
 perturb_dir = 'perturb'
 perturb_pattern = '.+_perturb.dat'
 
@@ -48,11 +72,35 @@ if not os.path.exists(cov_dir):
 if not os.path.exists(table_dir):
     os.makedirs(table_dir)
 
+if use_pickle and not os.path.exists(pickle_dir):
+    os.makedirs(pickle_dir)
+
 ### Load grid of models 
 data = pd.read_csv(simulations_filename, sep='\t')
-exclude = "nu_max|radial_velocity|mass_cc|delta_nu_asym|delta_Pg_asym"#|Dnu|dnu"
+#data = data.loc[data['ev_stage']<=3]
+#exclude = "radial_velocity|I_mean_mag|V_mean_mag"#"nu_max|radial_velocity|mass_cc|delta_nu_asym|delta_Pg_asym"#|Dnu|dnu"
+#include = r"Teff|^Fe|^nu_max$|^Dnu0$|^M$|^radius$|^age$|log_g"
 #|slope|mass_cc"#|Dnu"#|dnu"#|mass_cc"
-data = data.drop([i for i in data.columns if re.search(exclude, i)], axis=1)
+
+#exclude_models = '^' + '$|^'.join(['Dnu0', 'dnu02', 'r02', 'r01', 'r13', 'r10', 
+#    'epsilon_p', 'undershoot', 'under_exp', 'over_exp', 'nu_max']) + '$'
+
+#exclude_models = '^' + '$|^'.join(['Dnu0', 'dnu02', 'dnu13', 
+#    'undershoot', 'under_exp', 'over_exp', 'nu_max']) + '$'
+
+exclude_models = '|'.join(['r02_', 'r01_', 'r13_', 'r10_', 
+    #'Dnu0', 'dnu02', 'dnu13', 
+    #'Dnu0', 
+    'epsilon_p', 
+    'undershoot', 'under_exp', 'over_exp', 'nu_max'])
+
+#exclude_models = '^Dnu0$|^dnu02$|^r02$|^r01$|^dnu13$|^r13$|^r10$|epsilon_p|^over_exp$|' # "$^"
+data = data.drop([i for i in data.columns if re.search(exclude_models, i)], axis=1)
+#data = data.drop([i for i in data.columns if not re.match(include, i)], axis=1)
+data = data.replace([np.inf, -np.inf], np.nan)#.dropna()
+#exclude = "radius|log_g"
+
+exclude_data = "radial_velocity|I_mean_mag|V_mean_mag|" + exclude_models
 
 maxs = data.max()
 mins = data.min()
@@ -77,7 +125,12 @@ y_latex = {
     "log_g": r"Surface gravity log g (cgs)", 
     "L": r"Luminosity L$/$L$_\odot$",
     "Teff": r"Effective Temperature T$_{\mathrm{eff}}$/K",
-    "mass_cc": r"Convective-core mass M$_{\mathrm{cc}}$"
+    "mass_cc": r"Convective-core mass M$_{\mathrm{cc}}$",
+    "log_R": r"Radius $\log($R$/$R$_\odot)$",
+    "logR": r"Radius $\log($R$/$R$_\odot)$",
+    "logL": r"Luminosity $\log($L$/$L$_\odot)$",
+    "I_mean_mag": r"I Mag",
+    "V_mean_mag": r"V Mag"
 }
 
 y_latex_short = {
@@ -97,37 +150,64 @@ y_latex_short = {
     "log_g": r"log g", 
     "L": r"L$/$L$_\odot$",
     "Teff": r"T$_{\mathrm{eff}}$/K",
-    "mass_cc": r"M$_{\mathrm{cc}}$"
+    "mass_cc": r"M$_{\mathrm{cc}}$",
+    "log_R": r"$\log($R$/$R$_\odot)$",
+    "logR": r"$\log($R$/$R$_\odot)$",
+    "logL": r"$\log($L$/$L$_\odot)$",
+    "I_mean_mag": r"I",
+    "V_mean_mag": r"V"
 }
+
 
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
 y_curr = ['age', 'X_c', 'log_g', 'L', 'radius', 'Y_surf', 'Teff']
+y_sg = ['M', 'age', 'log_g', 'radius']
+y_classical = ['M', 'Y', 'Z', 'logR', 'logL', 'Teff', 'I_mean_mag', 'V_mean_mag']
 
-def train_regressor(data, X_columns, y_show=y_init+y_curr):
-    X = data.loc[:,X_columns]
-    ys = data.loc[:, [i for i in y_show if i not in X_columns]]
-    
-    print()
-    for n_trees in [1024]:
-    #list(range(4, 16)) + [18,20] + [2**n for n in range(4, 12)]:
-    #[n for n in range(4, 64)]:#[2**n for n in range(1, 12)]:
-        forest = Pipeline(steps=[
-            ('forest', ExtraTreesRegressor(
-                #RandomForestRegressor(
-                n_estimators=n_trees, 
-                n_jobs=min(n_trees, 62),
-                oob_score=True, bootstrap=True))])
-        start = time()
-        forest.fit(X, ys)#new_ys)
-        end = time()
-        print(n_trees, forest.steps[0][1].oob_score_, end-start)
-    
-    print()
-    print("%.5g seconds to train regressor" % (end-start))
-    print()
+#y_show = y_init+y_curr #y_classical # 
+y_show = ['M', 'Y', 'Z', 'alpha', 'age', 'radius']
+
+def train_regressor(data, X_columns, y_show=y_show, n_trees=256):
+    data_ = data.loc[:,list(set(list(X_columns)+y_show))].dropna()
+    X = data_.loc[:,X_columns]
+    ys = data_.loc[:, [i for i in y_show if i not in X_columns]]
     
     y_names = ys.columns
     X_names = X.columns
+    
+    #print(X.max())
+    #print(X.min())
+    #print(ys.max())
+    #print(ys.min())
+    
+    print()
+    
+    start = time()
+    has_pickle = False 
+    if use_pickle:
+        pkl_filename = allname + '_' + '_'.join(X.columns) + '-' + \
+            '_'.join(ys.columns) + str(n_trees)
+        hashed = hashlib.md5(pkl_filename.encode()).hexdigest()
+        pkl_path = os.path.join(pickle_dir, hashed)
+        if os.path.exists(pkl_path):
+            forest = joblib.load(pkl_path)
+            has_pickle = True 
+    if not has_pickle: 
+        forest = Pipeline(steps=[
+            ('forest', ExtraTreesRegressor(
+                n_estimators=n_trees, 
+                n_jobs=min(n_trees, 62),
+                oob_score=True, bootstrap=True))])
+        forest.fit(X, ys)#new_ys)
+        if use_pickle:
+            joblib.dump(forest, pkl_path)
+    end = time()
+    
+    print(n_trees, forest.steps[0][1].oob_score_, end-start)
+    
+    print()
+    print("%.5g seconds to train/load regressor" % (end-start))
+    print()
     return [forest, y_names, X_names]
 
 def get_rc(num_ys):
@@ -154,17 +234,22 @@ def gumr(xn, xu):
     uncert = z1*10**z2
     return('%g'%value, '%g'%uncert)
 
-def print_star(star, predict, y_names, table_curr, table_init):
+def print_star(star, predict, y_names, table_curr, table_init, table_ascii,
+        table_modes):
     middles = np.mean(predict, 0)
     stds = np.std(predict, 0)
     #middles, stds = weighted_avg_and_std(predict, 1/stds)
     outstr = star
     initstr = "\n" + star
     currstr = "\n" + star
+    asciistr = "\n" + star
     for (pred_j, name) in enumerate(y_names):
         (m, s) = (middles[pred_j], stds[pred_j])
         m, s = gumr(m, s)
         outstr += "\t%s±%s" % (m, s)
+        asciistr += "\t%s\t%s" % (m, s)
+        #strend = "\t" if pred_j < len(y_names)-1 else "\\"
+        #table_ascii.write(m + "\t" + s + strend)
         if name in y_init:
             initstr += r" & %s $\pm$ %s" % (m, s)
         if name in y_curr:
@@ -172,8 +257,19 @@ def print_star(star, predict, y_names, table_curr, table_init):
     print(outstr)
     table_curr.write(currstr + r' \\')
     table_init.write(initstr + r' \\')
+    table_ascii.write(asciistr)# + "\n")
+    
+    # find mode of the distribution using the mean shift algorithm 
+    if find_mode: 
+        mean_shift = MeanShift()
+        mean_shift.fit(predict)
+        modes = mean_shift.cluster_centers_
+        kde = gaussian_kde(predict.T)
+        mode = modes[np.argmax([kde.pdf(mode) for mode in modes])]
+        table_modes.write("\n" + star + '\t' + '\t'.join(map(str, mode)))
 
-def write_table_headers(y_names, table_curr, table_init):
+def write_table_headers(y_names, table_curr, table_init, table_ascii, 
+        table_modes):
     print("Name\t"+"\t".join(y_names))
     table_curr.write(
         r"\tablehead{\colhead{Name} & "+\
@@ -185,6 +281,10 @@ def write_table_headers(y_names, table_curr, table_init):
         ' & '.join([r"\colhead{" + y_latex_short[yy] + r"}"
                     for yy in y_names if yy in y_init]) +\
         r"}\startdata" )
+    table_ascii.write('Name\t' +\
+        '\t'.join([yy + '\t' 'e_'+yy for yy in y_names]))
+    if find_mode:
+        table_modes.write('Name\t' + '\t'.join(y_names))
 
 def plot_line(value, n, bins, plt, style):
     cands = bins > value
@@ -219,6 +319,12 @@ def plot_star(star, predict, y_names, out_dir=plot_dir):
         
         n, bins, patches = ax.hist(predict[:,pred_j], 50, normed=1, 
             histtype='stepfilled', color='white')
+        
+        if star == 'Sun' or star == 'Tagesstern' or star == '5774694':
+            if name is 'age':
+                plot_line(4.572, n, bins, plt, 'r--')
+            if name is 'M':
+                plot_line(1, n, bins, plt, 'r--')
         
         #if y_central is not None:
         #    mean = np.mean(y_central[:,pred_j])
@@ -312,6 +418,8 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         sort = [b for (a,b) in sorted(zip(names, others))]
         stars = sort + stars
     
+    #stars = stars[:30]
+    
     out_dir = os.path.join(plot_dir, directory)
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -321,35 +429,60 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         os.makedirs(cov_subdir)
     
     basename = os.path.basename(directory)
-    table_curr_fname = os.path.join(table_dir, basename+"_curr.dat")
-    table_init_fname = os.path.join(table_dir, basename+"_init.dat")
+    table_curr_fname = os.path.join(table_dir, basename+"_curr-latex.dat")
+    table_init_fname = os.path.join(table_dir, basename+"_init-latex.dat")
+    table_ascii_fname = os.path.join(table_dir, basename+'.dat')
+    table_modes_fname = os.path.join(table_dir, basename+'_modes.dat')
     table_curr = open(table_curr_fname, 'w')
     table_init = open(table_init_fname, 'w')
+    table_ascii = open(table_ascii_fname, 'w')
+    
+    table_modes = None 
+    if find_mode:
+        table_modes = open(table_modes_fname, 'w')
     
     wrong_cols = []
     outside = []
     run_times = []
     forest = None
+    X_columns_old = None
+    y_names_old = None
     for star_fname in stars:
         star = os.path.split(star_fname)[-1].split("_")[0]
         star_data = pd.read_csv(star_fname, sep='\t')
+        #if 'Fe/H' in star_data.columns:
+        #    star_data['Fe/H']
+        star_data.rename(columns={'Fe/H':'Fe_H'}, inplace=True)
         star_data = star_data.drop([i for i in star_data.columns 
-            if re.search(exclude, i)], axis=1).dropna()
+            if re.search(exclude_data, i)], axis=1).dropna()
         star_data = star_data.drop([i for i in star_data.columns 
             if i not in data.columns], axis=1)
         
         #star_data = star_data.drop([i for i in data.columns 
         #                            if re.search('Teff', i)], axis=1)
         
+        if drop_oob:
+            for X_name in set(star_data.columns):
+                upper = maxs[X_name]
+                lower = mins[X_name]
+                X_vals = star_data.loc[:, X_name]
+                if np.any(X_vals > upper) or np.any(X_vals < lower):
+                    print("dropping", X_name)
+                    star_data = star_data.drop(X_name, axis=1)
         
-        if forest is None: # train the regressor
-            X_columns = star_data.columns
-            
-            out = train_regressor(data, X_columns)
-            forest, y_names, X_names = out
+        X_columns = star_data.columns
+        different = X_columns_old is None or list(X_columns) != X_columns_old
+        X_columns_old = list(X_columns)
+        
+        if always_retrain and different or forest is None: # train the regressor
+            forest, y_names, X_names = train_regressor(data, X_columns)
+            #forest, y_names, X_names = out
             
             plot_importances(forest, cov_dir, basename, X_names)
-            write_table_headers(y_names, table_curr, table_init)
+            if y_names_old is None: #or list(y_names) != list(y_names_old):
+                write_table_headers(y_names, table_curr, table_init, 
+                    table_ascii, table_modes)
+                y_names_old = y_names 
         
         ## check that it has all of the right columns
         if not set(X_names).issubset(set(star_data.columns)):
@@ -357,19 +490,20 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
             continue
         
         ## check if all the params are within the grid
-        out_of_range = False
-        for X_name in set(X_names):
-            upper = maxs[X_name]
-            lower = mins[X_name]
-            X_vals = star_data.loc[:, X_name]
-            if np.any(X_vals > upper) or np.any(X_vals < lower):
-                print(X_name, "is out of range")
-                print(star, X_vals.min(), lower, X_vals.max(), upper)
-                out_of_range = True
-                break
-        if out_of_range:
-            outside += [(star, X_name)]
-            continue
+        if enforce_bounds: 
+            out_of_range = False
+            for X_name in set(X_names):
+                upper = maxs[X_name]
+                lower = mins[X_name]
+                X_vals = star_data.loc[:, X_name]
+                if np.any(X_vals > upper) or np.any(X_vals < lower):
+                    print(X_name, "is out of range")
+                    print(star, X_vals.min(), lower, X_vals.max(), upper)
+                    out_of_range = True
+                    #break
+            if out_of_range:
+                outside += [(star, X_name)]
+                continue
         
         ## predict values
         star_X = star_data.loc[:,X_names]
@@ -380,15 +514,21 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
         #stds = np.std(estimates, 0)
         end = time()
         run_times += [end-start]
-        np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
-            header=" ".join(y_names), comments='')
-        print_star(star, predict, y_names, table_curr, table_init)
+        if write_covs:
+            np.savetxt(os.path.join(cov_subdir, star+'.dat'), predict,
+                header=" ".join(y_names), comments='')
+        print_star(star, predict, y_names, table_curr, table_init, table_ascii,
+            table_modes)
         
-        plot_star(star, predict, y_names, out_dir)#, y_central)
+        if make_plots:
+            plot_star(star, predict, y_names, out_dir)#, y_central)
         
     
     table_curr.close()
     table_init.close()
+    table_ascii.close()
+    if find_mode:
+        table_modes.close()
     print("\ntotal prediction time:", sum(run_times))
     print("time per star:", np.mean(run_times), "+/-", np.std(run_times))
     #sum(run_times)/len(run_times))
@@ -403,6 +543,10 @@ def process_dir(directory=perturb_dir, perturb_pattern=perturb_pattern):
 ################################################################################
 #process_dir()
 process_dir('inversions')
+#process_dir()
+#process_dir('classical')
+#process_dir('sg-basu')
+#process_dir('inversions')
 #process_dir('benard')
 #process_dir('legacyRox2')
 #for directory in [f for f in os.listdir(perturb_dir) 
@@ -410,5 +554,7 @@ process_dir('inversions')
 #    process_dir(directory)
 #process_dir('Dnu')
 #process_dir('legacy')
+#process_dir('gangelou')
+#process_dir('kages')
 #process_dir('procyon')
 

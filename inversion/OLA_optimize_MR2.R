@@ -40,7 +40,7 @@ mode.set        <- if (length(args)>0)   args[1] else 'CygA'
 error.set       <- if (length(args)>1)   args[2] else 'CygA'
 target.name     <- if (length(args)>2)   args[3] else 'CygAwball'
 ref.mod.name    <- if (length(args)>3)   args[4] else 'diffusion'
-model.list.name <- if (length(args)>4)   args[5] else 'perturbed.CygA.names'
+star.name       <- if (length(args)>4)   args[5] else 'CygA'
 targ.kern.type  <- if (length(args)>5)   args[6] else 'mod_Gauss'
 initial.M       <- if (length(args)>6)   as.numeric(args[7])  else 1.08
 initial.R       <- if (length(args)>7)   as.numeric(args[8])  else 1.22
@@ -48,6 +48,12 @@ sigma.M         <- if (length(args)>8)   as.numeric(args[9])  else 0.016
 sigma.R         <- if (length(args)>9)   as.numeric(args[10]) else 0.02
 n_trials        <- if (length(args)>10)  as.numeric(args[11]) else 128
 perturb         <- if (length(args)>11)  as.logical(args[12]) else T
+cov.MR          <- if (length(args)>12)  as.numeric(args[13]) else 0
+cov.RM          <- if (length(args)>13)  as.numeric(args[14]) else 0
+subtract.mean   <- if (length(args)>14)  as.logical(args[15]) else F
+
+mu <- c(initial.M, initial.R)
+Sigma <- rbind(c(sigma.M, cov.MR), c(cov.RM, sigma.R))
 
 ### PREPARE MODELS 
 targ.mode <- paste0(
@@ -55,7 +61,8 @@ targ.mode <- paste0(
     '-m_', mode.set, 
     '-e_', error.set, 
     '-r_', ref.mod.name, 
-    paste0("-", targ.kern.type))
+    paste0("-", targ.kern.type),
+    paste0("-SM_", subtract.mean))
 
 freqs <- get_freqs(target.name=target.name, mode.set=mode.set, 
     error.set=error.set, perturb=perturb) 
@@ -63,10 +70,11 @@ freqs <- get_freqs(target.name=target.name, mode.set=mode.set,
 ref.mod <- get_model(freqs=freqs, model.name=ref.mod.name, 
     target.name=target.name, k.pair=k.pair, square.Ks=F)
 
-model.names <- get(model.list.name) 
-model.list <- parallelMap(function(model.name) 
+#model.names <- get(model.list.name) 
+model.names <- names.list[[star.name]]
+model.list <- parallelMap(function(model.name) { print(model.name); 
         get_model(freqs=freqs, model.name=model.name, 
-            target.name=target.name, k.pair=k.pair, square.Ks=T), 
+            target.name=target.name, k.pair=k.pair, square.Ks=T) }, 
     model.name=model.names)
 names(model.list) <- model.names
 
@@ -128,16 +136,27 @@ for (trial_i in 1:n_trials) {
                 cross.term=cross.term, error.sup=error.sup, width=width, 
                 targ.kern.type=targ.kern.type, 
                 get_cross_kerns=F, get_avg_kerns=F, 
-                subtract.mean=F, dM=model$M-star.M, dR=model$R-star.R, 
+                subtract.mean=subtract.mean, 
+                dM=model$M-star.M, dR=model$R-star.R, 
                 perturb=F, num_realizations=1, F_surf=model$F_surf)$result
         }, model_i=1:length(model.list))
         names(inv.list) <- model.names
         
         f.means <- sapply(inv.list, function(inversion) inversion$f) 
         result <- sum(apply(f.means, 1, var)) 
-        result <- log(result) - 
-            dnorm(star.M, trial.M, sigma.M, log=T) - 
-            dnorm(star.R, trial.R, sigma.R, log=T) 
+        if (cov.MR > 0 || cov.RM > 0) {
+            x <- c(star.M, star.R)
+            # assume M and R form a multivariate normal distribution and
+            # calculate the "dnorm" of that 
+            prior <- log(det(2*pi*Sigma)**-0.5 * 
+                exp(-0.5 * t(x-mu) %*% inv(Sigma) %*% (x-mu)))
+            
+        } else {
+            prior <- 
+                dnorm(star.M, trial.M, sigma.M, log=T) + 
+                dnorm(star.R, trial.R, sigma.R, log=T) 
+        }
+        result <- log(result) - prior
         cat(paste("Result:", format(result, digits=8), '\n')) 
         
         if (result < best_result) {
@@ -168,7 +187,8 @@ for (trial_i in 1:n_trials) {
             targ.kern.type=targ.kern.type, 
             get_cross_kerns=T, get_avg_kerns=T, 
             kern.interp.xs=kern.interp.xs,
-            subtract.mean=F, dM=model$M-star.M, dR=model$R-star.R, 
+            subtract.mean=subtract.mean, 
+            dM=model$M-star.M, dR=model$R-star.R, 
             perturb=F, num_realizations=1, F_surf=model$F_surf)
     }, model_i=1:length(model.list))
     names(inv.list) <- model.names
@@ -208,12 +228,40 @@ for (trial_i in 1:n_trials) {
         cross.lists=cross.lists, inv.params=inv.params,
         kern.interp.xs=kern.interp.xs)
     
-    make_plots_inversion_all(ref.mod, inversion, kern.interp.xs=kern.interp.xs,
-        k.str=targ.mode, cross.inset="bottomright",
-        #inversion_ylim=c(-0.15, 0.05),
+    targ_kerns <- get_target_kernels(inversion$result$rs, 
+        inversion$params[['widths']], 
+        kern.interp.xs, r_f=0.2, 
+        f.spl=ref.mod$cs.spl)
+    
+    #for (ii in 1:nrow(inversion$results)) {
+    penalties <- sapply(1:nrow(inversion$result), function(ii) {
+        avg_kern <- inversion$avg_kerns[,ii]
+        targ_kern <- targ_kerns[,ii]
+        sintegral(kern.interp.xs, (avg_kern-targ_kern)**2)$value
+    })
+    #print(penalties)
+    
+    make_plots_inversion_all(ref.mod, inversion, kern.interp.xs=kern.interp.xs, 
+        k.str=targ.mode, cross.inset="bottomright", 
+        inversion_ylim=c(-0.2, 0.1), 
         #col.pal="#F46D43", sampler=c(F,F,T,F,F,F),
-        #inversion_ylim=c(0, 0.15),
+        #inversion_ylim=c(0, 0.15), 
+        caption=star.name, 
+        caption2=as.expression(bquote('M' == .(signif(initial.M,3)) %+-% .(signif(sigma.M,2)))),
+        #sampler=penalties<5,
         cross_kern_ylim=c(-0.8, 0.3))
+    
+    #make_plots_inversion_all(ref.mod, inversion, kern.interp.xs=kern.interp.xs, 
+    #    k.str=targ.mode, cross.inset="bottomright", 
+    #    inversion_ylim=c(-0.2, 0.1), 
+    #    #col.pal="#F46D43", sampler=c(F,F,T,F,F,F),
+    #    #inversion_ylim=c(0, 0.15), 
+    #    caption=NULL, 
+    #    paper_pdf_width=4.17309,
+    #    xlim=c(0, 0.35),
+    #    caption2=NULL,
+    #    sampler=penalties<5,
+    #    cross_kern_ylim=c(-0.8, 0.3))
 }
 
 print_latex_table(inversion)

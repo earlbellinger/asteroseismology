@@ -19,9 +19,9 @@
       profile_interval = 15
       history_interval = 15
       
+      !delta_lg_XHe_cntr_hard_limit = 0.07
+      
       x_integer_ctrl(1) = 6 ! stop when He flash is over 
-      xa_central_lower_limit_species(1) = 'he4'
-      xa_central_lower_limit(1) = 1d-2
       
 / ! end of controls namelist
 

@@ -1,0 +1,154 @@
+&star_job
+      
+      save_model_when_terminate = .true.
+      
+      change_lnPgas_flag = .true.
+      new_lnPgas_flag = .true.
+      
+      show_log_description_at_start = .false.
+      write_profile_when_terminate = .false.
+      save_photo_when_terminate = .false.
+      pgstar_flag = .false.
+      
+      kappa_file_prefix = 'gs98'
+      change_net = .true. 
+      change_initial_net = .true. 
+      new_net_name = 'pp_cno_extras_o18_ne22.net'
+      
+/ ! end of star_job namelist
+
+
+&controls
+      
+      initial_mass = 1.473428
+      mixing_length_alpha = 2.106995
+      
+      initial_y = 0.310275
+      initial_z = 0.017791
+      Zbase = 0.017791
+      
+      use_Type2_opacities = .true.
+      cubic_interpolation_in_Z = .true.
+      
+      predictive_mix(1) = .true.
+      predictive_zone_type(1) = 'any'
+      predictive_zone_loc(1) = 'any'
+      predictive_bdy_loc(1) = 'any'
+      
+      overshoot_f_above_nonburn_core = 0.383451
+      overshoot_f_above_nonburn_shell = 0.383451
+      overshoot_f_above_burn_h_core = 0.383451
+      overshoot_f_above_burn_h_shell = 0.383451
+      overshoot_f_above_burn_he_core = 0.383451
+      overshoot_f_above_burn_he_shell = 0.383451
+      
+      overshoot_f_below_nonburn_shell = 0.001473
+      overshoot_f_below_burn_h_shell = 0.001473
+      overshoot_f_below_burn_he_shell = 0.001473
+      
+      step_overshoot_f_above_nonburn_core = 0.001644
+      step_overshoot_f_above_nonburn_shell = 0.001644
+      step_overshoot_f_above_burn_h_core = 0.001644
+      step_overshoot_f_above_burn_h_shell = 0.001644
+      step_overshoot_f_above_burn_he_core = 0.001644
+      step_overshoot_f_above_burn_he_shell = 0.001644
+      
+      step_overshoot_f_below_nonburn_shell = 1.186005
+      step_overshoot_f_below_burn_h_shell = 1.186005
+      step_overshoot_f_below_burn_he_shell = 1.186005
+      
+      overshoot_f0_above_nonburn_core = 0.01
+      overshoot_f0_above_nonburn_shell = 0.01
+      overshoot_f0_above_burn_h_core = 0.01
+      overshoot_f0_above_burn_h_shell = 0.01
+      overshoot_f0_above_burn_he_core = 0.01
+      overshoot_f0_above_burn_he_shell = 0.01
+      
+      overshoot_f0_below_nonburn_shell = 0.01
+      overshoot_f0_below_burn_h_shell = 0.01
+      overshoot_f0_below_burn_he_shell = 0.01
+      
+      do_element_diffusion = .false.
+      diffusion_use_full_net = .false. !.true.
+      diffusion_min_dq_at_surface = 1d-3
+      diffusion_dt_limit = 3d12
+      diffusion_use_cgs_solver = .false.
+      !diffusion_calculates_ionization = .false.
+      !diffusion_use_isolve = .true.
+      
+      diffusion_SIG_factor = 0d0
+      diffusion_GT_factor = 0d0
+      
+      !diffusion_class_factor(1) = 0
+      !diffusion_class_factor(2) = 0
+      !diffusion_class_factor(3) = 0
+      !diffusion_class_factor(4) = 0
+      !diffusion_class_factor(5) = 0
+      
+      skip_rotation_in_convection_zones = .true.
+      
+      photo_interval = 0
+      terminal_interval = 10000000
+      write_header_frequency = 10000000
+      max_num_profile_zones = 2
+      min_timestep_limit = 1d-12
+      
+      write_profiles_flag = .true.
+      write_pulse_data_with_profile = .true.
+      pulse_data_format = 'GYRE'
+      !pulse_data_format = 'FGONG'
+      !format_for_FGONG_data = '(1P5E16.9,x)'
+      
+      which_atm_option = 'Eddington_grey'
+      
+      cool_wind_RGB_scheme = 'Reimers'
+      !cool_wind_AGB_scheme = 'Reimers'
+      Reimers_scaling_factor = 0
+      !RGB_to_AGB_wind_switch = 1d-5
+      
+      add_atmosphere_to_pulse_data = .true.
+      add_center_point_to_pulse_data = .false.
+      keep_surface_point_for_pulse_data = .false.
+      add_double_points_to_pulse_data = .false.
+      
+      max_age = 20e9
+      
+      xa_central_lower_limit_species(1) = 'he4'
+      xa_central_lower_limit(1) = 1d-5
+      
+      max_model_number = 1000000
+      max_num_profile_models = 100000
+      
+      Lnuc_div_L_zams_limit = 0.9999
+      
+      x_ctrl(1) = -1d99 ! stop when (d log L / d log Teff) > -3
+      x_ctrl(2) = -1d99 ! decrease diffusion by this amount each time step
+      x_ctrl(3) = -1d99 ! stop when delta_Pg < this
+      x_logical_ctrl(1) = .false. ! stop when effective temperature increases 
+      x_logical_ctrl(2) = .false. ! stop at ZAMS 
+      x_integer_ctrl(1) = -1 ! stop when He flash is over 
+      
+      !xa_central_lower_limit_species(1) = 'h1'
+      !xa_central_lower_limit(1) = -1
+      
+      !xa_central_lower_limit_species(2) = 'he4'
+      !xa_central_lower_limit(2) = 1d-5
+      
+      mesh_delta_coeff = 0.5
+      !varcontrol_target = 1d-3
+      !newton_iterations_limit = 20 ! 7
+      !!max_tries = 20 ! 25 
+      !iter_for_resid_tol2 = 30 ! 6
+      !tol_residual_norm1 = 1d-9 ! 1d-10
+      !tol_max_residual1 = 1d-7 ! 1d-9
+      !!tol_correction_norm = 1d-9 ! 1d-3 
+      !!tol_max_correction = 1d-7 ! 3d-3
+
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

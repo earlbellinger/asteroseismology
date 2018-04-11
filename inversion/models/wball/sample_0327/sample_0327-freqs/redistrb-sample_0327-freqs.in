@@ -3,7 +3,7 @@
 3 'sample_0327-freqs.model'   @
 -1 ''        @
 nn  ,icnmsh
-3000,      ,,  @
+4800,      ,,  @
 10000,      ,,  
 icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
 211  ,      ,     ,0.013,      ,5.    ,      , 

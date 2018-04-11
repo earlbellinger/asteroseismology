@@ -22,9 +22,6 @@
       x_logical_ctrl(1) = .true. ! stop when effective temperature increases 
       x_integer_ctrl(1) = 6 ! stop when He flash is over 
       
-      xa_central_lower_limit_species(1) = 'he4'
-      xa_central_lower_limit(1) = 1d-2
-      
 / ! end of controls namelist
 
 

@@ -43,8 +43,8 @@ c
 c     the dimensional value of G is kept in gdimen
 c
 c      gdimen = 6.6732d-8
-c      gdimen = 6.67408d-8
-      gdimen = 6.67428d-8
+      gdimen = 6.67408d-8
+c      gdimen = 6.67428d-8
       gconst = 1.d0
       fourpi = 8.d0*acos(0.d0)
       twopi  = fourpi/2.0

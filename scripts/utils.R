@@ -12,8 +12,8 @@ Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21/bin/gswin64.exe")
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
-utils.font <<- "Palatino Linotype" #"CM Roman" #"Helvetica" #"Times" #
-font <- "Palatino Linotype" #"CM Roman" #"Helvetica" #"Palatino"
+utils.font <<- "Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Times" #
+font <- "Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Palatino"
 text.cex <- 1
 mgp <- c(2, 0.25, 0)
 #hack.mgp <- c(2, 0.5, 0)
@@ -29,6 +29,78 @@ cgrav = 6.67428*10**-8 # cm^3 * g^-1 * s^-2
 #solar_mass = 1.9891*10**30 # kg 
 solar_scale = sqrt(solar_mass/solar_radius^3)
 FeH <- function(Z, H1, Z_div_X_solar=0.02293) log10(Z / H1 / Z_div_X_solar)
+
+# e/Fe_solar for every element according to GS98 
+# abundances calculated with log10(Fe/H)+12 
+# where Fe=7.5, H=12. 
+# solve for Fe, then calculate log10(e/H)+12 and e/Fe 
+H_Fe_solar  = 31622.7766017
+He_Fe_solar = 2691.53480393
+Li_Fe_solar = 3.98107170554e-07
+Be_Fe_solar = 7.94328234725e-07
+B_Fe_solar  = 1.1220184543e-05
+C_Fe_solar  = 10.4712854805
+N_Fe_solar  = 2.6302679919
+O_Fe_solar  = 21.379620895
+F_Fe_solar  = 0.0011481536215
+Ne_Fe_solar = 3.80189396321
+Na_Fe_solar = 0.0676082975392
+Mg_Fe_solar = 1.20226443462
+Al_Fe_solar = 0.0933254300797
+Si_Fe_solar = 1.1220184543
+P_Fe_solar  = 0.00891250938134
+S_Fe_solar  = 0.676082975392
+Cl_Fe_solar = 0.01
+Ar_Fe_solar = 0.0794328234725
+K_Fe_solar  = 0.00416869383471
+Ca_Fe_solar = 0.0724435960075
+Sc_Fe_solar = 4.67735141287e-05
+Ti_Fe_solar = 0.00331131121483
+V_Fe_solar  = 0.000316227766017
+Cr_Fe_solar = 0.0147910838817
+Mn_Fe_solar = 0.00776247116629
+Fe_Fe_solar = 1.0
+Co_Fe_solar = 0.0026302679919
+Ni_Fe_solar = 0.0562341325191
+Cu_Fe_solar = 0.000512861383992
+Zn_Fe_solar = 0.00125892541179
+Ga_Fe_solar = 2.39883291902e-05
+Ge_Fe_solar = 8.12830516165e-05
+Rb_Fe_solar = 1.25892541179e-05
+Sr_Fe_solar = 2.95120922667e-05
+Y_Fe_solar  = 5.49540873858e-06
+Zr_Fe_solar = 1.25892541179e-05
+Nb_Fe_solar = 8.31763771103e-07
+Mo_Fe_solar = 2.6302679919e-06
+Ru_Fe_solar = 2.18776162395e-06
+Rh_Fe_solar = 4.16869383471e-07
+Pd_Fe_solar = 1.54881661891e-06
+Ag_Fe_solar = 2.75422870334e-07
+Cd_Fe_solar = 1.86208713666e-06
+In_Fe_solar = 1.44543977075e-06
+Sn_Fe_solar = 3.16227766017e-06
+Sb_Fe_solar = 3.16227766017e-07
+Ba_Fe_solar = 4.26579518802e-06
+La_Fe_solar = 4.67735141287e-07
+Ce_Fe_solar = 1.20226443462e-06
+Pr_Fe_solar = 1.62181009736e-07
+Nd_Fe_solar = 1e-06
+Sm_Fe_solar = 3.2359365693e-07
+Eu_Fe_solar = 1.02329299228e-07
+Gd_Fe_solar = 4.16869383471e-07
+Dy_Fe_solar = 4.3651583224e-07
+Ho_Fe_solar = 5.75439937337e-08
+Er_Fe_solar = 2.69153480393e-07
+Yb_Fe_solar = 3.80189396321e-07
+Lu_Fe_solar = 3.6307805477e-08
+Hf_Fe_solar = 2.39883291902e-07
+W_Fe_solar  = 4.07380277804e-07
+Os_Fe_solar = 8.91250938134e-07
+Ir_Fe_solar = 7.07945784385e-07
+Pt_Fe_solar = 1.99526231497e-06
+Au_Fe_solar = 3.2359365693e-07
+Tl_Fe_solar = 2.51188643151e-07
+Pb_Fe_solar = 2.81838293127e-06
 
 #png_res <- 400
 #cex.paper <- 0.8
@@ -238,7 +310,8 @@ find_closest <- function(x, y) {
         cost <- min(cost.mat)
         indices <- which(cost.mat==cost, arr.ind=T)
         if (cost >= 10*min.cost && ii > 5) break
-        if (cost < min.cost || ii < 5) min.cost <- min(cost.mat)
+        if ((cost < min.cost || ii < 5) && cost > 0) 
+            min.cost <- min(cost.mat)
         x.ind <- c(x.ind, which(x==x.dest[indices[1]])[1])
         y.ind <- c(y.ind, which(y==y.dest[indices[2]])[1])
         x.dest <- x.dest[-indices[1]]
@@ -697,12 +770,12 @@ plot_lamb_brunt <- function(DF, ...,
 
 ## R/R_sun = nu_max/nu_max_sun (Dnu/Dnu_sun)^-2 (Teff/Teff_sun)^(1/2)
 ## M/M_sun = (R/R_sun)^3 (Dnu/Dnu_sun)^2
-scaling_nu_max <- function(R, M, Teff, Teff_sun=5777.739, nu_max_sun=3090) {
+scaling_nu_max <- function(R, M, Teff, Teff_sun=5772, nu_max_sun=3090) {
     M * nu_max_sun / ( R**2 * sqrt(Teff/Teff_sun) )
 }
 
 scaling_nu_max_Viani <- function(R, M, Teff, mu,
-        Teff_sun=5777.739, nu_max_sun=3090, mu_sun=1.260134) {
+        Teff_sun=5772, nu_max_sun=3090, mu_sun=1.2546895396570101) {
     M * nu_max_sun * sqrt(mu / mu_sun) / ( R**2 * sqrt(Teff/Teff_sun) )
 }
 
@@ -730,7 +803,10 @@ asymptotic_Delta_nu <- function(radius, csound) {
 ################################################################################
 ### B-splines ##################################################################
 ################################################################################
-
+# x is the location
+# i is the ith knot 
+# j is the degree of the spline 
+# ks are the knot locations 
 B <- function(x, i, j, ks) {
     if (j == 0) {
         if (ks[i] <= x && x < ks[i+1]) 1 else 0
@@ -741,6 +817,14 @@ B <- function(x, i, j, ks) {
         exp.2 <- if (den.2 == 0) 0 else (ks[i+j+1]-x)/den.2 * B(x, i+1, j-1, ks)
         exp.1 + exp.2
     }
+}
+
+get_knots <- function(x, num_knots, degree=4) {
+    #x <- x[x>0]
+    n <- num_knots-(2*degree)
+    c(rep(min(x), degree), 
+      seq(min(x), max(x), length=n),
+      rep(max(x), degree))
 }
 
 dB_dx <- function(x, i, j, ks) {

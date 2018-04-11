@@ -1,0 +1,55 @@
+DATE: 2018-03-13
+TIME: 22:10:18
+                                         version_number       10108
+ read inlist_0all
+ read inlist_3ms
+load saved model zams.mod
+
+                                        set_initial_age    0.0000000000000000D+00
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        600   7.154788   5968.079   0.022136   0.022136   1.015383   1.015383   0.721534   0.000775   0.267356   0.721936  -1.700683   1518      0
+   3.434882   1.938494  -0.017973 -46.205487  -1.513226 -99.000000   0.000000   0.267787   0.004959   0.010625   0.267435   0.077532      4      0
+ 2.7220E+03  17.230645   0.022086  -9.553030   5.061510  -6.527335   0.000000   0.001357   0.001032  1.068E-02  1.063E-02 -0.592E-10              
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 600
+        673   7.215889   6045.655   0.152673   0.152673   1.015383   1.015383   0.330733   0.002768   0.267356   0.679871  -1.488188   1470      0
+   8.296195   2.229270   0.036012 -41.686146  -1.442980 -99.000000   0.000000   0.658320   0.004200   0.010625   0.309420   0.109095      6      0
+ 3.6526E+09  17.431979   0.152491  -8.170585   4.981955  -6.612954   0.000000   0.000012   0.001032  1.095E-02  1.071E-02  0.141E-12    varcontrol
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 673
+
+stop because have dropped below central lower limit for h1
+    0.9031930537E-05    0.1000000000E-04
+
+        729   7.293440   5989.551   0.366894   0.366894   1.015383   0.995272   0.000009   0.005679   0.267356   0.619311  -0.513768   1645      0
+   7.034985   2.846791   0.151139 -35.476936  -0.998717 -99.000000   0.020111   0.989486   0.001110   0.010625   0.369978   0.262726      6      0
+ 7.1565E+09  17.950245   0.366548  -6.434481   4.860557  -6.730830   0.000000   0.000034   0.001030  1.050E-02  1.071E-02  0.539E-12    lg_XH_cntr
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 729
+ saved to tams.mod
+termination code: xa_central_lower_limit
+        729   7.293440   5989.551   0.366894   0.366894   1.015383   0.995272   0.000009   0.005679   0.267356   0.619311  -0.513768   1645      0
+   7.034985   2.846791   0.151139 -35.476936  -0.998717 -99.000000   0.020111   0.989486   0.001110   0.010625   0.369978   0.262726      6      0
+ 7.1565E+09  17.950245   0.366548  -6.434481   4.860557  -6.730830   0.000000   0.000034   0.001030  1.050E-02  1.071E-02  0.539E-12    lg_XH_cntr
+
+DATE: 2018-03-13
+TIME: 22:21:14

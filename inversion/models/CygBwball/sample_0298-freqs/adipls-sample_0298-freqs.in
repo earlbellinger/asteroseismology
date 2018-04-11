@@ -9,6 +9,7 @@ outputs
  11 'sample_0298-freqs.agsm' @
  13 'sample_0298-freqs.g1k'  @
  15 'sample_0298-freqs.ssm'  @
+ 12 'sample_0298-freqs.rotk' @ 
  -1 ''   @
 
 cntrd:
@@ -69,16 +70,17 @@ int:
 
 out:
   istdpr,nout,nprcen,irsord,iekinr,
-       9,    ,      ,    20,      , @
+       9,    ,      ,    20,     1, @
        9,  10,      ,    20,      , 
        9,    ,      ,      ,      , 
   iper,ivarf,kvarf,npvarf,nfmode,
      1,    1,     ,      ,     3, 
      1,    3,     ,      ,     3, @
+     1,    2,     ,      ,     3, 
      1,    1,    1,      ,     3, 
      1,     ,     ,      ,     3, 
   irotkr,nprtkr,igm1kr,npgmkr,ispcpr,
-       0,      ,     0,      ,     0, @
+       1,      ,     0,      ,     0, @
   icaswn, sigwn1, sigwn2, frqwn1, frqwn2,iorwn1, iorwn2, frlwn1, frlwn2
         ,      0,     -1,      0,   9999,     0,     50,      0,     -1, 
         ,      0,     -1,       0,9999,      0,50,      0,     -1, @

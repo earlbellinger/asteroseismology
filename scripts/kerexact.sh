@@ -19,7 +19,7 @@ if [ -z ${1+x} ] || [ $1 == '-h' ] || [ $1 == '--help' ]; then
     echo "Searches through frequencies FRQWN1,FRQWN2 (default FRQWN=0,9999)"
     echo "and radial orders IORWN1,IORWN2 (default IORWN=0,50)"
     echo
-    echo ' Kernel types'
+    echo ' Kernel types (default KERTYPE=5)'
     echo '   1.  Eulerian ln(c^2) and ln(rho)'
     echo '   2.  Eulerian ln(Gamma1) and ln(rho)'
     echo '   3.  Eulerian ln(c^2) and ln(Gamma1)'
@@ -70,6 +70,10 @@ if [ -z ${4+x} ]; then
     nsel1=${nsel[1]}
     #nsel="$4"
 fi
+
+#if [ -z ${7+x} ]; then
+#    cgrav=$7
+#fi
 
 lmin=$nsel1
 lmax=$(($nsel1 + $nsel0 - 1))
@@ -171,11 +175,11 @@ paste ichkr-"$kpair"_2/* >| "$ktype"_"$kpair2"-"$kpair1".dat
 echo "Cleaning up"
 rm -rf $ichkr1 $ichkr2 ichkr-"$kpair"_1 ichkr-"$kpair"_2
 
-if [ $kpair -eq 5 ]; then
-    python3 $SCRIPTS_DIR/kern/psi_extractor.py -i $ichpsi -o psi -p >> kerexact.log
-    paste psi/* >| psi.dat
-fi
-rm -rf psi 
+#if [ $kpair -eq 5 ]; then
+#    python3 $SCRIPTS_DIR/kern/psi_extractor.py -i $ichpsi -o psi -p >> kerexact.log
+#    paste psi/* >| psi.dat
+#fi
+#rm -rf psi 
 rm -rf ichpsi 
 
 

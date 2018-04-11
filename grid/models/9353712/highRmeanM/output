@@ -1,0 +1,57 @@
+DATE: 2018-03-13
+TIME: 23:07:42
+                                         version_number       10108
+ read inlist_0all
+ read inlist_3ms
+load saved model zams.mod
+
+                                        set_initial_age    0.0000000000000000D+00
+ change to pp_cno_extras_o18_ne22.net
+ number of species          26
+ new_lnPgas_flag T
+ net name pp_cno_extras_o18_ne22.net
+ lnPgas_flag T
+                       which_atm_option: Eddington_grey
+ kappa_file_prefix gs98
+ kappa_lowT_prefix lowT_fa05_gs98
+
+   eos_file_prefix mesa
+                                        OMP_NUM_THREADS           1
+
+
+__________________________________________________________________________________________________________________________________________________
+
+       step    lg_Tcntr    Teff       lg_LH     lg_Lnuc     Mass       H_rich     H_cntr     N_cntr     Y_surf     X_avg     eta_cntr  zones retry
+   lg_dt_yr    lg_Dcntr    lg_R       lg_L3a    lg_Lneu     lg_Mdot    He_core    He_cntr    O_cntr     Z_surf     Y_avg     gam_cntr  iters bckup
+     age_yr    lg_Pcntr    lg_L       lg_LZ     lg_Psurf    lg_Dsurf   C_core     C_cntr     Ne_cntr    Z_cntr     Z_avg     v_div_cs     dt_limit
+__________________________________________________________________________________________________________________________________________________
+
+        658   7.224498   6663.604   0.769790   0.769790   1.591093   1.591093   0.714792   0.001833   0.260650   0.714972  -2.395331   1552      0
+   2.575732   1.757304   0.260109 -43.041945  -0.454479 -99.000000   0.000000   0.260751   0.011356   0.024329   0.260676   0.057945      6      0
+ 3.7647E+02  17.114926   0.769748  -7.542297   4.555101  -7.078807   0.000000   0.003108   0.002363  2.446E-02  2.435E-02 -0.830E-09              
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 658
+        838   7.316574   6554.345   0.795304   0.795304   1.591093   1.591093   0.330654   0.010456   0.260650   0.663435  -2.417913   1644      0
+   7.117416   1.994940   0.286841 -37.287659  -0.469809 -99.000000   0.000000   0.644878   0.004811   0.024329   0.312015   0.072900      6      0
+ 1.4556E+09  17.295077   0.794492  -5.714452   4.558037  -7.068730   0.000000   0.000059   0.002361  2.447E-02  2.455E-02  0.116E-11        lgTeff
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 838
+hydro_newton_step failed to accept
+       retry log10(dt/yr), log10(dt), retry_factor     1   903        6.460118       13.959229        0.500000
+
+stop because star_age >= max_age
+    0.2207156082E+10    0.2207156082E+10
+
+        907   7.360878   6431.187   0.948246   0.948247   1.591093   1.497965   0.000073   0.014035   0.260650   0.632966  -0.754852   1888      1
+   6.268323   2.857727   0.377242 -32.831052  -0.294176 -99.000000   0.093128   0.976082   0.002090   0.024329   0.342530   0.230657      6      0
+ 2.2072E+09  18.024187   0.942341  -5.442310   4.484698  -7.134037   0.000000   0.000111   0.002358  2.385E-02  2.450E-02  0.283E-10    lg_XH_cntr
+
+save LOGS_MS/profile1.data LOGS_MS/profile1.data.FGONG for model 907
+ saved to tams.mod
+termination code: max_age
+        907   7.360878   6431.187   0.948246   0.948247   1.591093   1.497965   0.000073   0.014035   0.260650   0.632966  -0.754852   1888      1
+   6.268323   2.857727   0.377242 -32.831052  -0.294176 -99.000000   0.093128   0.976082   0.002090   0.024329   0.342530   0.230657      6      0
+ 2.2072E+09  18.024187   0.942341  -5.442310   4.484698  -7.134037   0.000000   0.000111   0.002358  2.385E-02  2.450E-02  0.283E-10    lg_XH_cntr
+
+DATE: 2018-03-13
+TIME: 23:24:18

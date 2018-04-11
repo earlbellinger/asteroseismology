@@ -1,0 +1,36 @@
+&star_job
+      
+      save_model_filename = 'brgb.mod'
+      load_saved_model = .true.
+      saved_model_name = 'tams.mod'
+      
+/ ! end of star_job namelist
+
+
+&controls
+
+      log_directory = 'LOGS_SG'
+      
+      !max_years_for_timestep = -1
+      !min_timestep_limit = 1d-12
+      !mesh_delta_coeff = 1
+      !varcontrol_target = 1d-3 ! default is 1d-4
+      
+      delta_lgTeff_limit = 0.001
+      delta_lgL_phot_limit = 0.01
+      
+      profile_interval = 3
+      history_interval = 3
+      
+      x_ctrl(1) = -3 ! stop when (d log L / d log Teff) > -3
+      !x_ctrl(2) = 0 ! decrease diffusion by this amount each time step
+      x_ctrl(3) = 100 ! stop when delta_Pg < 100
+      x_integer_ctrl(1) = 6 ! stop when He flash is over 
+      
+/ ! end of controls namelist
+
+
+&pgstar
+
+/ ! end of pgstar namelist
+

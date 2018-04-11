@@ -9,7 +9,7 @@ phi = 0:pi/20:2*pi;                   % azimuth angle
 
 %% Calculate the Spherical Harmonic
 
-for degree = 1:3
+for degree = 1:3 %[1:3 20 25 75]
 
 %degree = 3;
 order = 0;
