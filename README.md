@@ -7,7 +7,9 @@ If any of these programs are useful to you, please consider citing one or more o
 
   * Angelou, G. C., Bellinger, E. P., Hekker, S., Basu, S. (2017). [On the Statistical Properties of the Lower Main Sequence](http://adsabs.harvard.edu/abs/2017ApJ...839..116A). *The Astrophysical Journal*, 839 (2), 116.
 
-  * Bellinger, E. P., Angelou, G., Hekker, S., Basu, S., Ball, W., Guggenberger, E. (2017). [Fundamental Parameters in an Instant with Machine Learning: Application to Kepler LEGACY Targets](https://arxiv.org/abs/1705.06759). Seismology of the Sun and Distant Stars, submitted.
+  * Bellinger, E. P., Angelou, G., Hekker, S., Basu, S., Ball, W., Guggenberger, E. (2017). [Fundamental Parameters in an Instant with Machine Learning: Application to Kepler LEGACY Targets](http://adsabs.harvard.edu/abs/2017EPJWC.16005003B). *Seismology of the Sun and Distant Stars*, European Physical Journal Web of Conferences.
+  
+  * Bellinger, E. P., Basu, S., Hekker, S., Ball, W. (2017). [Model-independent Measurement of Internal Stellar Structure in 16 Cygni A and B](http://adsabs.harvard.edu/abs/2017ApJ...851...80B). *The Astrophysical Journal*, 851 (2), 80. 
 
 See [Releases](https://github.com/earlbellinger/asteroseismology/releases) for the versions of this repository corresponding to those papers. 
 
