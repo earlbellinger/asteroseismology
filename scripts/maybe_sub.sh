@@ -20,8 +20,13 @@ request_cpus = $OMP_NUM_THREADS
     
     ## Set memory consumption
     image_size=""
-    if [ "$MEMORY" -gt 0 ]; then
-        image_size="image_size   = $MEMORY
+    if [ "$IMAGE" -gt 0 ]; then
+        image_size="image_size   = $IMAGE
+"
+    fi
+    request_memory=""
+    if [ "$MEMORY" != 0 ]; then
+        request_memory="request_memory   = $MEMORY
 "
     fi
     
@@ -71,7 +76,7 @@ Executable   = $name.sh
 Output       = condor.out
 Error        = condor.error
 Log          = condor.log
-$environment$image_size$nice$machine$requirements
+$environment$image_size$request_memory$nice$machine$requirements
 queue
 " > "condor.job"
         condor_submit "condor.job"
@@ -90,8 +95,9 @@ while [ "$#" -gt 0 ]; do
     -e) EXCLUDE=1; shift 1;;
     -p) OMP_NUM_THREADS="$2"; shift 2;;
     -m) MEMORY="$2"; shift 2;;
+    -i) IMAGE="$2"; shift 2;;
     -c) MACHINE="$2"; shift 2;;
-
+    
      *) break;;
   esac
 done
@@ -100,6 +106,7 @@ if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${OMP_NUM_THREADS+x} ]; then OMP_NUM_THREADS=1; fi
 if [ -z ${NICE+x} ]; then NICE=0; fi
 if [ -z ${MEMORY+x} ]; then MEMORY=0; fi
+if [ -z ${IMAGE+x} ]; then IMAGE=0; fi
 if [ -z ${EXCLUDE+x} ]; then EXCLUDE=0; fi
 
 if [ $HELP -gt 0 ]; then
@@ -122,6 +129,7 @@ if [ $HELP -gt 0 ]; then
     echo "  -e   : exclude two cores (a.k.a., a 'really' nice job)"
     echo "  -p # : set the number of threads to run in parallel"
     echo "  -m # : set the memory consumption of the job"
+    echo "  -i # : set the image size of the job"
     echo "  -c s : set the machine that this job will run on"
     echo
     exit

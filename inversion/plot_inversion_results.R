@@ -149,12 +149,12 @@ model.list <- parallelMap(function(model.name)
 names(model.list) <- model.names
 
 #targ.mode <- '-p_CygA-m_CygA-e_CygA-r_CygAwball-mod_Gauss'
-load(file.path('save', paste0('ref.mod',         targ.mode)))
-load(file.path('save', paste0('inv.lists',       targ.mode)))
-load(file.path('save', paste0('avg.kerns.lists', targ.mode)))
-load(file.path('save', paste0('cross.lists',     targ.mode)))
-load(file.path('save', paste0('MRs',             targ.mode)))
-load(file.path('save', paste0('inv.params',      targ.mode)))
+load(file.path('save-paper', paste0('ref.mod',         targ.mode)))
+load(file.path('save-paper', paste0('inv.lists',       targ.mode)))
+load(file.path('save-paper', paste0('avg.kerns.lists', targ.mode)))
+load(file.path('save-paper', paste0('cross.lists',     targ.mode)))
+load(file.path('save-paper', paste0('MRs',             targ.mode)))
+load(file.path('save-paper', paste0('inv.params',      targ.mode)))
 inversion <- lists_to_inversion(model=ref.mod, rs=rs, 
     inv.lists=inv.lists, avg.kerns.lists=avg.kerns.lists, 
     cross.lists=cross.lists, inv.params=inv.params,

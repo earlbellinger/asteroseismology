@@ -35,7 +35,10 @@ paths <- list(diffusion=file.path('models', 'diffusion', 'LOGS_MS'),
               CygAyoung=file.path('..', 'calibration', 'old', 'calibrate2',
                 'M=1.08_logR=0.08635983_age=6000000000', 'LOGS_MS'),
               CygAyounger=file.path('..', 'calibration', 'old', 'calibrate2',
-                'M=1.08_logR=0.08635983_age=5000000000', 'LOGS_MS'))
+                'M=1.08_logR=0.08635983_age=5000000000', 'LOGS_MS'),
+              calibrate=file.path('models', 'calibrate', 'LOGS_MS'),
+              overshoot=file.path('models', 'overshoot', 'os', 'LOGS_3MS'),
+              no_overshoot=file.path('models', 'overshoot', 'nos', 'LOGS_3MS'))
 
 path <- paths$hl.diff
 hl.diff <- list(name='MESA Diffusion', short='hlD',
@@ -178,6 +181,31 @@ CygAyounger <- list(name='16CygA lower age', short='CygAyounger',
                      profile.path=file.path(path, 'profile1.data'),
                      fgong.path=file.path(path, 'profile1-freqs', 
                                                 'profile1.data.FGONG.dat'))
+
+path <- paths$calibrate
+calibrate <- list(name='Diffusion', short='D',
+                  kerns.dir=file.path(path, 'profile1-freqs'),
+                  freq.path=file.path(path, 'profile1-freqs.dat'), 
+                  freq.col.names=c('l', 'n', 'nu', 'E'),
+                  profile.path=file.path(path, 'profile1.data'),
+                  fgong.path=file.path(path, 'profile1-freqs', 
+                                             'profile1.data.FGONG.dat'))
+
+path <- paths$overshoot
+overshoot <- list(name='Overshoot', short='ov',
+                  kerns.dir=NULL,#file.path(path, 'profile1-freqs'),
+                  freq.path=NULL,#file.path(path, 'profile1-freqs.dat'), 
+                  freq.col.names=NA, #c('l', 'n', 'nu', 'E'),
+                  profile.path=file.path(path, 'profile1.data'),
+                  fgong.path=file.path(path, 'profile1.data.FGONG.dat'))
+
+path <- paths$no_overshoot
+no_overshoot <- list(name='No overshoot', short='nov',
+                  kerns.dir=NULL,#file.path(path, 'profile1-freqs'),
+                  freq.path=NULL,#file.path(path, 'profile1-freqs.dat'), 
+                  freq.col.names=NA, #c('l', 'n', 'nu', 'E'),
+                  profile.path=file.path(path, 'profile1.data'),
+                  fgong.path=file.path(path, 'profile1.data.FGONG.dat'))
 
 names.list <<- list()
 get_model_list <- function() {

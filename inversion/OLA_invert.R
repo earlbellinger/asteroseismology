@@ -429,15 +429,15 @@ invert.OLA <- function(model, rs, cross.term, error.sup, width=NULL,
 }
 
 
-get_lists_mean <- function(quantity_name, lists) {
+get_lists_mean <- function(quantity_name, lists, fctnl=mean) {
     sapply(lists, function(inversion.list) {
         results <- sapply(inversion.list, function(result) 
             result[[quantity_name]])
-        apply(results, 1, mean)
+        apply(results, 1, fctnl)
     })
 }
 
-get_kernel_lists_mean <- function(kernel.lists) {
+get_kernel_lists_mean <- function(kernel.lists, fctnl=mean) {
     get_radius <- function(radius_i) {
         get_kerns <- function(trial_j) {
             trial. <- kernel.lists[[trial_j]]
@@ -445,7 +445,7 @@ get_kernel_lists_mean <- function(kernel.lists) {
             do.call(cbind, Map(get_kern, ref_mod_k=1:length(trial.)))
         }
         kerns <- do.call(cbind, Map(get_kerns, trial_j=1:length(kernel.lists)))
-        apply(kerns, 1, mean)
+        apply(kerns, 1, fctnl)
     }
     num_targ_rs <- ncol(kernel.lists[[1]][[1]])
     do.call(cbind, Map(get_radius, radius_i=1:num_targ_rs))
@@ -453,19 +453,19 @@ get_kernel_lists_mean <- function(kernel.lists) {
 
 lists_to_inversion <- function(model, rs, 
         inv.lists, avg.kerns.lists, cross.lists, 
-        inv.params=NULL, kern.interp.xs=NULL) {
+        inv.params=NULL, kern.interp.xs=NULL, fctnl='mean') {
     
-    avg_kerns <- get_kernel_lists_mean(avg.kerns.lists)
-    cross_kerns <- get_kernel_lists_mean(cross.lists)
+    avg_kerns <- get_kernel_lists_mean(avg.kerns.lists, fctnl=get(fctnl))
+    cross_kerns <- get_kernel_lists_mean(cross.lists, fctnl=get(fctnl))
     errbars <- get_errbars(avg_kerns=avg_kerns, 
         K.x=if (!is.null(kern.interp.xs)) kern.interp.xs else model$k1$xs)
     
     m.f <- model$f1.spl(errbars$fwhm.mid)
     
-    f.means <- get_lists_mean('f', lists=inv.lists)
-    f.err <- apply(f.means, 1, sd)
+    f.means <- get_lists_mean('f', lists=inv.lists, fctnl=get(fctnl))#mean)
+    f.err <- apply(f.means, 1, ifelse(fctnl=='mean', sd, mad))#sd)
     f.err[is.na(f.err)] <- 0
-    f <- apply(f.means, 1, mean)
+    f <- apply(f.means, 1, get(fctnl))#mean)
     
     df_dr <- (m.f - f) / m.f
     err <- abs(df_dr) * f.err / abs(m.f-f)
@@ -476,7 +476,7 @@ lists_to_inversion <- function(model, rs,
         result <- cbind(result, data.frame(true_df_dr=model$d.f1.spl(rs)))
     }
     
-    list(params=sapply(inv.params, mean),
+    list(params=sapply(inv.params, get(fctnl)),
          k.pair=model$k.pair, 
          #c.vecs=c.vecs, 
          #inv.coefs=inv.coefs, 
@@ -592,3 +592,4 @@ print_latex_table <- function(inversion) {
             sep=' & '), "\\\\ \n")))
     }
 }
+

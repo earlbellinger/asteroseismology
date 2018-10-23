@@ -47,6 +47,7 @@ def parse_k(filename, output_dir='', normalize=False,
         bin_file = f.read()
     
     x=0
+    meta = []
     while len(bin_file)>0:
         # not sure what this is
         fmt = '<i'
@@ -58,8 +59,10 @@ def parse_k(filename, output_dir='', normalize=False,
         fmt = '<'+50*'d'
         size = struct.calcsize(fmt)
         cs = struct.unpack(fmt, bin_file[:size])
+        beta = cs[35]
         l = int(cs[17])
         n = int(cs[18])
+        meta += [[l, n, beta]]
         print("Extracting kernel for mode l=%d, n=%d"%(l,n))
         bin_file = bin_file[size:]
         
@@ -106,7 +109,10 @@ def parse_k(filename, output_dir='', normalize=False,
         out = struct.unpack(fmt, bin_file[:size])
         bin_file = bin_file[size:]
     
-    np.savetxt(os.path.join(output_dir, 'x'), x, header='x', comments='')
+    if save_dat:
+        np.savetxt(os.path.join(output_dir, 'x'), x, header='x', comments='')
+        np.savetxt('beta.dat', np.array(meta), header='l n beta', comments='',
+            fmt='%i %i %16.16f')
     
     if len(bin_file) != 0:
         print("Error: failed to parse k file")

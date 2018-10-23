@@ -32,7 +32,7 @@ parse_freqs <- function(fname, gyre=F) {
             nu=freqs$Re.freq., E=freqs$E_norm)
     } else {
         #read.table(fname, col.names=c('l', 'n', 'nu'))
-        read.table(fname, col.names=c('l', 'n', 'nu', 'E'))
+        read.table(fname, header=1) #col.names=c('l', 'n', 'nu', 'E'))
     }
 }
 
@@ -41,9 +41,10 @@ parse_freqs <- function(fname, gyre=F) {
 # nu_max is the frequency of maximum oscillation power
 # acoustic_cutoff is the truncation frequency 
 # outf is the filename that plots should have (None for no plot)
-seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
+seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE,
+        verbose=T) {
     if (nrow(freqs) == 0) {
-        print("No frequencies found")
+        if (verbose) print("No frequencies found")
         return(NULL)
     }
     freqs <- unique(freqs[complete.cases(freqs) & freqs$nu < acoustic_cutoff,])
@@ -61,44 +62,50 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     orig <- freqs
     
     # remove mixed modes
-    mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l == 1,]
+    mixed <- freqs[freqs$n_g != 0 & freqs$n_p != 0 & freqs$l > 0,]
     freqs <- freqs[freqs$n_g == 0,]
     # get l=0
     #seis.DF <- NULL
-    seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, ...)
+    seis.DF <- get_average("Dnu", freqs, 0, nu_max, outf, verbose=verbose, ...)
+    
+    calc.dnu <- !any(mixed$nu > (nu_max - 5*seis.DF$Dnu0))
     
     # make echelle
     if (outf != FALSE) make_plots(echelle_plot, paste0(outf, '-echelle'), ..., 
         freqs=freqs, large_sep=seis.DF[[1]])
     
     # get averages for dnu, r01, r02, r10, r13
-    for (l_deg in 0:1) {
+    if (calc.dnu) for (l_deg in 0:1) {
         if (l_deg %in% ells && (l_deg+2) %in% ells) { 
-            dnu_median <- get_average("dnu", freqs, l_deg, nu_max, outf, ...)
+            dnu_median <- get_average("dnu", freqs, l_deg, nu_max, outf,  
+                verbose=verbose, ...)
             if (!is.null(dnu_median)) 
                 seis.DF <- if (is.null(seis.DF)) dnu_median else 
                     cbind(seis.DF, dnu_median)
             
             if ((1-l_deg) %in% ells) {
                 rsep_median <- get_average("r_sep", freqs, l_deg, nu_max, 
-                    outf, ...)
+                    outf, verbose=verbose, ...)
                 if (!is.null(rsep_median)) 
                     seis.DF <- if (is.null(seis.DF)) rsep_median else 
                         cbind(seis.DF, rsep_median)
             }
         }
         if (0 %in% ells && 1 %in% ells) {
-            ravg_median <- get_average("r_avg", freqs, l_deg, nu_max, outf, ...)
+            ravg_median <- get_average("r_avg", freqs, l_deg, nu_max, 
+                outf, verbose=verbose, ...)
             if (!is.null(ravg_median)) 
                 seis.DF <- if (is.null(seis.DF)) ravg_median else 
                     cbind(seis.DF, ravg_median)
         }
     }
     
+    if (F) {
+    
     ell.0 <- freqs[freqs$l == 0,]
     
     # calculate epsilon_p
-    if ('Dnu0' %in% names(seis.DF)) {
+    if ('Dnu0' %in% names(seis.DF) && FALSE) {
         epsilon_p <- weighted.mean(ell.0$nu / seis.DF[['Dnu0']] - ell.0$n,
             dnorm(ell.0$nu, nu_max, (0.66*nu_max**0.88)/fwhm_conversion))
         epsilon.DF <- data.frame(epsilon_p=epsilon_p)
@@ -108,10 +115,11 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
     
     
     # include all ratios 
-    for (l_deg in 0:1) {
+    if (calc.dnu && FALSE) for (l_deg in 0:1) {
         if (l_deg %in% ells && (l_deg+2) %in% ells) { 
             if ((1-l_deg) %in% ells) {
-                rseps <- get_separations("r_sep", freqs, l_deg, nu_max)
+                rseps <- get_separations("r_sep", freqs, l_deg, nu_max,
+                    verbose=verbose)
                 if (!is.null(rseps) & length(rseps$nus)>0) {
                     r.DF <- t(data.frame(rseps$separations))
                     colnames(r.DF) <- paste0('r', l_deg, l_deg+2, '_', rseps$n)
@@ -122,7 +130,8 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
             }
         }
         if (0 %in% ells && 1 %in% ells) {
-            ravgs <- get_separations("r_avg", freqs, l_deg, nu_max)
+            ravgs <- get_separations("r_avg", freqs, l_deg, nu_max,
+                verbose=verbose)
             if (!is.null(ravgs) & length(ravgs$nus)>0) {
                 r.DF <- t(data.frame(ravgs$separations))
                 colnames(r.DF) <- paste0('r', l_deg, 1-l_deg, '_', ravgs$n)
@@ -203,15 +212,16 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE) {
         seis.DF <- cbind(seis.DF, mixed)
     }
     }
+    }
     return(seis.DF)
 }
 
 get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F, 
-        min_points=3, check_nu_max=T, ...) {
+        min_points=3, check_nu_max=T, verbose=T, ...) {
     
     result <- NULL
     
-    vals <- get_separations(sep_name, freqs, l_deg, nu_max)
+    vals <- get_separations(sep_name, freqs, l_deg, nu_max, verbose=verbose)
     
     nus <- vals$nus
     seps <- vals$separations
@@ -222,7 +232,7 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F,
     seps <- seps[not.na]
     
     if (length(seps) < min_points) {
-        print(paste("Too few points for", sep_name))
+        if (verbose) print(paste("Too few points for", sep_name))
         return(NULL)
     }
     
@@ -234,8 +244,9 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F,
     if (!is.na(nu_max)) {
         fwhm <- (0.66*nu_max**0.88)/fwhm_conversion
         gaussian_env <- dnorm(nus, nu_max, fwhm)
-        if (check_nu_max && length(nus[nus<nu_max-fwhm | nus>nu_max+fwhm])==0) {
-            print(paste("All points too far from nu_max for", sep_name))
+        if (check_nu_max && length(nus[nus>nu_max-fwhm & nus<nu_max+fwhm])==0) {
+            if (verbose) 
+                print(paste("All points too far from nu_max for", sep_name))
             return(NULL)
         }
         w.median <- weightedMedian(seps, gaussian_env)
@@ -257,7 +268,8 @@ get_average <- function(sep_name, freqs, l_deg, nu_max=NA, outf=F,
     result
 }
 
-get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
+get_separations <- function(sep_name, freqs, l_deg, nu_max=NA, 
+        verbose=verbose) {
     freqs.ell <- freqs[freqs$l==l_deg,]
     freqs.ell <- freqs.ell[order(freqs.ell$nu),]
     nus <- freqs.ell$nu
@@ -274,7 +286,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         y <- sort(freqs[freqs$l==l_deg+2,]$nu)
         indices <- find_closest(nus, y)
         separations <- nus[indices$x]-y[indices$y]
-        Dnu <- get_average("Dnu", freqs, 0, nu_max)$Dnu0
+        Dnu <- get_average("Dnu", freqs, 0, nu_max, verbose=verbose)$Dnu0
         rem <- abs(separations) > Dnu / 1.5
         separations[rem] <- NA
         n <- freqs.ell$n[indices$x]
@@ -285,8 +297,8 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
         # r(l, n) = dnu(n, l) / Dnu(n+l, 1-l)
         # dnu(n, l) = nu_[n, l] - nu_[n-1, l+2]
         # Dnu(n, l) = nu_[n, l] - nu_[n-1, l]
-        dnus <- get_separations("dnu", freqs, l_deg)
-        Dnus <- get_separations("Dnu", freqs, 1-l_deg)
+        dnus <- get_separations("dnu", freqs, l_deg, verbose=verbose)
+        Dnus <- get_separations("Dnu", freqs, 1-l_deg, verbose=verbose)
         indices <- find_closest(dnus$nu, Dnus$nu)
         matched.dnus <- dnus$separations[indices$x]
         matched.Dnus <- Dnus$separations[indices$y]
@@ -372,7 +384,7 @@ get_separations <- function(sep_name, freqs, l_deg, nu_max=NA) {
 # make a plot with filename 'outf' if outf != FALSE
 avg <- function(separator, freqs, 
         l_degs=0, DF=NULL, nu_max=NA, acoustic_cutoff=Inf, outf=FALSE, 
-        min_points=3, ...) {
+        min_points=3, verbose=T, ...) {
     sep_name <- deparse(substitute(separator))
     #print(sep_name)
     seps <- c() # contains the computed quantity (e.g. large freq separations)
@@ -383,7 +395,7 @@ avg <- function(separator, freqs,
         ell <- p_modes[p_modes$l==l_deg,]
         ell <- ell[!duplicated(ell$n) & !duplicated(ell$n, fromLast=T),]
         if (nrow(ell) == 0) {
-            print(paste0("No ell=", ell))
+            if (verbose) print(paste0("No ell=", ell))
             #print(ell)
             next
         }
@@ -399,8 +411,8 @@ avg <- function(separator, freqs,
     
     # need 3 points to make something reasonable 
     if (length(seps) < min_points) {
-        print(paste("Too few points for", sep_name))
-        print(seps)
+        if (verbose) print(paste("Too few points for", sep_name))
+        if (verbose) print(seps)
         #DF[paste0(sep_name, "_median")] <- NA
         #DF[paste0(sep_name, "_slope")] <- NA
         return(DF)

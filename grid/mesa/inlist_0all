@@ -102,13 +102,15 @@
       
       cool_wind_RGB_scheme = 'Reimers'
       !cool_wind_AGB_scheme = 'Reimers'
-      Reimers_scaling_factor = 0
+      !Reimers_scaling_factor = 0
       !RGB_to_AGB_wind_switch = 1d-5
       
       add_atmosphere_to_pulse_data = .true.
       add_center_point_to_pulse_data = .false.
       keep_surface_point_for_pulse_data = .false.
       add_double_points_to_pulse_data = .false.
+      
+      max_allowed_nz = 16000
       
       max_age = 20e9
       

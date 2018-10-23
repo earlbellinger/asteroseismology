@@ -1,0 +1,103 @@
+Use of An where A is expected##\b[Aa]n\s+((?:(?:(?:\b(?:Euridyce|Euripides|Euroclydon|Eurocommunism|Eurocrat|Eurodollar|Euromarket|Europa|Europe|European|Europeanisation|Europeanise|Europeanised|Eurovision|Unix|eurhythmic|eurhythmy|euripus|one|unary|uniform|uniformally|uniformisation|uniformise|uniformitarian|uniformitarianism|uniformity|unify|unijugate|unilateral|unilateralisation|unilateralise|unilateralist|unilinear|unilingual|uniliteral|union|unique|unit|united|unity|universal|universalisation|universalise|universalism|universalist|universalistic|universality|universe|university|univocal|US|usage|useful|user|UK|uni.*)\b)|(?:(?!\b(?:NP|LP|heir|heirloom|honest|honor|honorable|honorarium|honorary|honorific|honour|hour|hourglass|hourly|HTML|XML|FBI|SGML)\b)\b[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ][[:alnum:]]+\b))|\b[BCDGJKPQRSTUVWYZbcdgjkpqrstuvwyz]\b|(?:\\frac\s*{|\\hat\s*{|\\acute\s*{|\\bar\s*{|\\dot\s*{|\\check\s*{|\\grave\s*{|\\vec\s*{|\\ddot\s*{|\\breve\s*{|\\tilde\s*{|[(])*(?:[012345679BCDGJKPQRSTUVWYZbcdgjkpqrstuvwyz]|\[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ])[^]*[]|(?:\\\$)?\b(?!(?:11|18)(?:[[:digit:]]{2})?(?:[[:digit:]]{3})*(?=[^[:digit:]]|$))[012345679][[:digit:]]*(?=[^[:digit:]]|$)))####An should only be used before words that start with a vowel sound (usually A,E,I,O or U), but ARG1 begins with a consonant sound
+
+Use of A where An is expected##\b[Aa]\s+((?:(?:(?:\b(?:NP|LP|heir|heirloom|honest|honor|honorable|honorarium|honorary|honorific|honour|hour|hourglass|hourly|HTML|XML|FBI|SGML)\b)|(?:(?!\b(?:Euridyce|Euripides|Euroclydon|Eurocommunism|Eurocrat|Eurodollar|Euromarket|Europa|Europe|European|Europeanisation|Europeanise|Europeanised|Eurovision|Unix|eurhythmic|eurhythmy|euripus|one|unary|uniform|uniformally|uniformisation|uniformise|uniformitarian|uniformitarianism|uniformity|unify|unijugate|unilateral|unilateralisation|unilateralise|unilateralist|unilinear|unilingual|uniliteral|union|unique|unit|united|unity|universal|universalisation|universalise|universalism|universalist|universalistic|universality|universe|university|univocal|US|usage|useful|user|UK|uni.*)\b)\b[aeiouAEIOU][[:alnum:]]+\b))|\b[FHILMANXAEIOfhilmanxaeio]\b|(?:\\frac\s*{|\\hat\s*{|\\acute\s*{|\\bar\s*{|\\dot\s*{|\\check\s*{|\\grave\s*{|\\vec\s*{|\\ddot\s*{|\\breve\s*{|\\tilde\s*{|[(])*(?:[8FHILMANXAEIOfhilmanxaeio]|\[aeiouAEIOU])[^]*[]|(?:\\\$)?\b(?:8[[:digit:]]*(?=[^[:digit:]]|$)|(?:11|18)(?:[[:digit:]]{2})?(?:[[:digit:]]{3})*(?=[^[:digit:]]|$))))####A should only be used before words that do not start with a vowel sound (usually A,E,I,O or U), but ARG1 begins with vowel sound.
+
+Use of the and 's##\b[Tt]he\s+[[:upper:]][[:lower:]]*'s####You should use the or 's, not both
+
+Sentance must begin with capital letter##(?<!\..)\.\s+[[:lower:]]####
+
+No space before math block##[[:alnum:]][^]*####
+
+No space before citation##[[:alnum:]]\\citep####
+
+Number of (singular)##[Nn]umber\s+of\s+[[:alnum:]]+[^s\s]\b####
+
+Capital following comma##,\s*(?!b|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Coomb|Hare\b|Marquis\b||Khachian\b|Dominating\s+Set\b\b|Impartial\s+Culture\b)[[:upper:]][[:lower:]]##Remove capitals from beginning of ARG1##
+
+No space after math block##[^]*[[:alnum:]]####
+
+No space before macro##[[:alnum:]]\\term\{[^}]*\}####
+
+No space after macro##\\term\{[^}]*\}[[:alnum:]]####
+
+A used for plural##\b[Aa]\s+sequences\b####
+
+Comma following footnote##\\footnote[{][^}]*[}],####
+
+Use of : in math-mode##[^]*:####LaTeX assumes a : in mathmode means division, if you are trying to define a function, you should use \colon instead.
+
+less that##\bless\s+that\b####
+
+Ugly fraction##([[:digit:]])/([[:digit:]])(?!n[}])(?!_home)####Use \nicefrac{ARG1}{ARG2} instead
+
+Too many zeros without a comma##(?<!PE.-.)0000(?![^\s]*[.]tex[}])####You should put a comma in there somewhere
+
+Split word##(?:with out|like wise)##ARG1 is a single word##
+
+Duplicated Words##(?i)\b([[:alpha:]]+)\b\s+\b\2\b##ARG1 occurs twice.##
+
+Use of I.e.##I\.e\.##At the beginning of a sentance you should use "That is" rather than "I.e."##
+
+Use of E.g.##E\.g\.##At the beginning of a sentance you should use "For example" rather than "E.g."##
+
+Use of "we could".##\b([Ww]e\s+c(?:an|ould))(?>!\s+say)\b####In formal text, we should not use ARG1 as it implies you cannot
+
+No space between sentances##[[:lower:]]\.[[:upper:]](?![^\s]*[.]tex[}])####
+
+Missing hyphen after math block##\s+(multinomial|Bernoulli|dimensional|binomial|probability)####Add a hyphen before ARG1
+
+Paragraph should end in fullstop##(?<!(?:(?<![.].)[.])|\s|~|!|[)]|;)\s*(?<!\\|\}|\{|\n|\s|\?|[:]|\])(?<=.)\s*(?=(?:(?m)\A|\n\n|\Z))####
+
+Paragraph should end start with captial##(?:(?m)\A|\n\n|\Z)[[:lower:]]####
+
+Paragraph starts with fullstop?##(?:(?m)\A|\n\n|\Z)\.####
+
+Place punctuation outside mathmode##.([,.:?])####Move ARG1 out of math mode
+
+Remove space before punctuation##(?<!\\)\b[[:alnum:]]+\s+([,.:?'])####Remove Space before ARG1 
+
+Remove space before punctuation##(?<!\\)\b[[:alnum:]]+\s+(['])####Remove Space before ARG1... or perhaps you meant to use ` instead of '?
+
+Index entries should start with captial letters##\\index[{][[:lower:]]####
+
+Perhaps you mean `is that'##\bit\s+that\b####
+
+You should use Var()##\\[Vv]ari[[]|\\sigma[(]|\\sigma\^[{]2[}][(]|\\cov[[]##\bit\s+that\b####You should use Var(). Even though you use E[X] instead of E(X). Weird huh?
+
+You should use E[X]##E[(]|\\mu[(]##\bit\s+that\b####You should use E[X] instead of E(X) or mu(X) to represent the stats concept of `expected value'.
+
+In `in sentance' math blocks you should say this in words instead of using symbols##\\(forall|exists)####You should replace the ARG1 symbol with words.
+
+Amiguous Terminology##\b(and\s+but|a\s+the\b|the\s+of|[Bb]inomial\s+varia|are\s+is|will\s+equal|that\s+the\s+all|an\s+impartial\s+culture|\ba\s+one\s+of\b)####ARG1 is a little odd.
+
+Use of pretty ref with out prefix##\\prettyref[{][^}:]*[}]####If you are using prettyref to cross reference a chapter the label should start with "cha:", if the label is fore a section the label should start with "sec:" etc.
+
+Use of pretty ref with cor:##\\prettyref[{]cor:####Prettyref does not support cor:
+
+Lemma label without 'lem:'##\\begin[{]lem[}]\s+\\label[{](?!lem:)####If you start a Lemma label without lem, prettyref can get confused.
+
+Corollary label without 'cor:'##\\begin[{]cor[}]\s+\\label[{](?!cor:)####If you start a Lemma label without lem, prettyref can get confused.
+
+Theorem label without 'thm:'##\\begin[{]thm[}]\s+\\label[{](?!thm:)####If you start a Lemma label without lem, prettyref can get confused.
+
+Lack of Lemma prefix##\b(?!Lemma)[^\s~]+[~\s]+\\ref[{]lem:####
+
+Lack of Corollary prefix##\b(?!Corollary)[^~\s]+[~\s]+\\ref[{]cor:####
+
+Lack of Theorem prefix##\b(?!Theorem)[^\s~]+[~\s]+\\ref[{]thm:####
+
+Use of lowercase reference##(lemma|theorem|table|figure|corollary)[~ ]\\ref\b####The first letter of ARG1 should be capitalised to adhere to the LaTeX \prettyref standard.
+
+lemma/theorem occurs before prettyref##(emma|heorem)\s+\\prettyref\b####It is safer to use a Formatted Reference (i.e. \prettyref), rather than manually format references, as Formatted References will automatically change the refernce if you change the object being referenced (e.g. from a lemma to a theorem).
+
+Empty Footnote##\\footnote[{](\s|
+)*[}]####There is a footnote with nothing in it. Perhaps you should remove it
+
+Attempt to Pluralize a name##(\bSaari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman)s\b####ARG1 is someone's name, so the plural (s) doesn't really make sense. Maybe you meant the possessive ('s) instead?
+
+Unraised 'c' in 'Mc'##\bMc[[:upper:]]####The 'c' in 'Mc' should be a raised character.
+
+Replace O with \bigO##[^g]O[(]####This is a personal rule I use, I should have disabled it before I published a new version. Sorry.
+
+Replace log with ln##\\log####I use ln rather than log where possible.
+

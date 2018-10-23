@@ -1,0 +1,100 @@
+
+      model_number
+      
+      star_age
+      star_mass
+      
+      mass_conv_core
+      he_core_mass
+      he_core_radius
+
+      ! values are m/Mstar
+      conv_mx1_top
+      conv_mx1_bot
+      conv_mx2_top
+      conv_mx2_bot
+
+      ! radius -- values are radii in Rsun units
+      conv_mx1_top_r
+      conv_mx1_bot_r
+      conv_mx2_top_r
+      conv_mx2_bot_r
+      
+      cz_bot_radius
+      log_LH
+      log_LHe
+      
+      log_Teff
+      luminosity
+      log_L
+      log_R
+      log_g
+      log_surf_cell_z
+      
+      log_center_T
+      log_center_Rho
+      log_center_P
+      
+      center_mu
+      center_degeneracy
+      
+      center h1
+      center h2
+      center he3
+      center he4
+      center li7
+      center be7
+      center b8
+      center c12
+      center c13
+      center n13
+      center n14
+      center n15
+      center o14
+      center o15
+      center o16
+      center o17
+      center o18
+      center f17
+      center f18
+      center f19
+      center ne18
+      center ne19
+      center ne20
+      center ne22
+      center mg22
+      center mg24
+      
+      surface h1
+      surface h2
+      surface he3
+      surface he4
+      surface li7
+      surface be7
+      surface b8
+      surface c12
+      surface c13
+      surface n13
+      surface n14
+      surface n15
+      surface o14
+      surface o15
+      surface o16
+      surface o17
+      surface o18
+      surface f17
+      surface f18
+      surface f19
+      surface ne18
+      surface ne19
+      surface ne20
+      surface ne22
+      surface mg22
+      surface mg24
+     
+      nu_max 
+      delta_nu
+      delta_Pg
+      acoustic_cutoff
+      acoustic_radius
+

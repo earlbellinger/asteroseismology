@@ -1,0 +1,111 @@
+\begin{minipage}[t][1cm][t]{1cm+\widthof{convection}}\vspace{0pt}
+\begin{tikzpicture}[scale=3]
+  \filldraw[fill=black!5!white]
+    (0,0) -- (0.169,0) -- (.169,.1) -- (0,.1) -- (0,0);
+  \filldraw[pattern=crosshatch dots, pattern color=black]
+    (0,0) -- (0.169,0) -- (.169,.1) -- (0,.1) -- (0,0);
+  \node[right] at (0.169, 0.06) {convection}; 
+\end{tikzpicture}%\hspace*{0.2cm}%
+\end{minipage}
+\begin{minipage}[t][1cm][t]{1cm+\widthof{radiation}}\vspace{0pt}
+\begin{tikzpicture}[scale=3]
+  \filldraw[fill=orange!30!white]
+    (0,0) -- (0.169,0) -- (.169,.1) -- (0,.1) -- (0,0);
+  \node[right] at (0.169, 0.06) {radiation}; 
+\end{tikzpicture}%\hspace*{0.2cm}%
+\end{minipage}
+\begin{minipage}[t][1cm][t]{1cm+\widthof{hydrogen fusion}}\vspace{0pt}
+\begin{tikzpicture}[scale=3]
+  %\filldraw[fill=orange!15!white]
+  %  (0,-0.04) -- (0.169,-0.04) -- (.169,.06) -- (0,.06) -- (0,-0.04);
+  \filldraw[pattern=fivepointed stars2, pattern color=red!70!black]
+    (0,-0.04) -- (0.169,-0.04) -- (.169,.06) -- (0,.06) -- (0,-0.04);
+  \node[right] at (0.169, 0) {hydrogen fusion}; 
+\end{tikzpicture}%\hspace*{0.2cm}%
+\end{minipage}
+\begin{minipage}[t][1cm][t]{1cm+\widthof{helium fusion}}\vspace{0pt}
+\begin{tikzpicture}[scale=3]
+  %\filldraw[fill=blue!70!black]
+  %  (0,0) -- (0.169,0) -- (.169,.1) -- (0,.1) -- (0,0);
+  \filldraw[pattern=fivepointed stars3, pattern color=blue!70!black]
+    (0,0) -- (0.169,0) -- (.169,.1) -- (0,.1) -- (0,0);
+  \node[right] at (0.169, 0.06) {helium fusion}; 
+\end{tikzpicture}
+\end{minipage}
+
+\vspace*{0.25cm}
+
+\begin{tikzpicture}[scale=3] %% MAIN SEQUENCE
+  \def\core{{(log10(0.2)-log10(0.001))/3}}
+  \def\env{{(log10(0.7)-log10(0.001))/3}}
+  \filldraw[fill=orange!30!white]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  %\filldraw[pattern=crosshatch, pattern color=black]
+  %  (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \filldraw[fill=orange!15!white]%, draw=red!50!black]
+    (0,0) -- (\core,0) arc (0:90:\core) -- (0,0);
+  \filldraw[pattern=fivepointed stars2, pattern color=red!70!black]
+    (0,0) -- (\core,0) arc (0:90:\core) -- (0,0);
+  \filldraw[fill=black!5!white, draw=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \filldraw[pattern=crosshatch dots, pattern color=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \draw[color=black]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \path[inner sep=0] (-0.03, 0) node[left] {$0.001$};
+  \path[inner sep=0] (-0.03, {(log10(0.01)-log10(0.001))/3}) node[left] {$0.01$};
+  \path[inner sep=0] (-0.03, {(log10(0.1)-log10(0.001))/3}) node[left] {$0.1$};
+  \path[inner sep=0] (-0.03, {(log10(1)-log10(0.001))/3}) node[left] {$r/R = 1$};
+  \path[inner sep=0] (0.94, 0.9) node {$0.9-1.3~R_\odot$}; 
+  \path[inner sep=0] (0.5, -0.15) node {main sequence}; 
+\end{tikzpicture}%
+\hspace{0.5cm}
+\begin{tikzpicture}[scale=3] %% SUB/RED GIANT 
+  \def\shellbot{{(log10(0.01)-log10(0.001))/3}}
+  \def\shelltop{{(log10(0.02)-log10(0.001))/3}}
+  \def\env{{(log10(0.05)-log10(0.001))/3}}
+  \filldraw[fill=orange!30!white]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \filldraw[fill=orange!15!white]
+    (\shellbot, 0) -- (\shelltop, 0) arc (0:90:\shelltop) -- (0, \shellbot) arc (90:0:\shellbot);
+  \filldraw[pattern=fivepointed stars2, pattern color=red!70!black]
+    (\shellbot, 0) -- (\shelltop, 0) arc (0:90:\shelltop) -- (0, \shellbot) arc (90:0:\shellbot);
+  \filldraw[fill=black!5!white, draw=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \filldraw[pattern=crosshatch dots, pattern color=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \draw[color=black]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \path[inner sep=0] (0.94, 0.9) node {$1.3-175~R_\odot$}; 
+  \path[inner sep=0] (0.5, -0.15) node {sub/red giant}; 
+\end{tikzpicture} %
+\hspace{0.5cm}
+\begin{tikzpicture}[scale=3] %% RED CLUMP
+  \def\core{{(log10(0.002)-log10(0.001))/3}}
+  \def\shellbot{{(log10(0.0063)-log10(0.001))/3}}
+  \def\shelltop{{(log10(0.01)-log10(0.001))/3}}
+  \def\env{{(log10(0.2213)-log10(0.001))/3}}
+  \def\convcore{{(log10(0.0031)-log10(0.001))/3}}
+  \filldraw[fill=orange!30!white]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \filldraw[fill=black!5!white, draw=black]
+    (0,0) -- (\convcore,0) arc (0:90:\convcore) -- (0,0);
+  \filldraw[pattern=crosshatch dots, pattern color=black]
+    (0,0) -- (\convcore,0) arc (0:90:\convcore) -- (0,0);
+  %\filldraw[fill=yellow!20!white]
+  %  (0,0) -- (\core,0) arc (0:90:\core) -- (0,0);
+  \filldraw[pattern=fivepointed stars3, pattern color=blue!70!black]
+    (0,0) -- (\core,0) arc (0:90:\core) -- (0,0);
+  \filldraw[fill=orange!15!white]
+    (\shellbot, 0) -- (\shelltop, 0) arc (0:90:\shelltop) -- (0, \shellbot) arc (90:0:\shellbot);
+  \filldraw[pattern=fivepointed stars2, pattern color=red!70!black]
+    (\shellbot, 0) -- (\shelltop, 0) arc (0:90:\shelltop) -- (0, \shellbot) arc (90:0:\shellbot);
+  \filldraw[fill=black!5!white, draw=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \filldraw[pattern=crosshatch dots, pattern color=black]
+    (\env, 0) -- (1, 0) arc (0:90:1) -- (0, \env) arc (90:0:\env);
+  \draw[color=black]
+    (0,0) -- (1,0) arc (0:90:1) -- (0,0);
+  \path[inner sep=0] (0.94, 0.9) node {$10-12~R_\odot$}; 
+  \path[inner sep=0] (0.5, -0.15) node {red clump}; 
+\end{tikzpicture} 

@@ -24,12 +24,11 @@ solar_Teff <- if (length(args)>1) as.numeric(args[2]) else 5777
 if (!('log_L' %in% names(DF))) {
     DF$log_L <- log10(DF$luminosity)
 }
-
 decreasing_L <- which(diff(DF$log_L) < 0 & DF$center_h1[-1] > 0.6)
 if (any(decreasing_L)) {
     pms <- max(decreasing_L)
-    #print(paste("Clipping", pms, "points"))
-    #DF <- DF[-1:-pms,]
+    print(paste("Clipping", pms, "points"))
+    DF <- DF[-1:-pms,]
 }
 
 png('HR.png', width=800, height=600, type='cairo')#, family='Palatino')

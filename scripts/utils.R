@@ -12,10 +12,11 @@ Sys.setenv(R_GSCMD = "C:/Program Files/gs/gs9.21/bin/gswin64.exe")
 utils.mar <<- c(3, 4, 1, 1)
 utils.mgp <<- c(2, 0.25, 0)
 #paper.mgp <<- c(2, 0.15, 0)
-utils.font <<- "Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Times" #
-font <- "Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Palatino"
+utils.font <<- "Palatino Linotype"#"Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Times" #
+font <- "Palatino Linotype"#"Times" #"Palatino Linotype" #"CM Roman" #"Helvetica" #"Palatino"
 text.cex <- 1
 mgp <- c(2, 0.25, 0)
+utils.tcl <<- -0.346
 #hack.mgp <- c(2, 0.5, 0)
 
 
@@ -157,7 +158,7 @@ make_plots <- function(plot_f, filename,
         latex_pt_per_in=5*72.27,
         png_res=400,
         font=utils.font, 
-        use.cairo=F, ...) {
+        use.cairo=T, ...) {
 
     paper_png_width <- paper_pdf_width * latex_pt_per_in
     paper_png_height <- paper_pdf_height * latex_pt_per_in
@@ -855,4 +856,19 @@ cbind.fill <- function(...){
     n <- max(sapply(nm, nrow)) 
     do.call(cbind, lapply(nm, function (x) 
         rbind(x, matrix(, n-nrow(x), ncol(x))))) 
+}
+
+shadowtext <- function(x, y=NULL, labels, col='black', bg='white', 
+                       theta= seq(0, 2*pi, length.out=50), r=0.2, ... ) {
+    
+    xy <- xy.coords(x,y)
+    xo <- r*strwidth('A')
+    yo <- r*strheight('A')
+    
+    # draw background text with small shift in x and y in background colour
+    for (i in theta) {
+        text( xy$x + cos(i)*xo, xy$y + sin(i)*yo, labels, col=bg, ... )
+    }
+    # draw actual text in exact xy position in foreground colour
+    text(xy$x, xy$y, labels, col=col, ... )
 }

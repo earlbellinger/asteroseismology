@@ -21,16 +21,17 @@ freqs.cols <- c('l', 'n', 'nu')#, 'inertia')
 num_points <- 64
 X_c.lim <- 1e-2
 ev_stages <- list(
-    'LOGS_MS'=1, 
-    'LOGS_SG'=2, 
-    'LOGS_RGB'=3, 
-    'LOGS_BUMP'=4, 
-    'LOGS_HEB'=5)
+    'LOGS_3MS'=1, 
+    'LOGS_4HOOK'=2,
+    'LOGS_5SG'=3, 
+    'LOGS_6RGB'=4, 
+    'LOGS_7BUMP'=5, 
+    'LOGS_8HEB'=6)
 
-exh <- 1e-5
+exh <- 1e-6
 
 ### Obtain observable properties from models 
-summarize <- function(pro_file, freqs_file, ev.DF, dname) {
+summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
     print(pro_file)
     
     pro_header <- read.table(pro_file, header=TRUE, nrows=1, skip=1)
@@ -47,19 +48,26 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["M_current"] <- hstry$star_mass
     
     obs.DF["mass_cc"] <- hstry$mass_conv_core/hstry$star_mass
-    obs.DF["mass_he_core"] <- hstry$he_core_mass
+    #obs.DF["mass_he_core"] <- hstry$he_core_mass
     
     obs.DF["h_exh_core_mass"] <- hstry$h_exh_core_mass
     obs.DF["h_exh_core_radius"] <- hstry$h_exh_core_radius
     
     obs.DF["radius_cc"] <- if (obs.DF['mass_cc'] <= 0) 0 else {
-        if (hstry$conv_mx1_bot_r <= 0.1) {
+        if (hstry$conv_mx1_bot <= 0.01) {
             hstry$conv_mx1_top_r / 10**(hstry$log_R)
         } else {
             hstry$conv_mx2_top_r / 10**(hstry$log_R)
         }
     }
     
+    if (obs.DF['mass_cc'] <= 0 || hstry$conv_mx1_bot >= 0.01) { # no convective core
+        obs.DF["cz_mass"]   <- hstry$conv_mx1_bot
+        obs.DF["cz_radius"] <- hstry$conv_mx1_bot_r / 10**(hstry$log_R)
+    } else {
+        obs.DF["cz_mass"]   <- hstry$conv_mx2_bot
+        obs.DF["cz_radius"] <- hstry$conv_mx2_bot_r / 10**(hstry$log_R)
+    }
     
     obs.DF["mass_X"] <- pro_header$star_mass_h1/pro_header$star_mass
     obs.DF["mass_Y"] <- (pro_header$star_mass_he3 + 
@@ -72,6 +80,43 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["log_center_P"] <- hstry$log_center_P
     obs.DF["center_mu"] <- hstry$center_mu
     obs.DF["center_degeneracy"] <- hstry$center_degeneracy
+    
+    obs.DF["Teff"] <- pro_header$Teff
+    obs.DF["log_Teff"] <- hstry$log_Teff
+    
+    obs.DF["L"] <- pro_header$photosphere_L
+    obs.DF["log_L"] <- hstry$log_L
+    
+    obs.DF["radius"] <- pro_header$photosphere_r
+    obs.DF["log_R"] <- hstry$log_R
+    
+    obs.DF["log_g"] <- hstry$log_g
+    
+    obs.DF["Fe_H"] <- log10(10**hstry$log_surf_cell_z / 
+            hstry$surface_h1 / Z_div_X_solar)
+    
+    #obs.DF["cz_base"] <- hstry$cz_bot_radius
+    obs.DF["acoustic_cutoff"] <- hstry$acoustic_cutoff / (2*pi)
+    obs.DF["acoustic_radius"] <- hstry$acoustic_radius
+    
+    obs.DF["surface_mu"] <- pro_body$mu
+    obs.DF["delta_Pg_asym"] <- hstry$delta_Pg
+    #obs.DF["nu_max_classic"] <- scaling_nu_max(R=obs.DF[["radius"]], 
+    #    M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]])
+    #obs.DF["nu_max"] <- scaling_nu_max_Viani(R=obs.DF[["radius"]], 
+    #    M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]], 
+    #    mu=obs.DF[["surface_mu"]]) 
+    #obs.DF["nu_max"] <- scaling_nu_max(R=obs.DF[["radius"]], 
+    #    M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]])
+    obs.DF["nu_max"] <- hstry$nu_max 
+    obs.DF["delta_nu_asym"] <- hstry$delta_nu 
+    
+    freqs <- parse_freqs(freqs_file, gyre=gyre) 
+    #seis <- seismology(freqs, nu_max=obs.DF[["nu_max_classic"]],
+    #    min_points=3, check_nu_max=T)
+    #if ("Dnu0" %in% names(seis)) obs.DF["Dnu0_classic"] <- seis[["Dnu0"]]
+    seis.DF <- seismology(freqs, nu_max=obs.DF[["nu_max"]], 
+        min_points=3, check_nu_max=T)
     
     obs.DF["X_c"]  <- hstry$center_h1 + hstry$center_h2
     obs.DF["Y_c"]  <- hstry$center_he3 + hstry$center_he4 
@@ -157,44 +202,13 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname) {
     obs.DF["Mg22_surf"] <- hstry$surface_mg22 
     obs.DF["Mg24_surf"] <- hstry$surface_mg24 
     
-    obs.DF["radius"] <- pro_header$photosphere_r
-    obs.DF["L"] <- pro_header$photosphere_L
-    obs.DF["Teff"] <- pro_header$Teff
-    obs.DF["log_Teff"] <- hstry$log_Teff
-    obs.DF["log_L"] <- hstry$log_L
-    obs.DF["log_R"] <- hstry$log_R
-    obs.DF["log_g"] <- hstry$log_g
-    
-    obs.DF["Fe_H"] <- log10(10**hstry$log_surf_cell_z / 
-            hstry$surface_h1 / Z_div_X_solar)
-    
-    obs.DF["cz_base"] <- hstry$cz_bot_radius
-    obs.DF["acoustic_cutoff"] <- hstry$acoustic_cutoff
-    obs.DF["acoustic_radius"] <- hstry$acoustic_radius
-    
-    obs.DF["surface_mu"] <- pro_body$mu
-    obs.DF["delta_Pg_asym"] <- hstry$delta_Pg
-    obs.DF["nu_max_classic"] <- scaling_nu_max(R=obs.DF[["radius"]], 
-        M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]])
-    obs.DF["nu_max"] <- scaling_nu_max_Viani(R=obs.DF[["radius"]], 
-        M=hstry[["star_mass"]], Teff=obs.DF[["Teff"]], 
-        mu=obs.DF[["surface_mu"]]) 
-    obs.DF["delta_nu_asym"] <- hstry$delta_nu
-    
-    freqs <- parse_freqs(freqs_file, gyre=T)
-    seis <- seismology(freqs, nu_max=obs.DF[["nu_max_classic"]],
-        min_points=3, check_nu_max=T)
-    if ("Dnu0" %in% names(seis)) obs.DF["Dnu0_classic"] <- seis[["Dnu0"]]
-    seis.DF <- seismology(freqs, nu_max=obs.DF[["nu_max"]],
-        min_points=3, check_nu_max=T)
-    
     #as.data.frame(cbind(obs.DF, seis.DF))
     merge(rbind(obs.DF), rbind(seis.DF))
 }
 
 ### Obtain evolutionary tracks from a MESA directory
 parse_dir <- function(directory, min_num_models=10, dname='simulations',
-        num_points=num_points) {
+        num_points=num_points, gyre=T) {
     ## parse dirname string e.g. "M=1.0_Y=0.28"
     params.DF <- NULL
     trackfile <- file.path(directory, 'track')
@@ -249,7 +263,8 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations',
         obs.DF <- do.call(plyr:::rbind.fill, 
             parallelMap(function(pro_file, freqs_file)
             #Map(function(pro_file, freqs_file)
-                    summarize(pro_file, freqs_file, ev.DF, dname=dname), 
+                    summarize(pro_file, freqs_file, ev.DF, dname=dname, 
+                        gyre=gyre), 
                 pro_file=file.path(log_dir, pro_files), 
                 freqs_file=file.path(log_dir, freq_files)))
         #print(obs.DF)
@@ -269,15 +284,16 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations',
         DF$lg_X_c <- log10(DF$X_c) #center_h1)
         DF$lg_Y_c <- log10(DF$Y_c) #center_he3 + DF$center_he4)
         ## solve linear transport problem to get equally-spaced points 
-        space_var <- ifelse(grepl('LOGS_MS', log_dir), 'lg_X_c', 
-                     ifelse(grepl('LOGS_HEB', log_dir), 'lg_Y_c', 
+        space_var <- ifelse(grepl('LOGS_4HOOK', log_dir), 'lg_X_c', 
+                     ifelse(grepl('LOGS_8HEB', log_dir), 'lg_Y_c', 
                      #ifelse(grepl('LOGS_BUMP', log_dir), 'center_degeneracy', 
                         'age'))
         x <- DF[[space_var]]
         nrow.DF <- length(x)
         if (nrow.DF < num_points) {
             print(paste(log_dir, "has too few points"))
-            return(NULL)
+            next 
+            #return(NULL)
         }
         ideal <- seq(max(x), min(x), length=num_points)
         cost.mat  <- outer(ideal, x, function(x, y) abs(x-y))
@@ -289,7 +305,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations',
             col.signs, col.rhs)$solution
         new.DF <- DF[apply(sol, 1, which.max),]
         
-        if (grepl('LOGS_BUMP', log_dir)) {
+        if (grepl('LOGS_7BUMP', log_dir)) {
             new.DF <- rbind(DF[which.max(DF$L),], new.DF)#[-1,])
         }
         
@@ -350,7 +366,7 @@ plot_HR <- function(DF, ev.DF, plot_legend=T, ...,
     var1range <- diff(par()$usr)[1] # Add colorbar
     color.legend(par()$usr[2]+0.05*var1range, par()$usr[3], 
                  par()$usr[2]+0.10*var1range, par()$usr[4],
-        c("MS", "SG", "RGB", "BUMP", "CLUMP"),
+        c("MS", "HOOK", "SG", "RGB", "BUMP", "CLUMP"),
         col.pal, gradient='y', align='rb', cex=text.cex)
     
     par(mgp=mgp+c(-0.5, 0, 0))
@@ -962,7 +978,9 @@ if (length(args)>0) {
     print(directory)
     dname <- dirname(directory)
     if (length(args)>1) num_points <- as.numeric(args[2])
-    parsed_dir <- parse_dir(directory, dname=dname, num_points=num_points)
+    if (length(args)>2) gyre <- !as.logical(as.numeric(args[3]))
+    parsed_dir <- parse_dir(directory, dname=dname, num_points=num_points,
+        gyre=gyre)
     
     DF <- unique(parsed_dir)
     DF <- DF[order(DF$age),]

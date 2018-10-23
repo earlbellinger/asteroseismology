@@ -99,8 +99,8 @@ echo "
 3 '$fname.model'   @
 -1 ''        @
 nn  ,icnmsh
-4800,      ,,  
-4000,      ,,  @
+4800,      ,,  @
+4000,      ,,  
 10000,      ,,  
 icase,icvzbn,nsmth,ndisc,dlxdsc,dlgrmx,cacvzb
 211  ,      ,     ,0.013,      ,5.    ,      , 
@@ -249,7 +249,7 @@ cp "$fname.dat" "$fname.dat.bak"
 cat "$fname.dat.bak" | cut -b 1-38 | \
     awk -v FIELDWIDTHS="5 7 12 14" -v OFS=, '{print $1,$2,$3,$4}' | \
     sed "s/,/ /g" | tr -s ' ' >| "$fname.dat"
-
+echo -e "l n nu E\n$(cat $fname.dat)" >| "$fname.dat"
 
 ## Also calculate the variational frequencies of the model 
 (echo 1; echo "$fname.agsm"; echo "$fname.var"; echo "5") | \
@@ -267,15 +267,22 @@ cat "$fname.var.bak" | cut -b 1-26 | \
     awk -v FIELDWIDTHS="5 7 12" -v OFS=, '{print $1,$2,$3,$4}' | \
     sed "s/,/ /g" | tr -s ' ' >| "$fname.var"
 
-
-python3 $SCRIPTS_DIR/rotk_extractor.py -i $fname.rotk -o rotk -p
-paste rotk/* >| rotk.dat
-rm -rf "$fname.rotk" rotk/
-
-#rm -rf "$fname.amde"
+## rotation kernels 
+#python3 $SCRIPTS_DIR/rotk_extractor.py -i $fname.rotk -o rotk -p
+#paste rotk/* >| "$fname-rotk.dat"
+#cp "$fname-rotk.dat" ..
+#rm -rf "$fname.rotk" rotk/
+#R --slave -q -e "options(scipen = 999);"\
+#"merged <- merge(read.table('"$fname".dat', header=1),"\
+#"read.table('beta.dat', header=1), by=c('l', 'n'), all=T);"\
+#"merged[is.na(merged)] <- 0;"\
+#"write.table(merged[with(merged, order(l, n)),], file='"$fname".dat', row.names=F, col.names=T, quote=F, sep='\\t');"
+##rm -rf "$fname.amde"
 
 ### Hooray!
 cp "$fname.dat" ..
+cd ..
+#rm -rf "$path"
 echo "Conversion complete. Results can be found in $path/$fname.dat"
 exit 0
 

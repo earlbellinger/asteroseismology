@@ -1,0 +1,40 @@
+\begin{tikzpicture}[
+        ele/.style={
+            %fill=black,
+            %circle,
+            minimum width=.8pt,
+            inner sep=1pt},
+            every fit/.style={ellipse,draw,inner sep=-2pt}
+        ]
+    \node[ele] (a1) at (0,4) {$1$};
+    \node[ele] (a2) at (0,3) {$2$};
+    \node[ele] (a3) at (0,2) {$3$};
+    \node[ele] (a4) at (0,1) {$4$};
+    
+    \node[ele] (b1) at (4,4) {$a$};
+    \node[ele] (b2) at (4,3) {$b$};
+    \node[ele] (b3) at (4,2) {$c$};
+    \node[ele] (b4) at (4,1) {$d$};
+    
+    \node[draw,fit= (a1) (a2) (a3) (a4),minimum width=2cm, thick, fill=orange!20!white] (leftoval) {} ;
+    \node[draw,fit= (b1) (b2) (b3) (b4),minimum width=2cm, thick, fill=blue!20!white] (rightoval) {};
+    
+    \node[above of=leftoval, yshift=1.75cm] {\sffamily Models};
+    \node[above of=rightoval, yshift=1.75cm] {\sffamily Data};
+    
+    \draw[->,thick,shorten <=5pt,shorten >=5pt] (a1) -- (b1);
+    \draw[->,thick,shorten <=5pt,shorten >=5pt] (a2) -- (b2);
+    \draw[->,thick,shorten <=5pt,shorten >=5pt] (a3) -- (b3);
+    \draw[->,thick,shorten <=5pt,shorten >=5pt] (a4) -- (b3);
+    %\draw[->,thick,shorten <=2pt,shorten >=2] (a4) -- (b3);
+    \node[ele] (a1) at (0,4) {$1$};
+    \node[ele] (a2) at (0,3) {$2$};
+    \node[ele] (a3) at (0,2) {$3$};
+    \node[ele] (a4) at (0,1) {$4$};
+    
+    \node[ele] (b1) at (4,4) {$a$};
+    \node[ele] (b2) at (4,3) {$b$};
+    \node[ele] (b3) at (4,2) {$c$};
+    \node[ele] (b4) at (4,1) {$d$};
+\end{tikzpicture}
+

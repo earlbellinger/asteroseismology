@@ -19,22 +19,22 @@ def main(arguments):
     init.add_argument('-M', default=[0.7, 3.0], nargs=2, type=float,
                       help='range of masses (solar = 1)')
     init.add_argument('-Y', default=[0.22, 0.34], nargs=2, type=float, 
-                      help='range of helium values (solar = 0.272957)')
+                      help='range of helium values (solar = 0.273)')
     init.add_argument('-Z', default=[10**-4, 0.04], nargs=2, type=float,
-                      help='range of metallicity values (solar = 0.0185827)')
+                      help='range of metallicity values (solar = 0.0185)')
     init.add_argument('-a', '--alpha', default=[1, 3], nargs=2,type=float,
-                      help='range of mixing length parameter values (solar = 1.83675938)')
-    init.add_argument('-o', '--overshoot', default=[10**-4, 2], nargs=2,
+                      help='range of mixing length parameter values (solar = 1.83)')
+    init.add_argument('-o', '--overshoot', default=[10**-4, 1], nargs=2,
                       type=float, help='range of step overshoot')
-    init.add_argument('-oe', '--over_exp', default=[10**-4, 2], nargs=2,
+    init.add_argument('-oe', '--over_exp', default=[10**-4, 1], nargs=2,
                       type=float, help='range of exponential overshoot')
-    init.add_argument('-u', '--undershoot', default=[10**-4, 2], nargs=2,
+    init.add_argument('-u', '--undershoot', default=[10**-4, 1], nargs=2,
                       type=float, help='range of step undershoot')
-    init.add_argument('-ue', '--under_exp', default=[10**-4, 2], nargs=2,
+    init.add_argument('-ue', '--under_exp', default=[10**-4, 3], nargs=2,
                       type=float, help='range of exponential undershoot')
-    init.add_argument('-D', '--diffusion', default=[10**-4, 5], nargs=2,
+    init.add_argument('-D', '--diffusion', default=[10**-4, 3], nargs=2,
                       type=float, help='range of diffusion factors')
-    init.add_argument('-g', '--grav_sett', default=[10**-4, 5], nargs=2,
+    init.add_argument('-g', '--grav_sett', default=[10**-4, 3], nargs=2,
                       type=float, help='range of gravitational settling')
     init.add_argument('-e', '--eta', default=[10**-4, 2], nargs=2,
                       type=float, help="range of Reimer's mass loss parameter")
@@ -62,6 +62,8 @@ def main(arguments):
                      help='delete models upon completion')
     job.add_argument('-n', '--nice', default=False, action='store_true',
                      help='run as nice job')
+    job.add_argument('-rotk', '--rotk', default=False, action='store_true',
+                     help='calculate rotation kernels')
     
     physics = parser.add_argument_group('physics')
     physics.add_argument('-L', '--light', default=False, action='store_true',
@@ -73,7 +75,9 @@ def main(arguments):
     physics.add_argument('-t', '--taper', default=False, action='store_true',
                          help='turn down diffusion with increasing mass')
     physics.add_argument('-c', '--chem_ev', default=False, action='store_true',
-        help='set Y = c*Z + 0.2463, where the -Y flag becomes the c range (solar c = 1.4345)')
+        help='set Y = c*Z + 0.2463, where the -Y flag becomes the c range (solar c = 1.4276221707417)')
+    physics.add_argument('-C', '--couple', default=False, action='store_true',
+        help='couple diffusion to gravitational settling')
     
     args = parser.parse_args(arguments)
     print(args)
@@ -92,12 +96,13 @@ def main(arguments):
         directory=args.directory, light=args.light, remove=args.remove,
         skip=args.skip, parallel=args.parallel, nice=args.nice, 
         memory=args.memory, mainseq=args.mainseq, subgiant=args.subgiant, 
-        taper=args.taper, chem_ev=args.chem_ev)
+        taper=args.taper, chem_ev=args.chem_ev, rotk=args.rotk, 
+        couple=args.couple)
 
 def dispatch(ranges, tracks, points, logs, threshold, directory, 
              light=0, remove=0, skip=0, 
              parallel=r"$OMP_NUM_THREADS", nice=0, memory=0, 
-             mainseq=0, subgiant=0, taper=0, chem_ev=0):
+             mainseq=0, subgiant=0, taper=0, chem_ev=0, rotk=0, couple=0):
     shift = ranges[:,0]
     scale = np.array([(b-a) for a,b in ranges])
     init_conds = []
@@ -112,22 +117,26 @@ def dispatch(ranges, tracks, points, logs, threshold, directory,
                 vals[j] = 0
         if chem_ev:
             vals[1] = vals[1] * vals[2] + 0.2463
+        if couple:
+            vals[9] = vals[8]
         
         bash_cmd = "maybe_sub.sh -e %s%s-p %d ./dispatch.sh -d %s "\
+            "-n %d -N %d "\
             "-M %.6f -Y %.6f -Z %.6f -a %.6f "\
             "-o %.6f -oe %.6f -u %.6f -ue %.6f "\
-            "-D %.6f -g %.6f -e %.6f -n %d -N %d "\
-            "%s%s%s%s%s"%\
+            "-D %.6f -g %.6f -e %.6f "\
+            "%s%s%s%s%s%s"%\
             tuple(["-n " if nice else ""] + 
                   ["-m %d "%memory if memory>0 else "" ] +
                   [parallel, directory] + 
-                  [val for val in vals] + 
                   [i] + [points] +
+                  [val for val in vals] + 
                   ["-L " if light else ""] +
                   ["-r " if remove else ""] +
                   ["-MS " if mainseq else ""] +
                   ["-S " if subgiant else ""] +
-                  ["-t " if taper else ""])
+                  ["-t " if taper else ""] +
+                  ["-rotk " if rotk else ""])
         print(bash_cmd)
         #exit()
         process = subprocess.Popen(bash_cmd.split(), shell=False)

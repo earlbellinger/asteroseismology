@@ -1,0 +1,22 @@
+Asteroseismology allows us to probe the internal structure of stars through their global modes of oscillation. 
+Thanks to missions such as the NASA \emph{Kepler} space observatory, we now have high-quality asteroseismic data for nearly $100$ solar-type stars. 
+This presents an opportunity to measure the core structures of these stars as well as their ages, masses, radii, and other fundamental parameters. 
+
+This thesis is primarily concerned with two inverse problems in asteroseismology. 
+The first is to estimate the fundamental parameters of stars from observations using evolutionary arguments. 
+This is inverse to the forward problem of simulating the theoretical evolution of a star, given the initial conditions. 
+We solve this problem using supervised machine learning in Chapter~\ref{chap:ML}. 
+We find ages, masses, and radii of stars with uncertainties (in the sense of precision) better than $6\%$, $2\%$, and $1\%$, respectively. 
+In Chapter~\ref{chap:statistical}, we use unsupervised machine learning to quantify how each kind of observation of a star is related to its fundamental parameters. 
+
+The second problem is to infer the structure of a star from its frequencies of pulsation using asteroseismic arguments. 
+This is inverse to the forward problem of calculating the theoretical pulsation frequencies of a known stellar structure. 
+Solving this problem presents an opportunity to test the quality of stellar evolution models, as we may then directly compare the asteroseismic structure of a star against theoretical predictions. 
+We solve this problem in Chapter~\ref{chap:inversion}. 
+Applying this technique to the solar-type stars in 16~Cygni, we find that while the structure of the $1.03$ solar mass star 16~Cyg~B is in good agreement with theoretical expectations, the more massive 16~Cyg~A differs in its internal structure from best-fitting evolutionary models. 
+
+These inverse problems are both \emph{ill-posed} in the sense that (I) a solution may not exist within the confines of the current theory; (II) if there is a solution, it may not be unique, as many solutions may be consistent with the data; and/or (III) the solutions may be unstable with respect to small fluctuations in the input data. 
+Therefore, care must be put into determining possible solutions and applying regularization where necessary. 
+
+Chapter~\ref{chap:intro} introduces this thesis with the history and theory of stellar structure, evolution, and pulsation; and emphasizes the role that variable star astronomy played in shaping our understanding of stellar evolution. 
+It also contains the kernels of stellar structure, an introduction to ill-posed inverse problems, and a discussion of some computational issues for the algorithms used to solve these problems. 

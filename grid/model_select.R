@@ -8,6 +8,7 @@ library(lpSolve)
 args <- commandArgs(TRUE)
 num_points <- if (length(args)>0) as.numeric(args[1]) else 64
 log_dir <- if (length(args)>1) args[2] else 'LOGS'
+fmt <- if (length(args)>2) args[3] else 'GYRE'
 
 DF <- read.table(file.path(log_dir, 'history.data'), header=1, skip=5)[-1,]
 
@@ -25,8 +26,8 @@ DF <- read.table(file.path(log_dir, 'history.data'), header=1, skip=5)[-1,]
 DF$lg_X_c <- log10(DF$center_h1)
 DF$lg_Y_c <- log10(DF$center_he3 + DF$center_he4)
 ## solve linear transport problem to get equally-spaced points 
-space_var <- ifelse(grepl('LOGS_MS', log_dir), 'lg_X_c', 
-             ifelse(grepl('LOGS_HEB', log_dir), 'lg_Y_c', 
+space_var <- ifelse(grepl('LOGS_4HOOK', log_dir), 'lg_X_c', 
+             ifelse(grepl('LOGS_8HEB', log_dir), 'lg_Y_c', 
              #ifelse(grepl('LOGS_BUMP', log_dir), 'center_degeneracy', 
                 'star_age'))
 #space_var <- ifelse(grepl('LOGS_MS', log_dir), 'center_h1', 'star_age')
@@ -42,7 +43,7 @@ sol <- lp.transport(cost.mat, "min", row.signs, row.rhs,
     col.signs, col.rhs)$solution
 new.DF <- DF[apply(sol, 1, which.max),]
 
-if (grepl('LOGS_BUMP', log_dir)) {
+if (grepl('LOGS_7BUMP', log_dir)) {
     new.DF <- rbind(new.DF, DF[which.max(DF$log_L),])#[-1,])
 }
 
@@ -53,5 +54,5 @@ profiles.index <- read.table(file.path(log_dir, 'profiles.index'),
 
 cat(file.path(log_dir, paste0('profile',
     profiles.index[profiles.index$model_num %in% model_nums,]$profile_num,
-    '.data.GYRE\n')))
+    paste0('.data.', fmt, '\n'))))
 

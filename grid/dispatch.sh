@@ -26,9 +26,9 @@ proceed=1
 ### PARSE COMMAND LINE ARGUMENTS ###############################################
 ################################################################################
 M=1
-Y=0.272957104887671
-Z=0.0185827894799524
-alpha=1.8367593860737
+Y=0.272804507715114
+Z=0.0185654918074489
+alpha=1.83454527401853
 overshoot=0
 undershoot=0
 overexp=0
@@ -46,9 +46,11 @@ mainseq=0
 subgiant=0
 bump=0
 nopulse=0
+ADI=0
 FGONG=0
 f0=0.01
-num_process=128 # try to get at least this many profile files 
+rotk=0
+num_process=32 # try to get at least this many profile files 
 net="'pp_cno_extras_o18_ne22.net'"
 
 while [ "$#" -gt 0 ]; do
@@ -78,7 +80,9 @@ while [ "$#" -gt 0 ]; do
     -B) bump=1; shift 1;;
     -s) suppress=1; shift 1;;
     -p) nopulse=1; shift 1;;
+    -A) ADI=1; shift 1;;
     -f) FGONG=1; shift 1;;
+ -rotk) ROTK=1; shift 1;;
     
     *) echo "unknown option: $1" >&2; exit 1;;
   esac
@@ -94,6 +98,20 @@ if (( $(echo "$taper > 0" | bc -l) )); then
         diffusion=$val
         settling=$val
     fi
+fi
+
+if [[ $ROTK -eq 1 ]]; then
+    ADI=1
+fi
+
+if [[ $ADI -eq 1 ]]; then
+    FGONG=1
+fi
+
+if [[ $FGONG -eq 1 ]]; then
+    filefmt="FGONG"
+else
+    filefmt="GYRE"
 fi
 
 #if (( $(echo "$taper > 0" | bc -l) )); then
@@ -137,6 +155,8 @@ if [ $HELP -gt 0 ]; then
     echo "  -p   : suppress pulsation calculations"
     echo "  -r   : delete profile files"
     echo "  -f   : use FGONG file format (otherwise GYRE)"
+    echo "  -A   : use ADIPLS (otherwise GYRE), sets -f flag"
+    echo "  -rotk: calculate rotation kernels, sets -A and -rotk flags"
     echo "  -c # : calibrate to age # Gyr"
     echo "  -n s : name the track 's'                    [default: from params]"
     echo "  -N # : output # profile files                [default: 128        ]"
@@ -198,7 +218,7 @@ set_inlist() {
 ## Deletes all of the calculations if the remove flag is set 
 cleanup() {
     cd - 
-    Rscript summarize.R "$dirname" $num_process #$(echo "$num_process / 2" | bc)
+    Rscript summarize.R "$dirname" $num_process $ADI #$(echo "$num_process / 2" | bc)
     if [ $remove -eq 1 ]; then
         rm -rf "$dirname"
     fi
@@ -367,22 +387,41 @@ run() { # logs_dir  final_mod
         num_logs=$(echo "$num_logs - 7" | bc -l)
     done
     
+    if [[ $ADI -eq 1 ]]; then
+        prog="fgong2freqs.sh {}"
+        #if [[ $ROTK -eq 1 ]]; then
+        #    prog="fgong2freqs.sh {} -r"
+        #fi
+    else
+        #prog="gyre-l0.sh {}"
+        if [[ "$inlist" = "inlist_3ms" ]] || 
+           [[ "$inlist" = "inlist_4hook" ]] ||
+           [[ "$inlist" = "inlist_5sg" ]]; then
+            prog="gyre2freqs.sh -i {} -S"
+        else
+            prog="gyre2freqs.sh -i {} -S -r" # only calculate radial modes
+        fi
+    fi
+    
     #if [[ $proceed -eq 1 ]]; then
     if [[ $proceed -eq 1 ]] && (( $(echo "$calibrate <= 0" | bc -l) )); then
         fix_mod "$final_mod"
         if [[ suppress -eq 0 ]] && [[ nopulse -eq 0 ]]; then
-            if [[ "$inlist" = "inlist_3ms" ]] || [[ "$inlist" = "inlist_4sg" ]]
-              then 
-                Rscript $scriptdir/model_select.R $num_process $logs_dir | 
-                    xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-                        "echo start {}; gyre2freqs.sh {}; echo end {}"
-                        #"echo start {}; gyre-Dnu.sh {}; echo end {}"
-            else
-                Rscript $scriptdir/model_select.R $num_process $logs_dir | 
-                    xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
-                        "echo start {}; gyre-l0.sh {}; echo end {}"
-                        #"echo start {}; gyre-Dnu.sh {}; echo end {}"
-            fi
+            Rscript $scriptdir/model_select.R $num_process $logs_dir $filefmt | 
+                xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
+                    "echo start {}; $prog; echo end {}"
+            #if [[ "$inlist" = "inlist_3ms" ]] || [[ "$inlist" = "inlist_4sg" ]]
+            #  then 
+            #    Rscript $scriptdir/model_select.R $num_process $logs_dir | 
+            #        xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
+            #            "echo start {}; gyre2freqs.sh {}; echo end {}"
+            #            #"echo start {}; gyre-Dnu.sh {}; echo end {}"
+            #else
+            #    Rscript $scriptdir/model_select.R $num_process $logs_dir | 
+            #        xargs -i --max-procs=$OMP_NUM_THREADS bash -c \
+            #            "echo start {}; gyre-l0.sh {}; echo end {}"
+            #            #"echo start {}; gyre-Dnu.sh {}; echo end {}"
+            #fi
         fi
     fi
     
@@ -434,18 +473,26 @@ if (( $(echo "$eta > 0" | bc -l) )); then
     change 'Reimers_scaling_factor' "$eta" "$inlist"
 fi
 #if (( $(echo "$calibrate > 0" | bc -l) )); then
+if [ ! $mainseq = 0 ] || [ ! $subgiant = 0 ] || [ $bump = 0 ]; then
+    change 'max_age' '-1' "$inlist"
+fi
 if [ ! $calibrate = 0 ]; then
     change 'max_age' "$calibrate" "$inlist"
     change 'profile_interval' '99999' "$inlist"
     change 'history_interval' '99999' "$inlist"
     change 'max_num_profile_models' '1' "$inlist"
+    change 'write_profile_when_terminate' '.true.' "$inlist"
     num_process=1
 fi
-run "LOGS_MS" "tams.mod"
+run "LOGS_3MS" "hook.mod"
 
 if [ ! $calibrate = 0 ]; then
     exit
 fi
+
+# main sequence hook
+set_inlist "inlist_4hook"
+run "LOGS_4HOOK" "tams.mod"
 
 #if (( $(echo "$mainseq > 0" | bc -l) )); then
 if [ ! $mainseq = 0 ]; then
@@ -453,8 +500,8 @@ if [ ! $mainseq = 0 ]; then
 fi
 
 # sub-giant
-set_inlist "inlist_4sg"
-run "LOGS_SG" "brgb.mod"
+set_inlist "inlist_5sg"
+run "LOGS_5SG" "brgb.mod"
 
 #if (( $(echo "$subgiant > 0" | bc -l) )); then
 if [ ! $subgiant = 0 ]; then 
@@ -462,8 +509,8 @@ if [ ! $subgiant = 0 ]; then
 fi
 
 # red giant
-set_inlist "inlist_5rgb"
-run "LOGS_RGB" "bump.mod"
+set_inlist "inlist_6rgb"
+run "LOGS_6RGB" "bump.mod"
 
 if [ ! $bump = 0 ]; then 
     cleanup
@@ -471,18 +518,18 @@ fi
 
 if ! grep -q "stopping: phase_of_evolution >= x_integer_ctrl(1)" output; then 
     # bump to tip 
-    set_inlist "inlist_6bump"
-    run "LOGS_BUMP" "flash.mod"
+    set_inlist "inlist_7bump"
+    run "LOGS_7BUMP" "flash.mod"
     
     # helium burning 
-    set_inlist "inlist_7heb"
-    run "LOGS_HEB" "hexh.mod"
+    set_inlist "inlist_8heb"
+    run "LOGS_8HEB" "hexh.mod"
 
 else
     # no bump: straight to helium burning 
-    set_inlist "inlist_7heb"
+    set_inlist "inlist_8heb"
     change "saved_model_name" "bump.mod" "$inlist"
-    run "LOGS_HEB" "hexh.mod"
+    run "LOGS_8HEB" "hexh.mod"
 fi
 
 

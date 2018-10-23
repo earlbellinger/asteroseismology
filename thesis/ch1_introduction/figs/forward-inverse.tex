@@ -1,0 +1,23 @@
+\begin{tikzpicture}[
+        ->, 
+        thick, 
+        main node/.style={
+            circle, 
+            draw,
+            minimum height=5em,
+        },
+        node distance=10em, 
+        auto,
+        pil/.style={
+           thick,
+           shorten <=2pt,
+           shorten >=2pt
+        }
+    ]
+    \node[main node, fill=blue!20!white] (model) {Model};
+    \node[main node, right=of model, fill=orange!20!white] (data) {Data}
+        %\draw[decoration={markings, mark=at position 1 with {\arrow[ultra thick]{>}}}, postaction={decorate}, bend left=30] %(model) to (data) 
+        %node[above] {Forward Problem} (model);
+        edge[pil, <-, bend right=30] node[above, yshift=0.1cm] {\sffamily\small{Forward Problem}} (model)
+        edge[pil, ->, bend left=30] node[below, yshift=-0.1cm] {\sffamily\small{Inverse Problem}} (model);
+\end{tikzpicture}
