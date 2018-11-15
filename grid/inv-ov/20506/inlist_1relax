@@ -9,8 +9,8 @@
       
       !relax_initial_Y = .true.
       !relax_initial_Z = .true.
-      new_Y = 0.275367
-      new_Z = 0.003470
+      !new_Y = 0.27238323
+      !new_Z = 0.01831911
       
 / ! end of star_job namelist
 

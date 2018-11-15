@@ -16,7 +16,7 @@ speed_of_light = 299792 # km/s
 boltz_sigma = 5.670367e-5 # erg cm^-2 K^-4 s^-1
 R_solar = 6.957e10 # cm
 L_solar = 3.828e33 # erg s^-1
-n_perturbations = 1000
+n_perturbations = 10000
 classical = F 
 
 ### Obtain properties of real stars varied within their uncertainties 
@@ -64,7 +64,7 @@ perturb <- function(star, obs_data_file, freqs_data_file,
     
     if (nrow(freqs) > 0) {
         nu_max <<- obs_data[obs_data$name == 'nu_max',]$value
-        seis.DF <- seismology(freqs, nu_max, verbose=F)
+        seis.DF <- seismology(freqs, nu_max, verbose=F, all_freqs=T, all_ratios=T)
     } else seis.DF <- NULL
     
     cols <<- length(seis.DF)
@@ -131,7 +131,8 @@ rand_inst <- function(n) {
                     noisy_freqs$nu > freqs$nu*doppler_shift
                         + 5*freqs$dnu*doppler_shift)) next 
             # Calculate Dnu, dnus, and ratios
-            seis.DF <- seismology(noisy_freqs, obs.DF$nu_max, verbose=F)
+            seis.DF <- seismology(noisy_freqs, obs.DF$nu_max, 
+                verbose=F, all_ratios=T, all_freqs=T)
         } else seis.DF <- data.frame()
         if (all(!is.na(seis.DF)) && length(seis.DF) == cols) break
 		#if (length(seis.DF) == cols) break
@@ -183,14 +184,11 @@ process_dir <- function(star_dir,
     cat('\n\n')
 }
 
-process_star <- function(star, star_dir, out_dir="perturb", bias=0, imp=0,
-        feh=T, feh.bias=0, teff.bias=0, feh.imp=0, teff.imp=0) {
+process_star <- function(star, star_dir, out_dir="perturb", ...) {
     print(paste("Processing", star))
     obs_data_file <- file.path(star_dir, paste0(star, "-obs.dat"))
     freqs_data_file <- file.path(star_dir, paste0(star, "-freqs.dat"))
-    results <- perturb(star, obs_data_file, freqs_data_file, n_perturbations,
-        bias=bias, imp=imp, feh=feh, feh.bias=feh.bias, teff.bias=teff.bias,
-        feh.imp=feh.imp, teff.imp=teff.imp)
+    results <- perturb(star, obs_data_file, freqs_data_file, ...)
     result <- results$res
     if (!is.null(result)) {
         write.table(result, 
@@ -204,6 +202,9 @@ process_star <- function(star, star_dir, out_dir="perturb", bias=0, imp=0,
 #reg.finalizer(environment(), cleanup, onexit = FALSE)
 parallelStartMulticore(max(1,as.integer(Sys.getenv()[['OMP_NUM_THREADS']])))
 
+process_dir(file.path('data', 'bigG'))
+
+stop()
 
 for (feh.bias in c(-0.1, -0.075, -0.05, -0.025, -0.01,
                     0,

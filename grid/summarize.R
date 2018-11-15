@@ -120,7 +120,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
     
     obs.DF["X_c"]  <- hstry$center_h1 + hstry$center_h2
     obs.DF["Y_c"]  <- hstry$center_he3 + hstry$center_he4 
-    obs.DF["Li_c"] <- hstry$center_li7
+	obs.DF["Li_c"] <- hstry$center_li7
     obs.DF["Be_c"] <- hstry$center_be7
     obs.DF["B_c"]  <- hstry$center_b8
     obs.DF["C_c"]  <- hstry$center_c12 + hstry$center_c13
@@ -132,6 +132,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
         hstry$center_ne20 + hstry$center_ne22
     obs.DF["Mg_c"] <- hstry$center_mg22 + hstry$center_mg24
     
+	if (F) {
     obs.DF["H1_c"]   <- hstry$center_h1 
     obs.DF["H2_c"]   <- hstry$center_h2 
     obs.DF["He3_c"]  <- hstry$center_he3 
@@ -158,7 +159,8 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
     obs.DF["Ne22_c"] <- hstry$center_ne22 
     obs.DF["Mg22_c"] <- hstry$center_mg22 
     obs.DF["Mg24_c"] <- hstry$center_mg24 
-    
+    }
+	
     obs.DF["X_surf"]  <- hstry$surface_h1 + hstry$surface_h2
     obs.DF["Y_surf"]  <- hstry$surface_he3 + hstry$surface_he4 
     obs.DF["Li_surf"] <- hstry$surface_li7
@@ -175,6 +177,7 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
         hstry$surface_ne20 + hstry$surface_ne22
     obs.DF["Mg_surf"] <- hstry$surface_mg22 + hstry$surface_mg24
     
+	if (F) {
     obs.DF["H1_surf"]   <- hstry$surface_h1 
     obs.DF["H2_surf"]   <- hstry$surface_h2 
     obs.DF["He3_surf"]  <- hstry$surface_he3 
@@ -201,13 +204,14 @@ summarize <- function(pro_file, freqs_file, ev.DF, dname, gyre=T) {
     obs.DF["Ne22_surf"] <- hstry$surface_ne22 
     obs.DF["Mg22_surf"] <- hstry$surface_mg22 
     obs.DF["Mg24_surf"] <- hstry$surface_mg24 
-    
+    }
+	
     #as.data.frame(cbind(obs.DF, seis.DF))
     merge(rbind(obs.DF), rbind(seis.DF))
 }
 
 ### Obtain evolutionary tracks from a MESA directory
-parse_dir <- function(directory, min_num_models=10, dname='simulations',
+parse_dir <- function(directory, min_num_models=4, dname='simulations',
         num_points=num_points, gyre=T) {
     ## parse dirname string e.g. "M=1.0_Y=0.28"
     params.DF <- NULL
@@ -267,6 +271,10 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations',
                         gyre=gyre), 
                 pro_file=file.path(log_dir, pro_files), 
                 freqs_file=file.path(log_dir, freq_files)))
+        if (nrow(obs.DF) <= min_num_models) {
+            print(paste(log_dir, "has too few points"))
+            next 
+		}
         #print(obs.DF)
         DF <- merge(rbind(params.DF), obs.DF[order(obs.DF$age),])
         
@@ -290,7 +298,7 @@ parse_dir <- function(directory, min_num_models=10, dname='simulations',
                         'age'))
         x <- DF[[space_var]]
         nrow.DF <- length(x)
-        if (nrow.DF < num_points) {
+        if (nrow.DF < min_num_models) {
             print(paste(log_dir, "has too few points"))
             next 
             #return(NULL)

@@ -10,7 +10,7 @@
       extra_star_job_inlist1_name = 'inlist_0all'
       
       read_extra_star_job_inlist2 = .true.
-      extra_star_job_inlist2_name = 'inlist_2pms'
+      extra_star_job_inlist2_name = 'inlist_1relax'
 
 / ! end of star_job namelist
 
@@ -21,7 +21,7 @@
       extra_controls_inlist1_name = 'inlist_0all'
       
       read_extra_controls_inlist2 = .true.
-      extra_controls_inlist2_name = 'inlist_2pms'
+      extra_controls_inlist2_name = 'inlist_1relax'
 
 / ! end of controls namelist
 

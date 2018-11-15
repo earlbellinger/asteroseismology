@@ -23,7 +23,7 @@ mpl.use("agg")
 from matplotlib import pyplot as plt 
 mpl.rc('font', family='serif') 
 mpl.rc('text', usetex='true') 
-mpl.rc('text', dvipnghack='true') 
+#mpl.rc('text', dvipnghack='true') 
 mpl.rcParams.update({'font.size': 16}) 
 import pylab as P
 from sys import argv
@@ -35,7 +35,7 @@ drop_oob = False #True # False
 enforce_bounds = True #True #False# 
 always_retrain = True# False#
 use_pickle = False #True #False#
-make_plots = False#True# 
+make_plots = True#True# 
 write_covs = True 
 find_mode = False#True#
 #fill = False#True
@@ -92,7 +92,10 @@ data['density'] = pd.Series(data['M'] / data['radius']**3, index=data.index)
 #exclude_models = '^' + '$|^'.join(['Dnu0', 'dnu02', 'dnu13', 
 #    'undershoot', 'under_exp', 'over_exp', 'nu_max']) + '$'
 
-exclude_models = '|'.join(['r02_', 'r01_', 'r13_', 'r10_', 
+exclude_models = '|'.join([#'r02_', 'r01_', 
+    '^Dnu0$', '^dnu02$', '^r02$', '^r01$', 
+    'r13_', 'r10', 
+    'nu_',
     #'Dnu0', 'dnu02', 'dnu13', 
     #'Dnu0', 
     'epsilon_p', 
@@ -142,7 +145,8 @@ y_latex = {
     "V_M0": r"V",
     "I_M0": r"I",
     "W": r"W",
-    "density": r"Mean density $\rho$"
+    "density": r"Mean density $\rho$",
+    "beta": r"$\beta$"
 }
 
 y_latex_short = {
@@ -172,7 +176,8 @@ y_latex_short = {
     "V_M0": r"V",
     "I_M0": r"I",
     "W": r"W",
-    "density": r"$\rho$"
+    "density": r"$\rho$",
+    "beta": r"$\beta$"
 }
 
 y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'diffusion']
@@ -187,6 +192,13 @@ y_init = ['M', 'Y', 'Z', 'alpha', 'overshoot', 'undershoot', 'diffusion']
 y_curr = ['age', 'X_c', 'log_g', 'density', 'L', 'radius', 'Y_surf', 'Teff']
 y_show = y_init+y_curr #y_classical # 
 #y_show = y_cep
+
+
+### Big G
+y_init = ['M', 'Y', 'Z', 'alpha', 'beta']
+y_curr = ['age']
+y_show = y_init+y_curr #y_classical # 
+
 
 #y_show = ['M', 'Y', 'Z', 'alpha', 'age', 'radius']#, 'L']
 #y_curr = y_show
@@ -232,6 +244,8 @@ def train_regressor(data, X_columns, y_show=y_show, n_trees=256):
                 n_estimators=n_trees, 
                 n_jobs=min(n_trees, int(os.environ["OMP_NUM_THREADS"])),
                 oob_score=True, bootstrap=True))])
+        from sklearn.model_selection import cross_val_score
+        print(cross_val_score(forest, X, ys, cv=10))
         forest.fit(X, ys)#new_ys)
         if use_pickle:
             print("Saving pickle file")
@@ -353,8 +367,8 @@ def plot_star(star, predict, y_names, out_dir=plot_dir, nbins=10):
             ax = plt.subplot2grid((rows, cols), (pred_j//2, (pred_j%2)*2),
                 colspan=2)
         
-        n, bins, patches = ax.hist(predict[:,pred_j], nbins, normed=1, 
-            histtype='stepfilled', color='white')
+        n, bins, patches = ax.hist(predict[:,pred_j], nbins, density=1)#, 
+            #histtype='stepfilled', color='white')
         
         if star == 'Sun' or star == 'Tagesstern' or star == '5774694':
             if name is 'age':

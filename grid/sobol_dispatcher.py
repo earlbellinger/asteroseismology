@@ -56,14 +56,14 @@ def main(arguments):
                      help='offset for sobol numbers')
     job.add_argument('-p', '--parallel', default=1, 
                      type=int, help='number of CPUs to use')
-    job.add_argument('-m', '--memory', default=1709000, type=int,
-                     help='set maximum memory consumption for job')
+    job.add_argument('-m', '--image', default=1709000, type=int,
+                     help='set default image size for job')
     job.add_argument('-r', '--remove', default=False, action='store_true',
                      help='delete models upon completion')
     job.add_argument('-n', '--nice', default=False, action='store_true',
                      help='run as nice job')
-    job.add_argument('-rotk', '--rotk', default=False, action='store_true',
-                     help='calculate rotation kernels')
+    job.add_argument('-x', '--exclude', default=False, action='store_true',
+                     help='exclude compute cores for extra niceness')
     
     physics = parser.add_argument_group('physics')
     physics.add_argument('-L', '--light', default=False, action='store_true',
@@ -78,6 +78,8 @@ def main(arguments):
         help='set Y = c*Z + 0.2463, where the -Y flag becomes the c range (solar c = 1.4276221707417)')
     physics.add_argument('-C', '--couple', default=False, action='store_true',
         help='couple diffusion to gravitational settling')
+    job.add_argument('-rotk', '--rotk', default=False, action='store_true',
+                     help='calculate rotation kernels')
     
     args = parser.parse_args(arguments)
     print(args)
@@ -95,13 +97,13 @@ def main(arguments):
         logs=args.logs, threshold=args.threshold,
         directory=args.directory, light=args.light, remove=args.remove,
         skip=args.skip, parallel=args.parallel, nice=args.nice, 
-        memory=args.memory, mainseq=args.mainseq, subgiant=args.subgiant, 
+        image=args.image, mainseq=args.mainseq, subgiant=args.subgiant, 
         taper=args.taper, chem_ev=args.chem_ev, rotk=args.rotk, 
         couple=args.couple)
 
 def dispatch(ranges, tracks, points, logs, threshold, directory, 
              light=0, remove=0, skip=0, 
-             parallel=r"$OMP_NUM_THREADS", nice=0, memory=0, 
+             parallel=r"$OMP_NUM_THREADS", nice=0, image=0, 
              mainseq=0, subgiant=0, taper=0, chem_ev=0, rotk=0, couple=0):
     shift = ranges[:,0]
     scale = np.array([(b-a) for a,b in ranges])
@@ -127,7 +129,7 @@ def dispatch(ranges, tracks, points, logs, threshold, directory,
             "-D %.6f -g %.6f -e %.6f "\
             "%s%s%s%s%s%s"%\
             tuple(["-n " if nice else ""] + 
-                  ["-m %d "%memory if memory>0 else "" ] +
+                  ["-i %d "%image if image>0 else "" ] +
                   [parallel, directory] + 
                   [i] + [points] +
                   [val for val in vals] + 

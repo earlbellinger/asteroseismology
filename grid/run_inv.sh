@@ -1,11 +1,17 @@
-python3 sobol_dispatcher.py -d ms-ov   -n -N 8192 -MS -i 64 -r 
+#python3 sobol_dispatcher.py -d ms-ov   -n -N 8192 -MS -i 64 -r 
 
--net "'basic.net'"
+#-net "'basic.net'"
 
-python3 sobol_dispatcher.py -d inv     -n -N 1024 -i 32 -r -MS    -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
-python3 sobol_dispatcher.py -d inv-ov  -n -N 1024 -i 32 -r -MS    -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
-python3 sobol_dispatcher.py -d inv-D   -n -N 1024 -i 32 -r -MS -t -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
-python3 sobol_dispatcher.py -d inv-Dov -n -N 1024 -i 32 -r -MS -t -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
+#python3 sobol_dispatcher.py -d inv     -n -N 1024 -i 32 -r -MS    -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
+#python3 sobol_dispatcher.py -d inv-ov  -n -N 1024 -i 32 -r -MS    -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
+#python3 sobol_dispatcher.py -d inv-D   -n -N 1024 -i 32 -r -MS -t -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
+#python3 sobol_dispatcher.py -d inv-Dov -n -N 1024 -i 32 -r -MS -t -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
+
+python3 sobol_dispatcher.py -d inv     -x -n -N 1024 -i 32 -r -S    -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
+python3 sobol_dispatcher.py -d inv-ov  -x -n -N 1024 -i 32 -r -S    -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 0 0 -g 0 0 -e 0 0 
+python3 sobol_dispatcher.py -d inv-D   -x -n -N 1024 -i 32 -r -S -t -o 0   0   -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
+python3 sobol_dispatcher.py -d inv-Dov -x -n -N 1024 -i 32 -r -S -t -o 0.2 0.2 -oe 0 0 -u 0 0 -ue 0 0 -D 1 1 -g 1 1 -e 0 0 
+
 
 maybe_sub.sh -p 16 Rscript collate.R inv 
 maybe_sub.sh -p 16 Rscript collate.R inv-ov 

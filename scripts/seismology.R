@@ -1,7 +1,6 @@
 #### Seismological calculations for stellar observations and models 
-#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
-#### Stellar predictions & Galactic Evolution Group 
-#### Max-Planck-Institut fur Sonnensystemforschung 
+#### Author: Earl Patrick Bellinger ( bellinger@phys.au.dk ) 
+#### Stellar Astrophysics Centre Aarhus
 
 source(file.path(dirname(sys.frame(1)$ofile), 'utils.R'))
 
@@ -42,7 +41,7 @@ parse_freqs <- function(fname, gyre=F) {
 # acoustic_cutoff is the truncation frequency 
 # outf is the filename that plots should have (None for no plot)
 seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE,
-        verbose=T) {
+        verbose=T, all_ratios=F, all_freqs=F) {
     if (nrow(freqs) == 0) {
         if (verbose) print("No frequencies found")
         return(NULL)
@@ -113,34 +112,48 @@ seismology <- function(freqs, nu_max, ..., acoustic_cutoff=Inf, outf=FALSE,
             cbind(seis.DF, epsilon.DF)
     }
     
+    }
+    
+    if (all_freqs) {
+        for (ii in 1:nrow(freqs)) {
+            freq <- freqs[ii,]
+            nu.DF <- data.frame(freq$nu)
+            colnames(nu.DF) <- paste0('nu_', freq$l, '_', freq$n)
+            seis.DF <- cbind(seis.DF, nu.DF)
+        }
+    }
     
     # include all ratios 
-    if (calc.dnu && FALSE) for (l_deg in 0:1) {
-        if (l_deg %in% ells && (l_deg+2) %in% ells) { 
-            if ((1-l_deg) %in% ells) {
-                rseps <- get_separations("r_sep", freqs, l_deg, nu_max,
+    if (all_ratios) {
+        if (calc.dnu) for (l_deg in 0:1) {
+            if (l_deg %in% ells && (l_deg+2) %in% ells) { 
+                if ((1-l_deg) %in% ells) {
+                    rseps <- get_separations("r_sep", freqs, l_deg, nu_max,
+                        verbose=verbose)
+                    if (!is.null(rseps) & length(rseps$nus)>0) {
+                        r.DF <- t(data.frame(rseps$separations))
+                        colnames(r.DF) <- paste0('r', l_deg, l_deg+2, '_', rseps$n)
+                        rownames(r.DF) <- NULL
+                        seis.DF <- if (is.null(seis.DF)) r.DF else 
+                            cbind(seis.DF, r.DF)
+                    }
+                }
+            }
+            if (0 %in% ells && 1 %in% ells) {
+                ravgs <- get_separations("r_avg", freqs, l_deg, nu_max,
                     verbose=verbose)
-                if (!is.null(rseps) & length(rseps$nus)>0) {
-                    r.DF <- t(data.frame(rseps$separations))
-                    colnames(r.DF) <- paste0('r', l_deg, l_deg+2, '_', rseps$n)
+                if (!is.null(ravgs) & length(ravgs$nus)>0) {
+                    r.DF <- t(data.frame(ravgs$separations))
+                    colnames(r.DF) <- paste0('r', l_deg, 1-l_deg, '_', ravgs$n)
                     rownames(r.DF) <- NULL
                     seis.DF <- if (is.null(seis.DF)) r.DF else 
                         cbind(seis.DF, r.DF)
                 }
             }
         }
-        if (0 %in% ells && 1 %in% ells) {
-            ravgs <- get_separations("r_avg", freqs, l_deg, nu_max,
-                verbose=verbose)
-            if (!is.null(ravgs) & length(ravgs$nus)>0) {
-                r.DF <- t(data.frame(ravgs$separations))
-                colnames(r.DF) <- paste0('r', l_deg, 1-l_deg, '_', ravgs$n)
-                rownames(r.DF) <- NULL
-                seis.DF <- if (is.null(seis.DF)) r.DF else 
-                    cbind(seis.DF, r.DF)
-            }
-        }
     }
+    
+    if (F) {
     
     # get periods for classical pulsators 
     classical <- ell.0[ell.0$n <= 4,]

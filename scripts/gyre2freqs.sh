@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#### Converter for .GYRE file to oscillation mode frequencies with GYRE
-#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
-#### Stellar Ages & Galactic Evolution Group 
-#### Max-Planck-Institut fur Sonnensystemforschung 
-#### Updated: March 2018
+#### Converter for .GYRE file to oscillation mode frequencies with GYRE 
+#### Author: Earl Bellinger ( bellinger@sac.au.dk ) 
+#### Stellar Astrophysics Centre, Aarhus 
+#### Updated: November 2018
 
 ### Parse command line tokens 
 
@@ -15,6 +14,7 @@ RADIAL=0
 FGONG=0
 OMP_NUM_THREADS=1
 LOWER=0.01
+UPPER=8496 # Kepler Nyquist frequency in microHertz 
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -23,6 +23,7 @@ while [ "$#" -gt 0 ]; do
     -o) OUTPUT="$2"; shift 2;;
     -t) OMP_NUM_THREADS="$2"; shift 2;;
     -l) LOWER="$2"; shift 2;;
+	-u) UPPER="$2"; shift 2;;
     -r) RADIAL=1; shift 1;;
     -e) EIGENF=1;SAVE=1; shift 1;;
     -f) FGONG=1; shift 1;;
@@ -127,7 +128,7 @@ if [ $SCALE -gt 0 ]; then
     # divide by the solar values 
     Mscal=$(awk '{ print $1 / 1.988475E+33 }' <<< "$M")
     Rscal=$(awk '{ print $1 / 6.957E+10 }' <<< "$R")
-    Tscal=$(awk '{ print $1 / 5777 }' <<< "$T")
+    Tscal=$(awk '{ print $1 / 5772 }' <<< "$T")
     
     # calculate scaling relations 
     # numax = M/R**2/sqrt(Teff/5777)
@@ -141,6 +142,9 @@ if [ $SCALE -gt 0 ]; then
     LOWER=$(awk -v numax="$numax" -v Dnu="$Dnu" \
         'BEGIN { print numax - 7.5*Dnu }')
     
+	UPPER=$(awk -v numax="$numax" \
+	    'BEGIN { print numax * 5/3 }')
+	
     # check that it's greater than 0.01 
     if [ $(echo "$LOWER < 0.01" | bc -l) -gt 0 ]; then
         LOWER=0.01
@@ -188,9 +192,9 @@ $MODES
 &scan
     grid_type = 'LINEAR'
     freq_min_units = 'UHZ'
-    freq_max_units = 'ACOUSTIC_CUTOFF'
+    freq_max_units = 'UHZ'
     freq_min = $LOWER
-    freq_max = 1
+    freq_max = $UPPER
     n_freq = 1000
 /
 

@@ -13,19 +13,19 @@
       kappa_file_prefix = 'gs98'
       change_net = .true. 
       change_initial_net = .true. 
-      new_net_name = 'pp_cno_extras_o18_ne22.net'
+      new_net_name = 'pp_cno_extras_o18_ne22.net' 
       
 / ! end of star_job namelist
 
 
 &controls
       
-      initial_mass = 2.785428
-      mixing_length_alpha = 2.904114
+      initial_mass = 1
+      mixing_length_alpha = 1.84663590
       
-      initial_y = 0.275367
-      initial_z = 0.003470
-      Zbase = 0.003470
+      initial_y = 0.27238323
+      initial_z = 0.01831911
+      Zbase = 0.01830403
       
       use_Type2_opacities = .true.
       cubic_interpolation_in_Z = .true.
@@ -46,27 +46,27 @@
       overshoot_f_below_burn_h_shell = 0
       overshoot_f_below_burn_he_shell = 0
       
-      step_overshoot_f_above_nonburn_core = 0.200000
-      step_overshoot_f_above_nonburn_shell = 0.200000
-      step_overshoot_f_above_burn_h_core = 0.200000
-      step_overshoot_f_above_burn_h_shell = 0.200000
-      step_overshoot_f_above_burn_he_core = 0.200000
-      step_overshoot_f_above_burn_he_shell = 0.200000
+      step_overshoot_f_above_nonburn_core = 0
+      step_overshoot_f_above_nonburn_shell = 0
+      step_overshoot_f_above_burn_h_core = 0
+      step_overshoot_f_above_burn_h_shell = 0
+      step_overshoot_f_above_burn_he_core = 0
+      step_overshoot_f_above_burn_he_shell = 0
       
       step_overshoot_f_below_nonburn_shell = 0
       step_overshoot_f_below_burn_h_shell = 0
       step_overshoot_f_below_burn_he_shell = 0
       
-      overshoot_f0_above_nonburn_core = 0.01
-      overshoot_f0_above_nonburn_shell = 0.01
-      overshoot_f0_above_burn_h_core = 0.01
-      overshoot_f0_above_burn_h_shell = 0.01
-      overshoot_f0_above_burn_he_core = 0.01
-      overshoot_f0_above_burn_he_shell = 0.01
+      overshoot_f0_above_nonburn_core = 0
+      overshoot_f0_above_nonburn_shell = 0
+      overshoot_f0_above_burn_h_core = 0
+      overshoot_f0_above_burn_h_shell = 0
+      overshoot_f0_above_burn_he_core = 0
+      overshoot_f0_above_burn_he_shell = 0
       
-      overshoot_f0_below_nonburn_shell = 0.01
-      overshoot_f0_below_burn_h_shell = 0.01
-      overshoot_f0_below_burn_he_shell = 0.01
+      overshoot_f0_below_nonburn_shell = 0
+      overshoot_f0_below_burn_h_shell = 0
+      overshoot_f0_below_burn_he_shell = 0
       
       do_element_diffusion = .false.
       diffusion_use_full_net = .false. !.true.
@@ -95,21 +95,22 @@
       
       write_profiles_flag = .true.
       write_pulse_data_with_profile = .true.
-      pulse_data_format = 'GYRE'
-      !pulse_data_format = 'FGONG'
-      !format_for_FGONG_data = '(1P5E16.9,x)'
+      pulse_data_format = 'GYRE' ! 'FGONG'
+      format_for_FGONG_data = '(1P5E16.9,x)'
       
       which_atm_option = 'Eddington_grey'
       
       cool_wind_RGB_scheme = 'Reimers'
       !cool_wind_AGB_scheme = 'Reimers'
-      Reimers_scaling_factor = 0
+      !Reimers_scaling_factor = 0
       !RGB_to_AGB_wind_switch = 1d-5
       
       add_atmosphere_to_pulse_data = .true.
       add_center_point_to_pulse_data = .false.
       keep_surface_point_for_pulse_data = .false.
       add_double_points_to_pulse_data = .false.
+      
+      max_allowed_nz = 16000
       
       max_age = 20e9
       
