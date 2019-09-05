@@ -1,9 +1,8 @@
 #!/bin/bash
 
 #### A script to install the MESA SDK and MESA to a 64-bit Linux system
-#### Author: Earl Bellinger ( bellinger@mps.mpg.de ) 
-#### Stellar Ages & Galactic Evolution Group 
-#### Max-Planck-Institut fur Sonnensystemforschung & Yale University 
+#### Author: Earl Patrick Bellinger ( bellinger@phys.au.dk ) 
+#### Stellar Astrophysics Centre, Aarhus University, Denmark 
 
 #################
 ### Variables ###
