@@ -9,7 +9,7 @@
 ### Variables ###
 #################
 # Adjust this if you want a different version 
-GYRE_VER=5.0
+GYRE_VER=6.0.1
 
 #########################################
 ### Download and install GYRE ###
@@ -18,14 +18,12 @@ mkdir GYRE
 cd GYRE
 
 ## Download and unpack GYRE
-wget https://bitbucket.org/rhdtownsend/gyre/downloads/gyre-"$GYRE_VER".tar.gz 
-mkdir gyre-"$GYRE_VER"
-tar xvfz gyre-"$GYRE_VER".tar.gz  -C gyre-"$GYRE_VER"
-ln -sfn gyre-"$GYRE_VER"/gyre gyre
+wget https://github.com/rhdtownsend/gyre/archive/v"$GYRE_VER".tar.gz
+tar xvfz v"$GYRE_VER".tar.gz
+ln -sfn gyre-"$GYRE_VER" gyre
 export GYRE_DIR=$(pwd)/gyre
 echo export GYRE_DIR="$GYRE_DIR" >> ~/.bash_profile
 
 ## Install GYRE
 cd $GYRE_DIR
 make
-
