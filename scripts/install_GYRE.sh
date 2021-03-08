@@ -21,7 +21,7 @@ wget https://github.com/rhdtownsend/gyre/archive/v"$GYRE_VER".tar.gz
 tar xvfz v"$GYRE_VER".tar.gz
 ln -sfn gyre-"$GYRE_VER" gyre
 export GYRE_DIR=$(pwd)/gyre
-echo export GYRE_DIR="$GYRE_DIR" >> ~/.bash_profile
+echo export GYRE_DIR="$GYRE_DIR" >> ~/.bashrc
 
 ## Install GYRE
 cd $GYRE_DIR
