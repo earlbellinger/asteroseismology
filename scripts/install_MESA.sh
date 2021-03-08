@@ -48,7 +48,7 @@ wget http://downloads.sourceforge.net/project/mesa/releases/"$MESA_REV".zip
 unzip "$MESA_REV".zip
 ln -sfn $(pwd)/"$MESA_REV" mesa
 export MESA_DIR=$(pwd)/mesa
-echo export MESA_DIR="$MESA_DIR" >> ~/.bash_profile
+echo export MESA_DIR="$MESA_DIR" >> ~/.bashrc
 echo export OMP_NUM_THREADS="$OMP_NUM_THREADS" >> ~/.bashrc
 
 ## Install MESA
