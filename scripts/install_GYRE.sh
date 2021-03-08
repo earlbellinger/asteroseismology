@@ -10,9 +10,9 @@
 # Adjust this if you want a different version 
 GYRE_VER=6.0.1
 
-#########################################
+#################################
 ### Download and install GYRE ###
-#########################################
+#################################
 mkdir GYRE
 cd GYRE
 
