@@ -23,10 +23,12 @@ slurm_sub() {
 #SBATCH --time=$TIME:00:00
 #SBATCH --mem=$MEMORY
 
+export PYTHONUNBUFFERED=1
+
 echo `date`
 
 cd ../..
-$cmd
+$cmd >| $dname/out
 
 echo `date`
 " > "sbatch.sh"
