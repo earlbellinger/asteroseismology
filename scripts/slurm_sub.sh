@@ -24,13 +24,11 @@ slurm_sub() {
 #SBATCH --mem=$MEMORY
 
 export PYTHONUNBUFFERED=1
+export OMP_NUM_THREADS=$OMP_NUM_THREADS
 
 echo `date`
-
 cd ../..
 $cmd >| $dname/out
-
-echo `date`
 " > "sbatch.sh"
     chmod +x "sbatch.sh"
     sbatch "sbatch.sh"
