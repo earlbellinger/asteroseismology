@@ -16,9 +16,9 @@ slurm_sub() {
 
 #SBATCH --job-name=$name
 #SBATCH --partition=$MACHINE
-#SBATCH --ntasks=$OMP_NUM_THREADS
+#SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=$OMP_NUM_THREADS
 #SBATCH --output=sbatch.out
 #SBATCH --time=$TIME:00:00
 #SBATCH --mem=$MEMORY
@@ -52,7 +52,7 @@ if [ -z ${HELP+x} ]; then HELP=0; fi
 if [ -z ${OMP_NUM_THREADS+x} ]; then OMP_NUM_THREADS=1; fi
 if [ -z ${MACHINE+x} ]; then MACHINE="q20"; fi
 if [ -z ${MEMORY+x} ]; then MEMORY="16G"; fi
-if [ -z ${TIME+x} ]; then TIME="240"; fi
+if [ -z ${TIME+x} ]; then TIME="120"; fi
 
 if [ $HELP -gt 0 ]; then
     echo "  slurm_sub.sh: automatic job queuer for the slurm"
