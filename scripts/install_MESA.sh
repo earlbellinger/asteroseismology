@@ -8,7 +8,7 @@
 ### Variables ###
 #################
 # Adjust these if you want a different version 
-MESA_VER=15140
+MESA_VER=21.12.1
 SDK_VER=20.12.1
 
 # Adjust this if you want to use more than one processor
@@ -44,7 +44,7 @@ echo source "$MESASDK_ROOT"/bin/mesasdk_init.sh >> ~/.bashrc
 #################################
 ## Download MESA
 MESA_REV=mesa-r"$MESA_VER"
-wget http://downloads.sourceforge.net/project/mesa/releases/"$MESA_REV".zip
+wget https://zenodo.org/record/5798242/files/"$MESA_REV".zip
 unzip "$MESA_REV".zip
 ln -sfn $(pwd)/"$MESA_REV" mesa
 export MESA_DIR=$(pwd)/mesa
