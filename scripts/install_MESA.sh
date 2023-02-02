@@ -8,8 +8,8 @@
 ### Variables ###
 #################
 # Adjust these if you want a different version 
-MESA_VER=21.12.1
-SDK_VER=20.12.1
+MESA_VER=22.11.1
+SDK_VER=22.6.1
 
 # Adjust this if you want to use more than one processor
 export OMP_NUM_THREADS=1 
@@ -28,7 +28,7 @@ cd MESA
 
 ## Download SDK
 SDK_REV=mesasdk-x86_64-linux-"$SDK_VER"
-curl --remote-name http://www.astro.wisc.edu/~townsend/resource/download/mesasdk/"$SDK_REV".tar.gz
+curl --remote-name http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/"$SDK_REV".tar.gz
 mkdir $SDK_REV
 tar xvfz "$SDK_REV".tar.gz -C "$SDK_REV"
 ln -sfn "$SDK_REV"/mesasdk mesasdk
@@ -44,7 +44,7 @@ echo source "$MESASDK_ROOT"/bin/mesasdk_init.sh >> ~/.bashrc
 #################################
 ## Download MESA
 MESA_REV=mesa-r"$MESA_VER"
-wget https://zenodo.org/record/5798242/files/"$MESA_REV".zip
+wget https://zenodo.org/record/7319739/files/"$MESA_REV".zip
 unzip "$MESA_REV".zip
 ln -sfn $(pwd)/"$MESA_REV" mesa
 export MESA_DIR=$(pwd)/mesa
